@@ -97,6 +97,7 @@ pub fn unsafe_project(args: TokenStream, input: TokenStream) -> TokenStream {
     let (impl_generics, ty_generics, where_clause) = item.generics.split_for_impl();
     let proj_impl = quote! {
         impl #impl_generics #ident #ty_generics #where_clause {
+            #[inline]
             fn project<'__a>(self: #pin<&'__a mut Self>) -> #proj_ident #proj_generics {
                 let this = unsafe { #pin::get_unchecked_mut(self) };
                 #proj_ident { #(#proj_init,)* }
