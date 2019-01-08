@@ -1,0 +1,9 @@
+[package]
+name = "pin-project-test-2015"
+version = "0.0.0"
+authors = ["Taiki Endo <te316e89@gmail.com>"]
+edition = "2015"
+publish = false
+
+[dependencies]
+pin-project = { path = "../.." }

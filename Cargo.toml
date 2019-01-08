@@ -1,0 +1,28 @@
+[package]
+name = "pin-project"
+# NB: When modifying, also modify html_root_url in lib.rs
+version = "0.1.0"
+authors = ["Taiki Endo <te316e89@gmail.com>"]
+edition = "2018"
+license = "Apache-2.0/MIT"
+description = "An attribute that would create a projection struct covering all the fields."
+repository = "https://github.com/taiki-e/pin-project"
+documentation = "https://docs.rs/pin-project/"
+readme = "README.md"
+keywords = ["pin", "macros", "attribute"]
+categories = ["rust-patterns"]
+exclude = ["/.travis.yml"]
+
+[workspace]
+members = ["tests/test_2015"]
+
+[badges]
+travis-ci = { repository = "taiki-e/pin-project" }
+
+[lib]
+proc-macro = true
+
+[dependencies]
+proc-macro2 = "^0.4.13"
+quote = "^0.6.8"
+syn = { version = "^0.15.9", default-features = false, features = ["proc-macro", "parsing", "printing", "full"] }

@@ -1,0 +1,40 @@
+language: rust
+sudo: false
+cache: cargo
+
+matrix:
+  fast_finish: true
+
+  include:
+    - rust: nightly
+      os: osx
+
+    - rust: nightly
+      os: linux
+
+    # When updating this, the reminder to update the minimum required version in README.md.
+    - rust: nightly-2018-12-26
+      name: cargo test (minimum required version)
+
+    - rust: nightly
+      name: cargo clippy
+      script:
+        - if rustup component add clippy-preview;
+          then
+            cargo clippy -- -Dwarnings;
+          else
+            echo 'Skipping clippy';
+          fi
+
+    - rust: nightly
+      name: cargo doc
+      script:
+        - RUSTDOCFLAGS=-Dwarnings cargo doc
+
+script:
+  - cargo test --all
+  - cargo test --all --release
+
+notifications:
+  email:
+    on_success: never
