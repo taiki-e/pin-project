@@ -36,7 +36,7 @@ use std::{
     task::{LocalWaker, Poll, Waker},
 };
 
-use pin_project::unsafe_pin_project;
+use pin_project::unsafe_project;
 
 #[derive(Debug)]
 struct CancelableFutureState {
@@ -44,7 +44,7 @@ struct CancelableFutureState {
     waker: Mutex<Option<Waker>>,
 }
 
-#[unsafe_pin_project]
+#[unsafe_project]
 #[derive(Debug)]
 #[must_use = "Futures do nothing unless polled"]
 pub struct CancelableFuture<A, B> {

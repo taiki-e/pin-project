@@ -3,11 +3,11 @@
 //! ## Examples
 //!
 //! ```rust
-//! use pin_project::unsafe_pin_project;
+//! use pin_project::unsafe_project;
 //! use std::marker::Unpin;
 //! use std::pin::Pin;
 //!
-//! #[unsafe_pin_project]
+//! #[unsafe_project]
 //! struct Foo<T, U> {
 //!     #[pin]
 //!     future: T,
@@ -43,13 +43,13 @@ use syn::{Attribute, Field, Fields, FieldsNamed, Ident, ItemStruct};
 
 /// An attribute that would create a projection struct covering all the fields.
 #[proc_macro_attribute]
-pub fn unsafe_pin_project(args: TokenStream, input: TokenStream) -> TokenStream {
+pub fn unsafe_project(args: TokenStream, input: TokenStream) -> TokenStream {
     if !args.is_empty() {
-        return compile_err("`unsafe_pin_project` do not requires arguments");
+        return compile_err("`unsafe_project` do not requires arguments");
     }
 
     let mut item: ItemStruct = match syn::parse(input) {
-        Err(_) => return compile_err("`unsafe_pin_project` may only be used on structs"),
+        Err(_) => return compile_err("`unsafe_project` may only be used on structs"),
         Ok(i) => i,
     };
 

@@ -21,7 +21,7 @@ pin-project = "0.1"
 Now, you can use pin-project:
 
 ```rust
-use pin_project::unsafe_pin_project;
+use pin_project::unsafe_project;
 ```
 
 The current version of pin-project requires Rust nightly 2018-12-26 or later.
@@ -29,11 +29,11 @@ The current version of pin-project requires Rust nightly 2018-12-26 or later.
 ## Examples
 
 ```rust
-use pin_project::unsafe_pin_project;
+use pin_project::unsafe_project;
 use std::marker::Unpin;
 use std::pin::Pin;
 
-#[unsafe_pin_project]
+#[unsafe_project]
 struct Foo<T, U> {
     #[pin]
     future: T,
