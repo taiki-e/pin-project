@@ -82,7 +82,7 @@ pub fn unsafe_pin_project(args: TokenStream, input: TokenStream) -> TokenStream 
         },
     );
 
-    let proj_ident = Ident::new(&format!("{}Projection", item.ident), Span::call_site());
+    let proj_ident = Ident::new(&format!("__{}Projection", item.ident), Span::call_site());
     let proj_generics = {
         let generics = item.generics.params.iter();
         quote!(<'__a, #(#generics),*>)
