@@ -13,9 +13,6 @@ keywords = ["pin", "macros", "attribute"]
 categories = ["rust-patterns"]
 exclude = ["/.travis.yml"]
 
-[workspace]
-members = ["tests/test_2015"]
-
 [badges]
 travis-ci = { repository = "taiki-e/pin-project" }
 

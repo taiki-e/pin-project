@@ -32,8 +32,8 @@ matrix:
         - RUSTDOCFLAGS=-Dwarnings cargo doc
 
 script:
-  - cargo test --all
-  - cargo test --all --release
+  - cargo test
+  - cargo test --release
 
 notifications:
   email:
