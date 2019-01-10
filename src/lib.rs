@@ -25,10 +25,6 @@
 //! impl<T: Unpin, U> Unpin for Foo<T, U> {} // Conditional Unpin impl
 //! ```
 //!
-//! See [`unsafe_project`] for more details.
-//!
-//! [`unsafe_project`]: ./attr.unsafe_project.html
-//!
 //! ## Rust Version
 //!
 //! The current version of pin-project requires Rust nightly 2018-12-26 or later.
@@ -41,19 +37,21 @@
 extern crate proc_macro;
 
 use proc_macro::TokenStream;
-use proc_macro2::Span;
+use proc_macro2::{Ident, Span};
 use quote::{quote, ToTokens};
-use syn::{Attribute, Field, Fields, FieldsNamed, Ident, ItemStruct};
+use syn::{Attribute, Field, Fields, FieldsNamed, ItemStruct};
 
 /// An attribute that would create a projection struct covering all the fields.
 ///
-/// For the field that use `#[pin]` attribute, makes the pinned reference to the field.
+/// This attribute creates a struct according to the following rules:
 ///
-/// For the other field, makes the unpinned reference to the field.
+/// - For the field that uses `#[pin]` attribute, makes the pinned reference to
+/// the field.
+/// - For the other fields, makes the unpinned reference to the field.
 ///
 /// ## Safety
 ///
-/// For the field that use `#[pin]` attribute, three things need to be ensured:
+/// For the field that uses `#[pin]` attribute, three things need to be ensured:
 ///
 /// - If the struct implements [`Drop`], the [`drop`] method is not allowed to
 ///   move the value of the field.
@@ -61,8 +59,8 @@ use syn::{Attribute, Field, Fields, FieldsNamed, Ident, ItemStruct};
 ///   The struct can only implement [`Unpin`] if the field's type is [`Unpin`].
 /// - The struct must not be `#[repr(packed)]`.
 ///
-/// For the other field, need to be ensured that the contained value not pinned in
-/// the current context.
+/// For the other fields, need to be ensured that the contained value not pinned
+/// in the current context.
 ///
 /// ## Examples
 ///
@@ -102,7 +100,7 @@ pub fn unsafe_project(args: TokenStream, input: TokenStream) -> TokenStream {
 
     let mut item: ItemStruct = match syn::parse(input) {
         Err(_) => return compile_err("`unsafe_project` may only be used on structs"),
-        Ok(i) => i,
+        Ok(item) => item,
     };
 
     let fields = match &mut item.fields {
@@ -162,6 +160,122 @@ pub fn unsafe_project(args: TokenStream, input: TokenStream) -> TokenStream {
     TokenStream::from(item)
 }
 
+/// An attribute that would create projections for each struct fields.
+///
+/// This is similar to [`unsafe_project`], but it is compatible with
+/// [pin-utils].
+///
+/// This attribute creates methods according to the following rules:
+///
+/// - For the field that uses `#[pin]` attribute, the method that makes the pinned
+/// reference to that field is created. This is the same as
+/// [`pin_utils::unsafe_pinned`].
+/// - For the field that uses `#[skip]` attribute, the method referencing that
+/// field is not created.
+/// - For the other fields, the method that makes the unpinned reference to that
+/// field is created.This is the same as [`pin_utils::unsafe_unpinned`].
+///
+/// ## Safety
+///
+/// For the field that uses `#[pin]` attribute, three things need to be ensured:
+///
+/// - If the struct implements [`Drop`], the [`drop`] method is not allowed to
+///   move the value of the field.
+/// - If the struct wants to implement [`Unpin`], it has to do so conditionally:
+///   The struct can only implement [`Unpin`] if the field's type is [`Unpin`].
+/// - The struct must not be `#[repr(packed)]`.
+///
+/// For the other fields, need to be ensured that the contained value not pinned
+/// in the current context.
+///
+/// ## Examples
+///
+/// ```rust
+/// use pin_project::unsafe_fields;
+/// use std::marker::Unpin;
+/// use std::pin::Pin;
+///
+/// #[unsafe_fields]
+/// struct Foo<T, U> {
+///     #[pin]
+///     future: T,
+///     field: U,
+/// }
+///
+/// impl<T, U> Foo<T, U> {
+///     fn baz(mut self: Pin<&mut Self>) {
+///         let _: Pin<&mut T> = self.as_mut().future(); // Pinned reference to the field
+///         let _: &mut U = self.as_mut().field(); // Normal reference to the field
+///     }
+/// }
+///
+/// impl<T: Unpin, U> Unpin for Foo<T, U> {} // Conditional Unpin impl
+/// ```
+///
+/// Note that borrowing the field multiple times requires using `.as_mut()` to
+/// avoid consuming the `Pin`.
+///
+/// [`unsafe_project`]: ./attr.unsafe_project.html
+/// [`Unpin`]: core::marker::Unpin
+/// [`drop`]: Drop::drop
+/// [pin-utils]: https://github.com/rust-lang-nursery/pin-utils
+/// [`pin_utils::unsafe_pinned`]: https://docs.rs/pin-utils/0.1.0-alpha/pin_utils/macro.unsafe_pinned.html
+/// [`pin_utils::unsafe_unpinned`]: https://docs.rs/pin-utils/0.1.0-alpha/pin_utils/macro.unsafe_unpinned.html
+#[proc_macro_attribute]
+pub fn unsafe_fields(args: TokenStream, input: TokenStream) -> TokenStream {
+    if !args.is_empty() {
+        return compile_err("`unsafe_fields` do not requires arguments");
+    }
+
+    let mut item: ItemStruct = match syn::parse(input) {
+        Err(_) => return compile_err("`unsafe_fields` may only be used on structs"),
+        Ok(item) => item,
+    };
+
+    let fields = match &mut item.fields {
+        Fields::Named(FieldsNamed { named, .. }) if !named.is_empty() => named,
+        Fields::Named(_) => return err("zero fields"),
+        Fields::Unnamed(_) => return err("unnamed fields"),
+        Fields::Unit => return err("with units"),
+    };
+
+    let mut proj_methods = Vec::with_capacity(fields.len());
+    let pin = quote!(core::pin::Pin);
+
+    fields.iter_mut().for_each(
+        |Field {
+             attrs, ident, ty, ..
+         }| {
+            if find_remove(attrs, "skip").is_none() {
+                match find_remove(attrs, "pin") {
+                    Some(_) => proj_methods.push(quote! {
+                        fn #ident<'__a>(self: #pin<&'__a mut Self>) -> #pin<&'__a mut #ty> {
+                            unsafe { #pin::map_unchecked_mut(self, |x| &mut x.#ident) }
+                        }
+                    }),
+                    None => proj_methods.push(quote! {
+                        fn #ident<'__a>(self: #pin<&'__a mut Self>) -> &'__a mut #ty {
+                            unsafe { &mut #pin::get_unchecked_mut(self).#ident }
+                        }
+                    }),
+                }
+            }
+        },
+    );
+
+    let ident = &item.ident;
+    let (impl_generics, ty_generics, where_clause) = item.generics.split_for_impl();
+    let proj_impl = quote! {
+        impl #impl_generics #ident #ty_generics #where_clause {
+            #(#proj_methods)*
+        }
+    };
+
+    let mut item = item.into_token_stream();
+    item.extend(proj_impl);
+    TokenStream::from(item)
+}
+
 #[inline(never)]
 fn compile_err(msg: &str) -> TokenStream {
     TokenStream::from(quote!(compile_error!(#msg);))
@@ -183,6 +297,6 @@ fn find_remove(attrs: &mut Vec<Attribute>, ident: &str) -> Option<Attribute> {
 
     attrs
         .iter()
-        .position(|attr| attr.path.is_ident(ident) && attr.tts.is_empty())
+        .position(|Attribute { path, tts, .. }| path.is_ident(ident) && tts.is_empty())
         .map(|i| remove(attrs, i))
 }
