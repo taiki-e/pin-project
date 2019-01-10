@@ -12,6 +12,12 @@ matrix:
     - rust: nightly
       os: linux
 
+    - rust: nightly
+      name: cargo test (minimal versions)
+      script:
+        - cargo update -Zminimal-versions
+        - cargo test
+
     # When updating this, the reminder to update the minimum required version in README.md.
     - rust: nightly-2018-12-26
       name: cargo test (minimum required version)
@@ -29,7 +35,7 @@ matrix:
     - rust: nightly
       name: cargo doc
       script:
-        - RUSTDOCFLAGS=-Dwarnings cargo doc
+        - RUSTDOCFLAGS=-Dwarnings cargo doc --no-deps
 
 script:
   - cargo test

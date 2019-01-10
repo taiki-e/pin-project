@@ -1,5 +1,7 @@
 # Unreleased
 
+* Fix dependencies
+
 # 0.1.2 - 2019-01-09
 
 * Improve documentation
