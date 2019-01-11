@@ -1,5 +1,7 @@
 # Unreleased
 
+# 0.1.3 - 2019-01-11
+
 * Fix dependencies
 
 * Add `unsafe_fields` attribute
