@@ -36,7 +36,7 @@
 
 #![crate_type = "proc-macro"]
 #![recursion_limit = "256"]
-#![doc(html_root_url = "https://docs.rs/pin-project/0.1.3")]
+#![doc(html_root_url = "https://docs.rs/pin-project/0.1.4")]
 
 extern crate proc_macro;
 
