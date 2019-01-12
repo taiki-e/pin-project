@@ -1,5 +1,7 @@
 # Unreleased
 
+* Add options for automatically implementing `Unpin` to both `unsafe_project` and `unsafe_fields`
+
 # 0.1.3 - 2019-01-11
 
 * Fix dependencies

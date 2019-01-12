@@ -30,10 +30,9 @@ The current version of pin-project requires Rust nightly 2018-12-26 or later.
 
 ```rust
 use pin_project::unsafe_project;
-use std::marker::Unpin;
 use std::pin::Pin;
 
-#[unsafe_project]
+#[unsafe_project(Unpin)]
 struct Foo<T, U> {
     #[pin]
     future: T,
@@ -48,8 +47,11 @@ impl<T, U> Foo<T, U> {
     }
 }
 
-impl<T: Unpin, U> Unpin for Foo<T, U> {} // Conditional Unpin impl
+// You do not need to implement this manually.
+// impl<T, U> Unpin for Foo<T, U> where T: Unpin {} // Conditional Unpin impl
 ```
+
+See the [documentation](https://docs.rs/pin-project/) for more details.
 
 ## License
 
