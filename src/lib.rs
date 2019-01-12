@@ -4,10 +4,9 @@
 //!
 //! ```rust
 //! use pin_project::unsafe_project;
-//! use std::marker::Unpin;
 //! use std::pin::Pin;
 //!
-//! #[unsafe_project]
+//! #[unsafe_project(Unpin)]
 //! struct Foo<T, U> {
 //!     #[pin]
 //!     future: T,
@@ -22,8 +21,13 @@
 //!     }
 //! }
 //!
-//! impl<T: Unpin, U> Unpin for Foo<T, U> {} // Conditional Unpin impl
+//! // You do not need to implement this manually.
+//! // impl<T: Unpin, U> Unpin for Foo<T, U> {} // Conditional Unpin impl
 //! ```
+//!
+//! See [`unsafe_project`] for more details.
+//!
+//! [`unsafe_project`]: ./attr.unsafe_project.html
 //!
 //! ## Rust Version
 //!
@@ -36,10 +40,12 @@
 
 extern crate proc_macro;
 
+mod compile_fail;
+
 use proc_macro::TokenStream;
 use proc_macro2::{Ident, Span};
 use quote::{quote, ToTokens};
-use syn::{Attribute, Field, Fields, FieldsNamed, ItemStruct};
+use syn::{parse_quote, Attribute, Field, Fields, FieldsNamed, ItemStruct};
 
 /// An attribute that would create a projection struct covering all the fields.
 ///
@@ -57,12 +63,42 @@ use syn::{Attribute, Field, Fields, FieldsNamed, ItemStruct};
 ///   move the value of the field.
 /// - If the struct wants to implement [`Unpin`], it has to do so conditionally:
 ///   The struct can only implement [`Unpin`] if the field's type is [`Unpin`].
+///   If you use `#[unsafe_project(Unpin)]`, you do not need to ensure this because
+///   an appropriate [`Unpin`] implementation will be generated.
 /// - The struct must not be `#[repr(packed)]`.
 ///
 /// For the other fields, need to be ensured that the contained value not pinned
 /// in the current context.
 ///
 /// ## Examples
+///
+/// Using `#[unsafe_project(Unpin)]` will automatically create the appropriate [`Unpin`]
+/// implementation:
+///
+/// ```rust
+/// use pin_project::unsafe_project;
+/// use std::pin::Pin;
+///
+/// #[unsafe_project(Unpin)]
+/// struct Foo<T, U> {
+///     #[pin]
+///     future: T,
+///     field: U,
+/// }
+///
+/// impl<T, U> Foo<T, U> {
+///     fn baz(mut self: Pin<&mut Self>) {
+///         let this = self.project();
+///         let _: Pin<&mut T> = this.future; // Pinned reference to the field
+///         let _: &mut U = this.field; // Normal reference to the field
+///     }
+/// }
+///
+/// // You do not need to implement this manually.
+/// // impl<T, U> Unpin for Foo<T, U> where T: Unpin {} // Conditional Unpin impl
+/// ```
+///
+/// If you want to implement [`Unpin`] manually:
 ///
 /// ```rust
 /// use pin_project::unsafe_project;
@@ -94,13 +130,15 @@ use syn::{Attribute, Field, Fields, FieldsNamed, ItemStruct};
 /// [`drop`]: Drop::drop
 #[proc_macro_attribute]
 pub fn unsafe_project(args: TokenStream, input: TokenStream) -> TokenStream {
-    if !args.is_empty() {
-        return compile_err("`unsafe_project` do not requires arguments");
-    }
-
     let mut item: ItemStruct = match syn::parse(input) {
         Err(_) => return compile_err("`unsafe_project` may only be used on structs"),
         Ok(item) => item,
+    };
+
+    let mut impl_unpin = match &*args.to_string() {
+        "" => None,
+        "Unpin" => Some(item.generics.clone()),
+        _ => return compile_err("`unsafe_project` an invalid argument was passed"),
     };
 
     let fields = match &mut item.fields {
@@ -112,22 +150,26 @@ pub fn unsafe_project(args: TokenStream, input: TokenStream) -> TokenStream {
 
     let mut proj_fields = Vec::with_capacity(fields.len());
     let mut proj_init = Vec::with_capacity(fields.len());
-    let pin = quote!(core::pin::Pin);
+    let pin = quote!(::core::pin::Pin);
+    let unpin = quote!(::core::marker::Unpin);
 
     fields.iter_mut().for_each(
         |Field {
              attrs, ident, ty, ..
          }| {
-            match find_remove(attrs, "pin") {
-                Some(_) => {
-                    proj_fields.push(quote!(#ident: #pin<&'__a mut #ty>));
-                    proj_init
-                        .push(quote!(#ident: unsafe { #pin::new_unchecked(&mut this.#ident) }));
+            if find_remove(attrs, "pin").is_some() {
+                proj_fields.push(quote!(#ident: #pin<&'__a mut #ty>));
+                proj_init.push(quote!(#ident: unsafe { #pin::new_unchecked(&mut this.#ident) }));
+
+                if let Some(generics) = &mut impl_unpin {
+                    generics
+                        .make_where_clause()
+                        .predicates
+                        .push(parse_quote!(#ty: #unpin));
                 }
-                None => {
-                    proj_fields.push(quote!(#ident: &'__a mut #ty));
-                    proj_init.push(quote!(#ident: &mut this.#ident));
-                }
+            } else {
+                proj_fields.push(quote!(#ident: &'__a mut #ty));
+                proj_init.push(quote!(#ident: &mut this.#ident));
             }
         },
     );
@@ -153,10 +195,20 @@ pub fn unsafe_project(args: TokenStream, input: TokenStream) -> TokenStream {
             }
         }
     };
+    let impl_unpin = impl_unpin
+        .as_ref()
+        .map(|generics| {
+            let where_clause = generics.split_for_impl().2;
+            quote! {
+                impl #impl_generics #unpin for #ident #ty_generics #where_clause {}
+            }
+        })
+        .unwrap_or_default();
 
     let mut item = item.into_token_stream();
     item.extend(proj_item);
     item.extend(proj_impl);
+    item.extend(impl_unpin);
     TokenStream::from(item)
 }
 
@@ -183,12 +235,41 @@ pub fn unsafe_project(args: TokenStream, input: TokenStream) -> TokenStream {
 ///   move the value of the field.
 /// - If the struct wants to implement [`Unpin`], it has to do so conditionally:
 ///   The struct can only implement [`Unpin`] if the field's type is [`Unpin`].
+///   If you use `#[unsafe_fields(Unpin)]`, you do not need to ensure this because
+///   an appropriate [`Unpin`] implementation will be generated.
 /// - The struct must not be `#[repr(packed)]`.
 ///
 /// For the other fields, need to be ensured that the contained value not pinned
 /// in the current context.
 ///
 /// ## Examples
+///
+/// Using `#[unsafe_fields(Unpin)]` will automatically create the appropriate [`Unpin`]
+/// implementation:
+///
+/// ```rust
+/// use pin_project::unsafe_fields;
+/// use std::pin::Pin;
+///
+/// #[unsafe_fields(Unpin)]
+/// struct Foo<T, U> {
+///     #[pin]
+///     future: T,
+///     field: U,
+/// }
+///
+/// impl<T, U> Foo<T, U> {
+///     fn baz(mut self: Pin<&mut Self>) {
+///         let _: Pin<&mut T> = self.as_mut().future(); // Pinned reference to the field
+///         let _: &mut U = self.as_mut().field(); // Normal reference to the field
+///     }
+/// }
+///
+/// // You do not need to implement this manually.
+/// // impl<T, U> Unpin for Foo<T, U> where T: Unpin {} // Conditional Unpin impl
+/// ```
+///
+/// If you want to implement [`Unpin`] manually:
 ///
 /// ```rust
 /// use pin_project::unsafe_fields;
@@ -223,13 +304,15 @@ pub fn unsafe_project(args: TokenStream, input: TokenStream) -> TokenStream {
 /// [`pin_utils::unsafe_unpinned`]: https://docs.rs/pin-utils/0.1.0-alpha/pin_utils/macro.unsafe_unpinned.html
 #[proc_macro_attribute]
 pub fn unsafe_fields(args: TokenStream, input: TokenStream) -> TokenStream {
-    if !args.is_empty() {
-        return compile_err("`unsafe_fields` do not requires arguments");
-    }
-
     let mut item: ItemStruct = match syn::parse(input) {
         Err(_) => return compile_err("`unsafe_fields` may only be used on structs"),
         Ok(item) => item,
+    };
+
+    let mut impl_unpin = match &*args.to_string() {
+        "" => None,
+        "Unpin" => Some(item.generics.clone()),
+        _ => return compile_err("`unsafe_fields` an invalid argument was passed"),
     };
 
     let fields = match &mut item.fields {
@@ -240,24 +323,33 @@ pub fn unsafe_fields(args: TokenStream, input: TokenStream) -> TokenStream {
     };
 
     let mut proj_methods = Vec::with_capacity(fields.len());
-    let pin = quote!(core::pin::Pin);
+    let pin = quote!(::core::pin::Pin);
+    let unpin = quote!(::core::marker::Unpin);
 
     fields.iter_mut().for_each(
         |Field {
              attrs, ident, ty, ..
          }| {
             if find_remove(attrs, "skip").is_none() {
-                match find_remove(attrs, "pin") {
-                    Some(_) => proj_methods.push(quote! {
+                if find_remove(attrs, "pin").is_some() {
+                    proj_methods.push(quote! {
                         fn #ident<'__a>(self: #pin<&'__a mut Self>) -> #pin<&'__a mut #ty> {
                             unsafe { #pin::map_unchecked_mut(self, |x| &mut x.#ident) }
                         }
-                    }),
-                    None => proj_methods.push(quote! {
+                    });
+
+                    if let Some(generics) = &mut impl_unpin {
+                        generics
+                            .make_where_clause()
+                            .predicates
+                            .push(parse_quote!(#ty: #unpin));
+                    }
+                } else {
+                    proj_methods.push(quote! {
                         fn #ident<'__a>(self: #pin<&'__a mut Self>) -> &'__a mut #ty {
                             unsafe { &mut #pin::get_unchecked_mut(self).#ident }
                         }
-                    }),
+                    });
                 }
             }
         },
@@ -270,9 +362,19 @@ pub fn unsafe_fields(args: TokenStream, input: TokenStream) -> TokenStream {
             #(#proj_methods)*
         }
     };
+    let impl_unpin = impl_unpin
+        .as_ref()
+        .map(|generics| {
+            let where_clause = generics.split_for_impl().2;
+            quote! {
+                impl #impl_generics #unpin for #ident #ty_generics #where_clause {}
+            }
+        })
+        .unwrap_or_default();
 
     let mut item = item.into_token_stream();
     item.extend(proj_impl);
+    item.extend(impl_unpin);
     TokenStream::from(item)
 }
 

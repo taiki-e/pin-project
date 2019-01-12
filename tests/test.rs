@@ -1,19 +1,16 @@
 #![deny(warnings)]
 
 use pin_project::{unsafe_fields, unsafe_project};
-use std::marker::Unpin;
 use std::pin::Pin;
 
 #[test]
 fn test_unsafe_project() {
-    #[unsafe_project]
+    #[unsafe_project(Unpin)]
     struct Foo<T, U> {
         #[pin]
         field1: T,
         field2: U,
     }
-
-    impl<T: Unpin, U> Unpin for Foo<T, U> {} // Conditional Unpin impl
 
     let mut foo = Foo {
         field1: 1,
@@ -31,14 +28,12 @@ fn test_unsafe_project() {
 
 #[test]
 fn test_unsafe_fields() {
-    #[unsafe_fields]
+    #[unsafe_fields(Unpin)]
     struct Foo<T, U> {
         #[pin]
         field1: T,
         field2: U,
     }
-
-    impl<T: Unpin, U> Unpin for Foo<T, U> {} // Conditional Unpin impl
 
     let mut foo = Foo {
         field1: 1,
@@ -53,7 +48,9 @@ fn test_unsafe_fields() {
     let y: &mut i32 = foo.as_mut().field2();
     assert_eq!(*y, 2);
 
-    #[unsafe_fields]
+    // skip
+
+    #[unsafe_fields(Unpin)]
     struct Bar<T, U> {
         #[pin]
         field1: T,
@@ -61,8 +58,6 @@ fn test_unsafe_fields() {
         #[skip]
         _field3: (),
     }
-
-    impl<T: Unpin, U> Unpin for Bar<T, U> {} // Conditional Unpin impl
 
     let mut foo = Bar {
         field1: 1,
