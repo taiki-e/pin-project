@@ -47,7 +47,7 @@ impl<T, U> Foo<T, U> {
     }
 }
 
-// You do not need to implement this manually.
+// Automatically create the appropriate conditional Unpin implementation.
 // impl<T, U> Unpin for Foo<T, U> where T: Unpin {} // Conditional Unpin impl
 ```
 

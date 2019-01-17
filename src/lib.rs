@@ -21,7 +21,7 @@
 //!     }
 //! }
 //!
-//! // You do not need to implement this manually.
+//! // Automatically create the appropriate conditional Unpin implementation.
 //! // impl<T: Unpin, U> Unpin for Foo<T, U> {} // Conditional Unpin impl
 //! ```
 //!
@@ -52,7 +52,7 @@ use proc_macro::TokenStream;
 
 /// An attribute that would create a projection struct covering all the fields.
 ///
-/// This attribute creates a struct according to the following rules:
+/// This attribute creates a projection struct according to the following rules:
 ///
 /// - For the field that uses `#[pin]` attribute, makes the pinned reference to
 /// the field.
@@ -66,8 +66,9 @@ use proc_macro::TokenStream;
 ///   move the value of the field.
 /// - If the struct wants to implement [`Unpin`], it has to do so conditionally:
 ///   The struct can only implement [`Unpin`] if the field's type is [`Unpin`].
-///   If you use `#[unsafe_project(Unpin)]`, you do not need to ensure this because
-///   an appropriate [`Unpin`] implementation will be generated.
+///   If you use `#[unsafe_project(Unpin)]`, you do not need to ensure this
+///   because an appropriate conditional [`Unpin`] implementation will be
+///   generated.
 /// - The struct must not be `#[repr(packed)]`.
 ///
 /// For the other fields, need to be ensured that the contained value not pinned
@@ -75,8 +76,8 @@ use proc_macro::TokenStream;
 ///
 /// ## Examples
 ///
-/// Using `#[unsafe_project(Unpin)]` will automatically create the appropriate [`Unpin`]
-/// implementation:
+/// Using `#[unsafe_project(Unpin)]` will automatically create the appropriate
+/// conditional [`Unpin`] implementation:
 ///
 /// ```rust
 /// use pin_project::unsafe_project;
@@ -97,7 +98,7 @@ use proc_macro::TokenStream;
 ///     }
 /// }
 ///
-/// // You do not need to implement this manually.
+/// // Automatically create the appropriate conditional Unpin implementation.
 /// // impl<T, U> Unpin for Foo<T, U> where T: Unpin {} // Conditional Unpin impl
 /// ```
 ///
@@ -129,6 +130,52 @@ use proc_macro::TokenStream;
 /// Note that borrowing the field where `#[pin]` attribute is used multiple
 /// times requires using `.as_mut()` to avoid consuming the `Pin`.
 ///
+/// ## Supported Items
+///
+/// The current version of pin-project supports the following two types of
+/// items.
+///
+/// ### Structs (structs with named fields):
+///
+/// ```rust
+/// # use pin_project::unsafe_project;
+/// # use std::pin::Pin;
+/// #[unsafe_project(Unpin)]
+/// struct Foo<T, U> {
+///     #[pin]
+///     future: T,
+///     field: U,
+/// }
+///
+/// impl<T, U> Foo<T, U> {
+///     fn baz(mut self: Pin<&mut Self>) {
+///         let this = self.project();
+///         let _: Pin<&mut T> = this.future; // Pinned reference to the field
+///         let _: &mut U = this.field; // Normal reference to the field
+///     }
+/// }
+/// ```
+///
+/// ### Tuple structs (structs with unnamed fields):
+///
+/// ```rust
+/// # use pin_project::unsafe_project;
+/// # use std::pin::Pin;
+/// #[unsafe_project(Unpin)]
+/// struct Foo<T, U>(#[pin] T, U);
+///
+/// impl<T, U> Foo<T, U> {
+///     fn baz(mut self: Pin<&mut Self>) {
+///         let this = self.project();
+///         let _: Pin<&mut T> = this.0; // Pinned reference to the field
+///         let _: &mut U = this.1; // Normal reference to the field
+///     }
+/// }
+/// ```
+///
+/// Structs without fields (unit-like struct and zero fields struct) are not
+/// supported.
+///
 /// [`Unpin`]: core::marker::Unpin
 /// [`drop`]: Drop::drop
 #[proc_macro_attribute]
@@ -143,13 +190,13 @@ pub fn unsafe_project(args: TokenStream, input: TokenStream) -> TokenStream {
 ///
 /// This attribute creates methods according to the following rules:
 ///
-/// - For the field that uses `#[pin]` attribute, the method that makes the pinned
-/// reference to that field is created. This is the same as
-/// [`pin_utils::unsafe_pinned`].
+/// - For the field that uses `#[pin]` attribute, the method that makes the
+///   pinned reference to that field is created. This is the same as
+///   [`pin_utils::unsafe_pinned`].
 /// - For the field that uses `#[skip]` attribute, the method referencing that
-/// field is not created.
+///   field is not created.
 /// - For the other fields, the method that makes the unpinned reference to that
-/// field is created.This is the same as [`pin_utils::unsafe_unpinned`].
+///   field is created.This is the same as [`pin_utils::unsafe_unpinned`].
 ///
 /// ## Safety
 ///
@@ -159,8 +206,8 @@ pub fn unsafe_project(args: TokenStream, input: TokenStream) -> TokenStream {
 ///   move the value of the field.
 /// - If the struct wants to implement [`Unpin`], it has to do so conditionally:
 ///   The struct can only implement [`Unpin`] if the field's type is [`Unpin`].
-///   If you use `#[unsafe_fields(Unpin)]`, you do not need to ensure this because
-///   an appropriate [`Unpin`] implementation will be generated.
+///   If you use `#[unsafe_fields(Unpin)]`, you do not need to ensure this
+///   because an appropriate [`Unpin`] implementation will be generated.
 /// - The struct must not be `#[repr(packed)]`.
 ///
 /// For the other fields, need to be ensured that the contained value not pinned
@@ -168,8 +215,8 @@ pub fn unsafe_project(args: TokenStream, input: TokenStream) -> TokenStream {
 ///
 /// ## Examples
 ///
-/// Using `#[unsafe_fields(Unpin)]` will automatically create the appropriate [`Unpin`]
-/// implementation:
+/// Using `#[unsafe_fields(Unpin)]` will automatically create the appropriate
+/// [`Unpin`] implementation:
 ///
 /// ```rust
 /// use pin_project::unsafe_fields;
