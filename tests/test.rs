@@ -5,6 +5,8 @@ use std::pin::Pin;
 
 #[test]
 fn test_unsafe_project() {
+    // struct
+
     #[unsafe_project(Unpin)]
     struct Foo<T, U> {
         #[pin]
@@ -23,6 +25,21 @@ fn test_unsafe_project() {
     assert_eq!(*x, 1);
 
     let y: &mut i32 = foo.field2;
+    assert_eq!(*y, 2);
+
+    // tuple struct
+
+    #[unsafe_project(Unpin)]
+    struct Bar<T, U>(#[pin] T, U);
+
+    let mut bar = Bar(1, 2);
+
+    let bar = Pin::new(&mut bar).project();
+
+    let x: Pin<&mut i32> = bar.0;
+    assert_eq!(*x, 1);
+
+    let y: &mut i32 = bar.1;
     assert_eq!(*y, 2);
 }
 
