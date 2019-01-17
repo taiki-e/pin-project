@@ -1,5 +1,7 @@
 # Unreleased
 
+# 0.1.5 - 2019-01-17
+
 * Add support for tuple struct to `unsafe_project`
 
 # 0.1.4 - 2019-01-12
