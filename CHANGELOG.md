@@ -1,5 +1,7 @@
 # Unreleased
 
+* Add support for tuple struct to `unsafe_project`
+
 # 0.1.4 - 2019-01-12
 
 * Add options for automatically implementing `Unpin` to both `unsafe_project` and `unsafe_fields`
