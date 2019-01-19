@@ -40,6 +40,7 @@
 
 extern crate proc_macro;
 
+#[cfg(feature = "unsafe_fields")]
 mod fields;
 mod variants {}
 mod enums {}
@@ -188,6 +189,9 @@ pub fn unsafe_project(args: TokenStream, input: TokenStream) -> TokenStream {
 /// This is similar to [`unsafe_project`], but it is compatible with
 /// [pin-utils].
 ///
+/// *This attribute is available if pin-project is built with the
+/// "unsafe_fields" feature (in version 0.1.*, it is enabled by default).*
+///
 /// This attribute creates methods according to the following rules:
 ///
 /// - For the field that uses `#[pin]` attribute, the method that makes the
@@ -273,6 +277,7 @@ pub fn unsafe_project(args: TokenStream, input: TokenStream) -> TokenStream {
 /// [pin-utils]: https://github.com/rust-lang-nursery/pin-utils
 /// [`pin_utils::unsafe_pinned`]: https://docs.rs/pin-utils/0.1.0-alpha/pin_utils/macro.unsafe_pinned.html
 /// [`pin_utils::unsafe_unpinned`]: https://docs.rs/pin-utils/0.1.0-alpha/pin_utils/macro.unsafe_unpinned.html
+#[cfg(feature = "unsafe_fields")]
 #[proc_macro_attribute]
 pub fn unsafe_fields(args: TokenStream, input: TokenStream) -> TokenStream {
     fields::unsafe_fields(args, input)

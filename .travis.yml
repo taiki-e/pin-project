@@ -17,6 +17,12 @@ matrix:
       os: linux
 
     - rust: nightly
+      name: cargo test (--no-default-features)
+      script:
+        - cargo test --no-default-features
+        - cargo test --no-default-features --release
+
+    - rust: nightly
       name: cargo test (minimal versions)
       script:
         - cargo update -Zminimal-versions

@@ -1,5 +1,7 @@
 # Unreleased
 
+* `unsafe_fields` can now opt-out.
+
 # 0.1.5 - 2019-01-17
 
 * Add support for tuple struct to `unsafe_project`

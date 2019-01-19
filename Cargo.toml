@@ -19,6 +19,12 @@ travis-ci = { repository = "taiki-e/pin-project" }
 [lib]
 proc-macro = true
 
+[features]
+# Default features.
+default = ["unsafe_fields"]
+# Use `unsafe_fields` attribute.
+unsafe_fields = []
+
 [dependencies]
 proc-macro2 = "^0.4.13"
 quote = "^0.6.8"
