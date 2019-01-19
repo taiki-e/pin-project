@@ -6,9 +6,13 @@ matrix:
   fast_finish: true
 
   include:
+    - rust: beta
+      os: osx
     - rust: nightly
       os: osx
 
+    - rust: beta
+      os: linux
     - rust: nightly
       os: linux
 
@@ -19,7 +23,7 @@ matrix:
         - cargo test
 
     # When updating this, the reminder to update the minimum required version in README.md.
-    - rust: nightly-2018-12-26
+    - rust: beta # FIXME(taiki-e): When 1.33 stabilizes, change to specify that version directly.
       name: cargo test (minimum required version)
 
     - rust: nightly
