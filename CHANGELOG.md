@@ -1,5 +1,9 @@
 # Unreleased
 
+# 0.1.7 - 2019-01-19
+
+* Fix documentation
+
 # 0.1.6 - 2019-01-19
 
 * `unsafe_fields` can now opt-out.
