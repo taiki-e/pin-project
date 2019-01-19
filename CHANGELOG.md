@@ -2,6 +2,8 @@
 
 * `unsafe_fields` can now opt-out.
 
+* Add `unsafe_variants` attribute. This attribute is available if pin-project is built with the "unsafe_variants" feature.
+
 # 0.1.5 - 2019-01-17
 
 * Add support for tuple struct to `unsafe_project`

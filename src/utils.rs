@@ -1,16 +1,15 @@
+use std::result;
+
 use proc_macro::TokenStream;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::quote;
-use syn::Attribute;
+use syn::{Attribute, Generics};
+
+pub(super) type Result<T> = result::Result<T, TokenStream>;
 
 #[inline(never)]
 pub(super) fn compile_err(msg: &str) -> TokenStream {
     TokenStream::from(quote!(compile_error!(#msg);))
-}
-
-#[inline(never)]
-pub(super) fn err(msg: &str) -> TokenStream {
-    compile_err(&format!("cannot be implemented for structs with {}", msg))
 }
 
 pub(super) fn pin() -> TokenStream2 {
@@ -33,4 +32,19 @@ pub(super) fn find_remove(attrs: &mut Vec<Attribute>, ident: &str) -> Option<Att
         .iter()
         .position(|Attribute { path, tts, .. }| path.is_ident(ident) && tts.is_empty())
         .map(|i| remove(attrs, i))
+}
+
+pub(super) fn parse_args(
+    args: TokenStream,
+    generics: &Generics,
+    name: &str,
+) -> Result<Option<Generics>> {
+    match &*args.to_string() {
+        "" => Ok(None),
+        "Unpin" => Ok(Some(generics.clone())),
+        _ => Err(compile_err(&format!(
+            "`{}` an invalid argument was passed",
+            name
+        )))?,
+    }
 }

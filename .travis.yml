@@ -17,16 +17,11 @@ matrix:
       os: linux
 
     - rust: nightly
-      name: cargo test (--no-default-features)
-      script:
-        - cargo test --no-default-features
-        - cargo test --no-default-features --release
-
-    - rust: nightly
       name: cargo test (minimal versions)
       script:
         - cargo update -Zminimal-versions
-        - cargo test
+        - cargo test --all-features
+        - cargo test --all-features --release
 
     # When updating this, the reminder to update the minimum required version in README.md.
     - rust: beta # FIXME(taiki-e): When 1.33 stabilizes, change to specify that version directly.
@@ -37,7 +32,7 @@ matrix:
       script:
         - if rustup component add clippy-preview;
           then
-            cargo clippy -- -Dwarnings;
+            cargo clippy --all-features -- -Dwarnings;
           else
             echo 'Skipping clippy';
           fi
@@ -45,11 +40,16 @@ matrix:
     - rust: nightly
       name: cargo doc
       script:
-        - RUSTDOCFLAGS=-Dwarnings cargo doc --no-deps
+        - RUSTDOCFLAGS=-Dwarnings cargo doc --no-deps --all-features
+
+before_script:
+  - set -o errexit
 
 script:
   - cargo test
-  - cargo test --release
+  - cargo test --no-default-features
+  - cargo test --all-features
+  - cargo test --all-features --release
 
 notifications:
   email:
