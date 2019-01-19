@@ -1,10 +1,11 @@
 #![deny(warnings)]
 
-use pin_project::{unsafe_fields, unsafe_project};
 use std::pin::Pin;
 
 #[test]
 fn test_unsafe_project() {
+    use pin_project::unsafe_project;
+
     // struct
 
     #[unsafe_project(Unpin)]
@@ -43,8 +44,11 @@ fn test_unsafe_project() {
     assert_eq!(*y, 2);
 }
 
+#[cfg(feature = "unsafe_fields")]
 #[test]
 fn test_unsafe_fields() {
+    use pin_project::unsafe_fields;
+
     #[unsafe_fields(Unpin)]
     struct Foo<T, U> {
         #[pin]

@@ -147,4 +147,5 @@ mod unsafe_project {}
 /// // conflicting implementations
 /// impl<T: Unpin, U: Unpin> Unpin for Foo<T, U> {} // Conditional Unpin impl
 /// ```
+#[cfg(feature = "unsafe_fields")]
 mod unsafe_fields {}
