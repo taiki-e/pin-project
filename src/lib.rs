@@ -29,10 +29,6 @@
 //!
 //! [`unsafe_project`]: ./attr.unsafe_project.html
 //!
-//! ## Rust Version
-//!
-//! The current version of pin-project requires Rust nightly 2018-12-26 or later.
-//!
 
 #![crate_type = "proc-macro"]
 #![recursion_limit = "256"]
