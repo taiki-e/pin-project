@@ -1,5 +1,7 @@
 # Unreleased
 
+# 0.1.6 - 2019-01-19
+
 * `unsafe_fields` can now opt-out.
 
 * Add `unsafe_variants` attribute. This attribute is available if pin-project is built with the "unsafe_variants" feature.
