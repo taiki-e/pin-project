@@ -24,7 +24,7 @@ Now, you can use pin-project:
 use pin_project::unsafe_project;
 ```
 
-The current version of pin-project requires Rust nightly 2018-12-26 or later.
+The current version of pin-project requires Rust 1.33 or later.
 
 ## Examples
 
