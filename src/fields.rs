@@ -5,7 +5,7 @@ use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, ToTokens};
 use syn::{parse_quote, Field, Fields, FieldsNamed, Generics, ItemStruct};
 
-use crate::utils::*;
+use crate::{structs::parse_failed, utils::*};
 
 pub(super) fn unsafe_fields(args: TokenStream, input: TokenStream) -> TokenStream {
     Struct::parse(args, input)
@@ -20,25 +20,18 @@ struct Struct {
 }
 
 impl Struct {
-    fn parse(args: TokenStream, input: TokenStream) -> Result<Self, TokenStream> {
+    fn parse(args: TokenStream, input: TokenStream) -> Result<Self> {
         let item: ItemStruct = match syn::parse(input) {
             Err(_) => Err(compile_err("`unsafe_fields` may only be used on structs"))?,
             Ok(item) => item,
         };
 
-        let impl_unpin = match &*args.to_string() {
-            "" => None,
-            "Unpin" => Some(item.generics.clone()),
-            _ => Err(compile_err(
-                "`unsafe_fields` an invalid argument was passed",
-            ))?,
-        };
-
+        let impl_unpin = parse_args(args, &item.generics, "unsafe_fields")?;
         let len = match &item.fields {
             Fields::Named(FieldsNamed { named, .. }) if !named.is_empty() => named.len(),
-            Fields::Named(_) => Err(err("zero fields"))?,
-            Fields::Unnamed(_) => Err(err("unnamed fields"))?,
-            Fields::Unit => Err(err("with units"))?,
+            Fields::Named(_) => parse_failed("zero fields")?,
+            Fields::Unnamed(_) => parse_failed("unnamed fields")?,
+            Fields::Unit => parse_failed("with units")?,
         };
 
         Ok(Self {

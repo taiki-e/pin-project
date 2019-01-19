@@ -21,25 +21,18 @@ struct Struct {
 }
 
 impl Struct {
-    fn parse(args: TokenStream, input: TokenStream) -> Result<Self, TokenStream> {
+    fn parse(args: TokenStream, input: TokenStream) -> Result<Self> {
         let item: ItemStruct = match syn::parse(input) {
             Err(_) => Err(compile_err("`unsafe_project` may only be used on structs"))?,
             Ok(item) => item,
         };
 
-        let impl_unpin = match &*args.to_string() {
-            "" => None,
-            "Unpin" => Some(item.generics.clone()),
-            _ => Err(compile_err(
-                "`unsafe_project` an invalid argument was passed",
-            ))?,
-        };
-
+        let impl_unpin = parse_args(args, &item.generics, "unsafe_project")?;
         let len = match &item.fields {
             Fields::Named(FieldsNamed { named, .. }) if !named.is_empty() => named.len(),
             Fields::Unnamed(FieldsUnnamed { unnamed, .. }) if !unnamed.is_empty() => unnamed.len(),
-            Fields::Named(_) | Fields::Unnamed(_) => Err(err("zero fields"))?,
-            Fields::Unit => Err(err("with units"))?,
+            Fields::Named(_) | Fields::Unnamed(_) => parse_failed("zero fields")?,
+            Fields::Unit => parse_failed("with units")?,
         };
 
         let proj_ident = Ident::new(&format!("__{}Projection", item.ident), Span::call_site());
@@ -184,4 +177,12 @@ impl Struct {
 
         (proj_item, proj_init)
     }
+}
+
+#[inline(never)]
+pub(super) fn parse_failed(msg: &str) -> Result<usize> {
+    Err(compile_err(&format!(
+        "cannot be implemented for structs with {}",
+        msg
+    )))
 }

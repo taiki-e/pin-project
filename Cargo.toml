@@ -24,6 +24,8 @@ proc-macro = true
 default = ["unsafe_fields"]
 # Use `unsafe_fields` attribute.
 unsafe_fields = []
+# Use `unsafe_variants` attribute.
+unsafe_variants = []
 
 [dependencies]
 proc-macro2 = "^0.4.13"
