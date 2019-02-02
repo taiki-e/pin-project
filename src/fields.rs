@@ -1,43 +1,35 @@
-use std::mem;
-
 use proc_macro::TokenStream;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, ToTokens};
-use syn::{parse_quote, Field, Fields, FieldsNamed, Generics, ItemStruct};
+use syn::{Field, Fields, FieldsNamed, ItemStruct};
 
-use crate::{structs::parse_failed, utils::*};
+use crate::utils::*;
 
 pub(super) fn unsafe_fields(args: TokenStream, input: TokenStream) -> TokenStream {
-    Struct::parse(args, input)
+    syn::parse(input)
+        .map_err(|_| compile_err("`unsafe_fields` may only be used on structs"))
+        .and_then(|item| Struct::parse(args, item))
         .map(|parsed| TokenStream::from(parsed.proj_impl()))
         .unwrap_or_else(|e| e)
 }
 
 struct Struct {
     item: ItemStruct,
-    impl_unpin: Option<Generics>,
-    len: usize,
+    impl_unpin: ImplUnpin,
 }
 
 impl Struct {
-    fn parse(args: TokenStream, input: TokenStream) -> Result<Self> {
-        let item: ItemStruct = match syn::parse(input) {
-            Err(_) => Err(compile_err("`unsafe_fields` may only be used on structs"))?,
-            Ok(item) => item,
-        };
-
-        let impl_unpin = parse_args(args, &item.generics, "unsafe_fields")?;
-        let len = match &item.fields {
-            Fields::Named(FieldsNamed { named, .. }) if !named.is_empty() => named.len(),
-            Fields::Named(_) => parse_failed("zero fields")?,
-            Fields::Unnamed(_) => parse_failed("unnamed fields")?,
-            Fields::Unit => parse_failed("with units")?,
-        };
+    fn parse(args: TokenStream, item: ItemStruct) -> Result<Self> {
+        match &item.fields {
+            Fields::Named(FieldsNamed { named, .. }) if !named.is_empty() => {}
+            Fields::Named(_) => parse_failed("unsafe_fields", "structs with zero fields")?,
+            Fields::Unnamed(_) => parse_failed("unsafe_fields", "structs with unnamed fields")?,
+            Fields::Unit => parse_failed("unsafe_fields", "structs with units")?,
+        }
 
         Ok(Self {
+            impl_unpin: ImplUnpin::parse(args, &item.generics, "unsafe_fields")?,
             item,
-            impl_unpin,
-            len,
         })
     }
 
@@ -47,7 +39,6 @@ impl Struct {
             _ => unreachable!(),
         };
 
-        let unpin = unpin();
         let ident = &self.item.ident;
         let (impl_generics, ty_generics, where_clause) = self.item.generics.split_for_impl();
         let proj_impl = quote! {
@@ -56,17 +47,7 @@ impl Struct {
             }
         };
 
-        let impl_unpin = self
-            .impl_unpin
-            .as_ref()
-            .map(|generics| {
-                let where_clause = generics.split_for_impl().2;
-                quote! {
-                    impl #impl_generics #unpin for #ident #ty_generics #where_clause {}
-                }
-            })
-            .unwrap_or_default();
-
+        let impl_unpin = self.impl_unpin.build(impl_generics, ident, ty_generics);
         let mut item = self.item.into_token_stream();
         item.extend(proj_impl);
         item.extend(impl_unpin);
@@ -80,8 +61,7 @@ impl Struct {
         };
 
         let pin = pin();
-        let unpin = unpin();
-        let mut proj_methods = Vec::with_capacity(self.len);
+        let mut proj_methods = Vec::with_capacity(fields.len());
         let mut impl_unpin = self.impl_unpin.take();
         fields.iter_mut().for_each(
             |Field {
@@ -89,18 +69,12 @@ impl Struct {
              }| {
                 if find_remove(attrs, "skip").is_none() {
                     if find_remove(attrs, "pin").is_some() {
+                        impl_unpin.push(ty);
                         proj_methods.push(quote! {
                             fn #ident<'__a>(self: #pin<&'__a mut Self>) -> #pin<&'__a mut #ty> {
                                 unsafe { #pin::map_unchecked_mut(self, |x| &mut x.#ident) }
                             }
                         });
-
-                        if let Some(generics) = &mut impl_unpin {
-                            generics
-                                .make_where_clause()
-                                .predicates
-                                .push(parse_quote!(#ty: #unpin));
-                        }
                     } else {
                         proj_methods.push(quote! {
                             fn #ident<'__a>(self: #pin<&'__a mut Self>) -> &'__a mut #ty {
@@ -111,8 +85,8 @@ impl Struct {
                 }
             },
         );
+        self.impl_unpin = impl_unpin;
 
-        mem::replace(&mut self.impl_unpin, impl_unpin);
         proj_methods
     }
 }

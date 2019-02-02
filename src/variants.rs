@@ -1,49 +1,45 @@
-use std::mem;
-
 use proc_macro::TokenStream;
 use proc_macro2::{Ident, Span, TokenStream as TokenStream2};
 use quote::{quote, ToTokens};
-use syn::{parse_quote, Field, Fields, FieldsUnnamed, Generics, ItemEnum, Variant};
+use syn::{Field, Fields, FieldsUnnamed, ItemEnum, Variant};
 
 use crate::utils::*;
 
 pub(super) fn unsafe_variants(args: TokenStream, input: TokenStream) -> TokenStream {
-    Enum::parse(args, input)
+    syn::parse(input)
+        .map_err(|_| compile_err("`unsafe_variants` may only be used on structs"))
+        .and_then(|item| Enum::parse(args, item))
         .map(|parsed| TokenStream::from(parsed.proj_impl()))
         .unwrap_or_else(|e| e)
 }
 
 struct Enum {
     item: ItemEnum,
-    impl_unpin: Option<Generics>,
+    impl_unpin: ImplUnpin,
 }
 
 impl Enum {
-    fn parse(args: TokenStream, input: TokenStream) -> Result<Self> {
-        let item: ItemEnum = match syn::parse(input) {
-            Err(_) => Err(compile_err("`unsafe_variants` may only be used on structs"))?,
-            Ok(item) => item,
-        };
+    fn parse(args: TokenStream, item: ItemEnum) -> Result<Self> {
+        if item.variants.is_empty() {
+            parse_failed("unsafe_variants", "enums without variants")?;
+        }
 
-        let impl_unpin = parse_args(args, &item.generics, "unsafe_variants")?;
         item.variants.iter().try_for_each(|v| match &v.fields {
-            _ if v.discriminant.is_some() => parse_failed("discriminants"),
-            Fields::Named(_) => parse_failed("named fields"),
+            _ if v.discriminant.is_some() => {
+                parse_failed("unsafe_variants", "enums with discriminants")
+            }
+            Fields::Named(_) => parse_failed("unsafe_variants", "enums with named fields"),
             _ => Ok(()),
         })?;
 
-        if item.variants.is_empty() {
-            Err(compile_err(
-                "`unsafe_variants` cannot be implemented for zero-variant enums",
-            ))?;
-        }
-
-        Ok(Self { item, impl_unpin })
+        Ok(Self {
+            impl_unpin: ImplUnpin::parse(args, &item.generics, "unsafe_variants")?,
+            item,
+        })
     }
 
     fn proj_impl(mut self) -> TokenStream2 {
         let proj_methods = self.proj_methods();
-        let unpin = unpin();
         let ident = &self.item.ident;
         let (impl_generics, ty_generics, where_clause) = self.item.generics.split_for_impl();
         let proj_impl = quote! {
@@ -52,17 +48,7 @@ impl Enum {
             }
         };
 
-        let impl_unpin = self
-            .impl_unpin
-            .as_ref()
-            .map(|generics| {
-                let where_clause = generics.split_for_impl().2;
-                quote! {
-                    impl #impl_generics #unpin for #ident #ty_generics #where_clause {}
-                }
-            })
-            .unwrap_or_default();
-
+        let impl_unpin = self.impl_unpin.build(impl_generics, ident, ty_generics);
         let mut item = self.item.into_token_stream();
         item.extend(proj_impl);
         item.extend(impl_unpin);
@@ -82,7 +68,7 @@ impl Enum {
             }
 
             let method = match &variant.fields {
-                Fields::Unnamed(_) => unnamed(variant, ident, impl_unpin.as_mut()),
+                Fields::Unnamed(_) => unnamed(variant, ident, &mut impl_unpin),
                 Fields::Unit => return,
                 _ => unreachable!(),
             };
@@ -91,8 +77,8 @@ impl Enum {
                 proj_methods.push(method);
             }
         });
+        self.impl_unpin = impl_unpin;
 
-        mem::replace(&mut self.impl_unpin, impl_unpin);
         proj_methods
     }
 }
@@ -100,7 +86,7 @@ impl Enum {
 fn unnamed(
     variant: &mut Variant,
     ident: &Ident,
-    mut impl_unpin: Option<&mut Generics>,
+    impl_unpin: &mut ImplUnpin,
 ) -> Option<TokenStream2> {
     let Variant {
         fields,
@@ -113,13 +99,11 @@ fn unnamed(
         _ => unreachable!(),
     };
 
-    let option = option();
     let pin = pin();
     let (pat, expr, ty) = {
-        let unpin = unpin();
-        let mut pat_vec = Vec::new();
-        let mut expr_vec = Vec::new();
-        let mut ty_vec = Vec::new();
+        let mut pat_vec = Vec::with_capacity(fields.len());
+        let mut expr_vec = Vec::with_capacity(fields.len());
+        let mut ty_vec = Vec::with_capacity(fields.len());
 
         fields
             .iter_mut()
@@ -129,13 +113,7 @@ fn unnamed(
                     let x = Ident::new(&format!("_x{}", i), Span::call_site());
 
                     if find_remove(attrs, "pin").is_some() {
-                        if let Some(generics) = &mut impl_unpin {
-                            generics
-                                .make_where_clause()
-                                .predicates
-                                .push(parse_quote!(#ty: #unpin));
-                        }
-
+                        impl_unpin.push(ty);
                         expr_vec.push(quote!(#pin::new_unchecked(#x)));
                         ty_vec.push(quote!(#pin<&'__a mut #ty>));
                     } else {
@@ -164,6 +142,7 @@ fn unnamed(
         }
     };
 
+    let option = option();
     let method = Ident::new(&variant.to_string().to_lowercase(), Span::call_site());
     Some(quote! {
         fn #method<'__a>(self: #pin<&'__a mut Self>) -> #option<#ty> {
@@ -179,12 +158,4 @@ fn unnamed(
 
 fn option() -> TokenStream2 {
     quote!(::core::option::Option)
-}
-
-#[inline(never)]
-fn parse_failed(msg: &str) -> Result<()> {
-    Err(compile_err(&format!(
-        "`unsafe_variants` cannot be implemented for enums with {}",
-        msg
-    )))
 }

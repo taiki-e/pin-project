@@ -2,6 +2,8 @@
 //!
 //! ## Examples
 //!
+//! For structs:
+//!
 //! ```rust
 //! use pin_project::unsafe_project;
 //! use std::pin::Pin;
@@ -25,9 +27,45 @@
 //! // impl<T: Unpin, U> Unpin for Foo<T, U> {} // Conditional Unpin impl
 //! ```
 //!
-//! See [`unsafe_project`] for more details.
+//! For enums:
+//!
+//! ```rust
+//! # #[cfg(feature = "project_attr")]
+//! use pin_project::{project, unsafe_project};
+//! # #[cfg(feature = "project_attr")]
+//! use std::pin::Pin;
+//!
+//! # #[cfg(feature = "project_attr")]
+//! #[unsafe_project(Unpin)]
+//! enum Foo<T, U> {
+//!     Future(#[pin] T),
+//!     Done(U),
+//! }
+//!
+//! # #[cfg(feature = "project_attr")]
+//! impl<T, U> Foo<T, U> {
+//!     #[project] // Nightly does not need a dummy attribute to the function.
+//!     fn baz(mut self: Pin<&mut Self>) {
+//!         #[project]
+//!         match self.project() {
+//!             Foo::Future(future) => {
+//!                 let _: Pin<&mut T> = future;
+//!             }
+//!             Foo::Done(value) => {
+//!                 let _: &mut U = value;
+//!             }
+//!         }
+//!     }
+//! }
+//!
+//! // Automatically create the appropriate conditional Unpin implementation.
+//! // impl<T, U> Unpin for Foo<T, U> where T: Unpin {} // Conditional Unpin impl
+//! ```
+//!
+//! See [`unsafe_project`] and [`project`] for more details.
 //!
 //! [`unsafe_project`]: ./attr.unsafe_project.html
+//! [`project`]: ./attr.project.html
 //!
 
 #![crate_type = "proc-macro"]
@@ -36,17 +74,22 @@
 
 extern crate proc_macro;
 
-mod enums {}
-#[cfg(feature = "unsafe_fields")]
-mod fields;
+mod enums;
 mod structs;
 mod utils;
+
+#[cfg(feature = "project_attr")]
+mod macros;
+
+#[cfg(feature = "unsafe_fields")]
+mod fields;
 #[cfg(feature = "unsafe_variants")]
 mod variants;
 
 mod compile_fail;
 
 use proc_macro::TokenStream;
+use syn::Item;
 
 /// An attribute that would create a projection struct covering all the fields.
 ///
@@ -129,8 +172,7 @@ use proc_macro::TokenStream;
 ///
 /// ## Supported Items
 ///
-/// The current version of pin-project supports the following two types of
-/// items.
+/// The current version of pin-project supports the following types of items.
 ///
 /// ### Structs (structs with named fields):
 ///
@@ -147,8 +189,8 @@ use proc_macro::TokenStream;
 /// impl<T, U> Foo<T, U> {
 ///     fn baz(mut self: Pin<&mut Self>) {
 ///         let this = self.project();
-///         let _: Pin<&mut T> = this.future; // Pinned reference to the field
-///         let _: &mut U = this.field; // Normal reference to the field
+///         let _: Pin<&mut T> = this.future;
+///         let _: &mut U = this.field;
 ///     }
 /// }
 /// ```
@@ -164,8 +206,8 @@ use proc_macro::TokenStream;
 /// impl<T, U> Foo<T, U> {
 ///     fn baz(mut self: Pin<&mut Self>) {
 ///         let this = self.project();
-///         let _: Pin<&mut T> = this.0; // Pinned reference to the field
-///         let _: &mut U = this.1; // Normal reference to the field
+///         let _: Pin<&mut T> = this.0;
+///         let _: &mut U = this.1;
 ///     }
 /// }
 /// ```
@@ -173,11 +215,52 @@ use proc_macro::TokenStream;
 /// Structs without fields (unit-like struct and zero fields struct) are not
 /// supported.
 ///
+/// ### Enums
+///
+/// ```rust
+/// # #[cfg(feature = "project_attr")]
+/// use pin_project::{project, unsafe_project};
+/// # #[cfg(feature = "project_attr")]
+/// # use std::pin::Pin;
+///
+/// # #[cfg(feature = "project_attr")]
+/// #[unsafe_project(Unpin)]
+/// enum Foo<A, B, C> {
+///     Tuple(#[pin] A, B),
+///     Struct { field: C },
+///     Unit,
+/// }
+///
+/// # #[cfg(feature = "project_attr")]
+/// impl<A, B, C> Foo<A, B, C> {
+///     #[project] // Nightly does not need a dummy attribute to the function.
+///     fn baz(self: Pin<&mut Self>) {
+///         #[project]
+///         match self.project() {
+///             Foo::Tuple(x, y) => {
+///                 let _: Pin<&mut A> = x;
+///                 let _: &mut B = y;
+///             }
+///             Foo::Struct { field } => {
+///                 let _: &mut C = field;
+///             }
+///             Foo::Unit => {}
+///         }
+///     }
+/// }
+/// ```
+///
+/// Enums without variants (zero-variant enums) are not supported.
+///
 /// [`Unpin`]: core::marker::Unpin
 /// [`drop`]: Drop::drop
 #[proc_macro_attribute]
 pub fn unsafe_project(args: TokenStream, input: TokenStream) -> TokenStream {
-    structs::unsafe_project(args, input)
+    match syn::parse(input) {
+        Ok(Item::Struct(item)) => structs::unsafe_project(args, item),
+        Ok(Item::Enum(item)) => enums::unsafe_project(args, item),
+        _ => utils::compile_err("`unsafe_project` may only be used on structs or enums"),
+    }
 }
 
 /// An attribute that would create projections for each struct fields.
@@ -367,4 +450,104 @@ pub fn unsafe_fields(args: TokenStream, input: TokenStream) -> TokenStream {
 #[proc_macro_attribute]
 pub fn unsafe_variants(args: TokenStream, input: TokenStream) -> TokenStream {
     variants::unsafe_variants(args, input)
+}
+
+/// An attribute to support pattern matching.
+///
+/// *This attribute is available if pin-project is built with the
+/// "project" feature (it is enabled by default).*
+///
+/// ## Examples
+///
+/// ### `let` bindings
+///
+/// ```rust
+/// use pin_project::{project, unsafe_project};
+/// # use std::pin::Pin;
+///
+/// #[unsafe_project(Unpin)]
+/// struct Foo<T, U> {
+///     #[pin]
+///     future: T,
+///     field: U,
+/// }
+///
+/// impl<T, U> Foo<T, U> {
+///     #[project] // Nightly does not need a dummy attribute to the function.
+///     fn baz(mut self: Pin<&mut Self>) {
+///         #[project]
+///         let Foo { future, field } = self.project();
+///
+///         let _: Pin<&mut T> = future;
+///         let _: &mut U = field;
+///     }
+/// }
+/// ```
+///
+/// ### `match` expressions
+///
+/// ```rust
+/// use pin_project::{project, unsafe_project};
+/// # use std::pin::Pin;
+///
+/// #[unsafe_project(Unpin)]
+/// enum Foo<A, B, C> {
+///     Tuple(#[pin] A, B),
+///     Struct { field: C },
+///     Unit,
+/// }
+///
+/// impl<A, B, C> Foo<A, B, C> {
+///     #[project] // Nightly does not need a dummy attribute to the function.
+///     fn baz(self: Pin<&mut Self>) {
+///         #[project]
+///         match self.project() {
+///             Foo::Tuple(x, y) => {
+///                 let _: Pin<&mut A> = x;
+///                 let _: &mut B = y;
+///             }
+///             Foo::Struct { field } => {
+///                 let _: &mut C = field;
+///             }
+///             Foo::Unit => {}
+///         }
+///     }
+/// }
+/// ```
+///
+/// ### `if let` expressions
+///
+/// When used against `if let` expressions, the `#[project]` attribute records
+/// the name of the structure destructed with the first `if let`. Destructing
+/// different structures in the after second times will not generate wrong code.
+///
+/// ```rust
+/// use pin_project::{project, unsafe_project};
+/// # use std::pin::Pin;
+///
+/// #[unsafe_project(Unpin)]
+/// enum Foo<A, B, C> {
+///     Tuple(#[pin] A, B),
+///     Struct { field: C },
+///     Unit,
+/// }
+///
+/// impl<A, B, C> Foo<A, B, C> {
+///     #[project] // Nightly does not need a dummy attribute to the function.
+///     fn baz(self: Pin<&mut Self>) {
+///         #[project]
+///         {
+///             if let Foo::Tuple(x, y) = self.project() {
+///                 let _: Pin<&mut A> = x;
+///                 let _: &mut B = y;
+///             }
+///         }
+///     }
+/// }
+/// ```
+#[cfg(feature = "project_attr")]
+#[proc_macro_attribute]
+pub fn project(args: TokenStream, input: TokenStream) -> TokenStream {
+    assert!(args.is_empty());
+    macros::project(input)
 }
