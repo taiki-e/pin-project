@@ -1,6 +1,6 @@
 # pin-project
 
-[![Build Status](http://img.shields.io/travis/taiki-e/pin-project.svg)](https://travis-ci.org/taiki-e/pin-project)
+[![Build Status](https://travis-ci.org/taiki-e/pin-project.svg?branch=master)](https://travis-ci.org/taiki-e/pin-project)
 [![version](https://img.shields.io/crates/v/pin-project.svg)](https://crates.io/crates/pin-project/)
 [![documentation](https://docs.rs/pin-project/badge.svg)](https://docs.rs/pin-project/)
 [![license](https://img.shields.io/crates/l/pin-project.svg)](https://crates.io/crates/pin-project/)
