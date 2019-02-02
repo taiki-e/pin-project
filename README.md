@@ -28,6 +28,8 @@ The current version of pin-project requires Rust 1.33 or later.
 
 ## Examples
 
+For structs:
+
 ```rust
 use pin_project::unsafe_project;
 use std::pin::Pin;
@@ -44,6 +46,37 @@ impl<T, U> Foo<T, U> {
         let this = self.project();
         let _: Pin<&mut T> = this.future; // Pinned reference to the field
         let _: &mut U = this.field; // Normal reference to the field
+    }
+}
+
+// Automatically create the appropriate conditional Unpin implementation.
+// impl<T, U> Unpin for Foo<T, U> where T: Unpin {} // Conditional Unpin impl
+```
+
+For enums:
+
+```rust
+use pin_project::{project, unsafe_project};
+use std::pin::Pin;
+
+#[unsafe_project(Unpin)]
+enum Foo<T, U> {
+    Future(#[pin] T),
+    Done(U),
+}
+
+impl<T, U> Foo<T, U> {
+    #[project] // Nightly does not need a dummy attribute to the function.
+    fn baz(mut self: Pin<&mut Self>) {
+        #[project]
+        match self.project() {
+            Foo::Future(future) => {
+                let _: Pin<&mut T> = future;
+            }
+            Foo::Done(value) => {
+                let _: &mut U = value;
+            }
+        }
     }
 }
 

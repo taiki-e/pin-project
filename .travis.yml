@@ -48,6 +48,7 @@ before_script:
 script:
   - cargo test
   - cargo test --no-default-features
+  - cargo test --no-default-features --features=project_attr
   - cargo test --all-features
   - cargo test --all-features --release
 

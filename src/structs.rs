@@ -1,46 +1,37 @@
-use std::mem;
-
 use proc_macro::TokenStream;
-use proc_macro2::{Ident, Span, TokenStream as TokenStream2};
+use proc_macro2::{Ident, TokenStream as TokenStream2};
 use quote::{quote, ToTokens};
-use syn::{parse_quote, Field, Fields, FieldsNamed, FieldsUnnamed, Generics, ItemStruct};
+use syn::{Field, Fields, FieldsNamed, FieldsUnnamed, ItemStruct};
 
 use crate::utils::*;
 
-pub(super) fn unsafe_project(args: TokenStream, input: TokenStream) -> TokenStream {
-    Struct::parse(args, input)
+pub(super) fn unsafe_project(args: TokenStream, item: ItemStruct) -> TokenStream {
+    Struct::parse(args, item)
         .map(|parsed| TokenStream::from(parsed.proj_impl()))
         .unwrap_or_else(|e| e)
 }
 
 struct Struct {
     item: ItemStruct,
-    impl_unpin: Option<Generics>,
+    impl_unpin: ImplUnpin,
     proj_ident: Ident,
-    len: usize,
 }
 
 impl Struct {
-    fn parse(args: TokenStream, input: TokenStream) -> Result<Self> {
-        let item: ItemStruct = match syn::parse(input) {
-            Err(_) => Err(compile_err("`unsafe_project` may only be used on structs"))?,
-            Ok(item) => item,
-        };
+    fn parse(args: TokenStream, item: ItemStruct) -> Result<Self> {
+        match &item.fields {
+            Fields::Named(FieldsNamed { named, .. }) if !named.is_empty() => {}
+            Fields::Unnamed(FieldsUnnamed { unnamed, .. }) if !unnamed.is_empty() => {}
+            Fields::Named(_) | Fields::Unnamed(_) => {
+                parse_failed("unsafe_project", "structs with zero fields")?
+            }
+            Fields::Unit => parse_failed("unsafe_project", "structs with units")?,
+        }
 
-        let impl_unpin = parse_args(args, &item.generics, "unsafe_project")?;
-        let len = match &item.fields {
-            Fields::Named(FieldsNamed { named, .. }) if !named.is_empty() => named.len(),
-            Fields::Unnamed(FieldsUnnamed { unnamed, .. }) if !unnamed.is_empty() => unnamed.len(),
-            Fields::Named(_) | Fields::Unnamed(_) => parse_failed("zero fields")?,
-            Fields::Unit => parse_failed("with units")?,
-        };
-
-        let proj_ident = Ident::new(&format!("__{}Projection", item.ident), Span::call_site());
         Ok(Self {
+            impl_unpin: ImplUnpin::parse(args, &item.generics, "unsafe_project")?,
+            proj_ident: proj_ident(&item.ident),
             item,
-            impl_unpin,
-            proj_ident,
-            len,
         })
     }
 
@@ -52,42 +43,28 @@ impl Struct {
         };
 
         let pin = pin();
-        let unpin = unpin();
         let ident = &self.item.ident;
         let proj_ident = &self.proj_ident;
-        let proj_generics = self.proj_generics();
+        let proj_generics = proj_generics(&self.item.generics);
         let (impl_generics, ty_generics, where_clause) = self.item.generics.split_for_impl();
 
         let proj_impl = quote! {
             impl #impl_generics #ident #ty_generics #where_clause {
                 fn project<'__a>(self: #pin<&'__a mut Self>) -> #proj_ident #proj_generics {
-                    let this = unsafe { #pin::get_unchecked_mut(self) };
-                    #proj_init
+                    unsafe {
+                        let this = #pin::get_unchecked_mut(self);
+                        #proj_init
+                    }
                 }
             }
         };
 
-        let impl_unpin = self
-            .impl_unpin
-            .as_ref()
-            .map(|generics| {
-                let where_clause = generics.split_for_impl().2;
-                quote! {
-                    impl #impl_generics #unpin for #ident #ty_generics #where_clause {}
-                }
-            })
-            .unwrap_or_default();
-
+        let impl_unpin = self.impl_unpin.build(impl_generics, ident, ty_generics);
         let mut item = self.item.into_token_stream();
         item.extend(proj_item);
         item.extend(proj_impl);
         item.extend(impl_unpin);
         item
-    }
-
-    fn proj_generics(&self) -> TokenStream2 {
-        let generics = self.item.generics.params.iter();
-        quote!(<'__a, #(#generics),*>)
     }
 
     fn named(&mut self) -> (TokenStream2, TokenStream2) {
@@ -97,35 +74,27 @@ impl Struct {
         };
 
         let pin = pin();
-        let unpin = unpin();
-        let mut proj_fields = Vec::with_capacity(self.len);
-        let mut proj_init = Vec::with_capacity(self.len);
+        let mut proj_fields = Vec::with_capacity(fields.len());
+        let mut proj_init = Vec::with_capacity(fields.len());
         let mut impl_unpin = self.impl_unpin.take();
         fields.iter_mut().for_each(
             |Field {
                  attrs, ident, ty, ..
              }| {
                 if find_remove(attrs, "pin").is_some() {
+                    impl_unpin.push(ty);
                     proj_fields.push(quote!(#ident: #pin<&'__a mut #ty>));
-                    proj_init
-                        .push(quote!(#ident: unsafe { #pin::new_unchecked(&mut this.#ident) }));
-
-                    if let Some(generics) = &mut impl_unpin {
-                        generics
-                            .make_where_clause()
-                            .predicates
-                            .push(parse_quote!(#ty: #unpin));
-                    }
+                    proj_init.push(quote!(#ident: #pin::new_unchecked(&mut this.#ident)));
                 } else {
                     proj_fields.push(quote!(#ident: &'__a mut #ty));
                     proj_init.push(quote!(#ident: &mut this.#ident));
                 }
             },
         );
+        self.impl_unpin = impl_unpin;
 
-        mem::replace(&mut self.impl_unpin, impl_unpin);
         let proj_ident = &self.proj_ident;
-        let proj_generics = self.proj_generics();
+        let proj_generics = proj_generics(&self.item.generics);
         let proj_item = quote! {
             struct #proj_ident #proj_generics {
                 #(#proj_fields,)*
@@ -143,33 +112,26 @@ impl Struct {
         };
 
         let pin = pin();
-        let unpin = unpin();
-        let mut proj_fields = Vec::with_capacity(self.len);
-        let mut proj_init = Vec::with_capacity(self.len);
+        let mut proj_fields = Vec::with_capacity(fields.len());
+        let mut proj_init = Vec::with_capacity(fields.len());
         let mut impl_unpin = self.impl_unpin.take();
         fields
             .iter_mut()
             .enumerate()
             .for_each(|(n, Field { attrs, ty, .. })| {
                 if find_remove(attrs, "pin").is_some() {
+                    impl_unpin.push(ty);
                     proj_fields.push(quote!(#pin<&'__a mut #ty>));
-                    proj_init.push(quote!(unsafe { #pin::new_unchecked(&mut this.#n) }));
-
-                    if let Some(generics) = &mut impl_unpin {
-                        generics
-                            .make_where_clause()
-                            .predicates
-                            .push(parse_quote!(#ty: #unpin));
-                    }
+                    proj_init.push(quote!(#pin::new_unchecked(&mut this.#n)));
                 } else {
                     proj_fields.push(quote!(&'__a mut #ty));
                     proj_init.push(quote!(&mut this.#n));
                 }
             });
+        self.impl_unpin = impl_unpin;
 
-        mem::replace(&mut self.impl_unpin, impl_unpin);
         let proj_ident = &self.proj_ident;
-        let proj_generics = self.proj_generics();
+        let proj_generics = proj_generics(&self.item.generics);
         let proj_item = quote! {
             struct #proj_ident #proj_generics(#(#proj_fields,)*);
         };
@@ -177,12 +139,4 @@ impl Struct {
 
         (proj_item, proj_init)
     }
-}
-
-#[inline(never)]
-pub(super) fn parse_failed(msg: &str) -> Result<usize> {
-    Err(compile_err(&format!(
-        "cannot be implemented for structs with {}",
-        msg
-    )))
 }
