@@ -455,7 +455,7 @@ pub fn unsafe_variants(args: TokenStream, input: TokenStream) -> TokenStream {
 /// An attribute to support pattern matching.
 ///
 /// *This attribute is available if pin-project is built with the
-/// "project" feature (it is enabled by default).*
+/// "project_attr" feature (it is enabled by default).*
 ///
 /// ## Examples
 ///

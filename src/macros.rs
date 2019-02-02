@@ -130,7 +130,7 @@ mod attr {
     use super::*;
     use syn::visit_mut::{self, VisitMut};
 
-    const NAMES: &[&str] = &["project", "project_attr"];
+    const NAMES: &[&str] = &["project"];
 
     pub(super) fn dummy(item: &mut ItemFn) {
         Dummy.visit_item_fn_mut(item)
