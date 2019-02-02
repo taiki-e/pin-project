@@ -1,5 +1,7 @@
 # Unreleased
 
+# 0.1.8 - 2019-02-02
+
 * Add the feature to create projected enums to `unsafe_project`.
 
 * Add `project` attribute to support pattern matching.
