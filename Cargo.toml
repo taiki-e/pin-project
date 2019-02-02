@@ -21,7 +21,7 @@ proc-macro = true
 
 [features]
 # Default features.
-default = ["project_attr", "unsafe_fields"]
+default = ["project_attr"]
 
 # Use `project` attribute.
 project_attr = ["syn/visit-mut"]

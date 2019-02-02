@@ -269,7 +269,7 @@ pub fn unsafe_project(args: TokenStream, input: TokenStream) -> TokenStream {
 /// [pin-utils].
 ///
 /// *This attribute is available if pin-project is built with the
-/// "unsafe_fields" feature (in version 0.1.*, it is enabled by default).*
+/// "unsafe_fields" feature.*
 ///
 /// This attribute creates methods according to the following rules:
 ///
