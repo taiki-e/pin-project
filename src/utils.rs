@@ -77,9 +77,9 @@ impl ImplUnpin {
 
     pub(super) fn build(
         self,
-        impl_generics: ImplGenerics,
+        impl_generics: ImplGenerics<'_>,
         ident: &Ident,
-        ty_generics: TypeGenerics,
+        ty_generics: TypeGenerics<'_>,
     ) -> TokenStream2 {
         self.0
             .map(|generics| {
