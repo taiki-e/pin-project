@@ -7,14 +7,7 @@ matrix:
 
   include:
     - rust: beta
-      os: osx
     - rust: nightly
-      os: osx
-
-    - rust: beta
-      os: linux
-    - rust: nightly
-      os: linux
 
     - rust: nightly
       name: cargo test (minimal versions)
