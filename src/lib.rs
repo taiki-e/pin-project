@@ -2,7 +2,9 @@
 //!
 //! ## Examples
 //!
-//! For structs:
+//! Structs and enums are supported.
+//!
+//! ### Structs
 //!
 //! ```rust
 //! use pin_project::unsafe_project;
@@ -27,7 +29,47 @@
 //! // impl<T: Unpin, U> Unpin for Foo<T, U> {} // Conditional Unpin impl
 //! ```
 //!
-//! For enums:
+//! <details>
+//! <summary>Code like this will be generated:</summary>
+//!
+//! ```rust
+//! # use std::pin::Pin;
+//! struct Foo<T, U> {
+//!     future: T,
+//!     field: U,
+//! }
+//!
+//! struct __FooProjection<'__a, T, U> {
+//!     future: ::core::pin::Pin<&'__a mut T>,
+//!     field: &'__a mut U,
+//! }
+//!
+//! impl<T, U> Foo<T, U> {
+//!     fn project<'__a>(self: ::core::pin::Pin<&'__a mut Self>) -> __FooProjection<'__a, T, U> {
+//!         unsafe {
+//!             let this = ::core::pin::Pin::get_unchecked_mut(self);
+//!             __FooProjection {
+//!                 future: ::core::pin::Pin::new_unchecked(&mut this.future),
+//!                 field: &mut this.field,
+//!             }
+//!         }
+//!     }
+//! }
+//!
+//! impl<T, U> Unpin for Foo<T, U> where T: Unpin {}
+//!
+//! impl<T, U> Foo<T, U> {
+//!     fn baz(mut self: Pin<&mut Self>) {
+//!         let this = self.project();
+//!         let _: Pin<&mut T> = this.future; // Pinned reference to the field
+//!         let _: &mut U = this.field; // Normal reference to the field
+//!     }
+//! }
+//! ```
+//!
+//! </details>
+//!
+//! ### Enums
 //!
 //! ```rust
 //! # #[cfg(feature = "project_attr")]
@@ -61,6 +103,50 @@
 //! // Automatically create the appropriate conditional Unpin implementation.
 //! // impl<T, U> Unpin for Foo<T, U> where T: Unpin {} // Conditional Unpin impl
 //! ```
+//!
+//! <details>
+//! <summary>Code like this will be generated:</summary>
+//!
+//! ```rust
+//! # use std::pin::Pin;
+//! enum Foo<T, U> {
+//!     Future(T),
+//!     Done(U),
+//! }
+//!
+//! enum __FooProjection<'__a, T, U> {
+//!     Future(::core::pin::Pin<&'__a mut T>),
+//!     Done(&'__a mut U),
+//! }
+//!
+//! impl<T, U> Foo<T, U> {
+//!     fn project<'__a>(self: ::core::pin::Pin<&'__a mut Self>) -> __FooProjection<'__a, T, U> {
+//!         unsafe {
+//!             match ::core::pin::Pin::get_unchecked_mut(self) {
+//!                 Foo::Future(_x0) => __FooProjection::Future(::core::pin::Pin::new_unchecked(_x0)),
+//!                 Foo::Done(_x0) => __FooProjection::Done(_x0),
+//!             }
+//!         }
+//!     }
+//! }
+//!
+//! impl<T, U> Unpin for Foo<T, U> where T: Unpin {}
+//!
+//! impl<T, U> Foo<T, U> {
+//!     fn baz(mut self: Pin<&mut Self>) {
+//!         match self.project() {
+//!             __FooProjection::Future(future) => {
+//!                 let _: Pin<&mut T> = future;
+//!             }
+//!             __FooProjection::Done(value) => {
+//!                 let _: &mut U = value;
+//!             }
+//!         }
+//!     }
+//! }
+//! ```
+//!
+//! </details>
 //!
 //! See [`unsafe_project`] and [`project`] for more details.
 //!

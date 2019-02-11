@@ -28,7 +28,9 @@ The current version of pin-project requires Rust 1.33 or later.
 
 ## Examples
 
-For structs:
+Structs and enums are supported.
+
+### Structs
 
 ```rust
 use pin_project::unsafe_project;
@@ -53,7 +55,9 @@ impl<T, U> Foo<T, U> {
 // impl<T, U> Unpin for Foo<T, U> where T: Unpin {} // Conditional Unpin impl
 ```
 
-For enums:
+[Code like this will be generated](doc/struct-example-1.md)
+
+### Enums
 
 ```rust
 use pin_project::{project, unsafe_project};
@@ -83,6 +87,8 @@ impl<T, U> Foo<T, U> {
 // Automatically create the appropriate conditional Unpin implementation.
 // impl<T, U> Unpin for Foo<T, U> where T: Unpin {} // Conditional Unpin impl
 ```
+
+[Code like this will be generated](doc/enum-example-1.md)
 
 See the [documentation](https://docs.rs/pin-project/) for more details.
 
