@@ -15,7 +15,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-pin-project = "0.1.8"
+pin-project = "0.2.0"
 ```
 
 Now, you can use pin-project:

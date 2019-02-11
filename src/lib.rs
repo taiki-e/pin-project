@@ -156,7 +156,7 @@
 
 #![crate_type = "proc-macro"]
 #![recursion_limit = "256"]
-#![doc(html_root_url = "https://docs.rs/pin-project/0.1.8")]
+#![doc(html_root_url = "https://docs.rs/pin-project/0.2.0")]
 #![deny(rust_2018_idioms)]
 
 extern crate proc_macro;
@@ -337,10 +337,13 @@ use syn::Item;
 /// }
 /// ```
 ///
+/// Also see [`project`] attribute.
+///
 /// Enums without variants (zero-variant enums) are not supported.
 ///
 /// [`Unpin`]: core::marker::Unpin
 /// [`drop`]: Drop::drop
+/// [`project`]: ./attr.project.html
 #[proc_macro_attribute]
 pub fn unsafe_project(args: TokenStream, input: TokenStream) -> TokenStream {
     match syn::parse(input) {

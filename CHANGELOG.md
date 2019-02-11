@@ -1,5 +1,7 @@
 # Unreleased
 
+# 0.2.0 - 2019-02-11
+
 * Make `unsafe_fields` optional.
 
 * Improve documentation.
