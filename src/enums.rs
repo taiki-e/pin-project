@@ -37,23 +37,31 @@ impl Enum {
 
     fn proj_impl(mut self) -> TokenStream2 {
         let ItemEnum {
-            variants, ident, ..
+            variants,
+            ident: enum_ident,
+            ..
         } = &mut self.item;
         let proj_ident = &self.proj_ident;
 
         let mut arm_vec = Vec::with_capacity(variants.len());
         let mut ty_vec = Vec::with_capacity(variants.len());
         let mut impl_unpin = self.impl_unpin.take();
-        variants.iter_mut().for_each(|variant| {
-            let (proj_arm, proj_ty) = match &variant.fields {
-                Fields::Unnamed(_) => unnamed(variant, ident, proj_ident, &mut impl_unpin),
-                Fields::Named(_) => named(variant, ident, proj_ident, &mut impl_unpin),
-                Fields::Unit => unit(variant, ident, proj_ident),
-            };
+        variants
+            .iter_mut()
+            .for_each(|Variant { fields, ident, .. }| {
+                let (proj_arm, proj_ty) = match fields {
+                    Fields::Unnamed(fields) => {
+                        unnamed(fields, ident, enum_ident, proj_ident, &mut impl_unpin)
+                    }
+                    Fields::Named(fields) => {
+                        named(fields, ident, enum_ident, proj_ident, &mut impl_unpin)
+                    }
+                    Fields::Unit => unit(ident, enum_ident, proj_ident),
+                };
 
-            arm_vec.push(proj_arm);
-            ty_vec.push(proj_ty);
-        });
+                arm_vec.push(proj_arm);
+                ty_vec.push(proj_ty);
+            });
         self.impl_unpin = impl_unpin;
 
         let pin = pin();
@@ -90,22 +98,12 @@ impl Enum {
 }
 
 fn named(
-    variant: &mut Variant,
-    ident: &Ident,
+    FieldsNamed { named: fields, .. }: &mut FieldsNamed,
+    variant_ident: &Ident,
+    enum_ident: &Ident,
     proj_ident: &Ident,
     impl_unpin: &mut ImplUnpin,
 ) -> (TokenStream2, TokenStream2) {
-    let Variant {
-        fields,
-        ident: variant_ident,
-        ..
-    } = variant;
-
-    let fields = match fields {
-        Fields::Named(FieldsNamed { named, .. }) => named,
-        _ => unreachable!(),
-    };
-
     let pin = pin();
     let mut pat_vec = Vec::with_capacity(fields.len());
     let mut expr_vec = Vec::with_capacity(fields.len());
@@ -128,7 +126,7 @@ fn named(
     );
 
     let proj_arm = quote! {
-        #ident::#variant_ident { #(#pat_vec),* } => #proj_ident::#variant_ident { #(#expr_vec),* }
+        #enum_ident::#variant_ident { #(#pat_vec),* } => #proj_ident::#variant_ident { #(#expr_vec),* }
     };
     let proj_ty = quote!(#variant_ident { #(#ty_vec),* });
 
@@ -136,22 +134,14 @@ fn named(
 }
 
 fn unnamed(
-    variant: &mut Variant,
-    ident: &Ident,
+    FieldsUnnamed {
+        unnamed: fields, ..
+    }: &mut FieldsUnnamed,
+    variant_ident: &Ident,
+    enum_ident: &Ident,
     proj_ident: &Ident,
     impl_unpin: &mut ImplUnpin,
 ) -> (TokenStream2, TokenStream2) {
-    let Variant {
-        fields,
-        ident: variant_ident,
-        ..
-    } = variant;
-
-    let fields = match fields {
-        Fields::Unnamed(FieldsUnnamed { unnamed, .. }) => unnamed,
-        _ => unreachable!(),
-    };
-
     let pin = pin();
     let mut pat_vec = Vec::with_capacity(fields.len());
     let mut expr_vec = Vec::with_capacity(fields.len());
@@ -175,27 +165,20 @@ fn unnamed(
         });
 
     let proj_arm = quote! {
-        #ident::#variant_ident(#(#pat_vec),*) => #proj_ident::#variant_ident(#(#expr_vec),*)
+        #enum_ident::#variant_ident(#(#pat_vec),*) => #proj_ident::#variant_ident(#(#expr_vec),*)
     };
     let proj_ty = quote!(#variant_ident(#(#ty_vec),*));
 
     (proj_arm, proj_ty)
 }
 
-fn unit(variant: &Variant, ident: &Ident, proj_ident: &Ident) -> (TokenStream2, TokenStream2) {
-    let Variant {
-        fields,
-        ident: variant_ident,
-        ..
-    } = variant;
-
-    match fields {
-        Fields::Unit => {}
-        _ => unreachable!(),
-    }
-
+fn unit(
+    variant_ident: &Ident,
+    enum_ident: &Ident,
+    proj_ident: &Ident,
+) -> (TokenStream2, TokenStream2) {
     let proj_arm = quote! {
-        #ident::#variant_ident => #proj_ident::#variant_ident
+        #enum_ident::#variant_ident => #proj_ident::#variant_ident
     };
     let proj_ty = quote!(#variant_ident);
 
