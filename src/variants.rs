@@ -50,7 +50,7 @@ impl Enum {
             variants,
             ident: enum_ident,
             ..
-        } = item;
+        } = &mut item;
 
         let mut proj_methods = Vec::with_capacity(variants.len());
         variants.iter_mut().for_each(|variant| {
@@ -59,7 +59,7 @@ impl Enum {
             }
 
             let method = match &variant.fields {
-                Fields::Unnamed(_) => unnamed(variant, enum_ident, impl_unpin),
+                Fields::Unnamed(_) => unnamed(variant, enum_ident, &mut impl_unpin),
                 Fields::Unit => return,
                 _ => unreachable!(),
             };
