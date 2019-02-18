@@ -36,9 +36,13 @@ impl Struct {
     }
 
     fn proj_impl(mut self) -> TokenStream2 {
-        let (proj_item, proj_init) = match &self.item.fields {
-            Fields::Named(_) => self.named(),
-            Fields::Unnamed(_) => self.unnamed(),
+        let Self {
+            item, impl_unpin, ..
+        } = &mut self;
+
+        let (proj_item_body, proj_init_body) = match &mut item.fields {
+            Fields::Named(fields) => named(fields, impl_unpin),
+            Fields::Unnamed(fields) => unnamed(fields, impl_unpin),
             Fields::Unit => unreachable!(),
         };
 
@@ -48,12 +52,16 @@ impl Struct {
         let proj_generics = proj_generics(&self.item.generics);
         let (impl_generics, ty_generics, where_clause) = self.item.generics.split_for_impl();
 
+        let proj_item = quote! {
+            struct #proj_ident #proj_generics #proj_item_body
+        };
+
         let proj_impl = quote! {
             impl #impl_generics #ident #ty_generics #where_clause {
                 fn project<'__a>(self: #pin<&'__a mut Self>) -> #proj_ident #proj_generics {
                     unsafe {
                         let this = #pin::get_unchecked_mut(self);
-                        #proj_init
+                        #proj_ident #proj_init_body
                     }
                 }
             }
@@ -66,77 +74,61 @@ impl Struct {
         item.extend(impl_unpin);
         item
     }
+}
 
-    fn named(&mut self) -> (TokenStream2, TokenStream2) {
-        let fields = match &mut self.item.fields {
-            Fields::Named(FieldsNamed { named, .. }) => named,
-            _ => unreachable!(),
-        };
-
-        let pin = pin();
-        let mut proj_fields = Vec::with_capacity(fields.len());
-        let mut proj_init = Vec::with_capacity(fields.len());
-        let mut impl_unpin = self.impl_unpin.take();
-        fields.iter_mut().for_each(
-            |Field {
-                 attrs, ident, ty, ..
-             }| {
-                if find_remove(attrs, "pin").is_some() {
-                    impl_unpin.push(ty);
-                    proj_fields.push(quote!(#ident: #pin<&'__a mut #ty>));
-                    proj_init.push(quote!(#ident: #pin::new_unchecked(&mut this.#ident)));
-                } else {
-                    proj_fields.push(quote!(#ident: &'__a mut #ty));
-                    proj_init.push(quote!(#ident: &mut this.#ident));
-                }
-            },
-        );
-        self.impl_unpin = impl_unpin;
-
-        let proj_ident = &self.proj_ident;
-        let proj_generics = proj_generics(&self.item.generics);
-        let proj_item = quote! {
-            struct #proj_ident #proj_generics {
-                #(#proj_fields,)*
+fn named(
+    FieldsNamed { named: fields, .. }: &mut FieldsNamed,
+    impl_unpin: &mut ImplUnpin,
+) -> (TokenStream2, TokenStream2) {
+    let pin = pin();
+    let mut proj_fields = Vec::with_capacity(fields.len());
+    let mut proj_init = Vec::with_capacity(fields.len());
+    fields.iter_mut().for_each(
+        |Field {
+             attrs, ident, ty, ..
+         }| {
+            if find_remove(attrs, "pin").is_some() {
+                impl_unpin.push(ty);
+                proj_fields.push(quote!(#ident: #pin<&'__a mut #ty>));
+                proj_init.push(quote!(#ident: #pin::new_unchecked(&mut this.#ident)));
+            } else {
+                proj_fields.push(quote!(#ident: &'__a mut #ty));
+                proj_init.push(quote!(#ident: &mut this.#ident));
             }
-        };
-        let proj_init = quote!(#proj_ident { #(#proj_init,)* });
+        },
+    );
 
-        (proj_item, proj_init)
-    }
+    let proj_item_body = quote!({ #(#proj_fields,)* });
+    let proj_init_body = quote!({ #(#proj_init,)* });
 
-    fn unnamed(&mut self) -> (TokenStream2, TokenStream2) {
-        let fields = match &mut self.item.fields {
-            Fields::Unnamed(FieldsUnnamed { unnamed, .. }) => unnamed,
-            _ => unreachable!(),
-        };
+    (proj_item_body, proj_init_body)
+}
 
-        let pin = pin();
-        let mut proj_fields = Vec::with_capacity(fields.len());
-        let mut proj_init = Vec::with_capacity(fields.len());
-        let mut impl_unpin = self.impl_unpin.take();
-        fields
-            .iter_mut()
-            .enumerate()
-            .for_each(|(n, Field { attrs, ty, .. })| {
-                if find_remove(attrs, "pin").is_some() {
-                    impl_unpin.push(ty);
-                    proj_fields.push(quote!(#pin<&'__a mut #ty>));
-                    proj_init.push(quote!(#pin::new_unchecked(&mut this.#n)));
-                } else {
-                    proj_fields.push(quote!(&'__a mut #ty));
-                    proj_init.push(quote!(&mut this.#n));
-                }
-            });
-        self.impl_unpin = impl_unpin;
+fn unnamed(
+    FieldsUnnamed {
+        unnamed: fields, ..
+    }: &mut FieldsUnnamed,
+    impl_unpin: &mut ImplUnpin,
+) -> (TokenStream2, TokenStream2) {
+    let pin = pin();
+    let mut proj_fields = Vec::with_capacity(fields.len());
+    let mut proj_init = Vec::with_capacity(fields.len());
+    fields
+        .iter_mut()
+        .enumerate()
+        .for_each(|(n, Field { attrs, ty, .. })| {
+            if find_remove(attrs, "pin").is_some() {
+                impl_unpin.push(ty);
+                proj_fields.push(quote!(#pin<&'__a mut #ty>));
+                proj_init.push(quote!(#pin::new_unchecked(&mut this.#n)));
+            } else {
+                proj_fields.push(quote!(&'__a mut #ty));
+                proj_init.push(quote!(&mut this.#n));
+            }
+        });
 
-        let proj_ident = &self.proj_ident;
-        let proj_generics = proj_generics(&self.item.generics);
-        let proj_item = quote! {
-            struct #proj_ident #proj_generics(#(#proj_fields,)*);
-        };
-        let proj_init = quote!(#proj_ident(#(#proj_init,)*));
+    let proj_item_body = quote!((#(#proj_fields,)*););
+    let proj_init_body = quote!((#(#proj_init,)*));
 
-        (proj_item, proj_init)
-    }
+    (proj_item_body, proj_init_body)
 }
