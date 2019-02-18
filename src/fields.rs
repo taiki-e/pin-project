@@ -34,8 +34,10 @@ impl Struct {
     }
 
     fn proj_impl(mut self) -> TokenStream2 {
-        let proj_methods = match &self.item.fields {
-            Fields::Named(_) => self.named(),
+        let Self { item, impl_unpin } = &mut self;
+
+        let proj_methods = match &mut item.fields {
+            Fields::Named(fields) => named(fields, impl_unpin),
             _ => unreachable!(),
         };
 
@@ -53,40 +55,36 @@ impl Struct {
         item.extend(impl_unpin);
         item
     }
+}
 
-    fn named(&mut self) -> Vec<TokenStream2> {
-        let fields = match &mut self.item.fields {
-            Fields::Named(FieldsNamed { named, .. }) => named,
-            _ => unreachable!(),
-        };
-
-        let pin = pin();
-        let mut proj_methods = Vec::with_capacity(fields.len());
-        let mut impl_unpin = self.impl_unpin.take();
-        fields.iter_mut().for_each(
-            |Field {
-                 attrs, ident, ty, ..
-             }| {
-                if find_remove(attrs, "skip").is_none() {
-                    if find_remove(attrs, "pin").is_some() {
-                        impl_unpin.push(ty);
-                        proj_methods.push(quote! {
-                            fn #ident<'__a>(self: #pin<&'__a mut Self>) -> #pin<&'__a mut #ty> {
-                                unsafe { #pin::map_unchecked_mut(self, |x| &mut x.#ident) }
-                            }
-                        });
-                    } else {
-                        proj_methods.push(quote! {
-                            fn #ident<'__a>(self: #pin<&'__a mut Self>) -> &'__a mut #ty {
-                                unsafe { &mut #pin::get_unchecked_mut(self).#ident }
-                            }
-                        });
-                    }
+fn named(
+    FieldsNamed { named: fields, .. }: &mut FieldsNamed,
+    impl_unpin: &mut ImplUnpin,
+) -> Vec<TokenStream2> {
+    let pin = pin();
+    let mut proj_methods = Vec::with_capacity(fields.len());
+    fields.iter_mut().for_each(
+        |Field {
+             attrs, ident, ty, ..
+         }| {
+            if find_remove(attrs, "skip").is_none() {
+                if find_remove(attrs, "pin").is_some() {
+                    impl_unpin.push(ty);
+                    proj_methods.push(quote! {
+                        fn #ident<'__a>(self: #pin<&'__a mut Self>) -> #pin<&'__a mut #ty> {
+                            unsafe { #pin::map_unchecked_mut(self, |x| &mut x.#ident) }
+                        }
+                    });
+                } else {
+                    proj_methods.push(quote! {
+                        fn #ident<'__a>(self: #pin<&'__a mut Self>) -> &'__a mut #ty {
+                            unsafe { &mut #pin::get_unchecked_mut(self).#ident }
+                        }
+                    });
                 }
-            },
-        );
-        self.impl_unpin = impl_unpin;
+            }
+        },
+    );
 
-        proj_methods
-    }
+    proj_methods
 }

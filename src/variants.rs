@@ -56,19 +56,23 @@ impl Enum {
     }
 
     fn proj_methods(&mut self) -> Vec<TokenStream2> {
+        let Self {
+            item, impl_unpin, ..
+        } = self;
         let ItemEnum {
-            variants, ident, ..
-        } = &mut self.item;
+            variants,
+            ident: enum_ident,
+            ..
+        } = item;
 
         let mut proj_methods = Vec::with_capacity(variants.len());
-        let mut impl_unpin = self.impl_unpin.take();
         variants.iter_mut().for_each(|variant| {
             if find_remove(&mut variant.attrs, "skip").is_some() {
                 return;
             }
 
             let method = match &variant.fields {
-                Fields::Unnamed(_) => unnamed(variant, ident, &mut impl_unpin),
+                Fields::Unnamed(_) => unnamed(variant, enum_ident, impl_unpin),
                 Fields::Unit => return,
                 _ => unreachable!(),
             };
@@ -77,7 +81,6 @@ impl Enum {
                 proj_methods.push(method);
             }
         });
-        self.impl_unpin = impl_unpin;
 
         proj_methods
     }

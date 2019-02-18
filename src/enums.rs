@@ -36,25 +36,28 @@ impl Enum {
     }
 
     fn proj_impl(mut self) -> TokenStream2 {
+        let Self {
+            item,
+            impl_unpin,
+            proj_ident,
+        } = &mut self;
         let ItemEnum {
             variants,
             ident: enum_ident,
             ..
-        } = &mut self.item;
-        let proj_ident = &self.proj_ident;
+        } = item;
 
         let mut arm_vec = Vec::with_capacity(variants.len());
         let mut ty_vec = Vec::with_capacity(variants.len());
-        let mut impl_unpin = self.impl_unpin.take();
         variants
             .iter_mut()
             .for_each(|Variant { fields, ident, .. }| {
                 let (proj_arm, proj_ty) = match fields {
                     Fields::Unnamed(fields) => {
-                        unnamed(fields, ident, enum_ident, proj_ident, &mut impl_unpin)
+                        unnamed(fields, ident, enum_ident, proj_ident, impl_unpin)
                     }
                     Fields::Named(fields) => {
-                        named(fields, ident, enum_ident, proj_ident, &mut impl_unpin)
+                        named(fields, ident, enum_ident, proj_ident, impl_unpin)
                     }
                     Fields::Unit => unit(ident, enum_ident, proj_ident),
                 };
@@ -62,7 +65,6 @@ impl Enum {
                 arm_vec.push(proj_arm);
                 ty_vec.push(proj_ty);
             });
-        self.impl_unpin = impl_unpin;
 
         let pin = pin();
         let ident = &self.item.ident;

@@ -62,10 +62,6 @@ impl ImplUnpin {
         }
     }
 
-    pub(super) fn take(&mut self) -> Self {
-        Self(self.0.take())
-    }
-
     pub(super) fn push(&mut self, ty: &Type) {
         if let Some(generics) = &mut self.0 {
             generics
