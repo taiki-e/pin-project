@@ -1,5 +1,6 @@
 #![recursion_limit = "128"]
 #![deny(warnings)]
+#![deny(unsafe_code)]
 #![allow(dead_code)]
 
 use pin_project::unsafe_project;

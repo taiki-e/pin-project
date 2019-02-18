@@ -61,7 +61,6 @@ impl Struct {
 
         let proj_impl = quote! {
             impl #impl_generics #ident #ty_generics #where_clause {
-                #[allow(unsafe_code)]
                 fn project<'__a>(self: #pin<&'__a mut Self>) -> #proj_ident #proj_generics {
                     unsafe {
                         let this = #pin::get_unchecked_mut(self);

@@ -45,7 +45,6 @@
 //! }
 //!
 //! impl<T, U> Foo<T, U> {
-//!     #[allow(unsafe_code)]
 //!     fn project<'__a>(self: ::core::pin::Pin<&'__a mut Self>) -> __FooProjection<'__a, T, U> {
 //!         unsafe {
 //!             let this = ::core::pin::Pin::get_unchecked_mut(self);
