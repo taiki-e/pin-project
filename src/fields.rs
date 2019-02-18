@@ -76,12 +76,14 @@ fn named(
                 if find_remove(attrs, "pin").is_some() {
                     impl_unpin.push(ty);
                     proj_methods.push(quote! {
+                        #[allow(unsafe_code)]
                         fn #ident<'__a>(self: #pin<&'__a mut Self>) -> #pin<&'__a mut #ty> {
                             unsafe { #pin::map_unchecked_mut(self, |x| &mut x.#ident) }
                         }
                     });
                 } else {
                     proj_methods.push(quote! {
+                        #[allow(unsafe_code)]
                         fn #ident<'__a>(self: #pin<&'__a mut Self>) -> &'__a mut #ty {
                             unsafe { &mut #pin::get_unchecked_mut(self).#ident }
                         }

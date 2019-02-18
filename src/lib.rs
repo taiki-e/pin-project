@@ -45,6 +45,7 @@
 //! }
 //!
 //! impl<T, U> Foo<T, U> {
+//!     #[allow(unsafe_code)]
 //!     fn project<'__a>(self: ::core::pin::Pin<&'__a mut Self>) -> __FooProjection<'__a, T, U> {
 //!         unsafe {
 //!             let this = ::core::pin::Pin::get_unchecked_mut(self);
@@ -157,7 +158,9 @@
 #![crate_type = "proc-macro"]
 #![recursion_limit = "256"]
 #![doc(html_root_url = "https://docs.rs/pin-project/0.2.0")]
+#![deny(unsafe_code)]
 #![deny(rust_2018_idioms)]
+#![deny(unreachable_pub)]
 
 extern crate proc_macro;
 

@@ -147,6 +147,7 @@ fn unnamed(
     let option = option();
     let method = Ident::new(&variant.to_string().to_lowercase(), Span::call_site());
     Some(quote! {
+        #[allow(unsafe_code)]
         fn #method<'__a>(self: #pin<&'__a mut Self>) -> #option<#ty> {
             unsafe {
                 match #pin::get_unchecked_mut(self) {
