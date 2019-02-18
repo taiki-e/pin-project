@@ -1,3 +1,5 @@
+use std::convert::identity;
+
 use proc_macro::TokenStream;
 use proc_macro2::{Ident, TokenStream as TokenStream2};
 use quote::{quote, ToTokens};
@@ -8,7 +10,7 @@ use crate::utils::*;
 pub(super) fn unsafe_project(args: TokenStream, item: ItemStruct) -> TokenStream {
     Struct::parse(args, item)
         .map(|parsed| TokenStream::from(parsed.proj_impl()))
-        .unwrap_or_else(|e| e)
+        .unwrap_or_else(identity)
 }
 
 struct Struct {

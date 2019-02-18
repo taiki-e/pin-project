@@ -1,3 +1,5 @@
+use std::convert::identity;
+
 use proc_macro::TokenStream;
 use proc_macro2::{Ident, Span, TokenStream as TokenStream2};
 use quote::{quote, ToTokens};
@@ -10,7 +12,7 @@ pub(super) fn unsafe_variants(args: TokenStream, input: TokenStream) -> TokenStr
         .map_err(|_| compile_err("`unsafe_variants` may only be used on structs"))
         .and_then(|item| Enum::parse(args, item))
         .map(|parsed| TokenStream::from(parsed.proj_impl()))
-        .unwrap_or_else(|e| e)
+        .unwrap_or_else(identity)
 }
 
 struct Enum {

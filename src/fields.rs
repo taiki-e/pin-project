@@ -1,3 +1,5 @@
+use std::convert::identity;
+
 use proc_macro::TokenStream;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, ToTokens};
@@ -10,7 +12,7 @@ pub(super) fn unsafe_fields(args: TokenStream, input: TokenStream) -> TokenStrea
         .map_err(|_| compile_err("`unsafe_fields` may only be used on structs"))
         .and_then(|item| Struct::parse(args, item))
         .map(|parsed| TokenStream::from(parsed.proj_impl()))
-        .unwrap_or_else(|e| e)
+        .unwrap_or_else(identity)
 }
 
 struct Struct {
