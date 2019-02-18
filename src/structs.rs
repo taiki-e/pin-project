@@ -37,22 +37,23 @@ impl Struct {
         })
     }
 
-    fn proj_impl(mut self) -> TokenStream2 {
+    fn proj_impl(self) -> TokenStream2 {
         let Self {
-            item, impl_unpin, ..
-        } = &mut self;
+            mut item,
+            mut impl_unpin,
+            proj_ident,
+        } = self;
 
         let (proj_item_body, proj_init_body) = match &mut item.fields {
-            Fields::Named(fields) => named(fields, impl_unpin),
-            Fields::Unnamed(fields) => unnamed(fields, impl_unpin),
+            Fields::Named(fields) => named(fields, &mut impl_unpin),
+            Fields::Unnamed(fields) => unnamed(fields, &mut impl_unpin),
             Fields::Unit => unreachable!(),
         };
 
         let pin = pin();
-        let ident = &self.item.ident;
-        let proj_ident = &self.proj_ident;
-        let proj_generics = proj_generics(&self.item.generics);
-        let (impl_generics, ty_generics, where_clause) = self.item.generics.split_for_impl();
+        let ident = &item.ident;
+        let proj_generics = proj_generics(&item.generics);
+        let (impl_generics, ty_generics, where_clause) = item.generics.split_for_impl();
 
         let proj_item = quote! {
             struct #proj_ident #proj_generics #proj_item_body
@@ -69,8 +70,8 @@ impl Struct {
             }
         };
 
-        let impl_unpin = self.impl_unpin.build(impl_generics, ident, ty_generics);
-        let mut item = self.item.into_token_stream();
+        let impl_unpin = impl_unpin.build(impl_generics, ident, ty_generics);
+        let mut item = item.into_token_stream();
         item.extend(proj_item);
         item.extend(proj_impl);
         item.extend(impl_unpin);

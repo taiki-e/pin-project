@@ -37,17 +37,18 @@ impl Enum {
         })
     }
 
-    fn proj_impl(mut self) -> TokenStream2 {
+    fn proj_impl(self) -> TokenStream2 {
         let Self {
-            item,
-            impl_unpin,
+            mut item,
+            mut impl_unpin,
             proj_ident,
-        } = &mut self;
+        } = self;
+
         let ItemEnum {
             variants,
             ident: enum_ident,
             ..
-        } = item;
+        } = &mut item;
 
         let mut arm_vec = Vec::with_capacity(variants.len());
         let mut ty_vec = Vec::with_capacity(variants.len());
@@ -56,12 +57,12 @@ impl Enum {
             .for_each(|Variant { fields, ident, .. }| {
                 let (proj_arm, proj_ty) = match fields {
                     Fields::Unnamed(fields) => {
-                        unnamed(fields, ident, enum_ident, proj_ident, impl_unpin)
+                        unnamed(fields, ident, enum_ident, &proj_ident, &mut impl_unpin)
                     }
                     Fields::Named(fields) => {
-                        named(fields, ident, enum_ident, proj_ident, impl_unpin)
+                        named(fields, ident, enum_ident, &proj_ident, &mut impl_unpin)
                     }
-                    Fields::Unit => unit(ident, enum_ident, proj_ident),
+                    Fields::Unit => unit(ident, enum_ident, &proj_ident),
                 };
 
                 arm_vec.push(proj_arm);
@@ -69,10 +70,9 @@ impl Enum {
             });
 
         let pin = pin();
-        let ident = &self.item.ident;
-        let proj_ident = &self.proj_ident;
-        let proj_generics = proj_generics(&self.item.generics);
-        let (impl_generics, ty_generics, where_clause) = self.item.generics.split_for_impl();
+        let ident = &item.ident;
+        let proj_generics = proj_generics(&item.generics);
+        let (impl_generics, ty_generics, where_clause) = item.generics.split_for_impl();
 
         let proj_item = quote! {
             enum #proj_ident #proj_generics {
@@ -92,8 +92,8 @@ impl Enum {
             }
         };
 
-        let impl_unpin = self.impl_unpin.build(impl_generics, ident, ty_generics);
-        let mut item = self.item.into_token_stream();
+        let impl_unpin = impl_unpin.build(impl_generics, ident, ty_generics);
+        let mut item = item.into_token_stream();
         item.extend(proj_item);
         item.extend(proj_impl);
         item.extend(impl_unpin);

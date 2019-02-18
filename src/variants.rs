@@ -40,27 +40,12 @@ impl Enum {
         })
     }
 
-    fn proj_impl(mut self) -> TokenStream2 {
-        let proj_methods = self.proj_methods();
-        let ident = &self.item.ident;
-        let (impl_generics, ty_generics, where_clause) = self.item.generics.split_for_impl();
-        let proj_impl = quote! {
-            impl #impl_generics #ident #ty_generics #where_clause {
-                #(#proj_methods)*
-            }
-        };
-
-        let impl_unpin = self.impl_unpin.build(impl_generics, ident, ty_generics);
-        let mut item = self.item.into_token_stream();
-        item.extend(proj_impl);
-        item.extend(impl_unpin);
-        item
-    }
-
-    fn proj_methods(&mut self) -> Vec<TokenStream2> {
+    fn proj_impl(self) -> TokenStream2 {
         let Self {
-            item, impl_unpin, ..
+            mut item,
+            mut impl_unpin,
         } = self;
+
         let ItemEnum {
             variants,
             ident: enum_ident,
@@ -84,7 +69,19 @@ impl Enum {
             }
         });
 
-        proj_methods
+        let ident = &item.ident;
+        let (impl_generics, ty_generics, where_clause) = item.generics.split_for_impl();
+        let proj_impl = quote! {
+            impl #impl_generics #ident #ty_generics #where_clause {
+                #(#proj_methods)*
+            }
+        };
+
+        let impl_unpin = impl_unpin.build(impl_generics, ident, ty_generics);
+        let mut item = item.into_token_stream();
+        item.extend(proj_impl);
+        item.extend(impl_unpin);
+        item
     }
 }
 
