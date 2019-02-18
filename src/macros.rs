@@ -16,9 +16,9 @@ pub(super) fn project(input: TokenStream) -> TokenStream {
 
 fn replace_stmt(stmt: &mut Stmt) {
     match stmt {
-        Stmt::Expr(expr) => replace_expr(expr, &mut Register(None)),
-        Stmt::Local(local) => replace_local(local, &mut Register(None)),
-        Stmt::Item(Item::Fn(item)) => attr::dummy(item),
+        Stmt::Expr(expr) => replace_expr(expr, &mut Register::default()),
+        Stmt::Local(local) => replace_local(local, &mut Register::default()),
+        Stmt::Item(Item::Fn(item)) => visitor::dummy(item),
         _ => {}
     }
 }
@@ -36,7 +36,7 @@ fn replace_expr(expr: &mut Expr, register: &mut Register) {
             .iter_mut()
             .for_each(|Arm { pats, .. }| replace_pats(pats, register)),
 
-        Expr::Unsafe(ExprUnsafe { block, .. }) | Expr::Block(ExprBlock { block, .. }) => {
+        Expr::Block(ExprBlock { block, .. }) | Expr::Unsafe(ExprUnsafe { block, .. }) => {
             if let Some(Stmt::Expr(expr)) = block.stmts.last_mut() {
                 replace_expr(expr, register);
             }
@@ -78,7 +78,6 @@ fn replace_pat(pat: &mut Pat, register: &mut Register) {
         Pat::Struct(PatStruct { path, .. })
         | Pat::TupleStruct(PatTupleStruct { path, .. })
         | Pat::Path(PatPath { qself: None, path }) => replace_path(path, register),
-
         _ => {}
     }
 }
@@ -126,7 +125,13 @@ impl Register {
     }
 }
 
-mod attr {
+impl Default for Register {
+    fn default() -> Self {
+        Self(None)
+    }
+}
+
+mod visitor {
     use super::*;
     use syn::visit_mut::{self, VisitMut};
 
@@ -151,7 +156,7 @@ mod attr {
     fn visit_stmt_mut(stmt: &mut Stmt) {
         fn parse_attr<A: AttrsMut, F: FnOnce(&mut A, &mut Register)>(attrs: &mut A, f: F) {
             if attrs.find_remove().is_some() {
-                f(attrs, &mut Register(None));
+                f(attrs, &mut Register::default());
             }
         }
 
