@@ -108,6 +108,32 @@ fn test_unsafe_project() {
     }
 }
 
+#[test]
+fn where_clause() {
+    // struct
+
+    #[unsafe_project(Unpin)]
+    struct Foo<I>
+    where
+        I: Iterator,
+    {
+        #[pin]
+        field1: I,
+        field2: I::Item,
+    }
+
+    // enum
+
+    #[unsafe_project(Unpin)]
+    enum Baz<I>
+    where
+        I: Iterator,
+    {
+        Variant1(#[pin] I),
+        Variant2(I::Item),
+    }
+}
+
 #[cfg(feature = "project_attr")]
 use pin_project::project;
 

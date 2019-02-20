@@ -75,7 +75,7 @@ impl Enum {
         let (impl_generics, ty_generics, where_clause) = item.generics.split_for_impl();
 
         let proj_item = quote! {
-            enum #proj_ident #proj_generics {
+            enum #proj_ident #proj_generics #where_clause {
                 #(#ty_vec,)*
             }
         };
@@ -92,7 +92,7 @@ impl Enum {
             }
         };
 
-        let impl_unpin = impl_unpin.build(impl_generics, ident, ty_generics);
+        let impl_unpin = impl_unpin.build(ident);
         let mut item = item.into_token_stream();
         item.extend(proj_item);
         item.extend(proj_impl);

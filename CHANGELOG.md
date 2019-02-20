@@ -1,5 +1,7 @@
 # Unreleased
 
+* Fix a bug that generates incorrect code for the structures with where clause and associated type fields.
+
 # 0.2.0 - 2019-02-11
 
 * Make `unsafe_fields` optional.

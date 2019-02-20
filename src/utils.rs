@@ -3,7 +3,7 @@ use std::result;
 use proc_macro::TokenStream;
 use proc_macro2::{Ident, Span, TokenStream as TokenStream2};
 use quote::quote;
-use syn::{parse_quote, Attribute, Generics, ImplGenerics, Type, TypeGenerics};
+use syn::{parse_quote, Attribute, Generics, Type};
 
 pub(super) type Result<T> = result::Result<T, TokenStream>;
 
@@ -71,15 +71,10 @@ impl ImplUnpin {
         }
     }
 
-    pub(super) fn build(
-        self,
-        impl_generics: ImplGenerics<'_>,
-        ident: &Ident,
-        ty_generics: TypeGenerics<'_>,
-    ) -> TokenStream2 {
+    pub(super) fn build(self, ident: &Ident) -> TokenStream2 {
         self.0
             .map(|generics| {
-                let where_clause = generics.split_for_impl().2;
+                let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
                 quote! {
                     impl #impl_generics ::core::marker::Unpin for #ident #ty_generics #where_clause {}
                 }

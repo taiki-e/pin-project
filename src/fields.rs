@@ -54,7 +54,7 @@ impl Struct {
             }
         };
 
-        let impl_unpin = impl_unpin.build(impl_generics, ident, ty_generics);
+        let impl_unpin = impl_unpin.build(ident);
         let mut item = item.into_token_stream();
         item.extend(proj_impl);
         item.extend(impl_unpin);
