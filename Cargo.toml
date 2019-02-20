@@ -26,8 +26,6 @@ default = ["project_attr"]
 # Use `project` attribute.
 project_attr = ["syn/visit-mut"]
 
-# Use `unsafe_fields` attribute.
-unsafe_fields = []
 # Use `unsafe_variants` attribute.
 unsafe_variants = []
 
