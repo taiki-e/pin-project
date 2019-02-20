@@ -170,9 +170,6 @@ mod utils;
 #[cfg(feature = "project_attr")]
 mod macros;
 
-#[cfg(feature = "unsafe_variants")]
-mod variants;
-
 mod compile_fail;
 
 use proc_macro::TokenStream;
@@ -351,97 +348,6 @@ pub fn unsafe_project(args: TokenStream, input: TokenStream) -> TokenStream {
         Ok(Item::Enum(item)) => enums::unsafe_project(args, item),
         _ => utils::compile_err("`unsafe_project` may only be used on structs or enums"),
     }
-}
-
-/// An attribute that would create projections for each enum variants.
-///
-/// *This attribute is available if pin-project is built with the
-/// "unsafe_variants" feature.*
-///
-/// This attribute creates methods according to the following rules:
-///
-/// - For the field that uses `#[pin]` attribute, the method that makes the
-///   pinned reference to that field is created.
-/// - For the variant or field that uses `#[skip]` attribute, the method referencing that
-///   variant or field is not created.
-/// - For the unit variant, the method referencing that variant is not created.
-/// - For the other fields, the method that makes the unpinned reference to that
-///   field is created.
-///
-/// ## Safety
-///
-/// For the field that uses `#[pin]` attribute, three things need to be ensured:
-///
-/// - If the enum implements [`Drop`], the [`drop`] method is not allowed to
-///   move the value of the field.
-/// - If the enum wants to implement [`Unpin`], it has to do so conditionally:
-///   The enum can only implement [`Unpin`] if the field's type is [`Unpin`].
-///   If you use `#[unsafe_variants(Unpin)]`, you do not need to ensure this
-///   because an appropriate [`Unpin`] implementation will be generated.
-/// - The enum must not be `#[repr(packed)]`.
-///
-/// For the other fields, need to be ensured that the contained value not pinned
-/// in the current context.
-///
-/// ## Examples
-///
-/// Using `#[unsafe_variants(Unpin)]` will automatically create the appropriate
-/// [`Unpin`] implementation:
-///
-/// ```rust
-/// use pin_project::unsafe_variants;
-/// use std::pin::Pin;
-///
-/// #[unsafe_variants(Unpin)]
-/// enum Foo<A, B, C> {
-///     Variant1(#[pin] A, B),
-///     Variant2(C),
-/// }
-///
-/// impl<A, B, C> Foo<A, B, C> {
-///     fn baz(mut self: Pin<&mut Self>) {
-///         let _: Pin<&mut A> = self.as_mut().variant1().unwrap().0; // Pinned reference to the field
-///         let _: &mut B = self.as_mut().variant1().unwrap().1; // Normal reference to the field
-///         let _: Option<&mut C> = self.as_mut().variant2();
-///     }
-/// }
-///
-/// // Automatically create the appropriate conditional Unpin implementation.
-/// // impl<A, B, C> Unpin for Foo<A, B, C> where A: Unpin {} // Conditional Unpin impl
-/// ```
-///
-/// If you want to implement [`Unpin`] manually:
-///
-/// ```rust
-/// use pin_project::unsafe_variants;
-/// use std::pin::Pin;
-///
-/// #[unsafe_variants]
-/// enum Foo<A, B, C> {
-///     Variant1(#[pin] A, B),
-///     Variant2(C),
-/// }
-///
-/// impl<A, B, C> Foo<A, B, C> {
-///     fn baz(mut self: Pin<&mut Self>) {
-///         let _: Pin<&mut A> = self.as_mut().variant1().unwrap().0; // Pinned reference to the field
-///         let _: &mut B = self.as_mut().variant1().unwrap().1; // Normal reference to the field
-///         let _: Option<&mut C> = self.as_mut().variant2();
-///     }
-/// }
-///
-/// impl<A, B, C> Unpin for Foo<A, B, C> where A: Unpin {} // Conditional Unpin impl
-/// ```
-///
-/// Note that borrowing the variant multiple times requires using `.as_mut()` to
-/// avoid consuming the `Pin`.
-///
-/// [`Unpin`]: core::marker::Unpin
-/// [`drop`]: Drop::drop
-#[cfg(feature = "unsafe_variants")]
-#[proc_macro_attribute]
-pub fn unsafe_variants(args: TokenStream, input: TokenStream) -> TokenStream {
-    variants::unsafe_variants(args, input)
 }
 
 /// An attribute to support pattern matching.

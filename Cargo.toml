@@ -26,9 +26,6 @@ default = ["project_attr"]
 # Use `project` attribute.
 project_attr = ["syn/visit-mut"]
 
-# Use `unsafe_variants` attribute.
-unsafe_variants = []
-
 [dependencies]
 proc-macro2 = "^0.4.13"
 quote = "^0.6.8"
