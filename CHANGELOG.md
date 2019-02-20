@@ -1,5 +1,7 @@
 # Unreleased
 
+* Remove `unsafe_fields` attribute.
+
 # 0.2.2 - 2019-02-20
 
 * Fix a bug that generates incorrect code for the some structures with trait bounds on type generics.
