@@ -73,6 +73,7 @@ impl Enum {
         let ident = &item.ident;
         let proj_generics = proj_generics(&item.generics);
         let (impl_generics, ty_generics, where_clause) = item.generics.split_for_impl();
+        let proj_ty_generics = proj_generics.split_for_impl().1;
 
         let proj_item = quote! {
             enum #proj_ident #proj_generics #where_clause {
@@ -82,7 +83,7 @@ impl Enum {
 
         let proj_impl = quote! {
             impl #impl_generics #ident #ty_generics #where_clause {
-                fn project<'__a>(self: #pin<&'__a mut Self>) -> #proj_ident #proj_generics {
+                fn project<'__a>(self: #pin<&'__a mut Self>) -> #proj_ident #proj_ty_generics {
                     unsafe {
                         match #pin::get_unchecked_mut(self) {
                             #(#arm_vec,)*

@@ -44,9 +44,9 @@ impl Struct {
             proj_ident,
         } = self;
 
-        let ((proj_item_body, proj_init_body), named) = match &mut item.fields {
-            Fields::Named(fields) => (named(fields, &mut impl_unpin), true),
-            Fields::Unnamed(fields) => (unnamed(fields, &mut impl_unpin), false),
+        let (proj_item_body, proj_init_body) = match &mut item.fields {
+            Fields::Named(fields) => named(fields, &mut impl_unpin),
+            Fields::Unnamed(fields) => unnamed(fields, &mut impl_unpin),
             Fields::Unit => unreachable!(),
         };
 
@@ -54,15 +54,15 @@ impl Struct {
         let ident = &item.ident;
         let proj_generics = proj_generics(&item.generics);
         let (impl_generics, ty_generics, where_clause) = item.generics.split_for_impl();
-        let proj_where_clause = if named { where_clause } else { None };
+        let proj_ty_generics = proj_generics.split_for_impl().1;
 
         let proj_item = quote! {
-            struct #proj_ident #proj_generics #proj_where_clause #proj_item_body
+            struct #proj_ident #proj_generics #where_clause #proj_item_body
         };
 
         let proj_impl = quote! {
             impl #impl_generics #ident #ty_generics #where_clause {
-                fn project<'__a>(self: #pin<&'__a mut Self>) -> #proj_ident #proj_generics {
+                fn project<'__a>(self: #pin<&'__a mut Self>) -> #proj_ident #proj_ty_generics {
                     unsafe {
                         let this = #pin::get_unchecked_mut(self);
                         #proj_ident #proj_init_body

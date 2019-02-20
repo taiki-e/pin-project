@@ -109,7 +109,7 @@ fn test_unsafe_project() {
 }
 
 #[test]
-fn where_clause() {
+fn where_clause_and_associated_type_fields() {
     // struct
 
     #[unsafe_project(Unpin)]
@@ -131,6 +131,27 @@ fn where_clause() {
     {
         Variant1(#[pin] I),
         Variant2(I::Item),
+    }
+}
+
+#[test]
+fn trait_bounds_on_type_generics() {
+    // struct
+
+    #[unsafe_project(Unpin)]
+    pub struct Foo<'a, T: ?Sized> {
+        field: &'a mut T,
+    }
+
+    // tuple struct
+    #[unsafe_project(Unpin)]
+    pub struct Bar<'a, T: ?Sized>(&'a mut T);
+
+    // enum
+
+    #[unsafe_project(Unpin)]
+    enum Baz<'a, T: ?Sized> {
+        Variant(&'a mut T),
     }
 }
 

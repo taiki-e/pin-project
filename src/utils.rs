@@ -43,27 +43,32 @@ pub(super) fn proj_ident(ident: &Ident) -> Ident {
     Ident::new(&format!("__{}Projection", ident), Span::call_site())
 }
 
-pub(super) fn proj_generics(generics: &Generics) -> TokenStream2 {
-    let generics = generics.params.iter();
-    quote!(<'__a, #(#generics),*>)
+pub(super) fn proj_generics(generics: &Generics) -> Generics {
+    let mut generics = generics.clone();
+    generics.params.insert(0, parse_quote!('__a));
+    generics
 }
 
-pub(super) struct ImplUnpin(Option<Generics>);
+pub(super) struct ImplUnpin {
+    generics: Option<Generics>,
+}
 
 impl ImplUnpin {
     pub(super) fn parse(args: TokenStream, generics: &Generics, name: &str) -> Result<Self> {
         match &*args.to_string() {
-            "" => Ok(Self(None)),
-            "Unpin" => Ok(Self(Some(generics.clone()))),
+            "" => Ok(Self { generics: None }),
+            "Unpin" => Ok(Self {
+                generics: Some(generics.clone()),
+            }),
             _ => Err(compile_err(&format!(
                 "`{}` an invalid argument was passed",
                 name
-            )))?,
+            ))),
         }
     }
 
     pub(super) fn push(&mut self, ty: &Type) {
-        if let Some(generics) = &mut self.0 {
+        if let Some(generics) = &mut self.generics {
             generics
                 .make_where_clause()
                 .predicates
@@ -72,7 +77,7 @@ impl ImplUnpin {
     }
 
     pub(super) fn build(self, ident: &Ident) -> TokenStream2 {
-        self.0
+        self.generics
             .map(|generics| {
                 let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
                 quote! {
