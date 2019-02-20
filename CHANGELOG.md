@@ -1,5 +1,7 @@
 # Unreleased
 
+# 0.3.0 - 2019-02-20
+
 * Remove `unsafe_fields` attribute.
 
 * Remove `unsafe_variants` attribute.
