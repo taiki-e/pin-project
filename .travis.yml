@@ -6,6 +6,11 @@ matrix:
   fast_finish: true
 
   include:
+    # This is the minimum Rust version supported by pin-project.
+    # When updating this, the reminder to update the minimum required version in README.md.
+    - rust: beta # FIXME(taiki-e): When 1.33 stabilizes, change to specify that version directly.
+      name: cargo test (minimum required version)
+
     - rust: beta
     - rust: nightly
 
@@ -13,20 +18,15 @@ matrix:
       name: cargo test (minimal versions)
       script:
         - cargo update -Zminimal-versions
-        - cargo test --all-features
-        - cargo test --all-features --release
-
-    # This is the minimum Rust version supported by pin-project.
-    # When updating this, the reminder to update the minimum required version in README.md.
-    - rust: beta # FIXME(taiki-e): When 1.33 stabilizes, change to specify that version directly.
-      name: cargo test (minimum required version)
+        - cargo test
+        - cargo test --release
 
     - rust: nightly
       name: cargo clippy
       script:
         - if rustup component add clippy-preview;
           then
-            cargo clippy --all-features -- -Dwarnings;
+            cargo clippy -- -Dwarnings;
           else
             echo 'Skipping clippy';
           fi
@@ -34,17 +34,15 @@ matrix:
     - rust: nightly
       name: cargo doc
       script:
-        - RUSTDOCFLAGS=-Dwarnings cargo doc --no-deps --all-features
+        - RUSTDOCFLAGS=-Dwarnings cargo doc --no-deps
 
 before_script:
   - set -o errexit
 
 script:
-  - cargo test
   - cargo test --no-default-features
-  - cargo test --no-default-features --features=project_attr
-  - cargo test --all-features
-  - cargo test --all-features --release
+  - cargo test
+  - cargo test --release
 
 notifications:
   email:
