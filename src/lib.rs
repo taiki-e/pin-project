@@ -156,7 +156,7 @@
 
 #![crate_type = "proc-macro"]
 #![recursion_limit = "256"]
-#![doc(html_root_url = "https://docs.rs/pin-project/0.2.0")]
+#![doc(html_root_url = "https://docs.rs/pin-project/0.2.1")]
 #![deny(unsafe_code)]
 #![deny(rust_2018_idioms)]
 #![deny(unreachable_pub)]

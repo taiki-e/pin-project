@@ -1,5 +1,7 @@
 # Unreleased
 
+# 0.2.1 - 2019-02-20
+
 * Fix a bug that generates incorrect code for the structures with where clause and associated type fields.
 
 # 0.2.0 - 2019-02-11
