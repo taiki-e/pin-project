@@ -22,7 +22,6 @@ proc-macro = true
 [features]
 # Default features.
 default = ["project_attr"]
-
 # Use `project` attribute.
 project_attr = ["syn/visit-mut"]
 
@@ -30,6 +29,3 @@ project_attr = ["syn/visit-mut"]
 proc-macro2 = "^0.4.13"
 quote = "^0.6.8"
 syn = { version = "^0.15.19", default-features = false, features = ["proc-macro", "parsing", "printing", "clone-impls", "full"] }
-
-[package.metadata.docs.rs]
-all-features = true
