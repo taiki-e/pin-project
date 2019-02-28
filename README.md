@@ -4,6 +4,7 @@
 [![version](https://img.shields.io/crates/v/pin-project.svg)](https://crates.io/crates/pin-project/)
 [![documentation](https://docs.rs/pin-project/badge.svg)](https://docs.rs/pin-project/)
 [![license](https://img.shields.io/crates/l/pin-project.svg)](https://crates.io/crates/pin-project/)
+[![Rustc Version](https://img.shields.io/badge/rustc-1.33+-lightgray.svg)](https://blog.rust-lang.org/2019/02/28/Rust-1.33.0.html)
 
 An attribute that would create a projection struct covering all the fields.
 
