@@ -8,9 +8,9 @@ matrix:
   include:
     # This is the minimum Rust version supported by pin-project.
     # When updating this, the reminder to update the minimum required version in README.md.
-    - rust: beta # FIXME(taiki-e): When 1.33 stabilizes, change to specify that version directly.
-      name: cargo test (minimum required version)
+    - rust: 1.33.0
 
+    - rust: stable
     - rust: beta
     - rust: nightly
 
