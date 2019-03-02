@@ -1,5 +1,7 @@
 # Unreleased
 
+# 0.3.1 - 2019-03-02
+
 * Improve documentation.
 
 * Update minimum syn version to 0.15.22.
