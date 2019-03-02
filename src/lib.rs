@@ -163,17 +163,14 @@
 
 extern crate proc_macro;
 
-mod enums;
-mod structs;
-mod utils;
-
 #[cfg(feature = "project_attr")]
-mod macros;
+mod project;
+mod unsafe_project;
+mod utils;
 
 mod compile_fail;
 
 use proc_macro::TokenStream;
-use syn::Item;
 
 /// An attribute that would create a projection struct covering all the fields.
 ///
@@ -343,11 +340,7 @@ use syn::Item;
 /// [`project`]: ./attr.project.html
 #[proc_macro_attribute]
 pub fn unsafe_project(args: TokenStream, input: TokenStream) -> TokenStream {
-    match syn::parse(input) {
-        Ok(Item::Struct(item)) => structs::unsafe_project(args, item),
-        Ok(Item::Enum(item)) => enums::unsafe_project(args, item),
-        _ => utils::compile_err("`unsafe_project` may only be used on structs or enums"),
-    }
+    TokenStream::from(unsafe_project::unsafe_project(args.into(), input.into()))
 }
 
 /// An attribute to support pattern matching.
@@ -447,5 +440,5 @@ pub fn unsafe_project(args: TokenStream, input: TokenStream) -> TokenStream {
 #[proc_macro_attribute]
 pub fn project(args: TokenStream, input: TokenStream) -> TokenStream {
     assert!(args.is_empty());
-    macros::project(input)
+    TokenStream::from(project::project(input.into()))
 }

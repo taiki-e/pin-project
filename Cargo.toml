@@ -22,10 +22,10 @@ proc-macro = true
 [features]
 # Default features.
 default = ["project_attr"]
-# Use `project` attribute.
+# Enable to use `project` attribute.
 project_attr = ["syn/visit-mut"]
 
 [dependencies]
-proc-macro2 = "^0.4.13"
-quote = "^0.6.8"
-syn = { version = "^0.15.19", default-features = false, features = ["proc-macro", "parsing", "printing", "clone-impls", "full"] }
+proc-macro2 = "0.4.13"
+quote = "0.6.8"
+syn = { version = "0.15.22", features = ["full"] }
