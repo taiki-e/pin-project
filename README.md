@@ -6,7 +6,7 @@
 [![license](https://img.shields.io/crates/l/pin-project.svg)](https://crates.io/crates/pin-project/)
 [![Rustc Version](https://img.shields.io/badge/rustc-1.33+-lightgray.svg)](https://blog.rust-lang.org/2019/02/28/Rust-1.33.0.html)
 
-An attribute that would create a projection struct covering all the fields.
+An attribute that creates a projection struct covering all the fields.
 
 [Documentation](https://docs.rs/pin-project/)
 
@@ -19,25 +19,17 @@ Add this to your `Cargo.toml`:
 pin-project = "0.3"
 ```
 
-Now, you can use pin-project:
-
-```rust
-use pin_project::unsafe_project;
-```
-
 The current version of pin-project requires Rust 1.33 or later.
 
 ## Examples
 
-Structs and enums are supported.
-
-### Structs
+[`unsafe_project`] attribute creates a projection struct covering all the fields.
 
 ```rust
 use pin_project::unsafe_project;
 use std::pin::Pin;
 
-#[unsafe_project(Unpin)]
+#[unsafe_project(Unpin)] // `(Unpin)` is optional (create the appropriate conditional Unpin implementation)
 struct Foo<T, U> {
     #[pin]
     future: T,
@@ -52,46 +44,13 @@ impl<T, U> Foo<T, U> {
     }
 }
 
-// Automatically create the appropriate conditional Unpin implementation.
-// impl<T, U> Unpin for Foo<T, U> where T: Unpin {} // Conditional Unpin impl
+// Automatically create the appropriate conditional Unpin implementation (optional).
+// impl<T, U> Unpin for Foo<T, U> where T: Unpin {}
 ```
 
 [Code like this will be generated](doc/struct-example-1.md)
 
-### Enums
-
-```rust
-use pin_project::{project, unsafe_project};
-use std::pin::Pin;
-
-#[unsafe_project(Unpin)]
-enum Foo<T, U> {
-    Future(#[pin] T),
-    Done(U),
-}
-
-impl<T, U> Foo<T, U> {
-    #[project] // Nightly does not need a dummy attribute to the function.
-    fn baz(mut self: Pin<&mut Self>) {
-        #[project]
-        match self.project() {
-            Foo::Future(future) => {
-                let _: Pin<&mut T> = future;
-            }
-            Foo::Done(value) => {
-                let _: &mut U = value;
-            }
-        }
-    }
-}
-
-// Automatically create the appropriate conditional Unpin implementation.
-// impl<T, U> Unpin for Foo<T, U> where T: Unpin {} // Conditional Unpin impl
-```
-
-[Code like this will be generated](doc/enum-example-1.md)
-
-See the [documentation](https://docs.rs/pin-project/) for more details.
+[`unsafe_project`]: https://docs.rs/pin-project/0.3/pin_project/attr.unsafe_project.html
 
 ## License
 

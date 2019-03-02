@@ -20,18 +20,6 @@ impl<T, U> Foo<T, U> {
     }
 }
 
+// Automatically create the appropriate conditional Unpin implementation (optional).
 impl<T, U> Unpin for Foo<T, U> where T: Unpin {}
-
-impl<T, U> Foo<T, U> {
-    fn baz(mut self: Pin<&mut Self>) {
-        match self.project() {
-            __FooProjection::Future(future) => {
-                let _: Pin<&mut T> = future;
-            }
-            __FooProjection::Done(value) => {
-                let _: &mut U = value;
-            }
-        }
-    }
-}
 ```

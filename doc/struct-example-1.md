@@ -21,13 +21,6 @@ impl<T, U> Foo<T, U> {
     }
 }
 
+// Automatically create the appropriate conditional Unpin implementation (optional).
 impl<T, U> Unpin for Foo<T, U> where T: Unpin {}
-
-impl<T, U> Foo<T, U> {
-    fn baz(mut self: Pin<&mut Self>) {
-        let this = self.project();
-        let _: Pin<&mut T> = this.future; // Pinned reference to the field
-        let _: &mut U = this.field; // Normal reference to the field
-    }
-}
 ```

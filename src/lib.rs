@@ -1,16 +1,14 @@
-//! An attribute that would create a projection struct covering all the fields.
+//! An attribute that creates a projection struct covering all the fields.
 //!
 //! ## Examples
 //!
-//! Structs and enums are supported.
-//!
-//! ### Structs
+//! [`unsafe_project`] attribute creates a projection struct covering all the fields.
 //!
 //! ```rust
 //! use pin_project::unsafe_project;
 //! use std::pin::Pin;
 //!
-//! #[unsafe_project(Unpin)]
+//! #[unsafe_project(Unpin)] // `(Unpin)` is optional (create the appropriate conditional Unpin implementation)
 //! struct Foo<T, U> {
 //!     #[pin]
 //!     future: T,
@@ -25,8 +23,8 @@
 //!     }
 //! }
 //!
-//! // Automatically create the appropriate conditional Unpin implementation.
-//! // impl<T: Unpin, U> Unpin for Foo<T, U> {} // Conditional Unpin impl
+//! // Automatically create the appropriate conditional Unpin implementation (optional).
+//! // impl<T: Unpin, U> Unpin for Foo<T, U> {}
 //! ```
 //!
 //! <details>
@@ -56,20 +54,14 @@
 //!     }
 //! }
 //!
+//! // Automatically create the appropriate conditional Unpin implementation (optional).
 //! impl<T, U> Unpin for Foo<T, U> where T: Unpin {}
-//!
-//! impl<T, U> Foo<T, U> {
-//!     fn baz(mut self: Pin<&mut Self>) {
-//!         let this = self.project();
-//!         let _: Pin<&mut T> = this.future; // Pinned reference to the field
-//!         let _: &mut U = this.field; // Normal reference to the field
-//!     }
-//! }
 //! ```
 //!
 //! </details>
 //!
-//! ### Enums
+//! [`unsafe_project`] also supports enums, but to use it ergonomically, you need
+//! to use the [`project`] attribute.
 //!
 //! ```rust
 //! # #[cfg(feature = "project_attr")]
@@ -78,7 +70,7 @@
 //! use std::pin::Pin;
 //!
 //! # #[cfg(feature = "project_attr")]
-//! #[unsafe_project(Unpin)]
+//! #[unsafe_project(Unpin)] // `(Unpin)` is optional (create the appropriate conditional Unpin implementation)
 //! enum Foo<T, U> {
 //!     Future(#[pin] T),
 //!     Done(U),
@@ -100,8 +92,8 @@
 //!     }
 //! }
 //!
-//! // Automatically create the appropriate conditional Unpin implementation.
-//! // impl<T, U> Unpin for Foo<T, U> where T: Unpin {} // Conditional Unpin impl
+//! // Automatically create the appropriate conditional Unpin implementation (optional).
+//! // impl<T, U> Unpin for Foo<T, U> where T: Unpin {}
 //! ```
 //!
 //! <details>
@@ -130,20 +122,8 @@
 //!     }
 //! }
 //!
+//! // Automatically create the appropriate conditional Unpin implementation (optional).
 //! impl<T, U> Unpin for Foo<T, U> where T: Unpin {}
-//!
-//! impl<T, U> Foo<T, U> {
-//!     fn baz(mut self: Pin<&mut Self>) {
-//!         match self.project() {
-//!             __FooProjection::Future(future) => {
-//!                 let _: Pin<&mut T> = future;
-//!             }
-//!             __FooProjection::Done(value) => {
-//!                 let _: &mut U = value;
-//!             }
-//!         }
-//!     }
-//! }
 //! ```
 //!
 //! </details>
@@ -172,7 +152,7 @@ mod compile_fail;
 
 use proc_macro::TokenStream;
 
-/// An attribute that would create a projection struct covering all the fields.
+/// An attribute that creates a projection struct covering all the fields.
 ///
 /// This attribute creates a projection struct according to the following rules:
 ///
@@ -221,7 +201,7 @@ use proc_macro::TokenStream;
 /// }
 ///
 /// // Automatically create the appropriate conditional Unpin implementation.
-/// // impl<T, U> Unpin for Foo<T, U> where T: Unpin {} // Conditional Unpin impl
+/// // impl<T, U> Unpin for Foo<T, U> where T: Unpin {}
 /// ```
 ///
 /// If you want to implement [`Unpin`] manually:
@@ -298,6 +278,9 @@ use proc_macro::TokenStream;
 ///
 /// ### Enums
 ///
+/// `unsafe_project` also supports enums, but to use it ergonomically, you need
+/// to use the [`project`] attribute.
+///
 /// ```rust
 /// # #[cfg(feature = "project_attr")]
 /// use pin_project::{project, unsafe_project};
@@ -331,9 +314,9 @@ use proc_macro::TokenStream;
 /// }
 /// ```
 ///
-/// Also see [`project`] attribute.
-///
 /// Enums without variants (zero-variant enums) are not supported.
+///
+/// Also see [`project`] attribute.
 ///
 /// [`Unpin`]: core::marker::Unpin
 /// [`drop`]: Drop::drop
