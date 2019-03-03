@@ -36,12 +36,6 @@ trait Replace {
     fn replace(&mut self, register: &mut Register);
 }
 
-impl<R: Replace> Replace for &mut R {
-    fn replace(&mut self, register: &mut Register) {
-        (**self).replace(register)
-    }
-}
-
 impl Replace for Local {
     fn replace(&mut self, register: &mut Register) {
         self.pats.replace(register);
@@ -74,6 +68,7 @@ impl Replace for Expr {
                 qself: None, path, ..
             })
             | Expr::Struct(ExprStruct { path, .. }) => path.replace(register),
+
             _ => {}
         }
     }
@@ -82,6 +77,7 @@ impl Replace for Expr {
 impl Replace for ExprIf {
     fn replace(&mut self, register: &mut Register) {
         self.cond.replace(register);
+
         if let Some(Expr::If(expr)) = self.else_branch.as_mut().map(|(_, expr)| &mut **expr) {
             expr.replace(register);
         }
@@ -107,6 +103,7 @@ impl Replace for Pat {
             Pat::Struct(PatStruct { path, .. })
             | Pat::TupleStruct(PatTupleStruct { path, .. })
             | Pat::Path(PatPath { qself: None, path }) => path.replace(register),
+
             _ => {}
         }
     }
