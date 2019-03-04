@@ -1,38 +1,65 @@
-use std::convert::identity;
-
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{quote, ToTokens};
 use syn::{Field, Fields, FieldsNamed, FieldsUnnamed, ItemEnum, Variant};
 
 use crate::utils::{Result, *};
 
-use super::{NAME, PIN};
+use super::*;
 
-pub(super) fn unsafe_project(args: TokenStream, item: ItemEnum) -> TokenStream {
-    parse(args, item).unwrap_or_else(identity)
-}
-
-fn parse(args: TokenStream, item: ItemEnum) -> Result<TokenStream> {
+pub(super) fn parse(args: TokenStream, item: ItemEnum) -> Result<TokenStream> {
     if item.variants.is_empty() {
-        parse_failed(NAME, "enums without variants")?;
+        parse_failed("enums without variants")?;
     }
 
     item.variants
         .iter()
         .filter(|v| v.discriminant.is_some())
-        .try_for_each(|_| parse_failed(NAME, "enums with discriminants"))?;
+        .try_for_each(|_| parse_failed("enums with discriminants"))?;
 
-    ImplUnpin::parse(args, &item.generics, NAME).map(|impl_unpin| proj_impl(item, impl_unpin))
+    ImplUnpin::parse(args, &item.generics).map(|impl_unpin| proj_impl(item, impl_unpin))
 }
 
 fn proj_impl(mut item: ItemEnum, mut impl_unpin: ImplUnpin) -> TokenStream {
     let proj_ident = proj_ident(&item.ident);
-    let ItemEnum {
+    let (proj_item_body, proj_arms) = variants(&mut item, &proj_ident, &mut impl_unpin);
+
+    let pin = pin();
+    let ident = &item.ident;
+    let proj_generics = proj_generics(&item.generics);
+    let proj_ty_generics = proj_generics.split_for_impl().1;
+    let (impl_generics, ty_generics, where_clause) = item.generics.split_for_impl();
+
+    let mut proj_items = quote! {
+        enum #proj_ident #proj_generics #where_clause #proj_item_body
+    };
+
+    proj_items.extend(impl_unpin.build(ident));
+    proj_items.extend(quote! {
+        impl #impl_generics #ident #ty_generics #where_clause {
+            fn project<'__a>(self: #pin<&'__a mut Self>) -> #proj_ident #proj_ty_generics {
+                unsafe {
+                    match #pin::get_unchecked_mut(self) {
+                        #proj_arms
+                    }
+                }
+            }
+        }
+    });
+
+    let mut item = item.into_token_stream();
+    item.extend(proj_items);
+    item
+}
+
+fn variants(
+    ItemEnum {
         variants,
         ident: enum_ident,
         ..
-    } = &mut item;
-
+    }: &mut ItemEnum,
+    proj_ident: &Ident,
+    impl_unpin: &mut ImplUnpin,
+) -> (TokenStream, TokenStream) {
     let mut arm_vec = Vec::with_capacity(variants.len());
     let mut ty_vec = Vec::with_capacity(variants.len());
     variants
@@ -40,48 +67,20 @@ fn proj_impl(mut item: ItemEnum, mut impl_unpin: ImplUnpin) -> TokenStream {
         .for_each(|Variant { fields, ident, .. }| {
             let (proj_arm, proj_ty) = match fields {
                 Fields::Unnamed(fields) => {
-                    unnamed(fields, ident, enum_ident, &proj_ident, &mut impl_unpin)
+                    unnamed(fields, ident, enum_ident, proj_ident, impl_unpin)
                 }
-                Fields::Named(fields) => {
-                    named(fields, ident, enum_ident, &proj_ident, &mut impl_unpin)
-                }
-                Fields::Unit => unit(ident, enum_ident, &proj_ident),
+                Fields::Named(fields) => named(fields, ident, enum_ident, proj_ident, impl_unpin),
+                Fields::Unit => unit(ident, enum_ident, proj_ident),
             };
 
             arm_vec.push(proj_arm);
             ty_vec.push(proj_ty);
         });
 
-    let pin = pin();
-    let ident = &item.ident;
-    let proj_generics = proj_generics(&item.generics);
-    let (impl_generics, ty_generics, where_clause) = item.generics.split_for_impl();
-    let proj_ty_generics = proj_generics.split_for_impl().1;
+    let proj_item_body = quote!({ #(#ty_vec,)* });
+    let proj_arms = quote!(#(#arm_vec,)*);
 
-    let proj_item = quote! {
-        enum #proj_ident #proj_generics #where_clause {
-            #(#ty_vec,)*
-        }
-    };
-
-    let proj_impl = quote! {
-        impl #impl_generics #ident #ty_generics #where_clause {
-            fn project<'__a>(self: #pin<&'__a mut Self>) -> #proj_ident #proj_ty_generics {
-                unsafe {
-                    match #pin::get_unchecked_mut(self) {
-                        #(#arm_vec,)*
-                    }
-                }
-            }
-        }
-    };
-
-    let impl_unpin = impl_unpin.build(ident);
-    let mut item = item.into_token_stream();
-    item.extend(proj_item);
-    item.extend(proj_impl);
-    item.extend(impl_unpin);
-    item
+    (proj_item_body, proj_arms)
 }
 
 fn named(

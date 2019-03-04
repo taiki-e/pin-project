@@ -32,7 +32,7 @@ fn parse(input: TokenStream) -> Result<TokenStream> {
 }
 
 trait Replace {
-    /// Replace original ident with projected type's ident.
+    /// Replace the original ident with the ident of projected type.
     fn replace(&mut self, register: &mut Register);
 }
 
@@ -201,18 +201,6 @@ mod visitor {
 
         fn find_remove(&mut self) -> bool {
             self.attrs_mut(|attrs| find_remove(attrs, NAME))
-        }
-    }
-
-    impl<A: AttrsMut> AttrsMut for &mut A {
-        fn attrs_mut<T, F: FnOnce(&mut Vec<Attribute>) -> T>(&mut self, f: F) -> T {
-            (**self).attrs_mut(f)
-        }
-    }
-
-    impl AttrsMut for Vec<Attribute> {
-        fn attrs_mut<T, F: FnOnce(&mut Vec<Attribute>) -> T>(&mut self, f: F) -> T {
-            f(self)
         }
     }
 
