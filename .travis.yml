@@ -19,7 +19,6 @@ matrix:
       script:
         - cargo update -Zminimal-versions
         - cargo test
-        - cargo test --release
 
     - rust: nightly
       name: cargo clippy
@@ -42,7 +41,6 @@ before_script:
 script:
   - cargo test --no-default-features
   - cargo test
-  - cargo test --release
 
 notifications:
   email:
