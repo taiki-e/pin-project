@@ -139,6 +139,7 @@
 #![doc(html_root_url = "https://docs.rs/pin-project/0.3.1")]
 #![deny(unsafe_code)]
 #![deny(rust_2018_idioms, unreachable_pub)]
+#![deny(clippy::all, clippy::pedantic)]
 
 extern crate proc_macro;
 
@@ -322,13 +323,13 @@ use proc_macro::TokenStream;
 /// [`project`]: ./attr.project.html
 #[proc_macro_attribute]
 pub fn unsafe_project(args: TokenStream, input: TokenStream) -> TokenStream {
-    TokenStream::from(unsafe_project::unsafe_project(args.into(), input.into()))
+    TokenStream::from(unsafe_project::unsafe_project(&args.into(), input.into()))
 }
 
 /// An attribute to support pattern matching.
 ///
 /// *This attribute is available if pin-project is built with the
-/// "project_attr" feature (it is enabled by default).*
+/// `"project_attr"` feature (it is enabled by default).*
 ///
 /// ## Examples
 ///
@@ -418,6 +419,7 @@ pub fn unsafe_project(args: TokenStream, input: TokenStream) -> TokenStream {
 ///     }
 /// }
 /// ```
+#[allow(clippy::needless_pass_by_value)] // https://github.com/rust-lang/rust-clippy/issues/3067
 #[cfg(feature = "project_attr")]
 #[proc_macro_attribute]
 pub fn project(args: TokenStream, input: TokenStream) -> TokenStream {

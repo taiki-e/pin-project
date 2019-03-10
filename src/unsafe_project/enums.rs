@@ -6,7 +6,7 @@ use crate::utils::{Result, *};
 
 use super::*;
 
-pub(super) fn parse(args: TokenStream, item: ItemEnum) -> Result<TokenStream> {
+pub(super) fn parse(args: &TokenStream, item: ItemEnum) -> Result<TokenStream> {
     if item.variants.is_empty() {
         parse_failed("enums without variants")?;
     }

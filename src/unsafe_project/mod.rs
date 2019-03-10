@@ -14,7 +14,7 @@ const NAME: &str = "unsafe_project";
 /// The annotation for pinned type.
 const PIN: &str = "pin";
 
-pub(super) fn unsafe_project(args: TokenStream, input: TokenStream) -> TokenStream {
+pub(super) fn unsafe_project(args: &TokenStream, input: TokenStream) -> TokenStream {
     match syn::parse2(input) {
         Ok(Item::Struct(item)) => structs::parse(args, item),
         Ok(Item::Enum(item)) => enums::parse(args, item),
@@ -44,7 +44,7 @@ struct ImplUnpin(Option<Generics>);
 
 impl ImplUnpin {
     /// Parses attribute arguments.
-    fn parse(args: TokenStream, generics: &Generics) -> Result<Self> {
+    fn parse(args: &TokenStream, generics: &Generics) -> Result<Self> {
         match &*args.to_string() {
             "" => Ok(Self(None)),
             "Unpin" => Ok(Self(Some(generics.clone()))),

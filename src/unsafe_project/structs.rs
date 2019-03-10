@@ -6,7 +6,7 @@ use crate::utils::{Result, *};
 
 use super::*;
 
-pub(super) fn parse(args: TokenStream, item: ItemStruct) -> Result<TokenStream> {
+pub(super) fn parse(args: &TokenStream, item: ItemStruct) -> Result<TokenStream> {
     match &item.fields {
         Fields::Named(FieldsNamed { named, .. }) if !named.is_empty() => {}
         Fields::Unnamed(FieldsUnnamed { unnamed, .. }) if !unnamed.is_empty() => {}

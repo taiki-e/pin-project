@@ -23,7 +23,7 @@ matrix:
     - rust: nightly
       name: cargo clippy
       script:
-        - if rustup component add clippy-preview;
+        - if rustup component add clippy;
           then
             cargo clippy -- -Dwarnings;
           else
