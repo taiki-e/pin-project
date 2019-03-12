@@ -2,26 +2,24 @@ use proc_macro2::TokenStream;
 use quote::{quote, ToTokens};
 use syn::{Field, Fields, FieldsNamed, FieldsUnnamed, ItemStruct};
 
-use crate::utils::{Result, *};
+use crate::utils::{proj_ident, Result, VecExt};
 
 use super::*;
 
-pub(super) fn parse(args: &TokenStream, item: ItemStruct) -> Result<TokenStream> {
-    match &item.fields {
-        Fields::Named(FieldsNamed { named, .. }) if !named.is_empty() => {}
-        Fields::Unnamed(FieldsUnnamed { unnamed, .. }) if !unnamed.is_empty() => {}
-        Fields::Named(_) | Fields::Unnamed(_) => parse_failed("structs with zero fields")?,
-        Fields::Unit => parse_failed("structs with units")?,
-    }
-
-    ImplUnpin::parse(args, &item.generics).map(|impl_unpin| proj_impl(item, impl_unpin))
+pub(super) fn parse(args: &str, item: ItemStruct) -> Result<TokenStream> {
+    ImplUnpin::parse(args, &item.generics).and_then(|impl_unpin| proj_impl(item, impl_unpin))
 }
 
-fn proj_impl(mut item: ItemStruct, mut impl_unpin: ImplUnpin) -> TokenStream {
+fn proj_impl(mut item: ItemStruct, mut impl_unpin: ImplUnpin) -> Result<TokenStream> {
     let (proj_item_body, proj_init_body) = match &mut item.fields {
+        Fields::Named(FieldsNamed { named: fields, .. })
+        | Fields::Unnamed(FieldsUnnamed {
+            unnamed: fields, ..
+        }) if fields.is_empty() => parse_failed("structs with zero fields")?,
+        Fields::Unit => parse_failed("structs with units")?,
+
         Fields::Named(fields) => named(fields, &mut impl_unpin),
         Fields::Unnamed(fields) => unnamed(fields, &mut impl_unpin),
-        Fields::Unit => unreachable!(),
     };
 
     let pin = pin();
@@ -49,7 +47,7 @@ fn proj_impl(mut item: ItemStruct, mut impl_unpin: ImplUnpin) -> TokenStream {
 
     let mut item = item.into_token_stream();
     item.extend(proj_items);
-    item
+    Ok(item)
 }
 
 fn named(
@@ -63,7 +61,7 @@ fn named(
         |Field {
              attrs, ident, ty, ..
          }| {
-            if find_remove(attrs, PIN) {
+            if attrs.find_remove(PIN) {
                 impl_unpin.push(ty);
                 proj_fields.push(quote!(#ident: #pin<&'__a mut #ty>));
                 proj_init.push(quote!(#ident: #pin::new_unchecked(&mut this.#ident)));
@@ -93,7 +91,7 @@ fn unnamed(
         .iter_mut()
         .enumerate()
         .for_each(|(n, Field { attrs, ty, .. })| {
-            if find_remove(attrs, PIN) {
+            if attrs.find_remove(PIN) {
                 impl_unpin.push(ty);
                 proj_fields.push(quote!(#pin<&'__a mut #ty>));
                 proj_init.push(quote!(#pin::new_unchecked(&mut this.#n)));

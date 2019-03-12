@@ -7,14 +7,14 @@ use proc_macro2::{Ident, TokenStream};
 use quote::quote;
 use syn::{parse_quote, Generics, Item, Type};
 
-use crate::utils::{Result, *};
+use crate::utils::{failed, Result};
 
 /// The attribute name.
 const NAME: &str = "unsafe_project";
 /// The annotation for pinned type.
 const PIN: &str = "pin";
 
-pub(super) fn unsafe_project(args: &TokenStream, input: TokenStream) -> TokenStream {
+pub(super) fn attribute(args: &str, input: TokenStream) -> TokenStream {
     match syn::parse2(input) {
         Ok(Item::Struct(item)) => structs::parse(args, item),
         Ok(Item::Enum(item)) => enums::parse(args, item),
@@ -40,12 +40,15 @@ fn proj_generics(generics: &Generics) -> Generics {
     generics
 }
 
+// =================================================================================================
+// conditional Unpin implementation
+
 struct ImplUnpin(Option<Generics>);
 
 impl ImplUnpin {
     /// Parses attribute arguments.
-    fn parse(args: &TokenStream, generics: &Generics) -> Result<Self> {
-        match &*args.to_string() {
+    fn parse(args: &str, generics: &Generics) -> Result<Self> {
+        match args {
             "" => Ok(Self(None)),
             "Unpin" => Ok(Self(Some(generics.clone()))),
             _ => failed(NAME, "an invalid argument was passed"),

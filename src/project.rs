@@ -4,12 +4,12 @@ use proc_macro2::TokenStream;
 use quote::ToTokens;
 use syn::{punctuated::Punctuated, token::Or, *};
 
-use crate::utils::{Result, *};
+use crate::utils::{proj_ident, Result};
 
 /// The attribute name.
 const NAME: &str = "project";
 
-pub(super) fn project(input: TokenStream) -> TokenStream {
+pub(super) fn attribute(input: TokenStream) -> TokenStream {
     parse(input).unwrap_or_else(identity)
 }
 
@@ -119,7 +119,7 @@ impl Replace for Path {
         }
 
         fn replace_ident(ident: &mut Ident) {
-            *ident = proj_ident(&ident);
+            *ident = proj_ident(ident);
         }
 
         let len = match self.segments.len() {
@@ -138,6 +138,7 @@ impl Replace for Path {
     }
 }
 
+#[derive(Default)]
 struct Register(Option<(String, usize)>);
 
 impl Register {
@@ -155,14 +156,10 @@ impl Register {
     }
 }
 
-impl Default for Register {
-    fn default() -> Self {
-        Self(None)
-    }
-}
-
 mod visitor {
     use syn::visit_mut::{self, VisitMut};
+
+    use crate::utils::VecExt;
 
     use super::*;
 
@@ -200,7 +197,7 @@ mod visitor {
         fn attrs_mut<T, F: FnOnce(&mut Vec<Attribute>) -> T>(&mut self, f: F) -> T;
 
         fn find_remove(&mut self) -> bool {
-            self.attrs_mut(|attrs| find_remove(attrs, NAME))
+            self.attrs_mut(|attrs| attrs.find_remove(NAME))
         }
     }
 

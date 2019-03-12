@@ -2,21 +2,18 @@ use proc_macro2::{Ident, Span, TokenStream};
 use quote::{quote, ToTokens};
 use syn::{Field, Fields, FieldsNamed, FieldsUnnamed, ItemEnum, Variant};
 
-use crate::utils::{Result, *};
+use crate::utils::{proj_ident, Result, VecExt};
 
 use super::*;
 
-pub(super) fn parse(args: &TokenStream, item: ItemEnum) -> Result<TokenStream> {
+pub(super) fn parse(args: &str, item: ItemEnum) -> Result<TokenStream> {
     if item.variants.is_empty() {
-        parse_failed("enums without variants")?;
+        parse_failed("enums without variants")
+    } else if item.variants.iter().any(|v| v.discriminant.is_some()) {
+        parse_failed("enums with discriminants")
+    } else {
+        ImplUnpin::parse(args, &item.generics).map(|impl_unpin| proj_impl(item, impl_unpin))
     }
-
-    item.variants
-        .iter()
-        .filter(|v| v.discriminant.is_some())
-        .try_for_each(|_| parse_failed("enums with discriminants"))?;
-
-    ImplUnpin::parse(args, &item.generics).map(|impl_unpin| proj_impl(item, impl_unpin))
 }
 
 fn proj_impl(mut item: ItemEnum, mut impl_unpin: ImplUnpin) -> TokenStream {
@@ -98,7 +95,7 @@ fn named(
         |Field {
              attrs, ident, ty, ..
          }| {
-            if find_remove(attrs, PIN) {
+            if attrs.find_remove(PIN) {
                 impl_unpin.push(ty);
                 expr_vec.push(quote!(#ident: #pin::new_unchecked(#ident)));
                 ty_vec.push(quote!(#ident: #pin<&'__a mut #ty>));
@@ -138,7 +135,7 @@ fn unnamed(
         .for_each(|(i, Field { attrs, ty, .. })| {
             let x = Ident::new(&format!("_x{}", i), Span::call_site());
 
-            if find_remove(attrs, PIN) {
+            if attrs.find_remove(PIN) {
                 impl_unpin.push(ty);
                 expr_vec.push(quote!(#pin::new_unchecked(#x)));
                 ty_vec.push(quote!(#pin<&'__a mut #ty>));

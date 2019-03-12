@@ -140,6 +140,8 @@
 #![deny(unsafe_code)]
 #![deny(rust_2018_idioms, unreachable_pub)]
 #![deny(clippy::all, clippy::pedantic)]
+#![warn(single_use_lifetimes)]
+#![warn(clippy::nursery)]
 
 extern crate proc_macro;
 
@@ -321,9 +323,10 @@ use proc_macro::TokenStream;
 /// [`Unpin`]: core::marker::Unpin
 /// [`drop`]: Drop::drop
 /// [`project`]: ./attr.project.html
+#[allow(clippy::needless_pass_by_value)] // https://github.com/rust-lang/rust-clippy/issues/3067
 #[proc_macro_attribute]
 pub fn unsafe_project(args: TokenStream, input: TokenStream) -> TokenStream {
-    TokenStream::from(unsafe_project::unsafe_project(&args.into(), input.into()))
+    TokenStream::from(unsafe_project::attribute(&args.to_string(), input.into()))
 }
 
 /// An attribute to support pattern matching.
@@ -424,5 +427,5 @@ pub fn unsafe_project(args: TokenStream, input: TokenStream) -> TokenStream {
 #[proc_macro_attribute]
 pub fn project(args: TokenStream, input: TokenStream) -> TokenStream {
     assert!(args.is_empty());
-    TokenStream::from(project::project(input.into()))
+    TokenStream::from(project::attribute(input.into()))
 }
