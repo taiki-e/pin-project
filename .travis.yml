@@ -15,10 +15,10 @@ matrix:
     - rust: nightly
 
     - rust: nightly
-      name: cargo test (minimal versions)
+      name: cargo check (minimal versions)
       script:
         - cargo update -Zminimal-versions
-        - cargo test
+        - cargo check
 
     - rust: nightly
       name: cargo clippy
