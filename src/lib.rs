@@ -323,7 +323,6 @@ use proc_macro::TokenStream;
 /// [`Unpin`]: core::marker::Unpin
 /// [`drop`]: Drop::drop
 /// [`project`]: ./attr.project.html
-#[allow(clippy::needless_pass_by_value)] // https://github.com/rust-lang/rust-clippy/issues/3067
 #[proc_macro_attribute]
 pub fn unsafe_project(args: TokenStream, input: TokenStream) -> TokenStream {
     TokenStream::from(unsafe_project::attribute(&args.to_string(), input.into()))
@@ -422,7 +421,6 @@ pub fn unsafe_project(args: TokenStream, input: TokenStream) -> TokenStream {
 ///     }
 /// }
 /// ```
-#[allow(clippy::needless_pass_by_value)] // https://github.com/rust-lang/rust-clippy/issues/3067
 #[cfg(feature = "project_attr")]
 #[proc_macro_attribute]
 pub fn project(args: TokenStream, input: TokenStream) -> TokenStream {
