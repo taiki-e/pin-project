@@ -22,7 +22,6 @@ fn proj_impl(mut item: ItemStruct, mut impl_unpin: ImplUnpin) -> Result<TokenStr
         Fields::Unnamed(fields) => unnamed(fields, &mut impl_unpin),
     };
 
-    let pin = pin();
     let ident = &item.ident;
     let proj_ident = proj_ident(&item.ident);
     let proj_generics = proj_generics(&item.generics);
@@ -36,9 +35,9 @@ fn proj_impl(mut item: ItemStruct, mut impl_unpin: ImplUnpin) -> Result<TokenStr
     proj_items.extend(impl_unpin.build(ident));
     proj_items.extend(quote! {
         impl #impl_generics #ident #ty_generics #where_clause {
-            fn project<'__a>(self: #pin<&'__a mut Self>) -> #proj_ident #proj_ty_generics {
+            fn project<'__a>(self: ::core::pin::Pin<&'__a mut Self>) -> #proj_ident #proj_ty_generics {
                 unsafe {
-                    let this = #pin::get_unchecked_mut(self);
+                    let this = ::core::pin::Pin::get_unchecked_mut(self);
                     #proj_ident #proj_init_body
                 }
             }
@@ -54,7 +53,6 @@ fn named(
     FieldsNamed { named: fields, .. }: &mut FieldsNamed,
     impl_unpin: &mut ImplUnpin,
 ) -> (TokenStream, TokenStream) {
-    let pin = pin();
     let mut proj_fields = Vec::with_capacity(fields.len());
     let mut proj_init = Vec::with_capacity(fields.len());
     fields.iter_mut().for_each(
@@ -63,8 +61,8 @@ fn named(
          }| {
             if attrs.find_remove(PIN) {
                 impl_unpin.push(ty);
-                proj_fields.push(quote!(#ident: #pin<&'__a mut #ty>));
-                proj_init.push(quote!(#ident: #pin::new_unchecked(&mut this.#ident)));
+                proj_fields.push(quote!(#ident: ::core::pin::Pin<&'__a mut #ty>));
+                proj_init.push(quote!(#ident: ::core::pin::Pin::new_unchecked(&mut this.#ident)));
             } else {
                 proj_fields.push(quote!(#ident: &'__a mut #ty));
                 proj_init.push(quote!(#ident: &mut this.#ident));
@@ -84,7 +82,6 @@ fn unnamed(
     }: &mut FieldsUnnamed,
     impl_unpin: &mut ImplUnpin,
 ) -> (TokenStream, TokenStream) {
-    let pin = pin();
     let mut proj_fields = Vec::with_capacity(fields.len());
     let mut proj_init = Vec::with_capacity(fields.len());
     fields
@@ -93,8 +90,8 @@ fn unnamed(
         .for_each(|(n, Field { attrs, ty, .. })| {
             if attrs.find_remove(PIN) {
                 impl_unpin.push(ty);
-                proj_fields.push(quote!(#pin<&'__a mut #ty>));
-                proj_init.push(quote!(#pin::new_unchecked(&mut this.#n)));
+                proj_fields.push(quote!(::core::pin::Pin<&'__a mut #ty>));
+                proj_init.push(quote!(::core::pin::Pin::new_unchecked(&mut this.#n)));
             } else {
                 proj_fields.push(quote!(&'__a mut #ty));
                 proj_init.push(quote!(&mut this.#n));

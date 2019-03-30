@@ -28,11 +28,6 @@ fn parse_failed<T>(msg: &str) -> Result<T> {
     failed(NAME, &format!("cannot be implemented for {}", msg))
 }
 
-/// Returns the absolute path of the `Pin`.
-fn pin() -> TokenStream {
-    quote!(::core::pin::Pin)
-}
-
 /// Makes the generics of projected type from the reference of the original generics.
 fn proj_generics(generics: &Generics) -> Generics {
     let mut generics = generics.clone();

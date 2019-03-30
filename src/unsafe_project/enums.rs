@@ -20,7 +20,6 @@ fn proj_impl(mut item: ItemEnum, mut impl_unpin: ImplUnpin) -> TokenStream {
     let proj_ident = proj_ident(&item.ident);
     let (proj_item_body, proj_arms) = variants(&mut item, &proj_ident, &mut impl_unpin);
 
-    let pin = pin();
     let ident = &item.ident;
     let proj_generics = proj_generics(&item.generics);
     let proj_ty_generics = proj_generics.split_for_impl().1;
@@ -33,9 +32,9 @@ fn proj_impl(mut item: ItemEnum, mut impl_unpin: ImplUnpin) -> TokenStream {
     proj_items.extend(impl_unpin.build(ident));
     proj_items.extend(quote! {
         impl #impl_generics #ident #ty_generics #where_clause {
-            fn project<'__a>(self: #pin<&'__a mut Self>) -> #proj_ident #proj_ty_generics {
+            fn project<'__a>(self: ::core::pin::Pin<&'__a mut Self>) -> #proj_ident #proj_ty_generics {
                 unsafe {
-                    match #pin::get_unchecked_mut(self) {
+                    match ::core::pin::Pin::get_unchecked_mut(self) {
                         #proj_arms
                     }
                 }
@@ -87,7 +86,6 @@ fn named(
     proj_ident: &Ident,
     impl_unpin: &mut ImplUnpin,
 ) -> (TokenStream, TokenStream) {
-    let pin = pin();
     let mut pat_vec = Vec::with_capacity(fields.len());
     let mut expr_vec = Vec::with_capacity(fields.len());
     let mut ty_vec = Vec::with_capacity(fields.len());
@@ -97,8 +95,8 @@ fn named(
          }| {
             if attrs.find_remove(PIN) {
                 impl_unpin.push(ty);
-                expr_vec.push(quote!(#ident: #pin::new_unchecked(#ident)));
-                ty_vec.push(quote!(#ident: #pin<&'__a mut #ty>));
+                expr_vec.push(quote!(#ident: ::core::pin::Pin::new_unchecked(#ident)));
+                ty_vec.push(quote!(#ident: ::core::pin::Pin<&'__a mut #ty>));
             } else {
                 expr_vec.push(quote!(#ident: #ident));
                 ty_vec.push(quote!(#ident: &'__a mut #ty));
@@ -125,7 +123,6 @@ fn unnamed(
     proj_ident: &Ident,
     impl_unpin: &mut ImplUnpin,
 ) -> (TokenStream, TokenStream) {
-    let pin = pin();
     let mut pat_vec = Vec::with_capacity(fields.len());
     let mut expr_vec = Vec::with_capacity(fields.len());
     let mut ty_vec = Vec::with_capacity(fields.len());
@@ -137,8 +134,8 @@ fn unnamed(
 
             if attrs.find_remove(PIN) {
                 impl_unpin.push(ty);
-                expr_vec.push(quote!(#pin::new_unchecked(#x)));
-                ty_vec.push(quote!(#pin<&'__a mut #ty>));
+                expr_vec.push(quote!(::core::pin::Pin::new_unchecked(#x)));
+                ty_vec.push(quote!(::core::pin::Pin<&'__a mut #ty>));
             } else {
                 expr_vec.push(quote!(#x));
                 ty_vec.push(quote!(&'__a mut #ty));
