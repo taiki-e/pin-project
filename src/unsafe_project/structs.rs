@@ -1,4 +1,4 @@
-use proc_macro2::TokenStream;
+use proc_macro2::{Literal, TokenStream};
 use quote::{quote, ToTokens};
 use syn::{Field, Fields, FieldsNamed, FieldsUnnamed, ItemStruct};
 
@@ -87,14 +87,15 @@ fn unnamed(
     fields
         .iter_mut()
         .enumerate()
-        .for_each(|(n, Field { attrs, ty, .. })| {
+        .for_each(|(i, Field { attrs, ty, .. })| {
+            let i = Literal::usize_unsuffixed(i);
             if attrs.find_remove(PIN) {
                 impl_unpin.push(ty);
                 proj_fields.push(quote!(::core::pin::Pin<&'__a mut #ty>));
-                proj_init.push(quote!(::core::pin::Pin::new_unchecked(&mut this.#n)));
+                proj_init.push(quote!(::core::pin::Pin::new_unchecked(&mut this.#i)));
             } else {
                 proj_fields.push(quote!(&'__a mut #ty));
-                proj_init.push(quote!(&mut this.#n));
+                proj_init.push(quote!(&mut this.#i));
             }
         });
 
