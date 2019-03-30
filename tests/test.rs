@@ -3,9 +3,10 @@
 #![deny(unsafe_code)]
 #![deny(rust_2018_idioms)]
 #![allow(dead_code)]
+#![no_std]
 
+use core::pin::Pin;
 use pin_project::unsafe_project;
-use std::pin::Pin;
 
 #[test]
 fn test_unsafe_project() {
