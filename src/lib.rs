@@ -136,7 +136,7 @@
 
 #![crate_type = "proc-macro"]
 #![recursion_limit = "256"]
-#![doc(html_root_url = "https://docs.rs/pin-project/0.3.1")]
+#![doc(html_root_url = "https://docs.rs/pin-project/0.3.2")]
 #![deny(unsafe_code)]
 #![deny(rust_2018_idioms, unreachable_pub)]
 #![deny(clippy::all, clippy::pedantic)]

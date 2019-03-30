@@ -1,5 +1,9 @@
 # Unreleased
 
+# 0.3.2 - 2019-03-30
+
+* Avoid suffixes on tuple index.
+
 # 0.3.1 - 2019-03-02
 
 * Improve documentation.
