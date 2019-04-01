@@ -1,6 +1,6 @@
-use proc_macro2::{Literal, TokenStream};
+use proc_macro2::TokenStream;
 use quote::{quote, ToTokens};
-use syn::{Field, Fields, FieldsNamed, FieldsUnnamed, ItemStruct};
+use syn::{Field, Fields, FieldsNamed, FieldsUnnamed, Index, ItemStruct};
 
 use crate::utils::{proj_ident, Result, VecExt};
 
@@ -88,7 +88,7 @@ fn unnamed(
         .iter_mut()
         .enumerate()
         .for_each(|(i, Field { attrs, ty, .. })| {
-            let i = Literal::usize_unsuffixed(i);
+            let i = Index::from(i);
             if attrs.find_remove(PIN) {
                 impl_unpin.push(ty);
                 proj_fields.push(quote!(::core::pin::Pin<&'__a mut #ty>));
