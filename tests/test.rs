@@ -19,10 +19,7 @@ fn test_unsafe_project() {
         field2: U,
     }
 
-    let mut foo = Foo {
-        field1: 1,
-        field2: 2,
-    };
+    let mut foo = Foo { field1: 1, field2: 2 };
 
     let foo = Pin::new(&mut foo).project();
 
@@ -79,10 +76,7 @@ fn test_unsafe_project() {
         __BazProjection::None => {}
     }
 
-    let mut baz = Baz::Variant2 {
-        field1: 3,
-        field2: 4,
-    };
+    let mut baz = Baz::Variant2 { field1: 3, field2: 4 };
 
     let mut baz = Pin::new(&mut baz).project();
 
@@ -173,10 +167,7 @@ fn test_project_attr() {
         field2: U,
     }
 
-    let mut foo = Foo {
-        field1: 1,
-        field2: 2,
-    };
+    let mut foo = Foo { field1: 1, field2: 2 };
 
     #[project]
     let Foo { field1, field2 } = Pin::new(&mut foo).project();

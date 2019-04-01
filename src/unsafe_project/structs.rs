@@ -13,9 +13,11 @@ pub(super) fn parse(args: &str, item: ItemStruct) -> Result<TokenStream> {
 fn proj_impl(mut item: ItemStruct, mut impl_unpin: ImplUnpin) -> Result<TokenStream> {
     let (proj_item_body, proj_init_body) = match &mut item.fields {
         Fields::Named(FieldsNamed { named: fields, .. })
-        | Fields::Unnamed(FieldsUnnamed {
-            unnamed: fields, ..
-        }) if fields.is_empty() => parse_failed("structs with zero fields")?,
+        | Fields::Unnamed(FieldsUnnamed { unnamed: fields, .. })
+            if fields.is_empty() =>
+        {
+            parse_failed("structs with zero fields")?
+        }
         Fields::Unit => parse_failed("structs with units")?,
 
         Fields::Named(fields) => named(fields, &mut impl_unpin),
@@ -55,20 +57,16 @@ fn named(
 ) -> (TokenStream, TokenStream) {
     let mut proj_fields = Vec::with_capacity(fields.len());
     let mut proj_init = Vec::with_capacity(fields.len());
-    fields.iter_mut().for_each(
-        |Field {
-             attrs, ident, ty, ..
-         }| {
-            if attrs.find_remove(PIN) {
-                impl_unpin.push(ty);
-                proj_fields.push(quote!(#ident: ::core::pin::Pin<&'__a mut #ty>));
-                proj_init.push(quote!(#ident: ::core::pin::Pin::new_unchecked(&mut this.#ident)));
-            } else {
-                proj_fields.push(quote!(#ident: &'__a mut #ty));
-                proj_init.push(quote!(#ident: &mut this.#ident));
-            }
-        },
-    );
+    fields.iter_mut().for_each(|Field { attrs, ident, ty, .. }| {
+        if attrs.find_remove(PIN) {
+            impl_unpin.push(ty);
+            proj_fields.push(quote!(#ident: ::core::pin::Pin<&'__a mut #ty>));
+            proj_init.push(quote!(#ident: ::core::pin::Pin::new_unchecked(&mut this.#ident)));
+        } else {
+            proj_fields.push(quote!(#ident: &'__a mut #ty));
+            proj_init.push(quote!(#ident: &mut this.#ident));
+        }
+    });
 
     let proj_item_body = quote!({ #(#proj_fields,)* });
     let proj_init_body = quote!({ #(#proj_init,)* });
@@ -77,27 +75,22 @@ fn named(
 }
 
 fn unnamed(
-    FieldsUnnamed {
-        unnamed: fields, ..
-    }: &mut FieldsUnnamed,
+    FieldsUnnamed { unnamed: fields, .. }: &mut FieldsUnnamed,
     impl_unpin: &mut ImplUnpin,
 ) -> (TokenStream, TokenStream) {
     let mut proj_fields = Vec::with_capacity(fields.len());
     let mut proj_init = Vec::with_capacity(fields.len());
-    fields
-        .iter_mut()
-        .enumerate()
-        .for_each(|(i, Field { attrs, ty, .. })| {
-            let i = Index::from(i);
-            if attrs.find_remove(PIN) {
-                impl_unpin.push(ty);
-                proj_fields.push(quote!(::core::pin::Pin<&'__a mut #ty>));
-                proj_init.push(quote!(::core::pin::Pin::new_unchecked(&mut this.#i)));
-            } else {
-                proj_fields.push(quote!(&'__a mut #ty));
-                proj_init.push(quote!(&mut this.#i));
-            }
-        });
+    fields.iter_mut().enumerate().for_each(|(i, Field { attrs, ty, .. })| {
+        let i = Index::from(i);
+        if attrs.find_remove(PIN) {
+            impl_unpin.push(ty);
+            proj_fields.push(quote!(::core::pin::Pin<&'__a mut #ty>));
+            proj_init.push(quote!(::core::pin::Pin::new_unchecked(&mut this.#i)));
+        } else {
+            proj_fields.push(quote!(&'__a mut #ty));
+            proj_init.push(quote!(&mut this.#i));
+        }
+    });
 
     let proj_item_body = quote!((#(#proj_fields,)*););
     let proj_init_body = quote!((#(#proj_init,)*));

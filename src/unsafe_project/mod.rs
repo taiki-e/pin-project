@@ -52,10 +52,7 @@ impl ImplUnpin {
 
     fn push(&mut self, ty: &Type) {
         if let Some(generics) = &mut self.0 {
-            generics
-                .make_where_clause()
-                .predicates
-                .push(parse_quote!(#ty: ::core::marker::Unpin));
+            generics.make_where_clause().predicates.push(parse_quote!(#ty: ::core::marker::Unpin));
         }
     }
 

@@ -23,12 +23,10 @@ fn parse(input: TokenStream) -> Result<TokenStream> {
         }
     }
 
-    syn::parse2(input)
-        .map_err(|err| err.to_compile_error())
-        .map(|mut stmt| {
-            replace_stmt(&mut stmt);
-            stmt.into_token_stream()
-        })
+    syn::parse2(input).map_err(|err| err.to_compile_error()).map(|mut stmt| {
+        replace_stmt(&mut stmt);
+        stmt.into_token_stream()
+    })
 }
 
 trait Replace {
@@ -49,9 +47,9 @@ impl Replace for Expr {
             Expr::ForLoop(ExprForLoop { pat, .. }) => pat.replace(register),
             Expr::Let(ExprLet { pats, .. }) => pats.replace(register),
 
-            Expr::Match(ExprMatch { arms, .. }) => arms
-                .iter_mut()
-                .for_each(|Arm { pats, .. }| pats.replace(register)),
+            Expr::Match(ExprMatch { arms, .. }) => {
+                arms.iter_mut().for_each(|Arm { pats, .. }| pats.replace(register))
+            }
 
             Expr::Block(ExprBlock { block, .. }) | Expr::Unsafe(ExprUnsafe { block, .. }) => {
                 if let Some(Stmt::Expr(expr)) = block.stmts.last_mut() {
@@ -64,9 +62,7 @@ impl Replace for Expr {
             | Expr::Paren(ExprParen { expr, .. })
             | Expr::Reference(ExprReference { expr, .. }) => expr.replace(register),
 
-            Expr::Path(ExprPath {
-                qself: None, path, ..
-            })
+            Expr::Path(ExprPath { qself: None, path, .. })
             | Expr::Struct(ExprStruct { path, .. }) => path.replace(register),
 
             _ => {}
@@ -93,10 +89,7 @@ impl Replace for Punctuated<Pat, Or> {
 impl Replace for Pat {
     fn replace(&mut self, register: &mut Register) {
         match self {
-            Pat::Ident(PatIdent {
-                subpat: Some((_, pat)),
-                ..
-            })
+            Pat::Ident(PatIdent { subpat: Some((_, pat)), .. })
             | Pat::Ref(PatRef { pat, .. })
             | Pat::Box(PatBox { pat, .. }) => pat.replace(register),
 
