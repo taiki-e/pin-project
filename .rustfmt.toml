@@ -1,1 +1,3 @@
+edition = "2018"
+tab_spaces = 4
 use_small_heuristics = "Max"
