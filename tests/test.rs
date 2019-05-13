@@ -1,7 +1,6 @@
 #![recursion_limit = "128"]
-#![deny(warnings)]
-#![deny(unsafe_code)]
-#![deny(rust_2018_idioms)]
+#![warn(unsafe_code)]
+#![warn(rust_2018_idioms)]
 #![allow(dead_code)]
 #![no_std]
 

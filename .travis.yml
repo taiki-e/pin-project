@@ -25,7 +25,7 @@ matrix:
       script:
         - if rustup component add clippy;
           then
-            cargo clippy -- -Dwarnings;
+            cargo clippy;
           else
             echo 'Skipping clippy';
           fi
@@ -40,6 +40,9 @@ matrix:
       name: cargo doc
       script:
         - RUSTDOCFLAGS=-Dwarnings cargo doc --no-deps
+
+env:
+  - RUSTFLAGS="-D warnings"
 
 before_script:
   - set -o errexit
