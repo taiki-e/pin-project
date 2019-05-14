@@ -11,7 +11,7 @@ documentation = "https://docs.rs/pin-project/"
 readme = "README.md"
 keywords = ["pin", "macros", "attribute"]
 categories = ["rust-patterns"]
-exclude = ["/.travis.yml"]
+exclude = ["/.travis.yml", "/bors.toml"]
 
 [badges]
 travis-ci = { repository = "taiki-e/pin-project" }

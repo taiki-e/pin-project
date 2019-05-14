@@ -2,6 +2,12 @@ language: rust
 sudo: false
 cache: cargo
 
+branches:
+  only:
+    - master
+    - staging
+    - trying
+
 matrix:
   fast_finish: true
 
@@ -13,6 +19,9 @@ matrix:
     - rust: stable
     - rust: beta
     - rust: nightly
+      script:
+        - cargo test --no-default-features
+        - cargo test
 
     - rust: nightly
       name: cargo check (minimal versions)
@@ -48,8 +57,8 @@ before_script:
   - set -o errexit
 
 script:
-  - cargo test --no-default-features
-  - cargo test
+  - cargo test --tests --no-default-features
+  - cargo test --tests
 
 notifications:
   email:
