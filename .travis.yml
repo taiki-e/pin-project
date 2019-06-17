@@ -32,12 +32,8 @@ matrix:
     - rust: nightly
       name: cargo clippy
       script:
-        - if rustup component add clippy;
-          then
-            cargo clippy;
-          else
-            echo 'Skipping clippy';
-          fi
+        - rustup component add clippy || travis_terminate 0
+        - cargo clippy
 
     - rust: stable
       name: cargo fmt
@@ -51,14 +47,14 @@ matrix:
         - RUSTDOCFLAGS=-Dwarnings cargo doc --no-deps
 
 env:
-  - RUSTFLAGS="-D warnings"
+  - RUSTFLAGS=-Dwarnings
 
 before_script:
   - set -o errexit
 
 script:
-  - cargo test --tests --no-default-features
-  - cargo test --tests
+  - cargo check --no-default-features
+  - cargo check
 
 notifications:
   email:
