@@ -16,7 +16,7 @@
 //! }
 //!
 //! impl<T, U> Foo<T, U> {
-//!     fn baz(mut self: Pin<&mut Self>) {
+//!     fn baz(self: Pin<&mut Self>) {
 //!         let this = self.project();
 //!         let _: Pin<&mut T> = this.future; // Pinned reference to the field
 //!         let _: &mut U = this.field; // Normal reference to the field
@@ -31,7 +31,6 @@
 //! <summary>Code like this will be generated:</summary>
 //!
 //! ```rust
-//! # use std::pin::Pin;
 //! struct Foo<T, U> {
 //!     future: T,
 //!     field: U,
@@ -79,7 +78,7 @@
 //! # #[cfg(feature = "project_attr")]
 //! impl<T, U> Foo<T, U> {
 //!     #[project] // Nightly does not need a dummy attribute to the function.
-//!     fn baz(mut self: Pin<&mut Self>) {
+//!     fn baz(self: Pin<&mut Self>) {
 //!         #[project]
 //!         match self.project() {
 //!             Foo::Future(future) => {
@@ -100,7 +99,6 @@
 //! <summary>Code like this will be generated:</summary>
 //!
 //! ```rust
-//! # use std::pin::Pin;
 //! enum Foo<T, U> {
 //!     Future(T),
 //!     Done(U),
@@ -136,10 +134,11 @@
 
 #![recursion_limit = "256"]
 #![doc(html_root_url = "https://docs.rs/pin-project/0.3.2")]
+#![doc(test(attr(deny(warnings), allow(dead_code, unused_assignments, unused_variables))))]
 #![warn(unsafe_code)]
 #![warn(rust_2018_idioms, unreachable_pub)]
-#![warn(clippy::all, clippy::pedantic)]
 #![warn(single_use_lifetimes)]
+#![warn(clippy::all, clippy::pedantic)]
 #![warn(clippy::nursery)]
 
 extern crate proc_macro;
@@ -194,7 +193,7 @@ use proc_macro::TokenStream;
 /// }
 ///
 /// impl<T, U> Foo<T, U> {
-///     fn baz(mut self: Pin<&mut Self>) {
+///     fn baz(self: Pin<&mut Self>) {
 ///         let this = self.project();
 ///         let _: Pin<&mut T> = this.future; // Pinned reference to the field
 ///         let _: &mut U = this.field; // Normal reference to the field
@@ -219,7 +218,7 @@ use proc_macro::TokenStream;
 /// }
 ///
 /// impl<T, U> Foo<T, U> {
-///     fn baz(mut self: Pin<&mut Self>) {
+///     fn baz(self: Pin<&mut Self>) {
 ///         let this = self.project();
 ///         let _: Pin<&mut T> = this.future; // Pinned reference to the field
 ///         let _: &mut U = this.field; // Normal reference to the field
@@ -249,7 +248,7 @@ use proc_macro::TokenStream;
 /// }
 ///
 /// impl<T, U> Foo<T, U> {
-///     fn baz(mut self: Pin<&mut Self>) {
+///     fn baz(self: Pin<&mut Self>) {
 ///         let this = self.project();
 ///         let _: Pin<&mut T> = this.future;
 ///         let _: &mut U = this.field;
@@ -266,7 +265,7 @@ use proc_macro::TokenStream;
 /// struct Foo<T, U>(#[pin] T, U);
 ///
 /// impl<T, U> Foo<T, U> {
-///     fn baz(mut self: Pin<&mut Self>) {
+///     fn baz(self: Pin<&mut Self>) {
 ///         let this = self.project();
 ///         let _: Pin<&mut T> = this.0;
 ///         let _: &mut U = this.1;
@@ -349,7 +348,7 @@ pub fn unsafe_project(args: TokenStream, input: TokenStream) -> TokenStream {
 ///
 /// impl<T, U> Foo<T, U> {
 ///     #[project] // Nightly does not need a dummy attribute to the function.
-///     fn baz(mut self: Pin<&mut Self>) {
+///     fn baz(self: Pin<&mut Self>) {
 ///         #[project]
 ///         let Foo { future, field } = self.project();
 ///
