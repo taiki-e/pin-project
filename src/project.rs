@@ -2,9 +2,14 @@ use std::convert::identity;
 
 use proc_macro2::TokenStream;
 use quote::ToTokens;
-use syn::{punctuated::Punctuated, token::Or, *};
+use syn::{
+    punctuated::Punctuated,
+    token::Or,
+    visit_mut::{self, VisitMut},
+    *,
+};
 
-use crate::utils::{proj_ident, Result};
+use crate::utils::{proj_ident, Result, VecExt};
 
 /// The attribute name.
 const NAME: &str = "project";
@@ -18,7 +23,7 @@ fn parse(input: TokenStream) -> Result<TokenStream> {
         match stmt {
             Stmt::Expr(expr) => expr.replace(&mut Register::default()),
             Stmt::Local(local) => local.replace(&mut Register::default()),
-            Stmt::Item(Item::Fn(item)) => visitor::dummy(item),
+            Stmt::Item(Item::Fn(item)) => Dummy.visit_item_fn_mut(item),
             _ => {}
         }
     }
@@ -149,109 +154,100 @@ impl Register {
     }
 }
 
-mod visitor {
-    use syn::visit_mut::{self, VisitMut};
+// =================================================================================================
+// visitor
 
-    use crate::utils::VecExt;
+struct Dummy;
 
-    use super::*;
-
-    pub(super) fn dummy(item: &mut ItemFn) {
-        Dummy.visit_item_fn_mut(item)
+impl VisitMut for Dummy {
+    fn visit_stmt_mut(&mut self, stmt: &mut Stmt) {
+        visit_mut::visit_stmt_mut(self, stmt);
+        visit_stmt_mut(stmt);
     }
 
-    struct Dummy;
+    // Stop at item bounds
+    fn visit_item_mut(&mut self, _item: &mut Item) {}
+}
 
-    impl VisitMut for Dummy {
-        fn visit_stmt_mut(&mut self, stmt: &mut Stmt) {
-            visit_mut::visit_stmt_mut(self, stmt);
-            visit_stmt_mut(stmt);
-        }
-
-        // Stop at item bounds
-        fn visit_item_mut(&mut self, _item: &mut Item) {}
-    }
-
-    fn visit_stmt_mut(stmt: &mut Stmt) {
-        fn parse_attr<A: AttrsMut + Replace>(attrs: &mut A) {
-            if attrs.find_remove() {
-                attrs.replace(&mut Register::default());
-            }
-        }
-
-        match stmt {
-            Stmt::Expr(expr) => parse_attr(expr),
-            Stmt::Local(local) => parse_attr(local),
-            _ => {}
+fn visit_stmt_mut(stmt: &mut Stmt) {
+    fn parse_attr<A: AttrsMut + Replace>(attrs: &mut A) {
+        if attrs.find_remove() {
+            attrs.replace(&mut Register::default());
         }
     }
 
-    trait AttrsMut {
-        fn attrs_mut<T, F: FnOnce(&mut Vec<Attribute>) -> T>(&mut self, f: F) -> T;
-
-        fn find_remove(&mut self) -> bool {
-            self.attrs_mut(|attrs| attrs.find_remove(NAME))
-        }
+    match stmt {
+        Stmt::Expr(expr) => parse_attr(expr),
+        Stmt::Local(local) => parse_attr(local),
+        _ => {}
     }
+}
 
-    impl AttrsMut for Local {
-        fn attrs_mut<T, F: FnOnce(&mut Vec<Attribute>) -> T>(&mut self, f: F) -> T {
-            f(&mut self.attrs)
-        }
+trait AttrsMut {
+    fn attrs_mut<T, F: FnOnce(&mut Vec<Attribute>) -> T>(&mut self, f: F) -> T;
+
+    fn find_remove(&mut self) -> bool {
+        self.attrs_mut(|attrs| attrs.find_remove(NAME))
     }
+}
 
-    macro_rules! attrs_impl {
-        ($($Expr:ident),*) => {
-            impl AttrsMut for Expr {
-                fn attrs_mut<T, F: FnOnce(&mut Vec<Attribute>) -> T>(&mut self, f: F) -> T {
-                    match self {
-                        $(Expr::$Expr(expr) => f(&mut expr.attrs),)*
-                        Expr::Verbatim(_) => f(&mut Vec::with_capacity(0)),
-                    }
+impl AttrsMut for Local {
+    fn attrs_mut<T, F: FnOnce(&mut Vec<Attribute>) -> T>(&mut self, f: F) -> T {
+        f(&mut self.attrs)
+    }
+}
+
+macro_rules! attrs_impl {
+    ($($Expr:ident),*) => {
+        impl AttrsMut for Expr {
+            fn attrs_mut<T, F: FnOnce(&mut Vec<Attribute>) -> T>(&mut self, f: F) -> T {
+                match self {
+                    $(Expr::$Expr(expr) => f(&mut expr.attrs),)*
+                    Expr::Verbatim(_) => f(&mut Vec::with_capacity(0)),
                 }
             }
-        };
-    }
+        }
+    };
+}
 
-    attrs_impl! {
-        Box,
-        InPlace,
-        Array,
-        Call,
-        MethodCall,
-        Tuple,
-        Binary,
-        Unary,
-        Lit,
-        Cast,
-        Type,
-        Let,
-        If,
-        While,
-        ForLoop,
-        Loop,
-        Match,
-        Closure,
-        Unsafe,
-        Block,
-        Assign,
-        AssignOp,
-        Field,
-        Index,
-        Range,
-        Path,
-        Reference,
-        Break,
-        Continue,
-        Return,
-        Macro,
-        Struct,
-        Repeat,
-        Paren,
-        Group,
-        Try,
-        Async,
-        TryBlock,
-        Yield
-    }
+attrs_impl! {
+    Box,
+    InPlace,
+    Array,
+    Call,
+    MethodCall,
+    Tuple,
+    Binary,
+    Unary,
+    Lit,
+    Cast,
+    Type,
+    Let,
+    If,
+    While,
+    ForLoop,
+    Loop,
+    Match,
+    Closure,
+    Unsafe,
+    Block,
+    Assign,
+    AssignOp,
+    Field,
+    Index,
+    Range,
+    Path,
+    Reference,
+    Break,
+    Continue,
+    Return,
+    Macro,
+    Struct,
+    Repeat,
+    Paren,
+    Group,
+    Try,
+    Async,
+    TryBlock,
+    Yield
 }
