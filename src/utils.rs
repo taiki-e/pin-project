@@ -1,24 +1,9 @@
-use std::result;
-
-use proc_macro2::{Ident, Span, TokenStream};
-use quote::quote;
+use proc_macro2::{Ident, Span};
 use syn::Attribute;
-
-pub(crate) type Result<T> = result::Result<T, TokenStream>;
 
 /// Makes the ident of projected type from the reference of the original ident.
 pub(crate) fn proj_ident(ident: &Ident) -> Ident {
     Ident::new(&format!("__{}Projection", ident), Span::call_site())
-}
-
-#[inline(never)]
-pub(crate) fn failed<T>(name: &str, msg: &str) -> Result<T> {
-    #[inline(never)]
-    fn compile_err(msg: &str) -> TokenStream {
-        quote!(compile_error!(#msg);)
-    }
-
-    Err(compile_err(&format!("`{}` {}", name, msg)))
 }
 
 pub(crate) trait VecExt {
@@ -32,4 +17,22 @@ impl VecExt for Vec<Attribute> {
             .map(|i| self.remove(i))
             .is_some()
     }
+}
+
+macro_rules! span {
+    ($expr:expr) => {
+        $expr.clone()
+    };
+}
+
+macro_rules! error {
+    ($msg:expr) => {
+        syn::Error::new_spanned($msg, $msg)
+    };
+    ($span:expr, $msg:expr) => {
+        syn::Error::new_spanned($span, $msg)
+    };
+    ($span:expr, $($tt:tt)*) => {
+        error!($span, format!($($tt)*))
+    };
 }
