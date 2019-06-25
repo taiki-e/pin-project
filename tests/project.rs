@@ -6,10 +6,8 @@
 #![cfg(feature = "project_attr")]
 
 use core::pin::Pin;
-use pin_project::project;
-use pin_project::unsafe_project;
+use pin_project::{project, unsafe_project};
 
-#[cfg(feature = "project_attr")]
 #[project] // Nightly does not need a dummy attribute to the function.
 #[test]
 fn test_project_attr() {

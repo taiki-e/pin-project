@@ -28,4 +28,7 @@ project_attr = ["syn/visit-mut"]
 [dependencies]
 proc-macro2 = "0.4.13"
 quote = "0.6.8"
-syn = { version = "0.15.22", features = ["full"] }
+syn = { version = "0.15.29", features = ["full"] }
+
+[dev-dependencies]
+compiletest = { version = "0.3.21", package = "compiletest_rs", features = ["stable", "tmp"] }

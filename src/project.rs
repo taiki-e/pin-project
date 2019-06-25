@@ -1,5 +1,3 @@
-use std::convert::identity;
-
 use proc_macro2::TokenStream;
 use quote::ToTokens;
 use syn::{
@@ -9,13 +7,13 @@ use syn::{
     *,
 };
 
-use crate::utils::{proj_ident, Result, VecExt};
+use crate::utils::{proj_ident, VecExt};
 
 /// The attribute name.
 const NAME: &str = "project";
 
 pub(super) fn attribute(input: TokenStream) -> TokenStream {
-    parse(input).unwrap_or_else(identity)
+    parse(input).unwrap_or_else(|e| e.to_compile_error())
 }
 
 fn parse(input: TokenStream) -> Result<TokenStream> {
@@ -28,7 +26,7 @@ fn parse(input: TokenStream) -> Result<TokenStream> {
         }
     }
 
-    syn::parse2(input).map_err(|err| err.to_compile_error()).map(|mut stmt| {
+    syn::parse2(input).map(|mut stmt| {
         replace_stmt(&mut stmt);
         stmt.into_token_stream()
     })

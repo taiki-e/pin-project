@@ -24,6 +24,12 @@ matrix:
         - cargo test
 
     - rust: nightly
+      name: cargo test (ui tests)
+      script:
+        - cargo clean
+        - RUSTFLAGS='--cfg ui_tests' cargo test --test compile-test
+
+    - rust: nightly
       name: cargo check (minimal versions)
       script:
         - cargo update -Zminimal-versions

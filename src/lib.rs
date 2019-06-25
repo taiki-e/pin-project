@@ -143,12 +143,12 @@
 
 extern crate proc_macro;
 
+#[macro_use]
+mod utils;
+
 #[cfg(feature = "project_attr")]
 mod project;
 mod unsafe_project;
-mod utils;
-
-mod compile_fail;
 
 use proc_macro::TokenStream;
 
@@ -323,7 +323,7 @@ use proc_macro::TokenStream;
 /// [`project`]: ./attr.project.html
 #[proc_macro_attribute]
 pub fn unsafe_project(args: TokenStream, input: TokenStream) -> TokenStream {
-    TokenStream::from(unsafe_project::attribute(&args.to_string(), input.into()))
+    TokenStream::from(unsafe_project::attribute(args.into(), input.into()))
 }
 
 /// An attribute to support pattern matching.

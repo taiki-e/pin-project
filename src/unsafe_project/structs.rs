@@ -1,24 +1,22 @@
 use proc_macro2::TokenStream;
 use quote::{quote, ToTokens};
-use syn::{Field, Fields, FieldsNamed, FieldsUnnamed, Index, ItemStruct};
+use syn::{Field, Fields, FieldsNamed, FieldsUnnamed, Index, ItemStruct, Result};
 
-use crate::utils::{proj_ident, Result, VecExt};
+use crate::utils::{proj_ident, VecExt};
 
 use super::*;
 
-pub(super) fn parse(args: &str, item: ItemStruct) -> Result<TokenStream> {
-    ImplUnpin::parse(args, &item.generics).and_then(|impl_unpin| proj_impl(item, impl_unpin))
-}
+pub(super) fn parse(args: TokenStream, mut item: ItemStruct) -> Result<TokenStream> {
+    let mut impl_unpin = ImplUnpin::new(args, &item.generics)?;
 
-fn proj_impl(mut item: ItemStruct, mut impl_unpin: ImplUnpin) -> Result<TokenStream> {
     let (proj_item_body, proj_init_body) = match &mut item.fields {
         Fields::Named(FieldsNamed { named: fields, .. })
         | Fields::Unnamed(FieldsUnnamed { unnamed: fields, .. })
             if fields.is_empty() =>
         {
-            parse_failed("structs with zero fields")?
+            return Err(error!(item.fields, "cannot be implemented for structs with zero fields"))
         }
-        Fields::Unit => parse_failed("structs with units")?,
+        Fields::Unit => return Err(error!(item, "cannot be implemented for structs with units")),
 
         Fields::Named(fields) => named(fields, &mut impl_unpin),
         Fields::Unnamed(fields) => unnamed(fields, &mut impl_unpin),

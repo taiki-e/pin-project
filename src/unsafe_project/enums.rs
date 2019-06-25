@@ -1,22 +1,24 @@
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{quote, ToTokens};
-use syn::{Field, Fields, FieldsNamed, FieldsUnnamed, ItemEnum, Variant};
+use syn::{Field, Fields, FieldsNamed, FieldsUnnamed, ItemEnum, Result, Variant};
 
-use crate::utils::{proj_ident, Result, VecExt};
+use crate::utils::{proj_ident, VecExt};
 
 use super::*;
 
-pub(super) fn parse(args: &str, item: ItemEnum) -> Result<TokenStream> {
-    if item.variants.is_empty() {
-        parse_failed("enums without variants")
-    } else if item.variants.iter().any(|v| v.discriminant.is_some()) {
-        parse_failed("enums with discriminants")
-    } else {
-        ImplUnpin::parse(args, &item.generics).map(|impl_unpin| proj_impl(item, impl_unpin))
-    }
-}
+pub(super) fn parse(args: TokenStream, mut item: ItemEnum) -> Result<TokenStream> {
+    let mut impl_unpin = ImplUnpin::new(args, &item.generics)?;
 
-fn proj_impl(mut item: ItemEnum, mut impl_unpin: ImplUnpin) -> TokenStream {
+    if item.variants.is_empty() {
+        return Err(error!(item.variants, "cannot be implemented for enums without variants"));
+    } else if let Some(e) = item.variants.iter().find_map(|v| {
+        v.discriminant
+            .as_ref()
+            .map(|(_, e)| error!(e, "an enum with discriminants is not supported"))
+    }) {
+        return Err(e);
+    }
+
     let proj_ident = proj_ident(&item.ident);
     let (proj_item_body, proj_arms) = variants(&mut item, &proj_ident, &mut impl_unpin);
 
@@ -44,7 +46,7 @@ fn proj_impl(mut item: ItemEnum, mut impl_unpin: ImplUnpin) -> TokenStream {
 
     let mut item = item.into_token_stream();
     item.extend(proj_items);
-    item
+    Ok(item)
 }
 
 fn variants(

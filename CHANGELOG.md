@@ -1,5 +1,7 @@
 # Unreleased
 
+* Improved error messages.
+
 # 0.3.2 - 2019-03-30
 
 * Avoided suffixes on tuple index.
