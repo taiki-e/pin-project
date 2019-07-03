@@ -6,7 +6,7 @@
 #![cfg(feature = "project_attr")]
 
 use core::pin::Pin;
-use pin_project::{project, unsafe_project};
+use pin_project::{pin_project, project, unsafe_project};
 
 #[project] // Nightly does not need a dummy attribute to the function.
 #[test]
@@ -92,4 +92,104 @@ fn test_project_attr() {
             // Check that don't replace different types by mistake
         }
     }
+}
+
+#[test]
+fn test_pin_project() {
+    // struct
+
+    #[unsafe_project(Unpin)]
+    struct Foo<T, U> {
+        #[pin]
+        field1: T,
+        field2: U,
+    }
+
+    impl Foo<i32, i32> {
+        #[pin_project(self)]
+        fn foo(self: Pin<&mut Self>) {
+            let x: Pin<&mut i32> = self.field1;
+            assert_eq!(*x, 1);
+            let y: &mut i32 = self.field2;
+            assert_eq!(*y, 2);
+        }
+    }
+
+    let mut foo = Foo { field1: 1, field2: 2 };
+    Pin::new(&mut foo).foo();
+
+    // tuple struct
+
+    #[unsafe_project(Unpin)]
+    struct Bar<T, U>(#[pin] T, U);
+
+    impl Bar<i32, i32> {
+        #[pin_project(self)]
+        fn bar(self: Pin<&mut Self>) {
+            let x: Pin<&mut i32> = self.0;
+            assert_eq!(*x, 1);
+            let y: &mut i32 = self.1;
+            assert_eq!(*y, 2);
+        }
+    }
+
+    let mut bar = Bar(1, 2);
+    Pin::new(&mut bar).bar();
+
+    // enum
+
+    #[unsafe_project(Unpin)]
+    enum Baz<A, B, C, D> {
+        Variant1(#[pin] A, B),
+        Variant2 {
+            #[pin]
+            field1: C,
+            field2: D,
+        },
+        None,
+    }
+
+    impl Baz<i32, i32, i32, i32> {
+        #[pin_project(self, bar)]
+        fn baz(mut self: Pin<&mut Self>, bar: Pin<&mut Bar<i32, i32>>) {
+            #[project]
+            match &mut self {
+                Baz::Variant1(x, y) => {
+                    let x: &mut Pin<&mut i32> = x;
+                    assert_eq!(**x, 1);
+                    let y: &mut &mut i32 = y;
+                    assert_eq!(**y, 2);
+                }
+                Baz::Variant2 { field1, field2 } => {
+                    let _x: &mut Pin<&mut i32> = field1;
+                    let _y: &mut &mut i32 = field2;
+                }
+                Baz::None => {}
+            }
+
+            #[project]
+            {
+                if let Baz::Variant1(x, y) = self {
+                    let x: Pin<&mut i32> = x;
+                    assert_eq!(*x, 1);
+
+                    let y: &mut i32 = y;
+                    assert_eq!(*y, 2);
+                } else if let Option::Some(_) = Some(1) {
+                    // Check that don't replace different types by mistake
+                }
+            }
+
+            #[project]
+            let Bar(x, y) = bar;
+            let _: Pin<&mut i32> = x;
+            assert_eq!(*x, 1);
+            let _: &mut i32 = y;
+            assert_eq!(*y, 2);
+        }
+    }
+
+    let mut baz = Baz::Variant1(1, 2);
+
+    Pin::new(&mut baz).baz(Pin::new(&mut bar));
 }

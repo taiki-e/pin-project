@@ -2,7 +2,6 @@ use proc_macro2::TokenStream;
 use quote::ToTokens;
 use syn::{
     punctuated::Punctuated,
-    token::Or,
     visit_mut::{self, VisitMut},
     *,
 };
@@ -83,7 +82,7 @@ impl Replace for ExprIf {
     }
 }
 
-impl Replace for Punctuated<Pat, Or> {
+impl Replace for Punctuated<Pat, token::Or> {
     fn replace(&mut self, register: &mut Register) {
         self.iter_mut().for_each(|pat| pat.replace(register));
     }
@@ -155,7 +154,7 @@ impl Register {
 // =================================================================================================
 // visitor
 
-struct Dummy;
+pub(crate) struct Dummy;
 
 impl VisitMut for Dummy {
     fn visit_stmt_mut(&mut self, stmt: &mut Stmt) {

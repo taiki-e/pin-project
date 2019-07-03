@@ -147,6 +147,8 @@ extern crate proc_macro;
 mod utils;
 
 #[cfg(feature = "project_attr")]
+mod pin_project;
+#[cfg(feature = "project_attr")]
 mod project;
 mod unsafe_project;
 
@@ -424,4 +426,11 @@ pub fn unsafe_project(args: TokenStream, input: TokenStream) -> TokenStream {
 pub fn project(args: TokenStream, input: TokenStream) -> TokenStream {
     assert!(args.is_empty());
     TokenStream::from(project::attribute(input.into()))
+}
+
+// TODO: doc
+#[cfg(feature = "project_attr")]
+#[proc_macro_attribute]
+pub fn pin_project(args: TokenStream, input: TokenStream) -> TokenStream {
+    TokenStream::from(pin_project::attribute(args.into(), input.into()))
 }
