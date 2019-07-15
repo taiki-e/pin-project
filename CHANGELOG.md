@@ -1,5 +1,7 @@
 # Unreleased
 
+# 0.3.3 - 2019-07-15
+
 * Improved error messages.
 
 # 0.3.2 - 2019-03-30
