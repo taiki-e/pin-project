@@ -10,11 +10,11 @@ pub(super) fn parse(args: TokenStream, mut item: ItemEnum) -> Result<TokenStream
     let mut impl_unpin = ImplUnpin::new(args, &item.generics)?;
 
     if item.variants.is_empty() {
-        return Err(error!(item.variants, "cannot be implemented for enums without variants"));
+        return Err(error!(item, "cannot be implemented for enums without variants"));
     } else if let Some(e) = item.variants.iter().find_map(|v| {
         v.discriminant
             .as_ref()
-            .map(|(_, e)| error!(e, "an enum with discriminants is not supported"))
+            .map(|(_, e)| error!(e, "cannot be implemented for enums with discriminants"))
     }) {
         return Err(e);
     }

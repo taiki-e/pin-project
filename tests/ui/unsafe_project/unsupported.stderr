@@ -1,0 +1,32 @@
+error: cannot be implemented for structs with zero fields
+ --> $DIR/unsupported.rs:8:16
+  |
+8 | struct Struct1 {} //~ ERROR cannot be implemented for structs with zero fields
+  |                ^^
+
+error: cannot be implemented for structs with zero fields
+  --> $DIR/unsupported.rs:11:15
+   |
+11 | struct Struct2(); //~ ERROR cannot be implemented for structs with zero fields
+   |               ^^
+
+error: cannot be implemented for structs with units
+  --> $DIR/unsupported.rs:14:1
+   |
+14 | struct Struct3; //~ ERROR cannot be implemented for structs with units
+   | ^^^^^^^^^^^^^^^
+
+error: cannot be implemented for enums without variants
+  --> $DIR/unsupported.rs:17:1
+   |
+17 | enum Enum1 {} //~ ERROR cannot be implemented for enums without variants
+   | ^^^^^^^^^^^^^
+
+error: cannot be implemented for enums with discriminants
+  --> $DIR/unsupported.rs:21:9
+   |
+21 |     A = 2, //~ ERROR cannot be implemented for enums with discriminants
+   |         ^
+
+error: aborting due to 5 previous errors
+
