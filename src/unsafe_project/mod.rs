@@ -1,6 +1,6 @@
-use proc_macro2::{Ident, Span, TokenStream};
-use quote::quote_spanned;
-use syn::{spanned::Spanned, Generics, Item, Result, Type};
+use proc_macro2::{Ident, TokenStream};
+use quote::quote;
+use syn::{Generics, Item, Result, Type};
 
 mod enums;
 mod structs;
@@ -29,27 +29,20 @@ fn proj_generics(generics: &Generics) -> Generics {
 // conditional Unpin implementation
 
 #[derive(Default)]
-struct ImplUnpin(
-    Option<(
-        // generics
-        Generics,
-        // span
-        Span,
-    )>,
-);
+struct ImplUnpin(Option<Generics>);
 
 impl ImplUnpin {
     /// Parses attribute arguments.
     fn new(args: TokenStream, generics: &Generics) -> Result<Self> {
         match &*args.to_string() {
             "" => Ok(Self::default()),
-            "Unpin" => Ok(Self(Some((generics.clone(), args.span())))),
+            "Unpin" => Ok(Self(Some(generics.clone()))),
             _ => Err(error!(args, "an invalid argument was passed")),
         }
     }
 
     fn push(&mut self, ty: &Type) {
-        if let Some((generics, _)) = &mut self.0 {
+        if let Some(generics) = &mut self.0 {
             generics
                 .make_where_clause()
                 .predicates
@@ -60,9 +53,9 @@ impl ImplUnpin {
     /// Creates `Unpin` implementation.
     fn build(self, ident: &Ident) -> TokenStream {
         self.0
-            .map(|(generics, span)| {
+            .map(|generics| {
                 let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
-                quote_spanned! { span =>
+                quote! {
                     impl #impl_generics ::core::marker::Unpin for #ident #ty_generics #where_clause {}
                 }
             })
