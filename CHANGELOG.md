@@ -1,6 +1,10 @@
 # Unreleased
 
-# 0.3.3 - 2019-07-15
+# 0.3.4 - 2019-07-21
+
+* Improved error messages.
+
+# 0.3.3 - 2019-07-15 (yanked)
 
 * Improved error messages.
 
