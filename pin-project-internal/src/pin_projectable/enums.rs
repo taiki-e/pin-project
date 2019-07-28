@@ -6,7 +6,11 @@ use crate::utils::{proj_ident, VecExt};
 
 use super::*;
 
-pub(super) fn parse(args: TokenStream, mut item: ItemEnum, pinned_drop: Option<ItemFn>) -> Result<TokenStream> {
+pub(super) fn parse(
+    args: TokenStream,
+    mut item: ItemEnum,
+    pinned_drop: Option<ItemFn>,
+) -> Result<TokenStream> {
     let impl_drop = ImplDrop::new(item.generics.clone(), pinned_drop)?;
     let mut impl_unpin = ImplUnpin::new(args, &item.generics)?;
 

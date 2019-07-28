@@ -1,8 +1,9 @@
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{quote, ToTokens};
-use syn::{Generics, Item, Result, Type, Attribute, Meta, NestedMeta, ItemFn, ItemStruct, ItemEnum};
 use syn::parse::{Parse, ParseStream};
-
+use syn::{
+    Attribute, Generics, Item, ItemEnum, ItemFn, ItemStruct, Meta, NestedMeta, Result, Type,
+};
 
 use crate::utils::VecExt;
 use crate::PIN_PROJECT_CRATE;
@@ -16,7 +17,7 @@ const PIN: &str = "pin";
 const PINNED_DROP: &str = "pinned_drop";
 
 struct PinProject {
-    items: Vec<Item>
+    items: Vec<Item>,
 }
 
 impl Parse for PinProject {
@@ -29,7 +30,7 @@ impl Parse for PinProject {
     }
 }
 
-fn handle_type(args: TokenStream, item: Item, pinned_drop: Option<ItemFn>) -> Result<TokenStream>  {
+fn handle_type(args: TokenStream, item: Item, pinned_drop: Option<ItemFn>) -> Result<TokenStream> {
     match item {
         Item::Struct(item) => {
             ensure_not_packed(&item.attrs)?;
@@ -38,8 +39,8 @@ fn handle_type(args: TokenStream, item: Item, pinned_drop: Option<ItemFn>) -> Re
         Item::Enum(item) => {
             ensure_not_packed(&item.attrs)?;
             Ok(enums::parse(args, item, pinned_drop)?)
-        },
-        _ => panic!("Unexpected item: {:?}", item)
+        }
+        _ => panic!("Unexpected item: {:?}", item),
     }
 }
 
@@ -88,12 +89,12 @@ pub(super) fn pin_project(input: TokenStream) -> Result<TokenStream> {
     }
 
     if found_type.is_none() {
-        return Err(error!(span, "pin_project must declare a struct or enum"))
+        return Err(error!(span, "pin_project must declare a struct or enum"));
     }
 
     let (type_, args) = match found_type {
         Some(t) => t,
-        None => return Err(error!(span, "No #[pin_projectable] type found!"))
+        None => return Err(error!(span, "No #[pin_projectable] type found!")),
     };
 
     let res = handle_type(args, type_, found_pinned_drop.clone());
@@ -117,7 +118,10 @@ fn ensure_not_packed(attrs: &[Attribute]) -> Result<()> {
                     for repr in l.nested.iter() {
                         if let NestedMeta::Meta(Meta::Word(w)) = repr {
                             if w == "packed" {
-                                return Err(error!(w, "pin_projectable may not be used on #[repr(packed)] types"))
+                                return Err(error!(
+                                    w,
+                                    "pin_projectable may not be used on #[repr(packed)] types"
+                                ));
                             }
                         }
                     }
@@ -125,7 +129,7 @@ fn ensure_not_packed(attrs: &[Attribute]) -> Result<()> {
             }
         }
     }
-    return Ok(())
+    return Ok(());
 }
 
 /// Makes the generics of projected type from the reference of the original generics.
@@ -137,7 +141,7 @@ fn proj_generics(generics: &Generics) -> Generics {
 
 struct ImplDrop {
     generics: Generics,
-    pinned_drop: Option<ItemFn>
+    pinned_drop: Option<ItemFn>,
 }
 
 impl ImplDrop {
@@ -146,7 +150,7 @@ impl ImplDrop {
         Ok(ImplDrop { generics, pinned_drop })
     }
 
-    fn build(self, ident: &Ident)-> TokenStream {
+    fn build(self, ident: &Ident) -> TokenStream {
         let (impl_generics, ty_generics, where_clause) = self.generics.split_for_impl();
 
         match self.pinned_drop {
@@ -171,7 +175,7 @@ impl ImplDrop {
                         }
                     }
                 }
-            },
+            }
             None => {
                 quote! {
                     impl #impl_generics ::core::ops::Drop for #ident #ty_generics #where_clause {
@@ -191,7 +195,7 @@ impl ImplDrop {
 
 struct ImplUnpin {
     generics: Generics,
-    auto: bool
+    auto: bool,
 }
 
 impl ImplUnpin {
@@ -233,20 +237,18 @@ impl ImplUnpin {
             // However, we're in a proc macro, which runs while *another* crate is being compiled.
             // By retreiving the runtime value of `CARGO_PKG_NAME`, we can figure out the name
             // of the crate that's calling us.
-            let cur_crate = std::env::var("CARGO_PKG_NAME").expect("Could not find CARGO_PKG_NAME environemnt variable");
-            let pin_project_crate = Ident::new(if cur_crate == "pin-project" {
-                "pin_project"
-            } else {
-                PIN_PROJECT_CRATE.as_str()
-            }, Span::call_site());
+            let cur_crate = std::env::var("CARGO_PKG_NAME")
+                .expect("Could not find CARGO_PKG_NAME environemnt variable");
+            let pin_project_crate = Ident::new(
+                if cur_crate == "pin-project" { "pin_project" } else { PIN_PROJECT_CRATE.as_str() },
+                Span::call_site(),
+            );
 
             where_clause.predicates.push(syn::parse_quote!(::#pin_project_crate::Wrapper<#ident #ty_generics>: ::#pin_project_crate::UnsafeUnpin));
 
             quote! {
                 impl #impl_generics ::core::marker::Unpin for #ident #ty_generics #where_clause {}
             }
-
-
         };
         res
     }

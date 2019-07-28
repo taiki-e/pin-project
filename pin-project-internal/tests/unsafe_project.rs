@@ -5,7 +5,7 @@
 #![allow(dead_code)]
 
 use core::pin::Pin;
-use pin_project_internal::{pin_projectable, pin_project};
+use pin_project_internal::{pin_project, pin_projectable};
 
 #[test]
 fn test_pin_projectable() {
@@ -149,7 +149,6 @@ fn trait_bounds_on_type_generics() {
         Variant(&'a mut T),
     }
 }
-
 
 pin_project! {
     #[pin_projectable]
