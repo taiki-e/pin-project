@@ -266,4 +266,3 @@ fn pin_project_crate_path() -> Ident {
 fn pin_project_crate_path() -> Ident {
     Ident::new("pin_project", Span::call_site())
 }
-
