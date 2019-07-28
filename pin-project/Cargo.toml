@@ -24,3 +24,6 @@ project_attr = ["pin-project-internal/project_attr"]
 
 [dependencies]
 pin-project-internal = { path = "../pin-project-internal" }
+
+[dev-dependencies]
+compiletest = { version = "0.3.21", package = "compiletest_rs", features = ["stable", "tmp"] }
