@@ -6,7 +6,6 @@
 #![warn(single_use_lifetimes)]
 #![warn(clippy::all, clippy::pedantic)]
 #![warn(clippy::nursery)]
-#![feature(proc_macro_hygiene)]
 
 extern crate proc_macro;
 
