@@ -21,14 +21,16 @@ proc-macro = true
 default = ["project_attr"]
 # Enable to use `project` attribute.
 project_attr = ["syn/visit-mut"]
+# Enable to allow using the crate with a renamed 'pin-project' dependency
+renamed = ["proc-macro-crate"]
 
 
 [dependencies]
 proc-macro2 = "0.4.13"
 quote = "0.6.8"
 syn = { version = "0.15.29", features = ["full", "extra-traits"] }
-proc-macro-crate = "0.1.4"
-# Required until https://github.com/alexcrichton/toml-rs/pull/311 is merged,
-# and proc-macro-crate updates to a new version of toml-rs
+proc-macro-crate = { version = "0.1.4", optional = true }
+# Required until a new toml-rs release is made with https://github.com/alexcrichton/toml-rs/pull/311,
+# and proc-macro-crate updates to that new version of toml-rs.
 serde = "1.0.97"
 lazy_static = "1.3.0"

@@ -21,6 +21,8 @@ travis-ci = { repository = "taiki-e/pin-project" }
 default = ["project_attr"]
 # Enable to use `project` attribute.
 project_attr = ["pin-project-internal/project_attr"]
+# Enable to allow using this crate as a renamed dependency
+renamed = ["pin-project-internal/renamed"]
 
 [dependencies]
 pin-project-internal = { path = "../pin-project-internal" }
