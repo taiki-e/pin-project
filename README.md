@@ -29,7 +29,7 @@ The current version of pin-project requires Rust 1.33 or later.
 use pin_project::pin_projectable;
 use std::pin::Pin;
 
-#[pin_projectable(Unpin)] // `(Unpin)` is optional (create the appropriate conditional Unpin implementation)
+#[pin_projectable]
 struct Foo<T, U> {
     #[pin]
     future: T,
