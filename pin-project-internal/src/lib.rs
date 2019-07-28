@@ -44,7 +44,7 @@ pub fn pin_projectable(args: TokenStream, input: TokenStream) -> TokenStream {
 
 lazy_static! {
     pub(crate) static ref PIN_PROJECT_CRATE: String = {
-        let crate_name = proc_macro_crate::crate_name("pin-projectable")
+        let crate_name = proc_macro_crate::crate_name("pin-project")
             .expect("pin-project-internal was used without pin-project!");
         crate_name
     };
