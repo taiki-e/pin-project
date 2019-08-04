@@ -1,0 +1,18 @@
+jobs:
+- job: ${{ parameters.name }}
+  displayName: Rustfmt
+  pool:
+    vmImage: ubuntu-16.04
+
+  steps:
+    - template: azure-install-rust.yml
+      parameters:
+        rust: ${{ parameters.rust }}
+
+    - script: |
+        rustup component add rustfmt
+        cargo fmt --version
+      displayName: rustup component add rustfmt
+
+    - script: cargo fmt --all -- --check
+      displayName: cargo fmt --all -- --check
