@@ -1,0 +1,54 @@
+trigger:
+- master
+- staging
+- trying
+
+variables:
+  RUSTFLAGS: -Dwarnings
+
+jobs:
+# This is the minimum Rust version supported by pin-project.
+# When updating this, the reminder to update the minimum supported
+# Rust version in README.md.
+#
+# Tests are not run as tests may require newer versions of rust.
+- template: ci/azure-test.yml
+  parameters:
+    name: minrust
+    rust: 1.33.0
+
+- template: ci/azure-test.yml
+  parameters:
+    name: stable
+    rust: stable
+
+- template: ci/azure-test.yml
+  parameters:
+    name: beta
+    rust: beta
+
+- template: ci/azure-test.yml
+  parameters:
+    name: nightly
+    rust: nightly
+    cmd: test
+
+- template: ci/azure-compile-test.yml
+  parameters:
+    name: compile_test
+    rust: nightly
+
+- template: ci/azure-clippy.yml
+  parameters:
+    name: clippy
+    rust: nightly
+
+- template: ci/azure-rustfmt.yml
+  parameters:
+    name: rustfmt
+    rust: stable
+
+- template: ci/azure-rustdoc.yml
+  parameters:
+    name: rustdoc
+    rust: nightly

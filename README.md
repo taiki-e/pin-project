@@ -1,10 +1,21 @@
 # pin-project
 
-[![Build Status](https://travis-ci.org/taiki-e/pin-project.svg?branch=master)](https://travis-ci.org/taiki-e/pin-project)
-[![version](https://img.shields.io/crates/v/pin-project.svg)](https://crates.io/crates/pin-project/)
-[![documentation](https://docs.rs/pin-project/badge.svg)](https://docs.rs/pin-project/)
-[![license](https://img.shields.io/crates/l/pin-project.svg)](https://crates.io/crates/pin-project/)
-[![Rustc Version](https://img.shields.io/badge/rustc-1.33+-lightgray.svg)](https://blog.rust-lang.org/2019/02/28/Rust-1.33.0.html)
+[![Build Status][azure-badge]][azure-url]
+[![Crates.io][crates-version-badge]][crates-url]
+[![Docs.rs][docs-badge]][docs-url]
+[![License][crates-license-badge]][crates-url]
+[![Minimum supported Rust version][rustc-badge]][rustc-url]
+
+[azure-badge]: https://dev.azure.com/taiki-e/taiki-e/_apis/build/status/taiki-e.pin-project?branchName=master
+[azure-url]: https://dev.azure.com/taiki-e/taiki-e/_build/latest?definitionId=13&branchName=master
+[crates-version-badge]: https://img.shields.io/crates/v/pin-project.svg
+[crates-license-badge]: https://img.shields.io/crates/l/pin-project.svg
+[crates-badge]: https://img.shields.io/crates/v/pin-project.svg
+[crates-url]: https://crates.io/crates/pin-project/
+[docs-badge]: https://docs.rs/pin-project/badge.svg
+[docs-url]: https://docs.rs/pin-project/
+[rustc-badge]: https://img.shields.io/badge/rustc-1.33+-lightgray.svg
+[rustc-url]: https://blog.rust-lang.org/2019/02/28/Rust-1.33.0.html
 
 An attribute that creates a projection struct covering all the fields.
 
