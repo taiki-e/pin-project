@@ -1,1 +1,1 @@
-status = ["continuous-integration/travis-ci/push"]
+status = ["taiki-e.pin-project"]
