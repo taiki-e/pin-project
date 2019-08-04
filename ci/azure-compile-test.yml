@@ -1,0 +1,15 @@
+jobs:
+- job: ${{ parameters.name }}
+  displayName: compile-test
+  pool:
+    vmImage: ubuntu-16.04
+
+  steps:
+    - template: azure-install-rust.yml
+      parameters:
+        rust: ${{ parameters.rust }}
+
+    - script: |
+        cargo clean
+        RUSTFLAGS='--cfg ui_tests' cargo test -p pin-project --all-features --test compile-test
+      displayName: cargo test (compile-test)
