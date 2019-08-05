@@ -39,7 +39,7 @@ fn handle_type(args: TokenStream, item: Item, pinned_drop: Option<ItemFn>) -> Re
             ensure_not_packed(&item.attrs)?;
             Ok(enums::parse(args, item, pinned_drop)?)
         }
-        _ => panic!("Unexpected item: {:?}", item),
+        _ => unreachable!(),
     }
 }
 
@@ -66,10 +66,10 @@ pub(super) fn pin_project(input: TokenStream) -> Result<TokenStream> {
 
                         found_type = Some((item.clone(), args));
                     } else {
-                        return Err(error!(span, "type delcared in pin_project! must have pin_projectable attribute"))
+                        return Err(error!(item, "type declared in pin_project! must have pin_projectable attribute"))
                     }
                 } else {
-                    return Err(error!(span, "cannot declare multiple types within pinned module"))
+                    return Err(error!(item, "cannot declare multiple types within pinned module"))
                 }
             },
             Item::Fn(ref mut fn_) => {
@@ -77,18 +77,14 @@ pub(super) fn pin_project(input: TokenStream) -> Result<TokenStream> {
                     if found_pinned_drop.is_none() {
                         found_pinned_drop = Some(fn_.clone());
                     } else {
-                        return Err(error!(span, "cannot declare multiple functions within pinned module"));
+                        return Err(error!(fn_, "cannot declare multiple functions within pinned module"));
                     }
                 } else {
-                    return Err(error!(span, "only #[pinned_drop] functions cannot be declared within pinend module"));
+                    return Err(error!(fn_, "only #[pinned_drop] functions can be declared within a pin_project! block"));
                 }
             },
-            _ => return Err(error!(span, "pinned module may only contain a struct/enum with an option #[pinned_drop] function"))
+            _ => return Err(error!(item, "pin_project! block may only contain a struct/enum with an optional #[pinned_drop] function"))
         }
-    }
-
-    if found_type.is_none() {
-        return Err(error!(span, "pin_project must declare a struct or enum"));
     }
 
     let (type_, args) = match found_type {
@@ -100,11 +96,10 @@ pub(super) fn pin_project(input: TokenStream) -> Result<TokenStream> {
 }
 
 pub(super) fn attribute(args: TokenStream, input: TokenStream) -> Result<TokenStream> {
-    let span = span!(input);
     let item = syn::parse2(input)?;
     match &item {
         Item::Struct(_) | Item::Enum(_) => handle_type(args, item, None),
-        _ => Err(error!(span, "may only be used on structs or enums")),
+        _ => Err(error!(item, "may only be used on structs or enums")),
     }
 }
 
