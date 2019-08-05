@@ -242,6 +242,7 @@
 ///     }
 /// }
 /// ```
+#[cfg(feature = "project_attr")]
 #[doc(inline)]
 pub use pin_project_internal::project;
 

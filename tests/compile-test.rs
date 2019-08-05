@@ -1,4 +1,4 @@
-#![cfg(ui_tests)]
+#![cfg(compile_test)]
 #![cfg(feature = "project_attr")]
 
 use std::{env, path::PathBuf};

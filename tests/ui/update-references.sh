@@ -21,7 +21,7 @@
 
 MYDIR=$(dirname $0)
 
-BUILD_DIR="../../../target/tests/ui"
+BUILD_DIR="../../target/tests/ui"
 
 while [[ "$1" != "" ]]; do
     STDERR_NAME="${1/%.rs/.stderr}"
