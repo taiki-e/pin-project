@@ -316,7 +316,7 @@ pub use pin_project_internal::project;
 /// ```
 ///
 /// If you want to implement [`Unpin`] manually,
-/// you msut use thw `unsafe_Unpin` argument to
+/// you must use the `unsafe_Unpin` argument to
 /// `#[pin_projectable]`.
 ///
 /// ```rust
