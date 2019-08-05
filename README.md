@@ -54,9 +54,6 @@ impl<T, U> Foo<T, U> {
         let _: &mut U = this.field; // Normal reference to the field
     }
 }
-
-// Automatically create the appropriate conditional Unpin implementation (optional).
-// impl<T, U> Unpin for Foo<T, U> where T: Unpin {}
 ```
 
 [Code like this will be generated](doc/struct-example-1.md)
