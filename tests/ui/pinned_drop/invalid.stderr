@@ -1,0 +1,8 @@
+error: unexpected token
+  --> $DIR/invalid.rs:15:18
+   |
+15 |     #[pinned_drop(foo)] //~ ERROR unexpected token
+   |                  ^^^^^
+
+error: aborting due to previous error
+
