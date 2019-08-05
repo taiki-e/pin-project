@@ -138,7 +138,6 @@
 #![warn(rust_2018_idioms, unreachable_pub)]
 #![warn(single_use_lifetimes)]
 #![warn(clippy::all, clippy::pedantic)]
-#![warn(clippy::nursery)]
 
 /// An attribute to support pattern matching.
 ///
@@ -576,7 +575,6 @@ pub use pin_project_internal::pin_project;
 #[allow(unsafe_code)]
 pub unsafe trait UnsafeUnpin {}
 
-#[doc(hidden)]
 // This is an internal helper struct used by `pin-project-internal`.
 // This allows us to force an error if the user tries to provide
 // a regular `Unpin` impl when they specify the `unsafe_Unpin` argument
@@ -622,6 +620,7 @@ pub unsafe trait UnsafeUnpin {}
 // the user must either provide no impl of `UnsafeUnpinned` (which is equivalent
 // to making the type never implement Unpin), or provide an impl of `UnsafeUnpin`.
 // It is impossible for them to provide an impl of `Unpin`
+#[doc(hidden)]
 pub struct Wrapper<T>(T);
 
 #[allow(unsafe_code)]

@@ -11,7 +11,6 @@ documentation = "https://docs.rs/pin-project/"
 readme = "README.md"
 keywords = ["pin", "macros", "attribute"]
 categories = ["rust-patterns"]
-exclude = ["/.travis.yml", "/bors.toml"]
 
 [lib]
 proc-macro = true
@@ -23,7 +22,6 @@ default = ["project_attr"]
 project_attr = ["syn/visit-mut"]
 # Enable to allow using the crate with a renamed 'pin-project' dependency
 renamed = ["proc-macro-crate", "serde", "lazy_static"]
-
 
 [dependencies]
 proc-macro2 = "0.4.13"
