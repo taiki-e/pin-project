@@ -6,7 +6,7 @@ use syn::{
     Type, TypeTuple,
 };
 
-use crate::utils::VecExt;
+use crate::utils::{Nothing, VecExt};
 
 mod enums;
 mod structs;
@@ -55,10 +55,7 @@ pub(super) fn pin_project(input: TokenStream) -> Result<TokenStream> {
         match &mut item {
             Item::Struct(ItemStruct { attrs, .. }) | Item::Enum(ItemEnum { attrs, .. }) => {
                 if found_type.is_none() {
-                    if let Some(pos) = attrs.iter().position(|a| a.path.is_ident("pin_projectable")) {
-                        // Remove the 'pin_projectable' attribute, to prevent it from
-                        // being parsed again
-                        let attr = attrs.remove(pos);
+                    if let Some(attr) = attrs.find_remove("pin_projectable") {
                         let args = match attr.parse_meta()? {
                             Meta::List(l) => l.nested.into_token_stream(),
                             Meta::Word(_) => TokenStream::new(),
@@ -74,7 +71,8 @@ pub(super) fn pin_project(input: TokenStream) -> Result<TokenStream> {
                 }
             },
             Item::Fn(fn_) => {
-                if fn_.attrs.find_remove(PINNED_DROP) {
+                if let Some(attr)= fn_.attrs.find_remove(PINNED_DROP) {
+                    let _: Nothing = syn::parse2(attr.tts)?;
                     if found_pinned_drop.is_none() {
                         if let ReturnType::Type(_, ty) = &fn_.decl.output {
                             match &**ty {
@@ -111,18 +109,16 @@ pub(super) fn attribute(args: TokenStream, input: TokenStream) -> Result<TokenSt
 }
 
 fn ensure_not_packed(attrs: &[Attribute]) -> Result<()> {
-    for attr in attrs {
-        if let Ok(meta) = attr.parse_meta() {
-            if let Meta::List(l) = meta {
-                if l.ident == "repr" {
-                    for repr in l.nested.iter() {
-                        if let NestedMeta::Meta(Meta::Word(w)) = repr {
-                            if w == "packed" {
-                                return Err(error!(
-                                    w,
-                                    "pin_projectable may not be used on #[repr(packed)] types"
-                                ));
-                            }
+    for meta in attrs.iter().filter_map(|attr| attr.parse_meta().ok()) {
+        if let Meta::List(l) = meta {
+            if l.ident == "repr" {
+                for repr in l.nested.iter() {
+                    if let NestedMeta::Meta(Meta::Word(w)) = repr {
+                        if w == "packed" {
+                            return Err(error!(
+                                w,
+                                "pin_projectable may not be used on #[repr(packed)] types"
+                            ));
                         }
                     }
                 }

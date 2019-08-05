@@ -17,27 +17,26 @@ mod project;
 
 use proc_macro::TokenStream;
 
+use crate::utils::Nothing;
+
 #[cfg(feature = "project_attr")]
 #[proc_macro_attribute]
 pub fn project(args: TokenStream, input: TokenStream) -> TokenStream {
-    assert!(args.is_empty());
-    TokenStream::from(project::attribute(input.into()))
+    let _: Nothing = syn::parse_macro_input!(args);
+    project::attribute(input.into()).into()
 }
 
 /// This is a doc comment from the defining crate!
 #[proc_macro]
 pub fn pin_project(input: TokenStream) -> TokenStream {
-    TokenStream::from(
-        pin_projectable::pin_project(input.into()).unwrap_or_else(|e| e.to_compile_error()),
-    )
+    pin_projectable::pin_project(input.into()).unwrap_or_else(|e| e.to_compile_error()).into()
 }
 
 #[proc_macro_attribute]
 pub fn pin_projectable(args: TokenStream, input: TokenStream) -> TokenStream {
-    TokenStream::from(
-        pin_projectable::attribute(args.into(), input.into())
-            .unwrap_or_else(|e| e.to_compile_error()),
-    )
+    pin_projectable::attribute(args.into(), input.into())
+        .unwrap_or_else(|e| e.to_compile_error())
+        .into()
 }
 
 #[cfg(feature = "renamed")]

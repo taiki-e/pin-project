@@ -7,7 +7,7 @@ use syn::{
     *,
 };
 
-use crate::utils::{proj_ident, VecExt};
+use crate::utils::{proj_ident, Nothing, VecExt};
 
 /// The attribute name.
 const NAME: &str = "project";
@@ -168,23 +168,27 @@ impl VisitMut for Dummy {
 }
 
 fn visit_stmt_mut(stmt: &mut Stmt) {
-    fn parse_attr<A: AttrsMut + Replace>(attrs: &mut A) {
-        if attrs.find_remove() {
+    fn parse_attr<A: AttrsMut + Replace>(attrs: &mut A) -> Result<()> {
+        if let Some(attr) = attrs.find_remove() {
+            let _: Nothing = syn::parse2(attr.tts)?;
             attrs.replace(&mut Register::default());
         }
+        Ok(())
     }
 
-    match stmt {
+    if let Err(e) = match stmt {
         Stmt::Expr(expr) => parse_attr(expr),
         Stmt::Local(local) => parse_attr(local),
-        _ => {}
+        _ => return,
+    } {
+        *stmt = Stmt::Expr(syn::parse2(e.to_compile_error()).unwrap())
     }
 }
 
 trait AttrsMut {
     fn attrs_mut<T, F: FnOnce(&mut Vec<Attribute>) -> T>(&mut self, f: F) -> T;
 
-    fn find_remove(&mut self) -> bool {
+    fn find_remove(&mut self) -> Option<Attribute> {
         self.attrs_mut(|attrs| attrs.find_remove(NAME))
     }
 }
