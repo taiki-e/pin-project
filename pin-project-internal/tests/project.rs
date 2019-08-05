@@ -6,14 +6,14 @@
 #![cfg(feature = "project_attr")]
 
 use core::pin::Pin;
-use pin_project::{project, unsafe_project};
+use pin_project_internal::{pin_projectable, project};
 
 #[project] // Nightly does not need a dummy attribute to the function.
 #[test]
 fn test_project_attr() {
     // struct
 
-    #[unsafe_project(Unpin)]
+    #[pin_projectable]
     struct Foo<T, U> {
         #[pin]
         field1: T,
@@ -33,7 +33,7 @@ fn test_project_attr() {
 
     // tuple struct
 
-    #[unsafe_project(Unpin)]
+    #[pin_projectable]
     struct Bar<T, U>(#[pin] T, U);
 
     let mut bar = Bar(1, 2);
@@ -49,7 +49,7 @@ fn test_project_attr() {
 
     // enum
 
-    #[unsafe_project(Unpin)]
+    #[pin_projectable]
     enum Baz<A, B, C, D> {
         Variant1(#[pin] A, B),
         Variant2 {

@@ -6,7 +6,12 @@ use crate::utils::{proj_ident, VecExt};
 
 use super::*;
 
-pub(super) fn parse(args: TokenStream, mut item: ItemEnum) -> Result<TokenStream> {
+pub(super) fn parse(
+    args: TokenStream,
+    mut item: ItemEnum,
+    pinned_drop: Option<ItemFn>,
+) -> Result<TokenStream> {
+    let impl_drop = ImplDrop::new(item.generics.clone(), pinned_drop)?;
     let mut impl_unpin = ImplUnpin::new(args, &item.generics)?;
 
     if item.variants.is_empty() {
@@ -31,6 +36,7 @@ pub(super) fn parse(args: TokenStream, mut item: ItemEnum) -> Result<TokenStream
         enum #proj_ident #proj_generics #where_clause #proj_item_body
     };
 
+    proj_items.extend(impl_drop.build(ident));
     proj_items.extend(impl_unpin.build(ident));
     proj_items.extend(quote! {
         impl #impl_generics #ident #ty_generics #where_clause {

@@ -1,34 +1,6 @@
-[package]
-name = "pin-project"
-# NB: When modifying, also modify html_root_url in lib.rs
-version = "0.3.4"
-authors = ["Taiki Endo <te316e89@gmail.com>"]
-edition = "2018"
-license = "Apache-2.0/MIT"
-description = "An attribute that creates a projection struct covering all the fields."
-repository = "https://github.com/taiki-e/pin-project"
-documentation = "https://docs.rs/pin-project/"
-readme = "README.md"
-keywords = ["pin", "macros", "attribute"]
-categories = ["rust-patterns"]
-exclude = ["/.travis.yml", "/bors.toml"]
+[workspace]
 
-[badges]
-travis-ci = { repository = "taiki-e/pin-project" }
-
-[lib]
-proc-macro = true
-
-[features]
-# Default features.
-default = ["project_attr"]
-# Enable to use `project` attribute.
-project_attr = ["syn/visit-mut"]
-
-[dependencies]
-proc-macro2 = "0.4.13"
-quote = "0.6.8"
-syn = { version = "0.15.29", features = ["full"] }
-
-[dev-dependencies]
-compiletest = { version = "0.3.21", package = "compiletest_rs", features = ["stable", "tmp"] }
+members = [
+    "pin-project",
+    "pin-project-internal",
+]

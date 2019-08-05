@@ -34,13 +34,13 @@ The current version of pin-project requires Rust 1.33 or later.
 
 ## Examples
 
-[`unsafe_project`] attribute creates a projection struct covering all the fields.
+[`pin_projectable`] attribute creates a projection struct covering all the fields.
 
 ```rust
-use pin_project::unsafe_project;
+use pin_project::pin_projectable;
 use std::pin::Pin;
 
-#[unsafe_project(Unpin)] // `(Unpin)` is optional (create the appropriate conditional Unpin implementation)
+#[pin_projectable]
 struct Foo<T, U> {
     #[pin]
     future: T,
@@ -61,7 +61,7 @@ impl<T, U> Foo<T, U> {
 
 [Code like this will be generated](doc/struct-example-1.md)
 
-[`unsafe_project`]: https://docs.rs/pin-project/0.3/pin_project/attr.unsafe_project.html
+[`pin_projectable`]: https://docs.rs/pin-project/0.3/pin_project/attr.pin_projectable.html
 
 ## License
 

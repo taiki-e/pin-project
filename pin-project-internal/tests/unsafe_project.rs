@@ -5,13 +5,13 @@
 #![allow(dead_code)]
 
 use core::pin::Pin;
-use pin_project::unsafe_project;
+use pin_project_internal::{pin_project, pin_projectable};
 
 #[test]
-fn test_unsafe_project() {
+fn test_pin_projectable() {
     // struct
 
-    #[unsafe_project(Unpin)]
+    #[pin_projectable]
     struct Foo<T, U> {
         #[pin]
         field1: T,
@@ -30,7 +30,7 @@ fn test_unsafe_project() {
 
     // tuple struct
 
-    #[unsafe_project(Unpin)]
+    #[pin_projectable]
     struct Bar<T, U>(#[pin] T, U);
 
     let mut bar = Bar(1, 2);
@@ -45,7 +45,7 @@ fn test_unsafe_project() {
 
     // enum
 
-    #[unsafe_project(Unpin)]
+    #[pin_projectable]
     enum Baz<A, B, C, D> {
         Variant1(#[pin] A, B),
         Variant2 {
@@ -107,7 +107,7 @@ fn test_unsafe_project() {
 fn where_clause_and_associated_type_fields() {
     // struct
 
-    #[unsafe_project(Unpin)]
+    #[pin_projectable]
     struct Foo<I>
     where
         I: Iterator,
@@ -119,7 +119,7 @@ fn where_clause_and_associated_type_fields() {
 
     // enum
 
-    #[unsafe_project(Unpin)]
+    #[pin_projectable]
     enum Baz<I>
     where
         I: Iterator,
@@ -133,19 +133,39 @@ fn where_clause_and_associated_type_fields() {
 fn trait_bounds_on_type_generics() {
     // struct
 
-    #[unsafe_project(Unpin)]
+    #[pin_projectable]
     pub struct Foo<'a, T: ?Sized> {
         field: &'a mut T,
     }
 
     // tuple struct
-    #[unsafe_project(Unpin)]
+    #[pin_projectable]
     pub struct Bar<'a, T: ?Sized>(&'a mut T);
 
     // enum
 
-    #[unsafe_project(Unpin)]
+    #[pin_projectable]
     enum Baz<'a, T: ?Sized> {
         Variant(&'a mut T),
     }
+}
+
+pin_project! {
+    #[pin_projectable]
+    pub struct Foo<'a> {
+        was_dropped: &'a mut bool,
+        #[pin] field_2: u8
+    }
+
+    #[pinned_drop]
+    fn do_drop(foo: Pin<&mut Foo<'_>>) {
+        **foo.project().was_dropped = true;
+    }
+}
+
+#[test]
+fn safe_project() {
+    let mut was_dropped = false;
+    drop(Foo { was_dropped: &mut was_dropped, field_2: 42 });
+    assert!(was_dropped);
 }

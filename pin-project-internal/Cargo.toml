@@ -1,0 +1,36 @@
+[package]
+name = "pin-project-internal"
+# NB: When modifying, also modify html_root_url in lib.rs
+version = "0.3.4"
+authors = ["Taiki Endo <te316e89@gmail.com>"]
+edition = "2018"
+license = "Apache-2.0/MIT"
+description = "An interal crate to support pin_project - do not use directly"
+repository = "https://github.com/taiki-e/pin-project"
+documentation = "https://docs.rs/pin-project/"
+readme = "README.md"
+keywords = ["pin", "macros", "attribute"]
+categories = ["rust-patterns"]
+exclude = ["/.travis.yml", "/bors.toml"]
+
+[lib]
+proc-macro = true
+
+[features]
+# Default features.
+default = ["project_attr"]
+# Enable to use `project` attribute.
+project_attr = ["syn/visit-mut"]
+# Enable to allow using the crate with a renamed 'pin-project' dependency
+renamed = ["proc-macro-crate", "serde", "lazy_static"]
+
+
+[dependencies]
+proc-macro2 = "0.4.13"
+quote = "0.6.8"
+syn = { version = "0.15.29", features = ["full", "extra-traits"] }
+proc-macro-crate = { version = "0.1.4", optional = true }
+# Required until a new toml-rs release is made with https://github.com/alexcrichton/toml-rs/pull/311,
+# and proc-macro-crate updates to that new version of toml-rs.
+serde = { version = "1.0.97", optional = true }
+lazy_static = { version = "1.3.0", optional = true }
