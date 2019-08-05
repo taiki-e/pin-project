@@ -22,9 +22,6 @@
 //!         let _: &mut U = this.field; // Normal reference to the field
 //!     }
 //! }
-//!
-//! // Automatically create the appropriate conditional Unpin implementation (optional).
-//! // impl<T: Unpin, U> Unpin for Foo<T, U> {}
 //! ```
 //!
 //! <details>
@@ -53,7 +50,15 @@
 //!     }
 //! }
 //!
-//! // Automatically create the appropriate conditional Unpin implementation (optional).
+//! // Automatically create the Drop implementation.
+//! impl<T, U> Drop for Foo<T, U> {
+//!     fn drop(&mut self) {
+//!         // Do nothing. The precense of this Drop
+//!         // impl ensures that the user can't provide one of their own
+//!     }
+//! }
+//!
+//! // Automatically create the appropriate conditional Unpin implementation.
 //! impl<T, U> Unpin for Foo<T, U> where T: Unpin {}
 //! ```
 //!
@@ -90,9 +95,6 @@
 //!         }
 //!     }
 //! }
-//!
-//! // Automatically create the appropriate conditional Unpin implementation (optional).
-//! // impl<T, U> Unpin for Foo<T, U> where T: Unpin {}
 //! ```
 //!
 //! <details>
@@ -120,7 +122,15 @@
 //!     }
 //! }
 //!
-//! // Automatically create the appropriate conditional Unpin implementation (optional).
+//! // Automatically create the Drop implementation.
+//! impl<T, U> Drop for Foo<T, U> {
+//!     fn drop(&mut self) {
+//!         // Do nothing. The precense of this Drop
+//!         // impl ensures that the user can't provide one of their own
+//!     }
+//! }
+//!
+//! // Automatically create the appropriate conditional Unpin implementation.
 //! impl<T, U> Unpin for Foo<T, U> where T: Unpin {}
 //! ```
 //!
@@ -310,9 +320,6 @@ pub use pin_project_internal::project;
 ///         let _: &mut U = this.field; // Normal reference to the field
 ///     }
 /// }
-///
-/// // Automatically create the appropriate conditional Unpin implementation.
-/// // impl<T, U> Unpin for Foo<T, U> where T: Unpin {}
 /// ```
 ///
 /// If you want to implement [`Unpin`] manually,
