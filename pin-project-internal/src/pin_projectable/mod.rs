@@ -25,7 +25,7 @@ impl Parse for PinProject {
         while !input.is_empty() {
             items.push(input.parse()?);
         }
-        Ok(PinProject { items })
+        Ok(Self { items })
     }
 }
 
@@ -96,8 +96,7 @@ pub(super) fn pin_project(input: TokenStream) -> Result<TokenStream> {
         None => return Err(error!(span, "No #[pin_projectable] type found!")),
     };
 
-    let res = handle_type(args, type_, found_pinned_drop.clone());
-    res
+    handle_type(args, type_, found_pinned_drop)
 }
 
 pub(super) fn attribute(args: TokenStream, input: TokenStream) -> Result<TokenStream> {
@@ -128,7 +127,7 @@ fn ensure_not_packed(attrs: &[Attribute]) -> Result<()> {
             }
         }
     }
-    return Ok(());
+    Ok(())
 }
 
 /// Makes the generics of projected type from the reference of the original generics.
@@ -146,42 +145,39 @@ struct ImplDrop {
 impl ImplDrop {
     /// Parses attribute arguments.
     fn new(generics: Generics, pinned_drop: Option<ItemFn>) -> Result<Self> {
-        Ok(ImplDrop { generics, pinned_drop })
+        Ok(Self { generics, pinned_drop })
     }
 
     fn build(self, ident: &Ident) -> TokenStream {
         let (impl_generics, ty_generics, where_clause) = self.generics.split_for_impl();
 
-        match self.pinned_drop {
-            Some(fn_) => {
-                let fn_name = fn_.ident.clone();
-                quote! {
-                    impl #impl_generics ::core::ops::Drop for #ident #ty_generics #where_clause {
-                        fn drop(&mut self) {
-                            // Declare the #[pinned_drop] function *inside* our drop function
-                            // This guarantees that it's impossible for any other user code
-                            // to call it
-                            #fn_
-                            // Safety - we're in 'drop', so we know that 'self' will
-                            // never move again
-                            let pinned_self = unsafe { ::core::pin::Pin::new_unchecked(self) };
-                            // 'pinned_drop' is a free function - if it were part of a trait impl,
-                            // it would be possible for user code to call it by directly invoking
-                            // the trait.
-                            // Therefore, we enforce a return type of '()' by explicitly
-                            // assigning it to a temporary.
-                            let _: () = #fn_name(pinned_self);
-                        }
+        if let Some(fn_) = self.pinned_drop {
+            let fn_name = fn_.ident.clone();
+            quote! {
+                impl #impl_generics ::core::ops::Drop for #ident #ty_generics #where_clause {
+                    fn drop(&mut self) {
+                        // Declare the #[pinned_drop] function *inside* our drop function
+                        // This guarantees that it's impossible for any other user code
+                        // to call it
+                        #fn_
+                        // Safety - we're in 'drop', so we know that 'self' will
+                        // never move again
+                        let pinned_self = unsafe { ::core::pin::Pin::new_unchecked(self) };
+                        // 'pinned_drop' is a free function - if it were part of a trait impl,
+                        // it would be possible for user code to call it by directly invoking
+                        // the trait.
+                        // Therefore, we enforce a return type of '()' by explicitly
+                        // assigning it to a temporary.
+                        let _: () = #fn_name(pinned_self);
                     }
                 }
             }
-            None => {
-                quote! {
-                    impl #impl_generics ::core::ops::Drop for #ident #ty_generics #where_clause {
-                        fn drop(&mut self) {
-                            // Do nothing. The precense of this Drop
-                            // impl ensures that the user can't provide one of their own
-                        }
+        } else {
+            quote! {
+                impl #impl_generics ::core::ops::Drop for #ident #ty_generics #where_clause {
+                    fn drop(&mut self) {
+                        // Do nothing. The precense of this Drop
+                        // impl ensures that the user can't provide one of their own
                     }
                 }
             }
@@ -204,8 +200,8 @@ impl ImplUnpin {
         generics.make_where_clause();
 
         match &*args.to_string() {
-            "" => Ok(Self { generics: generics.clone(), auto: true }),
-            "unsafe_Unpin" => Ok(Self { generics: generics.clone(), auto: false }),
+            "" => Ok(Self { generics, auto: true }),
+            "unsafe_Unpin" => Ok(Self { generics, auto: false }),
             _ => Err(error!(args, "an invalid argument was passed")),
         }
     }
@@ -225,7 +221,7 @@ impl ImplUnpin {
         let (impl_generics, ty_generics, where_clause) = self.generics.split_for_impl();
         let mut where_clause = where_clause.unwrap().clone(); // Created in 'new'
 
-        let res = if self.auto {
+        if self.auto {
             quote! {
                 impl #impl_generics ::core::marker::Unpin for #ident #ty_generics #where_clause {}
             }
@@ -236,8 +232,7 @@ impl ImplUnpin {
             quote! {
                 impl #impl_generics ::core::marker::Unpin for #ident #ty_generics #where_clause {}
             }
-        };
-        res
+        }
     }
 }
 
