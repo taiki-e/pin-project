@@ -28,5 +28,12 @@ error: cannot be implemented for enums with discriminants
 21 |     A = 2, //~ ERROR cannot be implemented for enums with discriminants
    |         ^
 
-error: aborting due to 5 previous errors
+error: cannot be implemented for enums that have no field
+  --> $DIR/unsupported.rs:26:5
+   |
+26 | /     A, //~ ERROR cannot be implemented for enums that have no field
+27 | |     B,
+   | |______^
+
+error: aborting due to 6 previous errors
 

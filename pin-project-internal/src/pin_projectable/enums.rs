@@ -16,12 +16,18 @@ pub(super) fn parse(
 
     if item.variants.is_empty() {
         return Err(error!(item, "cannot be implemented for enums without variants"));
-    } else if let Some(e) = item.variants.iter().find_map(|v| {
-        v.discriminant
-            .as_ref()
-            .map(|(_, e)| error!(e, "cannot be implemented for enums with discriminants"))
-    }) {
-        return Err(e);
+    }
+    let has_field = item.variants.iter().try_fold(false, |has_field, v| {
+        if let Some((_, e)) = &v.discriminant {
+            Err(error!(e, "cannot be implemented for enums with discriminants"))
+        } else if let Fields::Unit = v.fields {
+            Ok(has_field)
+        } else {
+            Ok(true)
+        }
+    })?;
+    if !has_field {
+        return Err(error!(item.variants, "cannot be implemented for enums that have no field"));
     }
 
     let proj_ident = proj_ident(&item.ident);

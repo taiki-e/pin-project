@@ -21,11 +21,10 @@ enum Enum2 {
     A = 2, //~ ERROR cannot be implemented for enums with discriminants
 }
 
-/* FIXME: cannot be implemented for enums that has no field.
 #[pin_projectable]
 enum Enum1 {
-    A,
+    A, //~ ERROR cannot be implemented for enums that have no field
+    B,
 }
-*/
 
 fn main() {}
