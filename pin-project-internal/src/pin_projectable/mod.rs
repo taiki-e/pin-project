@@ -2,7 +2,8 @@ use proc_macro2::{Ident, Span, TokenStream};
 use quote::{quote, ToTokens};
 use syn::parse::{Parse, ParseStream};
 use syn::{
-    Attribute, Generics, Item, ItemEnum, ItemFn, ItemStruct, Meta, NestedMeta, Result, Type,
+    Attribute, Generics, Item, ItemEnum, ItemFn, ItemStruct, Meta, NestedMeta, Result, ReturnType,
+    Type, TypeTuple,
 };
 
 use crate::utils::VecExt;
@@ -33,11 +34,11 @@ fn handle_type(args: TokenStream, item: Item, pinned_drop: Option<ItemFn>) -> Re
     match item {
         Item::Struct(item) => {
             ensure_not_packed(&item.attrs)?;
-            Ok(structs::parse(args, item, pinned_drop)?)
+            structs::parse(args, item, pinned_drop)
         }
         Item::Enum(item) => {
             ensure_not_packed(&item.attrs)?;
-            Ok(enums::parse(args, item, pinned_drop)?)
+            enums::parse(args, item, pinned_drop)
         }
         _ => unreachable!(),
     }
@@ -72,9 +73,15 @@ pub(super) fn pin_project(input: TokenStream) -> Result<TokenStream> {
                     return Err(error!(item, "cannot declare multiple types within pinned module"))
                 }
             },
-            Item::Fn(ref mut fn_) => {
+            Item::Fn(fn_) => {
                 if fn_.attrs.find_remove(PINNED_DROP) {
                     if found_pinned_drop.is_none() {
+                        if let ReturnType::Type(_, ty) = &fn_.decl.output {
+                            match &**ty {
+                                Type::Tuple(TypeTuple { elems, .. }) if elems.is_empty() => {}
+                                _ => return Err(error!(ty, "#[pinned_drop] function must return the unit type")),
+                            }
+                        }
                         found_pinned_drop = Some(fn_.clone());
                     } else {
                         return Err(error!(fn_, "cannot declare multiple functions within pinned module"));
@@ -161,9 +168,7 @@ impl ImplDrop {
                         // 'pinned_drop' is a free function - if it were part of a trait impl,
                         // it would be possible for user code to call it by directly invoking
                         // the trait.
-                        // Therefore, we enforce a return type of '()' by explicitly
-                        // assigning it to a temporary.
-                        let _: () = #fn_name(pinned_self);
+                        #fn_name(pinned_self);
                     }
                 }
             }
