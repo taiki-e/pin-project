@@ -2,8 +2,8 @@ use proc_macro2::{Ident, Span, TokenStream};
 use quote::{quote, ToTokens};
 use syn::parse::{Parse, ParseStream};
 use syn::{
-    Attribute, Generics, Item, ItemEnum, ItemFn, ItemStruct, Meta, NestedMeta, Result, ReturnType,
-    Type, TypeTuple,
+    Fields, FieldsNamed, FieldsUnnamed, Generics, Item, ItemEnum, ItemFn, ItemStruct, Meta,
+    NestedMeta, Result, ReturnType, Type, TypeTuple,
 };
 
 use crate::utils::{Nothing, VecExt};
@@ -33,11 +33,15 @@ impl Parse for PinProject {
 fn handle_type(args: TokenStream, item: Item, pinned_drop: Option<ItemFn>) -> Result<TokenStream> {
     match item {
         Item::Struct(item) => {
-            ensure_not_packed(&item.attrs)?;
-            structs::parse(args, item, pinned_drop)
+            let packed_check = ensure_not_packed(&item)?;
+            let mut res = structs::parse(args, item, pinned_drop)?;
+            //println!("Packed check: {}", packed_check);
+            res.extend(packed_check);
+            Ok(res)
         }
         Item::Enum(item) => {
-            ensure_not_packed(&item.attrs)?;
+            // We don't need to check for '#[repr(packed)]',
+            // since it does not apply to enums
             enums::parse(args, item, pinned_drop)
         }
         _ => unreachable!(),
@@ -108,8 +112,8 @@ pub(super) fn attribute(args: TokenStream, input: TokenStream) -> Result<TokenSt
     }
 }
 
-fn ensure_not_packed(attrs: &[Attribute]) -> Result<()> {
-    for meta in attrs.iter().filter_map(|attr| attr.parse_meta().ok()) {
+fn ensure_not_packed(item: &ItemStruct) -> Result<TokenStream> {
+    for meta in item.attrs.iter().filter_map(|attr| attr.parse_meta().ok()) {
         if let Meta::List(l) = meta {
             if l.ident == "repr" {
                 for repr in l.nested.iter() {
@@ -125,7 +129,71 @@ fn ensure_not_packed(attrs: &[Attribute]) -> Result<()> {
             }
         }
     }
-    Ok(())
+
+    // Workaround for https://github.com/taiki-e/pin-project/issues/32
+    // Through the tricky use of proc macros, it's possible to bypass
+    // the above check for the 'repr' attribute.
+    // To ensure that it's impossible to use pin projections on a #[repr(packed)][
+    // struct, we generate code like this:
+    //
+    // #[deny(safe_packed_borrows)]
+    // fn enforce_not_packed_for_MyStruct(val: MyStruct) {
+    //  let _field1 = &val.field1;
+    //  let _field2 = &val.field2;
+    //  ...
+    //  let _fieldn = &val.fieldn;
+    // }
+    //
+    // Taking a reference to a packed field is unsafe, amd appplying
+    // #[deny(safe_packed_borrows)] makes sure that doing this without
+    // an 'unsafe' block (which we deliberately do not generate)
+    // is a hard error.
+    //
+    // If the struct ends up having #[repr(packed)] applied somehow,
+    // this will generate an (unfriendly) error message. Under all reasonable
+    // circumstances, we'll detect the #[repr(packed)] attribute, and generate
+    // a much nicer error above.
+    //
+    // There is one exception: If the type of a struct field has a alignemtn of 1
+    // (e.g. u8), it is always safe to take a reference to it, even if the struct
+    // is #[repr(packed)]. If the struct is composed entirely of types of alignent 1,
+    // our generated method will not trigger an error if the struct is #[repr(packed)]
+    //
+    // Fortunately, this should have no observable consequence - #[repr(packed)]
+    // is essentially a no-op on such a type. Nevertheless, we include a test
+    // to ensure that the compiler doesn't ever try to copy the fields on
+    // such a struct when trying to drop it - which is reason we prevent
+    // #[repr(packed)] in the first place
+    let mut field_refs = vec![];
+    match &item.fields {
+        Fields::Named(FieldsNamed { named, .. }) => {
+            for field in named.iter() {
+                let ident = field.ident.as_ref().unwrap();
+                field_refs.push(quote!(&val.#ident;));
+            }
+        }
+        Fields::Unnamed(FieldsUnnamed { unnamed, .. }) => {
+            for (i, _) in unnamed.iter().enumerate() {
+                field_refs.push(quote!(&val.#i;));
+            }
+        }
+        Fields::Unit => {}
+    }
+
+    let (impl_generics, ty_generics, where_clause) = item.generics.split_for_impl();
+
+    let struct_name = &item.ident;
+    let method_name = Ident::new(
+        &("__pin_project_assert_not_repr_packed_".to_string() + &item.ident.to_string()),
+        Span::call_site(),
+    );
+    let test_fn = quote! {
+        #[deny(safe_packed_borrows)]
+        fn #method_name #impl_generics (val: #struct_name #ty_generics) #where_clause {
+            #(#field_refs)*
+        }
+    };
+    Ok(test_fn)
 }
 
 /// Makes the generics of projected type from the reference of the original generics.
