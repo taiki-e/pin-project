@@ -2,8 +2,8 @@ use proc_macro2::{Ident, Span, TokenStream};
 use quote::{quote, ToTokens};
 use syn::parse::{Parse, ParseStream};
 use syn::{
-    Fields, FieldsNamed, FieldsUnnamed, Generics, Item, ItemEnum, ItemFn, ItemStruct, Meta,
-    NestedMeta, Result, ReturnType, Type, TypeTuple, Index
+    Fields, FieldsNamed, FieldsUnnamed, Generics, Index, Item, ItemEnum, ItemFn, ItemStruct, Meta,
+    NestedMeta, Result, ReturnType, Type, TypeTuple,
 };
 
 use crate::utils::{Nothing, VecExt};
