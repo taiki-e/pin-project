@@ -3,7 +3,7 @@ use quote::{quote, ToTokens};
 use syn::parse::{Parse, ParseStream};
 use syn::{
     Fields, FieldsNamed, FieldsUnnamed, Generics, Item, ItemEnum, ItemFn, ItemStruct, Meta,
-    NestedMeta, Result, ReturnType, Type, TypeTuple,
+    NestedMeta, Result, ReturnType, Type, TypeTuple, Index
 };
 
 use crate::utils::{Nothing, VecExt};
@@ -174,7 +174,8 @@ fn ensure_not_packed(item: &ItemStruct) -> Result<TokenStream> {
         }
         Fields::Unnamed(FieldsUnnamed { unnamed, .. }) => {
             for (i, _) in unnamed.iter().enumerate() {
-                field_refs.push(quote!(&val.#i;));
+                let index = Index::from(i);
+                field_refs.push(quote!(&val.#index;));
             }
         }
         Fields::Unit => {}
