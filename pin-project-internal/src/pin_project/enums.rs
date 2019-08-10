@@ -6,13 +6,8 @@ use crate::utils::{proj_ident, VecExt};
 
 use super::*;
 
-pub(super) fn parse(
-    args: TokenStream,
-    mut item: ItemEnum,
-    pinned_drop: Option<ItemFn>,
-) -> Result<TokenStream> {
-    let impl_drop = ImplDrop::new(item.generics.clone(), pinned_drop)?;
-    let mut impl_unpin = ImplUnpin::new(args, &item.generics)?;
+pub(super) fn parse(args: Args, mut item: ItemEnum) -> Result<TokenStream> {
+    let mut impl_unpin = args.impl_unpin(&item.generics);
 
     if item.variants.is_empty() {
         return Err(error!(item, "cannot be implemented for enums without variants"));
@@ -34,6 +29,7 @@ pub(super) fn parse(
     let (proj_item_body, proj_arms) = variants(&mut item, &proj_ident, &mut impl_unpin)?;
 
     let ident = &item.ident;
+    let impl_drop = args.impl_drop(&item.generics);
     let proj_generics = proj_generics(&item.generics);
     let proj_ty_generics = proj_generics.split_for_impl().1;
     let (impl_generics, ty_generics, where_clause) = item.generics.split_for_impl();

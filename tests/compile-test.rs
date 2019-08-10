@@ -1,5 +1,6 @@
 #![cfg(compile_test)]
 #![cfg(feature = "project_attr")]
+#![warn(rust_2018_idioms)]
 
 use std::{env, path::PathBuf};
 

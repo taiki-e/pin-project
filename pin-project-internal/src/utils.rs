@@ -29,10 +29,29 @@ impl Parse for Nothing {
     }
 }
 
-macro_rules! span {
-    ($expr:expr) => {
-        $expr.clone()
-    };
+/// If the 'renamed' feature is enabled, we detect
+/// the actual name of the 'pin-project' crate in the consumer's Cargo.toml
+#[cfg(feature = "renamed")]
+pub(crate) fn crate_path() -> Ident {
+    // This is fairly subtle.
+    // Normally, you would use `env!("CARGO_PKG_NAME")` to get the name of the package,
+    // since it's set at compile time.
+    // However, we're in a proc macro, which runs while *another* crate is being compiled.
+    // By retreiving the runtime value of `CARGO_PKG_NAME`, we can figure out the name
+    // of the crate that's calling us.
+    let cur_crate = std::env::var("CARGO_PKG_NAME")
+        .expect("Could not find CARGO_PKG_NAME environemnt variable");
+    Ident::new(
+        if cur_crate == "pin-project" { "pin_project" } else { crate::PIN_PROJECT_CRATE.as_str() },
+        Span::call_site(),
+    )
+}
+
+/// If the 'renamed' feature is not enabled, we just
+/// assume that the 'pin-project' dependency has not been renamed
+#[cfg(not(feature = "renamed"))]
+pub(crate) fn crate_path() -> Ident {
+    Ident::new("pin_project", Span::call_site())
 }
 
 macro_rules! error {

@@ -1,8 +1,14 @@
 error: unexpected token
-  --> $DIR/invalid.rs:15:18
+  --> $DIR/invalid.rs:15:15
    |
-15 |     #[pinned_drop(foo)] //~ ERROR unexpected token
-   |                  ^^^^^
+15 | #[pinned_drop(foo)] //~ ERROR unexpected token
+   |               ^^^
 
-error: aborting due to previous error
+error: #[pinned_drop] function must take a argument `Pin<&mut Type>`
+  --> $DIR/invalid.rs:26:12
+   |
+26 | fn do_drop(_bar: &mut Bar<'_>) {} //~ ERROR #[pinned_drop] function must take a argument `Pin<&mut Type>`
+   |            ^^^^^^^^^^^^^^^^^^
+
+error: aborting due to 2 previous errors
 

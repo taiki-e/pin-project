@@ -2,13 +2,13 @@
 //!
 //! ## Examples
 //!
-//! [`pin_projectable`] attribute creates a projection struct covering all the fields.
+//! [`pin_project`] attribute creates a projection struct covering all the fields.
 //!
 //! ```rust
-//! use pin_project::pin_projectable;
+//! use pin_project::pin_project;
 //! use std::pin::Pin;
 //!
-//! #[pin_projectable]
+//! #[pin_project]
 //! struct Foo<T, U> {
 //!     #[pin]
 //!     future: T,
@@ -64,17 +64,17 @@
 //!
 //! </details>
 //!
-//! [`pin_projectable`] also supports enums, but to use it ergonomically, you need
+//! [`pin_project`] also supports enums, but to use it ergonomically, you need
 //! to use the [`project`] attribute.
 //!
 //! ```rust
 //! # #[cfg(feature = "project_attr")]
-//! use pin_project::{project, pin_projectable};
+//! use pin_project::{project, pin_project};
 //! # #[cfg(feature = "project_attr")]
 //! use std::pin::Pin;
 //!
 //! # #[cfg(feature = "project_attr")]
-//! #[pin_projectable]
+//! #[pin_project]
 //! enum Foo<T, U> {
 //!     Future(#[pin] T),
 //!     Done(U),
@@ -136,14 +136,15 @@
 //!
 //! </details>
 //!
-//! See [`pin_projectable`] and [`project`] for more details.
+//! See [`pin_project`] and [`project`] for more details.
 //!
-//! [`pin_projectable`]: ./attr.pin_projectable.html
+//! [`pin_project`]: ./attr.pin_project.html
 //! [`project`]: ./attr.project.html
-//!
+
 #![recursion_limit = "256"]
 #![doc(html_root_url = "https://docs.rs/pin-project/0.3.4")]
 #![doc(test(attr(deny(warnings), allow(dead_code, unused_assignments, unused_variables))))]
+#![no_std]
 #![warn(unsafe_code)]
 #![warn(rust_2018_idioms, unreachable_pub)]
 #![warn(single_use_lifetimes)]
@@ -162,10 +163,10 @@
 /// ### `let` bindings
 ///
 /// ```rust
-/// use pin_project::{pin_projectable, project};
-/// # use std::pin::Pin;
+/// use pin_project::{pin_project, project};
+/// use std::pin::Pin;
 ///
-/// #[pin_projectable]
+/// #[pin_project]
 /// struct Foo<T, U> {
 ///     #[pin]
 ///     future: T,
@@ -187,10 +188,10 @@
 /// ### `match` expressions
 ///
 /// ```rust
-/// use pin_project::{project, pin_projectable};
-/// # use std::pin::Pin;
+/// use pin_project::{project, pin_project};
+/// use std::pin::Pin;
 ///
-/// #[pin_projectable]
+/// #[pin_project]
 /// enum Foo<A, B, C> {
 ///     Tuple(#[pin] A, B),
 ///     Struct { field: C },
@@ -272,14 +273,14 @@ pub use pin_project_internal::project;
 ///
 /// ## Examples
 ///
-/// Using `#[pin_projectable]` will automatically create the appropriate
+/// Using `#[pin_project]` will automatically create the appropriate
 /// conditional [`Unpin`] implementation:
 ///
 /// ```rust
-/// use pin_project::pin_projectable;
+/// use pin_project::pin_project;
 /// use std::pin::Pin;
 ///
-/// #[pin_projectable]
+/// #[pin_project]
 /// struct Foo<T, U> {
 ///     #[pin]
 ///     future: T,
@@ -297,13 +298,13 @@ pub use pin_project_internal::project;
 ///
 /// If you want to implement [`Unpin`] manually,
 /// you must use the `unsafe_Unpin` argument to
-/// `#[pin_projectable]`.
+/// `#[pin_project]`.
 ///
 /// ```rust
-/// use pin_project::{pin_projectable, UnsafeUnpin};
+/// use pin_project::{pin_project, UnsafeUnpin};
 /// use std::pin::Pin;
 ///
-/// #[pin_projectable(unsafe_Unpin)]
+/// #[pin_project(unsafe_Unpin)]
 /// struct Foo<T, U> {
 ///     #[pin]
 ///     future: T,
@@ -321,14 +322,55 @@ pub use pin_project_internal::project;
 /// unsafe impl<T: Unpin, U> UnsafeUnpin for Foo<T, U> {} // Conditional Unpin impl
 /// ```
 ///
-/// Note the usage of the unsafe `UnsafeUnpin` trait, instead of the usual
-/// `Unpin` trait. `UnsafeUnpin` behaves exactly like `Unpin`, except that is
+/// Note the usage of the unsafe [`UnsafeUnpin`] trait, instead of the usual
+/// [`Unpin`] trait. [`UnsafeUnpin`] behaves exactly like [`Unpin`], except that is
 /// unsafe to implement. This unsafety comes from the fact that pin projections
-/// are being used. If you implement `UnsafeUnpin`, you must ensure that it is
-/// only implemented when all pin-projected fields implement `Unpin`.
+/// are being used. If you implement [`UnsafeUnpin`], you must ensure that it is
+/// only implemented when all pin-projected fields implement [`Unpin`].
 ///
 /// Note that borrowing the field where `#[pin]` attribute is used multiple
-/// times requires using `.as_mut()` to avoid consuming the `Pin`.
+/// times requires using [`.as_mut()`](core::pin::Pin::as_mut) to avoid
+/// consuming the `Pin`.
+///
+/// ### `#[pinned_drop]`
+///
+/// In order to correctly implement pin projections, a type's `Drop` impl must
+/// not move out of any stucturally pinned fields. Unfortunately, [`Drop::drop`]
+/// takes `&mut Self`, not `Pin<&mut Self>`.
+///
+/// To ensure that this requirement is upheld, the `pin_project` attribute will
+/// provide a `Drop` impl for you. This `Drop` impl will delegate to a function
+/// annotated with `#[pinned_drop]` if you use the `PinnedDrop` argument to
+/// `#[pin_project]`. This function acts just like a normal [`drop`] impl, except
+/// for the fact that it takes `Pin<&mut Self>`. In particular, it will never be
+/// called more than once, just like [`Drop::drop`].
+///
+/// For example:
+///
+/// ```rust
+/// use pin_project::{pin_project, pinned_drop};
+/// use std::fmt::Debug;
+/// use std::pin::Pin;
+///
+/// #[pin_project(PinnedDrop)]
+/// pub struct Foo<T: Debug, U: Debug> {
+///     #[pin] pinned_field: T,
+///     unpin_field: U
+/// }
+///
+/// #[pinned_drop]
+/// fn my_drop_fn<T: Debug, U: Debug>(foo: Pin<&mut Foo<T, U>>) {
+///     let foo = foo.project();
+///     println!("Dropping pinned field: {:?}", foo.pinned_field);
+///     println!("Dropping unpin field: {:?}", foo.unpin_field);
+/// }
+///
+/// fn main() {
+///     Foo { pinned_field: true, unpin_field: 40 };
+/// }
+/// ```
+///
+/// See also [`pinned_drop`] attribute.
 ///
 /// ## Supported Items
 ///
@@ -337,9 +379,10 @@ pub use pin_project_internal::project;
 /// ### Structs (structs with named fields):
 ///
 /// ```rust
-/// # use pin_project::pin_projectable;
-/// # use std::pin::Pin;
-/// #[pin_projectable]
+/// use pin_project::pin_project;
+/// use std::pin::Pin;
+///
+/// #[pin_project]
 /// struct Foo<T, U> {
 ///     #[pin]
 ///     future: T,
@@ -358,9 +401,10 @@ pub use pin_project_internal::project;
 /// ### Tuple structs (structs with unnamed fields):
 ///
 /// ```rust
-/// # use pin_project::pin_projectable;
-/// # use std::pin::Pin;
-/// #[pin_projectable]
+/// use pin_project::pin_project;
+/// use std::pin::Pin;
+///
+/// #[pin_project]
 /// struct Foo<T, U>(#[pin] T, U);
 ///
 /// impl<T, U> Foo<T, U> {
@@ -377,17 +421,17 @@ pub use pin_project_internal::project;
 ///
 /// ### Enums
 ///
-/// `pin_projectable` also supports enums, but to use it ergonomically, you need
+/// `pin_project` also supports enums, but to use it ergonomically, you need
 /// to use the [`project`] attribute.
 ///
 /// ```rust
 /// # #[cfg(feature = "project_attr")]
-/// use pin_project::{project, pin_projectable};
+/// use pin_project::{project, pin_project};
 /// # #[cfg(feature = "project_attr")]
-/// # use std::pin::Pin;
+/// use std::pin::Pin;
 ///
 /// # #[cfg(feature = "project_attr")]
-/// #[pin_projectable]
+/// #[pin_project]
 /// enum Foo<A, B, C> {
 ///     Tuple(#[pin] A, B),
 ///     Struct { field: C },
@@ -415,93 +459,52 @@ pub use pin_project_internal::project;
 ///
 /// Enums without variants (zero-variant enums) are not supported.
 ///
-/// ### `#[pinned_drop]`
+/// See also [`project`] attribute.
 ///
-/// In order to correctly implement pin projections, a type's Drop impl must
-/// not move out of any stucturally pinned fields. Unfortunately, `Drop::drop` takes
-/// `&mut Self`, not `Pin<&mut Self>`.
-///
-/// To ensure that this requirement is upheld, the `pin_projectable` attribute will
-/// provide a `Drop` impl for you. This `Drop` impl will delegate to a function
-/// annotated with `#[pinned_drop]`, if present in the same `pin_project!` block.
-/// This function acts just like a normal `drop` impl, except for the fact that it
-/// takes `Pin<&mut Self>`. In particular, it will never be called more than once,
-/// just like `Drop::drop`.
-///
-/// For example:
-///
-/// ```rust
-/// use std::fmt::Debug;
-/// use pin_project::pin_project;
-/// use std::pin::Pin;
-///
-/// pin_project! {
-///     #[pin_projectable]
-///     pub struct Foo<T: Debug, U: Debug> {
-///         #[pin] pinned_field: T,
-///         unpin_field: U
-///     }
-///
-///     #[pinned_drop]
-///     fn my_drop_fn<T: Debug, U: Debug>(foo: Pin<&mut Foo<T, U>>) {
-///         let foo = foo.project();
-///         println!("Dropping pinned field: {:?}", foo.pinned_field);
-///         println!("Dropping unpin field: {:?}", foo.unpin_field);
-///     }
-/// }
-///
-/// fn main() {
-///     Foo { pinned_field: true, unpin_field: 40 };
-/// }
-/// ```
-///
-///
-///
-/// Also see [`project`] attribute.
-///
-/// [`Unpin`]: core::marker::Unpin
 /// [`drop`]: Drop::drop
 /// [`project`]: ./attr.project.html
+/// [`pinned_drop`]: ./attr.pinned_drop.html
 #[doc(inline)]
-pub use pin_project_internal::pin_projectable;
+pub use pin_project_internal::pin_project;
 
-/// A helper macro for working with `pin_projectable`.
+/// An attribute for annotating a function that implements [`Drop`].
 ///
-/// This macro is only needed when you wish to provide a `Drop`
-/// impl for your type. You may include a single `#[pin_projectable]`
-/// type, and (optionally) one `#[pinned_drop]` function. Writing
-/// anything else within the `pin_projectable` block is an error.
+/// This attribute is only needed when you wish to provide a [`Drop`]
+/// impl for your type. The function annotated with `#[pinned_drop]` acts just
+/// like a normal [`drop`](Drop::drop) impl, except for the fact that it takes
+/// `Pin<&mut Self>`. In particular, it will never be called more than once,
+/// just like [`Drop::drop`].
 ///
 /// Example:
 ///
 /// ```rust
-///
+/// use pin_project::{pin_project, pinned_drop};
 /// use std::pin::Pin;
-/// use pin_project::pin_project;
 ///
-/// pin_project! {
+/// #[pin_project(PinnedDrop)]
+/// struct Foo {
+///     #[pin] field: u8
+/// }
 ///
-///     #[pin_projectable]
-///     struct Foo {
-///         #[pin] field: u8
-///     }
-///
-///     #[pinned_drop]
-///     fn my_drop(foo: Pin<&mut Foo>) {
-///         println!("Dropping: {}", foo.field);
-///     }
+/// #[pinned_drop]
+/// fn my_drop(foo: Pin<&mut Foo>) {
+///     println!("Dropping: {}", foo.field);
 /// }
 ///
 /// fn main() {
 ///     Foo { field: 50 };
 /// }
-///```
+/// ```
+///
+/// See [`pin_project`] attribute for more.
+///
+/// [`pin_project`]: ./attr.pin_project.html
 #[doc(inline)]
-pub use pin_project_internal::pin_project;
+pub use pin_project_internal::pinned_drop;
 
 /// A trait used for custom implementations of [`Unpin`].
 /// This trait is used in conjunction with the `unsafe_Unpin`
-/// argument to [`pin_projectable`]
+/// argument to [`pin_project`]
 ///
 /// The Rust [`Unpin`] trait is safe to implement - by itself,
 /// implementing it cannot lead to undefined behavior. Undefined
@@ -513,7 +516,7 @@ pub use pin_project_internal::pin_project;
 /// you to violate any of the guarnatees required by pin projection.
 ///
 /// However, things change if you want to provide a custom `Unpin` impl
-/// for your `#[pin_projectable]` type. As stated in [the Rust
+/// for your `#[pin_project]` type. As stated in [the Rust
 /// documentation](https://doc.rust-lang.org/beta/std/pin/index.html#projections-and-structural-pinning),
 /// you must be sure to only implement `Unpin` when all of your `#[pin]` fields (i.e. struturally
 /// pinend fields) are also `Unpin`.
@@ -526,7 +529,7 @@ pub use pin_project_internal::pin_project;
 /// you must be sure that your `UnsafeUnpinned` impls follows all of
 /// the requirements for an `Unpin` impl of a structurally-pinned type.
 ///
-/// Note that if you specify `#[pin_projectable(unsafe_Unpin)]`, but do *not*
+/// Note that if you specify `#[pin_project(unsafe_Unpin)]`, but do *not*
 /// provide an impl of `UnsafeUnpin`, your type will never implement `Unpin`.
 /// This is effectly the same thing as adding a `PhantomUnpin` to your type
 ///
@@ -539,9 +542,9 @@ pub use pin_project_internal::pin_project;
 /// fields be `Unpin`, imposes an additional requirement:
 ///
 /// ```rust
-/// use pin_project::{pin_projectable, UnsafeUnpin};
+/// use pin_project::{pin_project, UnsafeUnpin};
 ///
-/// #[pin_projectable(unsafe_Unpin)]
+/// #[pin_project(unsafe_Unpin)]
 /// struct Foo<K, V> {
 ///     #[pin]
 ///     field_1: K,
@@ -551,57 +554,78 @@ pub use pin_project_internal::pin_project;
 /// unsafe impl<K, V> UnsafeUnpin for Foo<K, V> where K: Unpin + Clone {}
 /// ```
 ///
-/// [`pin_projectable`]: ./attr.pin_projectable.html
+/// [`pin_project`]: ./attr.pin_project.html
 #[allow(unsafe_code)]
 pub unsafe trait UnsafeUnpin {}
 
-// This is an internal helper struct used by `pin-project-internal`.
-// This allows us to force an error if the user tries to provide
-// a regular `Unpin` impl when they specify the `unsafe_Unpin` argument
-// This is why we need Wrapper:
-//
-// Supposed we have the following code:
-//
-// #[pin_projectable(unsafe_Unpin)]
-// struct MyStruct<T> {
-//     #[pin] field: T
-// }
-//
-// impl<T> Unpin for MyStruct<T> where MyStruct<T>: UnsafeUnpinned {} // generated by pin-project-internal
-// impl<T> Unpin for MyStruct<T> where T: Copy // written by the user
-//
-// We want this code to be rejected - the user is completely bypassing unsafe_Unpin,
-// and providing an unsound Unpin impl in safe code!
-//
-// Unfortunately, the Rust compiler will accept the above code.
-// Because MyStruct is declared in the same crate as the user-provided impl,
-// the compiler will notice that 'MyStruct<T>: UnsafeUnpinned' never holds.
-//
-// The solution is to introduce the 'Wrapper' struct, which is defined
-// in the 'pin-project' crate.
-//
-// We now have code that looks like this:
-//
-// impl<T> Unpin for MyStruct<T> where Wrapper<MyStruct<T>>: UnsafeUnpinned {} // generated by pin-project-internal
-// impl<T> Unpin for MyStruct<T> where T: Copy // written by the user
-//
-// We also have 'unsafe impl<T> UnsafeUnpin for Wrapper<T> where T: UnsafeUnpin {}' in the
-// 'pin-project' crate.
-//
-// Now, our generated impl has a bound involving a type defined in another crate - Wrapper.
-// This will cause rust to conservatively assume that 'Wrapper<MyStruct<T>>: UnsafeUnpinned'
-// holds, in the interest of preserving forwards compatibility (in case such an impl is added
-// for Wrapper<T> in a new version of the crate).
-//
-// This will cause rust to reject any other Unpin impls for MyStruct<T>, since it will
-// assume that our generated impl could potentially apply in any situation.
-//
-// This acheives the desired effect - when the user writes `#[pin_projectable(unsafe_Unpin)]`,
-// the user must either provide no impl of `UnsafeUnpinned` (which is equivalent
-// to making the type never implement Unpin), or provide an impl of `UnsafeUnpin`.
-// It is impossible for them to provide an impl of `Unpin`
 #[doc(hidden)]
-pub struct Wrapper<T>(T);
+pub mod __private {
+    use super::UnsafeUnpin;
+    use core::pin::Pin;
 
-#[allow(unsafe_code)]
-unsafe impl<T> UnsafeUnpin for Wrapper<T> where T: UnsafeUnpin {}
+    // This is an internal helper trait used by `pin-project-internal`.
+    // This allows us to force an error if the user tries to provide
+    // a regular `Drop` impl when they specify the `PinnedDrop` argument.
+    //
+    // Users can implement `Drop` safely using `#[pinned_drop]`.
+    // **Do not call or implement this trait directly.**
+    #[allow(unsafe_code)]
+    #[doc(hidden)]
+    pub unsafe trait UnsafePinnedDrop {
+        // Since calling it twice on the same object would be UB,
+        // this method is unsafe.
+        #[doc(hidden)]
+        unsafe fn pinned_drop(self: Pin<&mut Self>);
+    }
+
+    // This is an internal helper struct used by `pin-project-internal`.
+    // This allows us to force an error if the user tries to provide
+    // a regular `Unpin` impl when they specify the `unsafe_Unpin` argument.
+    // This is why we need Wrapper:
+    //
+    // Supposed we have the following code:
+    //
+    // #[pin_project(unsafe_Unpin)]
+    // struct MyStruct<T> {
+    //     #[pin] field: T
+    // }
+    //
+    // impl<T> Unpin for MyStruct<T> where MyStruct<T>: UnsafeUnpinned {} // generated by pin-project-internal
+    // impl<T> Unpin for MyStruct<T> where T: Copy // written by the user
+    //
+    // We want this code to be rejected - the user is completely bypassing unsafe_Unpin,
+    // and providing an unsound Unpin impl in safe code!
+    //
+    // Unfortunately, the Rust compiler will accept the above code.
+    // Because MyStruct is declared in the same crate as the user-provided impl,
+    // the compiler will notice that 'MyStruct<T>: UnsafeUnpinned' never holds.
+    //
+    // The solution is to introduce the 'Wrapper' struct, which is defined
+    // in the 'pin-project' crate.
+    //
+    // We now have code that looks like this:
+    //
+    // impl<T> Unpin for MyStruct<T> where Wrapper<MyStruct<T>>: UnsafeUnpinned {} // generated by pin-project-internal
+    // impl<T> Unpin for MyStruct<T> where T: Copy // written by the user
+    //
+    // We also have 'unsafe impl<T> UnsafeUnpin for Wrapper<T> where T: UnsafeUnpin {}' in the
+    // 'pin-project' crate.
+    //
+    // Now, our generated impl has a bound involving a type defined in another crate - Wrapper.
+    // This will cause rust to conservatively assume that 'Wrapper<MyStruct<T>>: UnsafeUnpinned'
+    // holds, in the interest of preserving forwards compatibility (in case such an impl is added
+    // for Wrapper<T> in a new version of the crate).
+    //
+    // This will cause rust to reject any other Unpin impls for MyStruct<T>, since it will
+    // assume that our generated impl could potentially apply in any situation.
+    //
+    // This acheives the desired effect - when the user writes `#[pin_project(unsafe_Unpin)]`,
+    // the user must either provide no impl of `UnsafeUnpinned` (which is equivalent
+    // to making the type never implement Unpin), or provide an impl of `UnsafeUnpin`.
+    // It is impossible for them to provide an impl of `Unpin`
+    #[doc(hidden)]
+    pub struct Wrapper<T>(T);
+
+    #[allow(unsafe_code)]
+    unsafe impl<T> UnsafeUnpin for Wrapper<T> where T: UnsafeUnpin {}
+}

@@ -7,7 +7,7 @@ use std::cell::Cell;
 // Ensure that the compiler doesn't copy the fields
 // of #[repr(packed)] types during drop, if the field has alignment 1
 // (that is, any reference to the field is guaranteed to have proper alignment)
-// We are currently unable to statically prevent the usage of #[pin_projectable]
+// We are currently unable to statically prevent the usage of #[pin_project]
 // on #[repr(packed)] types composed entirely of fields of alignment 1.
 // This shouldn't lead to undefined behavior, as long as the compiler doesn't
 // try to move the field anyway during drop.

@@ -1,0 +1,21 @@
+error[E0119]: conflicting implementations of trait `std::ops::Drop` for type `Foo<_, _>`:
+  --> $DIR/drop_conflict.rs:8:1
+   |
+8  | #[pin_project] //~ ERROR E0119
+   | ^^^^^^^^^^^^^^ conflicting implementation for `Foo<_, _>`
+...
+15 | impl<T, U> Drop for Foo<T, U> {
+   | ----------------------------- first implementation here
+
+error[E0119]: conflicting implementations of trait `std::ops::Drop` for type `Bar<_, _>`:
+  --> $DIR/drop_conflict.rs:19:1
+   |
+19 | #[pin_project(PinnedDrop)] //~ ERROR E0119
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^ conflicting implementation for `Bar<_, _>`
+...
+29 | impl<T, U> Drop for Bar<T, U> {
+   | ----------------------------- first implementation here
+
+error: aborting due to 2 previous errors
+
+For more information about this error, try `rustc --explain E0119`.

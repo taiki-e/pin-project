@@ -1,8 +1,8 @@
 error: #[pinned_drop] function must return the unit type
-  --> $DIR/return-type.rs:16:43
+  --> $DIR/return-type.rs:16:39
    |
-16 |     fn do_drop(foo: Pin<&mut Foo<'_>>) -> bool { //~ ERROR #[pinned_drop] function must return the unit type
-   |                                           ^^^^
+16 | fn do_drop(foo: Pin<&mut Foo<'_>>) -> bool {
+   |                                       ^^^^
 
 error: aborting due to previous error
 
