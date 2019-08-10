@@ -46,7 +46,6 @@ impl Replace for Local {
 impl Replace for Expr {
     fn replace(&mut self, register: &mut Register) {
         match self {
-            Expr::If(expr) => expr.replace(register),
             Expr::ForLoop(ExprForLoop { pat, .. }) => pat.replace(register),
             Expr::Let(ExprLet { pats, .. }) => pats.replace(register),
 
@@ -69,16 +68,6 @@ impl Replace for Expr {
             | Expr::Struct(ExprStruct { path, .. }) => path.replace(register),
 
             _ => {}
-        }
-    }
-}
-
-impl Replace for ExprIf {
-    fn replace(&mut self, register: &mut Register) {
-        self.cond.replace(register);
-
-        if let Some(Expr::If(expr)) = self.else_branch.as_mut().map(|(_, expr)| &mut **expr) {
-            expr.replace(register);
         }
     }
 }

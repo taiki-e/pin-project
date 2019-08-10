@@ -79,17 +79,4 @@ fn test_project_attr() {
         }
         Baz::None => {}
     }
-
-    #[project]
-    {
-        if let Baz::Variant1(x, y) = baz {
-            let x: Pin<&mut i32> = x;
-            assert_eq!(*x, 1);
-
-            let y: &mut i32 = y;
-            assert_eq!(*y, 2);
-        } else if let Option::Some(_) = Some(1) {
-            // Check that don't replace different types by mistake
-        }
-    }
 }

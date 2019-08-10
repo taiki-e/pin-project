@@ -157,6 +157,8 @@
 ///
 /// ## Examples
 ///
+/// The following two syntaxes are supported.
+///
 /// ### `let` bindings
 ///
 /// ```rust
@@ -208,37 +210,6 @@
 ///                 let _: &mut C = field;
 ///             }
 ///             Foo::Unit => {}
-///         }
-///     }
-/// }
-/// ```
-///
-/// ### `if let` expressions
-///
-/// When used against `if let` expressions, the `#[project]` attribute records
-/// the name of the structure destructed with the first `if let`. Destructing
-/// different structures in the after second times will not generate wrong code.
-///
-/// ```rust
-/// use pin_project::{project, pin_projectable};
-/// # use std::pin::Pin;
-///
-/// #[pin_projectable]
-/// enum Foo<A, B, C> {
-///     Tuple(#[pin] A, B),
-///     Struct { field: C },
-///     Unit,
-/// }
-///
-/// impl<A, B, C> Foo<A, B, C> {
-///     #[project] // Nightly does not need a dummy attribute to the function.
-///     fn baz(self: Pin<&mut Self>) {
-///         #[project]
-///         {
-///             if let Foo::Tuple(x, y) = self.project() {
-///                 let _: Pin<&mut A> = x;
-///                 let _: &mut B = y;
-///             }
 ///         }
 ///     }
 /// }
