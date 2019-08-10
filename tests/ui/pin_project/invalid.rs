@@ -1,24 +1,24 @@
 // compile-fail
 
-#![deny(warnings)]
+#![deny(warnings, unsafe_code)]
 
-use pin_project::pin_projectable;
+use pin_project::pin_project;
 
-#[pin_projectable]
+#[pin_project]
 struct A<T> {
     #[pin()] //~ ERROR unexpected token
     future: T,
 }
 
-#[pin_projectable]
+#[pin_project]
 struct B<T>(#[pin(foo)] T); //~ ERROR unexpected token
 
-#[pin_projectable]
+#[pin_project]
 enum C<T> {
     A(#[pin(foo)] T), //~ ERROR unexpected token
 }
 
-#[pin_projectable]
+#[pin_project]
 enum D<T> {
     A {
         #[pin(foo)] //~ ERROR unexpected token

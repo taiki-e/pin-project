@@ -1,0 +1,11 @@
+error[E0277]: the trait bound `Foo<'a>: pin_project::__private::UnsafePinnedDrop` is not satisfied
+ --> $DIR/forget-pinned-drop.rs:8:15
+  |
+8 | #[pin_project(PinnedDrop)]
+  |               ^^^^^^^^^^ the trait `pin_project::__private::UnsafePinnedDrop` is not implemented for `Foo<'a>`
+  |
+  = note: required by `pin_project::__private::UnsafePinnedDrop::pinned_drop`
+
+error: aborting due to previous error
+
+For more information about this error, try `rustc --explain E0277`.

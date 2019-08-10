@@ -1,10 +1,10 @@
 // compile-fail
 
-#![deny(warnings)]
+#![deny(warnings, unsafe_code)]
 
-use pin_project::{pin_projectable, project};
+use pin_project::{pin_project, project};
 
-#[pin_projectable]
+#[pin_project]
 struct A<T> {
     #[pin]
     future: T,

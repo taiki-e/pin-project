@@ -12,13 +12,14 @@ extern crate proc_macro;
 #[macro_use]
 mod utils;
 
-mod pin_projectable;
+mod pin_project;
+mod pinned_drop;
 #[cfg(feature = "project_attr")]
 mod project;
 
 use proc_macro::TokenStream;
 
-use crate::utils::Nothing;
+use utils::Nothing;
 
 #[cfg(feature = "project_attr")]
 #[proc_macro_attribute]
@@ -27,17 +28,15 @@ pub fn project(args: TokenStream, input: TokenStream) -> TokenStream {
     project::attribute(input.into()).into()
 }
 
-/// This is a doc comment from the defining crate!
-#[proc_macro]
-pub fn pin_project(input: TokenStream) -> TokenStream {
-    pin_projectable::pin_project(input.into()).unwrap_or_else(|e| e.to_compile_error()).into()
+#[proc_macro_attribute]
+pub fn pin_project(args: TokenStream, input: TokenStream) -> TokenStream {
+    pin_project::attribute(args.into(), input.into()).into()
 }
 
 #[proc_macro_attribute]
-pub fn pin_projectable(args: TokenStream, input: TokenStream) -> TokenStream {
-    pin_projectable::attribute(args.into(), input.into())
-        .unwrap_or_else(|e| e.to_compile_error())
-        .into()
+pub fn pinned_drop(args: TokenStream, input: TokenStream) -> TokenStream {
+    let _: Nothing = syn::parse_macro_input!(args);
+    pinned_drop::attribute(input.into()).into()
 }
 
 #[cfg(feature = "renamed")]

@@ -1,27 +1,27 @@
 // compile-fail
 
-#![deny(warnings)]
+#![deny(warnings, unsafe_code)]
 
-use pin_project::pin_projectable;
+use pin_project::pin_project;
 
-#[pin_projectable]
+#[pin_project]
 struct Struct1 {} //~ ERROR cannot be implemented for structs with zero fields
 
-#[pin_projectable]
+#[pin_project]
 struct Struct2(); //~ ERROR cannot be implemented for structs with zero fields
 
-#[pin_projectable]
+#[pin_project]
 struct Struct3; //~ ERROR cannot be implemented for structs with units
 
-#[pin_projectable]
+#[pin_project]
 enum Enum1 {} //~ ERROR cannot be implemented for enums without variants
 
-#[pin_projectable]
+#[pin_project]
 enum Enum2 {
     A = 2, //~ ERROR cannot be implemented for enums with discriminants
 }
 
-#[pin_projectable]
+#[pin_project]
 enum Enum1 {
     A, //~ ERROR cannot be implemented for enums that have no field
     B,
