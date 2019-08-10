@@ -35,7 +35,6 @@ fn handle_type(args: TokenStream, item: Item, pinned_drop: Option<ItemFn>) -> Re
         Item::Struct(item) => {
             let packed_check = ensure_not_packed(&item)?;
             let mut res = structs::parse(args, item, pinned_drop)?;
-            //println!("Packed check: {}", packed_check);
             res.extend(packed_check);
             Ok(res)
         }

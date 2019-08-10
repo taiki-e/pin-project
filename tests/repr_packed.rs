@@ -17,7 +17,7 @@ use std::cell::Cell;
 fn weird_repr_packed() {
     // We keep track of the field address during
     // drop using a thread local, to avoid changing
-    // the layout of our #[repr(packed)] type
+    // the layout of our #[repr(packed)] type.
     thread_local! {
         static FIELD_ADDR: Cell<usize> = Cell::new(0);
     }
@@ -39,8 +39,8 @@ fn weird_repr_packed() {
         // We let this field drop by going out of scope,
         // rather than explicitly calling drop(foo).
         // Calling drop(foo) causes 'foo' to be moved
-        // into the 'drop' function, resulinting a different
-        // address
+        // into the 'drop' function, resulting in a different
+        // address.
         let foo = Foo { field: 27 };
         let field_addr = &foo.field as *const u8 as usize;
         field_addr
