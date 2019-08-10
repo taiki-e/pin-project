@@ -1,26 +1,14 @@
 error: pin_projectable may not be used on #[repr(packed)] types
- --> $DIR/packed.rs:8:8
+ --> $DIR/packed.rs:9:8
   |
-8 | #[repr(packed, C)] //~ ERROR may not be used on #[repr(packed)] type
+9 | #[repr(packed, C)] //~ ERROR may not be used on #[repr(packed)] type
   |        ^^^^^^
 
 error: pin_projectable may not be used on #[repr(packed)] types
-  --> $DIR/packed.rs:15:8
+  --> $DIR/packed.rs:16:8
    |
-15 | #[repr(packed, C)] //~ ERROR may not be used on #[repr(packed)] type
+16 | #[repr(packed, C)] //~ ERROR may not be used on #[repr(packed)] type
    |        ^^^^^^
 
-error: pin_projectable may not be used on #[repr(packed)] types
-  --> $DIR/packed.rs:23:8
-   |
-23 | #[repr(packed, C)] //~ ERROR may not be used on #[repr(packed)] type
-   |        ^^^^^^
-
-error: pin_projectable may not be used on #[repr(packed)] types
-  --> $DIR/packed.rs:28:8
-   |
-28 | #[repr(packed, C)] //~ ERROR may not be used on #[repr(packed)] type
-   |        ^^^^^^
-
-error: aborting due to 4 previous errors
+error: aborting due to 2 previous errors
 
