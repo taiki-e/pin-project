@@ -23,7 +23,6 @@ jobs:
         rust: ${{ parameters.rust }}
 
     - script: |
-        cargo ${{ parameters.cmd }} --all --no-default-features
         cargo ${{ parameters.cmd }} --all
         cargo ${{ parameters.cmd }} --all --all-features
       displayName: cargo ${{ parameters.cmd }} --all

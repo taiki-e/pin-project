@@ -16,8 +16,6 @@ categories = ["rust-patterns"]
 members = ["pin-project-internal"]
 
 [features]
-# Default features.
-default = ["project_attr"]
 # Enable to use `project` attribute.
 project_attr = ["pin-project-internal/project_attr"]
 # Enable to allow using this crate as a renamed dependency

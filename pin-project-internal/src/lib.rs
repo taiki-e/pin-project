@@ -21,13 +21,6 @@ use proc_macro::TokenStream;
 
 use utils::Nothing;
 
-#[cfg(feature = "project_attr")]
-#[proc_macro_attribute]
-pub fn project(args: TokenStream, input: TokenStream) -> TokenStream {
-    let _: Nothing = syn::parse_macro_input!(args);
-    project::attribute(input.into()).into()
-}
-
 #[proc_macro_attribute]
 pub fn pin_project(args: TokenStream, input: TokenStream) -> TokenStream {
     pin_project::attribute(args.into(), input.into()).into()
@@ -37,6 +30,13 @@ pub fn pin_project(args: TokenStream, input: TokenStream) -> TokenStream {
 pub fn pinned_drop(args: TokenStream, input: TokenStream) -> TokenStream {
     let _: Nothing = syn::parse_macro_input!(args);
     pinned_drop::attribute(input.into()).into()
+}
+
+#[cfg(feature = "project_attr")]
+#[proc_macro_attribute]
+pub fn project(args: TokenStream, input: TokenStream) -> TokenStream {
+    let _: Nothing = syn::parse_macro_input!(args);
+    project::attribute(input.into()).into()
 }
 
 #[cfg(feature = "renamed")]
