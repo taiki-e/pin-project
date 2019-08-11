@@ -25,7 +25,7 @@ renamed = ["proc-macro-crate", "serde", "lazy_static"]
 [dependencies]
 proc-macro2 = "0.4.13"
 quote = "0.6.8"
-syn = { version = "0.15.29", features = ["full", "extra-traits"] }
+syn = { version = "0.15.29", features = ["full"] }
 proc-macro-crate = { version = "0.1.4", optional = true }
 # Required until a new toml-rs release is made with https://github.com/alexcrichton/toml-rs/pull/311,
 # and proc-macro-crate updates to that new version of toml-rs.
