@@ -15,8 +15,6 @@ categories = ["rust-patterns"]
 proc-macro = true
 
 [features]
-# Default features.
-default = ["project_attr"]
 # Enable to use `project` attribute.
 project_attr = ["syn/visit-mut"]
 # Enable to allow using the crate with a renamed 'pin-project' dependency

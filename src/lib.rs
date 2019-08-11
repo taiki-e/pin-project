@@ -64,82 +64,9 @@
 //!
 //! </details>
 //!
-//! [`pin_project`] also supports enums, but to use it ergonomically, you need
-//! to use the [`project`] attribute.
-//!
-//! ```rust
-//! # #[cfg(feature = "project_attr")]
-//! use pin_project::{project, pin_project};
-//! # #[cfg(feature = "project_attr")]
-//! use std::pin::Pin;
-//!
-//! # #[cfg(feature = "project_attr")]
-//! #[pin_project]
-//! enum Foo<T, U> {
-//!     Future(#[pin] T),
-//!     Done(U),
-//! }
-//!
-//! # #[cfg(feature = "project_attr")]
-//! impl<T, U> Foo<T, U> {
-//!     #[project] // Nightly does not need a dummy attribute to the function.
-//!     fn baz(self: Pin<&mut Self>) {
-//!         #[project]
-//!         match self.project() {
-//!             Foo::Future(future) => {
-//!                 let _: Pin<&mut T> = future;
-//!             }
-//!             Foo::Done(value) => {
-//!                 let _: &mut U = value;
-//!             }
-//!         }
-//!     }
-//! }
-//! ```
-//!
-//! <details>
-//! <summary>Code like this will be generated:</summary>
-//!
-//! ```rust
-//! enum Foo<T, U> {
-//!     Future(T),
-//!     Done(U),
-//! }
-//!
-//! enum __FooProjection<'__a, T, U> {
-//!     Future(::core::pin::Pin<&'__a mut T>),
-//!     Done(&'__a mut U),
-//! }
-//!
-//! impl<T, U> Foo<T, U> {
-//!     fn project<'__a>(self: ::core::pin::Pin<&'__a mut Self>) -> __FooProjection<'__a, T, U> {
-//!         unsafe {
-//!             match ::core::pin::Pin::get_unchecked_mut(self) {
-//!                 Foo::Future(_x0) => __FooProjection::Future(::core::pin::Pin::new_unchecked(_x0)),
-//!                 Foo::Done(_x0) => __FooProjection::Done(_x0),
-//!             }
-//!         }
-//!     }
-//! }
-//!
-//! // Automatically create the Drop implementation.
-//! impl<T, U> Drop for Foo<T, U> {
-//!     fn drop(&mut self) {
-//!         // Do nothing. The precense of this Drop
-//!         // impl ensures that the user can't provide one of their own
-//!     }
-//! }
-//!
-//! // Automatically create the appropriate conditional Unpin implementation.
-//! impl<T, U> Unpin for Foo<T, U> where T: Unpin {}
-//! ```
-//!
-//! </details>
-//!
-//! See [`pin_project`] and [`project`] for more details.
+//! See [`pin_project`] attribute for more details.
 //!
 //! [`pin_project`]: ./attr.pin_project.html
-//! [`project`]: ./attr.project.html
 
 #![recursion_limit = "256"]
 #![doc(html_root_url = "https://docs.rs/pin-project/0.3.4")]
@@ -150,77 +77,6 @@
 #![warn(single_use_lifetimes)]
 #![warn(clippy::all, clippy::pedantic)]
 #![allow(clippy::use_self)]
-
-/// An attribute to support pattern matching.
-///
-/// *This attribute is available if pin-project is built with the
-/// `"project_attr"` feature (it is enabled by default).*
-///
-/// The attribute at the expression position is not stable, so you need to use
-/// a dummy `#[project]` attribute for the function.
-///
-/// ## Examples
-///
-/// The following two syntaxes are supported.
-///
-/// ### `let` bindings
-///
-/// ```rust
-/// use pin_project::{pin_project, project};
-/// use std::pin::Pin;
-///
-/// #[pin_project]
-/// struct Foo<T, U> {
-///     #[pin]
-///     future: T,
-///     field: U,
-/// }
-///
-/// impl<T, U> Foo<T, U> {
-///     #[project] // Nightly does not need a dummy attribute to the function.
-///     fn baz(self: Pin<&mut Self>) {
-///         #[project]
-///         let Foo { future, field } = self.project();
-///
-///         let _: Pin<&mut T> = future;
-///         let _: &mut U = field;
-///     }
-/// }
-/// ```
-///
-/// ### `match` expressions
-///
-/// ```rust
-/// use pin_project::{project, pin_project};
-/// use std::pin::Pin;
-///
-/// #[pin_project]
-/// enum Foo<A, B, C> {
-///     Tuple(#[pin] A, B),
-///     Struct { field: C },
-///     Unit,
-/// }
-///
-/// impl<A, B, C> Foo<A, B, C> {
-///     #[project] // Nightly does not need a dummy attribute to the function.
-///     fn baz(self: Pin<&mut Self>) {
-///         #[project]
-///         match self.project() {
-///             Foo::Tuple(x, y) => {
-///                 let _: Pin<&mut A> = x;
-///                 let _: &mut B = y;
-///             }
-///             Foo::Struct { field } => {
-///                 let _: &mut C = field;
-///             }
-///             Foo::Unit => {}
-///         }
-///     }
-/// }
-/// ```
-#[cfg(feature = "project_attr")]
-#[doc(inline)]
-pub use pin_project_internal::project;
 
 /// An attribute that creates a projection struct covering all the fields.
 ///
@@ -427,6 +283,9 @@ pub use pin_project_internal::project;
 /// `pin_project` also supports enums, but to use it ergonomically, you need
 /// to use the [`project`] attribute.
 ///
+/// *This attribute is only available if pin-project is built
+/// with the `"project_attr"` feature.*
+///
 /// The attribute at the expression position is not stable, so you need to use
 /// a dummy `#[project]` attribute for the function.
 ///
@@ -507,6 +366,77 @@ pub use pin_project_internal::pin_project;
 /// [`pin_project`]: ./attr.pin_project.html
 #[doc(inline)]
 pub use pin_project_internal::pinned_drop;
+
+/// An attribute to support pattern matching.
+///
+/// *This attribute is available if pin-project is built with the
+/// `"project_attr"` feature.*
+///
+/// The attribute at the expression position is not stable, so you need to use
+/// a dummy `#[project]` attribute for the function.
+///
+/// ## Examples
+///
+/// The following two syntaxes are supported.
+///
+/// ### `let` bindings
+///
+/// ```rust
+/// use pin_project::{pin_project, project};
+/// use std::pin::Pin;
+///
+/// #[pin_project]
+/// struct Foo<T, U> {
+///     #[pin]
+///     future: T,
+///     field: U,
+/// }
+///
+/// impl<T, U> Foo<T, U> {
+///     #[project] // Nightly does not need a dummy attribute to the function.
+///     fn baz(self: Pin<&mut Self>) {
+///         #[project]
+///         let Foo { future, field } = self.project();
+///
+///         let _: Pin<&mut T> = future;
+///         let _: &mut U = field;
+///     }
+/// }
+/// ```
+///
+/// ### `match` expressions
+///
+/// ```rust
+/// use pin_project::{project, pin_project};
+/// use std::pin::Pin;
+///
+/// #[pin_project]
+/// enum Foo<A, B, C> {
+///     Tuple(#[pin] A, B),
+///     Struct { field: C },
+///     Unit,
+/// }
+///
+/// impl<A, B, C> Foo<A, B, C> {
+///     #[project] // Nightly does not need a dummy attribute to the function.
+///     fn baz(self: Pin<&mut Self>) {
+///         #[project]
+///         match self.project() {
+///             Foo::Tuple(x, y) => {
+///                 let _: Pin<&mut A> = x;
+///                 let _: &mut B = y;
+///             }
+///             Foo::Struct { field } => {
+///                 let _: &mut C = field;
+///             }
+///             Foo::Unit => {}
+///         }
+///     }
+/// }
+/// ```
+#[cfg(feature = "project_attr")]
+#[doc(inline)]
+pub use pin_project_internal::project;
 
 /// A trait used for custom implementations of [`Unpin`].
 /// This trait is used in conjunction with the `UnsafeUnpin`
