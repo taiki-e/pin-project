@@ -156,6 +156,9 @@
 /// *This attribute is available if pin-project is built with the
 /// `"project_attr"` feature (it is enabled by default).*
 ///
+/// The attribute at the expression position is not stable, so you need to use
+/// a dummy `#[project]` attribute for the function.
+///
 /// ## Examples
 ///
 /// The following two syntaxes are supported.
@@ -423,6 +426,9 @@ pub use pin_project_internal::project;
 ///
 /// `pin_project` also supports enums, but to use it ergonomically, you need
 /// to use the [`project`] attribute.
+///
+/// The attribute at the expression position is not stable, so you need to use
+/// a dummy `#[project]` attribute for the function.
 ///
 /// ```rust
 /// # #[cfg(feature = "project_attr")]

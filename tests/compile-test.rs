@@ -13,7 +13,6 @@ fn run_mode(mode: &'static str) {
         "--edition=2018 \
          -Z unstable-options \
          --extern pin_project \
-         --cfg procmacro2_semver_exempt \
          -L {}",
         me.display()
     ));

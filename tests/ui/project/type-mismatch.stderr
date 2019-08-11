@@ -1,0 +1,17 @@
+error[E0308]: mismatched types
+  --> $DIR/type-mismatch.rs:41:9
+   |
+41 |         None => {} //~ ERROR mismatched types
+   |         ^^^^ expected enum `span::__BazProjection`, found enum `std::option::Option`
+   |
+   = note: expected type `span::__BazProjection<'_, {integer}, {integer}, _, _>`
+              found type `std::option::Option<_>`
+
+error[E0308]: mismatched types
+  |
+  = note: expected type `loses_span::__BazProjection<'_, {integer}, {integer}, _, _>`
+             found type `std::option::Option<_>`
+
+error: aborting due to 2 previous errors
+
+For more information about this error, try `rustc --explain E0308`.
