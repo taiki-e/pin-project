@@ -6,7 +6,7 @@ use syn::{
 
 /// Makes the ident of projected type from the reference of the original ident.
 pub(crate) fn proj_ident(ident: &Ident) -> Ident {
-    Ident::new(&format!("__{}Projection", ident), Span::call_site())
+    Ident::new(&format!("__{}Projection", ident), ident.span())
 }
 
 pub(crate) trait VecExt {

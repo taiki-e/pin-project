@@ -28,6 +28,14 @@ fn test_pin_project() {
     let y: &mut i32 = foo.field2;
     assert_eq!(*y, 2);
 
+    let mut foo = Foo { field1: 1, field2: 2 };
+
+    let foo = Pin::new(&mut foo).project();
+
+    let __FooProjection { field1, field2 } = foo;
+    let _: Pin<&mut i32> = field1;
+    let _: &mut i32 = field2;
+
     // tuple struct
 
     #[pin_project]
