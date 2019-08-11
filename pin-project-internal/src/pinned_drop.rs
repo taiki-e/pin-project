@@ -12,8 +12,7 @@ pub(super) fn attribute(input: TokenStream) -> TokenStream {
 }
 
 fn parse_arg(arg: &FnArg) -> Result<&Type> {
-    if let FnArg::Captured(ArgCaptured { ty: Type::Path(TypePath { qself: None, path }), .. }) =
-        &arg
+    if let FnArg::Captured(ArgCaptured { ty: Type::Path(TypePath { qself: None, path }), .. }) = arg
     {
         let ty = &path.segments[path.segments.len() - 1];
         if let PathArguments::AngleBracketed(args) = &ty.arguments {

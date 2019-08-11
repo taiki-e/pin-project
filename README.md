@@ -27,10 +27,10 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-pin-project = "0.3"
+pin-project = "0.4.0-alpha.1"
 ```
 
-The current version of pin-project requires Rust 1.33 or later.
+The current pin-project requires Rust 1.33 or later.
 
 ## Examples
 
@@ -58,7 +58,7 @@ impl<T, U> Foo<T, U> {
 
 [Code like this will be generated](doc/struct-example-1.md)
 
-[`pin_project`]: https://docs.rs/pin-project/0.3/pin_project/attr.pin_project.html
+[`pin_project`]: https://docs.rs/pin-project/0.4.0-alpha.1/pin_project/attr.pin_project.html
 
 ## License
 
