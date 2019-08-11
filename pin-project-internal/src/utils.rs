@@ -55,9 +55,6 @@ pub(crate) fn crate_path() -> Ident {
 }
 
 macro_rules! error {
-    ($msg:expr) => {
-        syn::Error::new_spanned($msg, $msg)
-    };
     ($span:expr, $msg:expr) => {
         syn::Error::new_spanned($span, $msg)
     };

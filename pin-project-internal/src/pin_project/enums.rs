@@ -64,26 +64,19 @@ fn variants(
 ) -> Result<(TokenStream, TokenStream)> {
     let mut arm_vec = Vec::with_capacity(variants.len());
     let mut ty_vec = Vec::with_capacity(variants.len());
-    variants
-        .iter_mut()
-        .try_for_each(|Variant { fields, ident, .. }| {
-            let (proj_arm, proj_ty) = match fields {
-                Fields::Unnamed(fields) => {
-                    unnamed(fields, ident, enum_ident, proj_ident, impl_unpin)?
-                }
-                Fields::Named(fields) => named(fields, ident, enum_ident, proj_ident, impl_unpin)?,
-                Fields::Unit => unit(ident, enum_ident, proj_ident),
-            };
+    for Variant { fields, ident, .. } in variants {
+        let (proj_arm, proj_ty) = match fields {
+            Fields::Unnamed(fields) => unnamed(fields, ident, enum_ident, proj_ident, impl_unpin)?,
+            Fields::Named(fields) => named(fields, ident, enum_ident, proj_ident, impl_unpin)?,
+            Fields::Unit => unit(ident, enum_ident, proj_ident),
+        };
+        arm_vec.push(proj_arm);
+        ty_vec.push(proj_ty);
+    }
 
-            arm_vec.push(proj_arm);
-            ty_vec.push(proj_ty);
-            Ok(())
-        })
-        .map(|()| {
-            let proj_item_body = quote!({ #(#ty_vec,)* });
-            let proj_arms = quote!(#(#arm_vec,)*);
-            (proj_item_body, proj_arms)
-        })
+    let proj_item_body = quote!({ #(#ty_vec,)* });
+    let proj_arms = quote!(#(#arm_vec,)*);
+    Ok((proj_item_body, proj_arms))
 }
 
 fn named(
@@ -96,29 +89,24 @@ fn named(
     let mut pat_vec = Vec::with_capacity(fields.len());
     let mut expr_vec = Vec::with_capacity(fields.len());
     let mut ty_vec = Vec::with_capacity(fields.len());
-    fields
-        .iter_mut()
-        .try_for_each(|Field { attrs, ident, ty, .. }| {
-            if let Some(attr) = attrs.find_remove(PIN) {
-                let _: Nothing = syn::parse2(attr.tts)?;
-                impl_unpin.push(ty);
-                expr_vec.push(quote!(#ident: ::core::pin::Pin::new_unchecked(#ident)));
-                ty_vec.push(quote!(#ident: ::core::pin::Pin<&'__a mut #ty>));
-            } else {
-                expr_vec.push(quote!(#ident: #ident));
-                ty_vec.push(quote!(#ident: &'__a mut #ty));
-            }
+    for Field { attrs, ident, ty, .. } in fields {
+        if let Some(attr) = attrs.find_remove(PIN) {
+            let _: Nothing = syn::parse2(attr.tts)?;
+            impl_unpin.push(ty);
+            expr_vec.push(quote!(#ident: ::core::pin::Pin::new_unchecked(#ident)));
+            ty_vec.push(quote!(#ident: ::core::pin::Pin<&'__a mut #ty>));
+        } else {
+            expr_vec.push(quote!(#ident: #ident));
+            ty_vec.push(quote!(#ident: &'__a mut #ty));
+        }
+        pat_vec.push(ident);
+    }
 
-            pat_vec.push(ident);
-            Ok(())
-        })
-        .map(|()| {
-            let proj_arm = quote! {
-                #enum_ident::#variant_ident { #(#pat_vec),* } => #proj_ident::#variant_ident { #(#expr_vec),* }
-            };
-            let proj_ty = quote!(#variant_ident { #(#ty_vec),* });
-            (proj_arm, proj_ty)
-        })
+    let proj_arm = quote! {
+        #enum_ident::#variant_ident { #(#pat_vec),* } => #proj_ident::#variant_ident { #(#expr_vec),* }
+    };
+    let proj_ty = quote!(#variant_ident { #(#ty_vec),* });
+    Ok((proj_arm, proj_ty))
 }
 
 fn unnamed(
@@ -131,32 +119,25 @@ fn unnamed(
     let mut pat_vec = Vec::with_capacity(fields.len());
     let mut expr_vec = Vec::with_capacity(fields.len());
     let mut ty_vec = Vec::with_capacity(fields.len());
-    fields
-        .iter_mut()
-        .enumerate()
-        .try_for_each(|(i, Field { attrs, ty, .. })| {
-            let x = Ident::new(&format!("_x{}", i), Span::call_site());
+    for (i, Field { attrs, ty, .. }) in fields.iter_mut().enumerate() {
+        let x = Ident::new(&format!("_x{}", i), Span::call_site());
+        if let Some(attr) = attrs.find_remove(PIN) {
+            let _: Nothing = syn::parse2(attr.tts)?;
+            impl_unpin.push(ty);
+            expr_vec.push(quote!(::core::pin::Pin::new_unchecked(#x)));
+            ty_vec.push(quote!(::core::pin::Pin<&'__a mut #ty>));
+        } else {
+            expr_vec.push(quote!(#x));
+            ty_vec.push(quote!(&'__a mut #ty));
+        }
+        pat_vec.push(x);
+    }
 
-            if let Some(attr) = attrs.find_remove(PIN) {
-                let _: Nothing = syn::parse2(attr.tts)?;
-                impl_unpin.push(ty);
-                expr_vec.push(quote!(::core::pin::Pin::new_unchecked(#x)));
-                ty_vec.push(quote!(::core::pin::Pin<&'__a mut #ty>));
-            } else {
-                expr_vec.push(quote!(#x));
-                ty_vec.push(quote!(&'__a mut #ty));
-            }
-
-            pat_vec.push(x);
-            Ok(())
-        })
-        .map(|()| {
-            let proj_arm = quote! {
-                #enum_ident::#variant_ident(#(#pat_vec),*) => #proj_ident::#variant_ident(#(#expr_vec),*)
-            };
-            let proj_ty = quote!(#variant_ident(#(#ty_vec),*));
-            (proj_arm, proj_ty)
-        })
+    let proj_arm = quote! {
+        #enum_ident::#variant_ident(#(#pat_vec),*) => #proj_ident::#variant_ident(#(#expr_vec),*)
+    };
+    let proj_ty = quote!(#variant_ident(#(#ty_vec),*));
+    Ok((proj_arm, proj_ty))
 }
 
 fn unit(

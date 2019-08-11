@@ -1,4 +1,3 @@
-#![recursion_limit = "128"]
 #![no_std]
 #![warn(unsafe_code)]
 #![warn(rust_2018_idioms)]
