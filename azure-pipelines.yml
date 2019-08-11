@@ -33,9 +33,9 @@ jobs:
     rust: nightly
     cmd: test
 
-- template: ci/azure-compile-test.yml
+- template: ci/azure-compiletest.yml
   parameters:
-    name: compile_test
+    name: compiletest
     rust: nightly
 
 - template: ci/azure-clippy.yml

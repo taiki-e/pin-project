@@ -15,4 +15,4 @@ jobs:
       displayName: rustup component add rustfmt
 
     - script: cargo fmt --all -- --check
-      displayName: cargo fmt --all -- --check
+      displayName: cargo fmt -- --check

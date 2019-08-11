@@ -1,4 +1,4 @@
-#![cfg(compile_test)]
+#![cfg(compiletest)]
 #![cfg(feature = "project_attr")]
 #![warn(rust_2018_idioms)]
 
@@ -26,6 +26,6 @@ fn run_mode(mode: &'static str) {
 }
 
 #[test]
-fn compile_test() {
+fn compiletest() {
     run_mode("ui");
 }

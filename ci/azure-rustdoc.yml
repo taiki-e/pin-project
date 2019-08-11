@@ -10,4 +10,4 @@ jobs:
         rust: ${{ parameters.rust }}
 
     - script: RUSTDOCFLAGS=-Dwarnings cargo doc --no-deps --all --all-features
-      displayName: cargo doc --all --all-features
+      displayName: cargo doc --all-features
