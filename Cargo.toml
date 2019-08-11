@@ -1,16 +1,15 @@
 [package]
 name = "pin-project"
-# NB: When modifying, also modify html_root_url in lib.rs
 version = "0.4.0-alpha.1"
 authors = ["Taiki Endo <te316e89@gmail.com>"]
 edition = "2018"
 license = "Apache-2.0/MIT"
-description = "A crate for safe and ergonomic pin-projection."
 repository = "https://github.com/taiki-e/pin-project"
 documentation = "https://docs.rs/pin-project/"
 readme = "README.md"
 keywords = ["pin", "macros", "attribute"]
 categories = ["rust-patterns"]
+description = "A crate for safe and ergonomic pin-projection."
 
 [workspace]
 members = ["pin-project-internal"]
