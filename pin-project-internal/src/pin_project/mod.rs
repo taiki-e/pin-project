@@ -42,7 +42,7 @@ impl Parse for Args {
             let i = input.parse::<Ident>()?;
             match &*i.to_string() {
                 "PinnedDrop" => pinned_drop = Some(i.span()),
-                "unsafe_Unpin" => unsafe_unpin = Some(i.span()),
+                "UnsafeUnpin" => unsafe_unpin = Some(i.span()),
                 _ => return Err(error!(i, "an invalid argument was passed")),
             }
         }
