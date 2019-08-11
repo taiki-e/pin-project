@@ -17,7 +17,7 @@
 [rustc-badge]: https://img.shields.io/badge/rustc-1.33+-lightgray.svg
 [rustc-url]: https://blog.rust-lang.org/2019/02/28/Rust-1.33.0.html
 
-An attribute that creates a projection struct covering all the fields.
+A crate for safe and ergonomic pin-projection.
 
 [Documentation](https://docs.rs/pin-project/)
 
