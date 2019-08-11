@@ -4,7 +4,8 @@ use syn::{
     punctuated::Punctuated,
     token::Or,
     visit_mut::{self, VisitMut},
-    *,
+    Arm, Expr, ExprMatch, Ident, Item, ItemFn, Local, Pat, PatBox, PatIdent, PatPath, PatRef,
+    PatStruct, PatTupleStruct, Path, Result, Stmt,
 };
 
 use crate::utils::{proj_ident, Nothing, VecExt};
@@ -17,21 +18,17 @@ pub(super) fn attribute(input: TokenStream) -> TokenStream {
 }
 
 fn parse(input: TokenStream) -> Result<TokenStream> {
-    fn replace_stmt(stmt: &mut Stmt) {
-        match stmt {
-            Stmt::Expr(Expr::Match(expr)) | Stmt::Semi(Expr::Match(expr), _) => {
-                expr.replace(&mut Register::default())
-            }
-            Stmt::Local(local) => local.replace(&mut Register::default()),
-            Stmt::Item(Item::Fn(ItemFn { block, .. })) => Dummy.visit_block_mut(block),
-            _ => {}
+    let mut stmt = syn::parse2(input)?;
+    match &mut stmt {
+        Stmt::Expr(Expr::Match(expr)) | Stmt::Semi(Expr::Match(expr), _) => {
+            expr.replace(&mut Register::default())
         }
+        Stmt::Local(local) => local.replace(&mut Register::default()),
+        Stmt::Item(Item::Fn(ItemFn { block, .. })) => Dummy.visit_block_mut(block),
+        _ => {}
     }
 
-    syn::parse2(input).map(|mut stmt| {
-        replace_stmt(&mut stmt);
-        stmt.into_token_stream()
-    })
+    Ok(stmt.into_token_stream())
 }
 
 trait Replace {
@@ -139,5 +136,5 @@ impl VisitMut for Dummy {
     }
 
     // Stop at item bounds
-    fn visit_item_mut(&mut self, _item: &mut Item) {}
+    fn visit_item_mut(&mut self, _: &mut Item) {}
 }

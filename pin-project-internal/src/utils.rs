@@ -1,7 +1,7 @@
 use proc_macro2::{Ident, Span};
 use syn::{
-    parse::{Parse, ParseStream},
-    Attribute, Result,
+    parse::{Parse, ParseStream, Result},
+    Attribute,
 };
 
 /// Makes the ident of projected type from the reference of the original ident.
@@ -25,7 +25,7 @@ pub(crate) struct Nothing;
 
 impl Parse for Nothing {
     fn parse(_input: ParseStream<'_>) -> Result<Self> {
-        Ok(Nothing)
+        Ok(Self)
     }
 }
 

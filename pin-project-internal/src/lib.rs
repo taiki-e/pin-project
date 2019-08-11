@@ -18,7 +18,6 @@ mod pinned_drop;
 mod project;
 
 use proc_macro::TokenStream;
-
 use utils::Nothing;
 
 #[proc_macro_attribute]

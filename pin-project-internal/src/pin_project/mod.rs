@@ -6,7 +6,7 @@ use syn::{
     Result, Type,
 };
 
-use crate::utils::{crate_path, Nothing};
+use crate::utils::crate_path;
 
 mod enums;
 mod structs;

@@ -2,9 +2,9 @@ use proc_macro2::{Ident, Span, TokenStream};
 use quote::{quote, ToTokens};
 use syn::{Field, Fields, FieldsNamed, FieldsUnnamed, ItemEnum, Result, Variant};
 
-use crate::utils::{proj_ident, VecExt};
+use crate::utils::{proj_ident, Nothing, VecExt};
 
-use super::*;
+use super::{proj_generics, Args, ImplUnpin, PIN};
 
 pub(super) fn parse(args: Args, mut item: ItemEnum) -> Result<TokenStream> {
     let mut impl_unpin = args.impl_unpin(&item.generics);
