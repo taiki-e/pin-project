@@ -7,7 +7,7 @@ use pin_project::{pin_project, UnsafeUnpin};
 
 #[test]
 fn unsafe_unpin() {
-    #[pin_project(unsafe_Unpin)]
+    #[pin_project(UnsafeUnpin)]
     pub struct Blah<T> {
         field_1: u8,
         #[pin]
