@@ -57,25 +57,21 @@ fn named(
 ) -> Result<(TokenStream, TokenStream)> {
     let mut proj_fields = Vec::with_capacity(fields.len());
     let mut proj_init = Vec::with_capacity(fields.len());
-    fields
-        .iter_mut()
-        .try_for_each(|Field { attrs, ident, ty, .. }| {
-            if let Some(attr) = attrs.find_remove(PIN) {
-                let _: Nothing = syn::parse2(attr.tts)?;
-                impl_unpin.push(ty);
-                proj_fields.push(quote!(#ident: ::core::pin::Pin<&'__a mut #ty>));
-                proj_init.push(quote!(#ident: ::core::pin::Pin::new_unchecked(&mut this.#ident)));
-            } else {
-                proj_fields.push(quote!(#ident: &'__a mut #ty));
-                proj_init.push(quote!(#ident: &mut this.#ident));
-            }
-            Ok(())
-        })
-        .map(|()| {
-            let proj_item_body = quote!({ #(#proj_fields,)* });
-            let proj_init_body = quote!({ #(#proj_init,)* });
-            (proj_item_body, proj_init_body)
-        })
+    for Field { attrs, ident, ty, .. } in fields {
+        if let Some(attr) = attrs.find_remove(PIN) {
+            let _: Nothing = syn::parse2(attr.tts)?;
+            impl_unpin.push(ty);
+            proj_fields.push(quote!(#ident: ::core::pin::Pin<&'__a mut #ty>));
+            proj_init.push(quote!(#ident: ::core::pin::Pin::new_unchecked(&mut this.#ident)));
+        } else {
+            proj_fields.push(quote!(#ident: &'__a mut #ty));
+            proj_init.push(quote!(#ident: &mut this.#ident));
+        }
+    }
+
+    let proj_item_body = quote!({ #(#proj_fields,)* });
+    let proj_init_body = quote!({ #(#proj_init,)* });
+    Ok((proj_item_body, proj_init_body))
 }
 
 fn unnamed(
@@ -84,25 +80,20 @@ fn unnamed(
 ) -> Result<(TokenStream, TokenStream)> {
     let mut proj_fields = Vec::with_capacity(fields.len());
     let mut proj_init = Vec::with_capacity(fields.len());
-    fields
-        .iter_mut()
-        .enumerate()
-        .try_for_each(|(i, Field { attrs, ty, .. })| {
-            let i = Index::from(i);
-            if let Some(attr) = attrs.find_remove(PIN) {
-                let _: Nothing = syn::parse2(attr.tts)?;
-                impl_unpin.push(ty);
-                proj_fields.push(quote!(::core::pin::Pin<&'__a mut #ty>));
-                proj_init.push(quote!(::core::pin::Pin::new_unchecked(&mut this.#i)));
-            } else {
-                proj_fields.push(quote!(&'__a mut #ty));
-                proj_init.push(quote!(&mut this.#i));
-            }
-            Ok(())
-        })
-        .map(|()| {
-            let proj_item_body = quote!((#(#proj_fields,)*););
-            let proj_init_body = quote!((#(#proj_init,)*));
-            (proj_item_body, proj_init_body)
-        })
+    for (i, Field { attrs, ty, .. }) in fields.iter_mut().enumerate() {
+        let i = Index::from(i);
+        if let Some(attr) = attrs.find_remove(PIN) {
+            let _: Nothing = syn::parse2(attr.tts)?;
+            impl_unpin.push(ty);
+            proj_fields.push(quote!(::core::pin::Pin<&'__a mut #ty>));
+            proj_init.push(quote!(::core::pin::Pin::new_unchecked(&mut this.#i)));
+        } else {
+            proj_fields.push(quote!(&'__a mut #ty));
+            proj_init.push(quote!(&mut this.#i));
+        }
+    }
+
+    let proj_item_body = quote!((#(#proj_fields,)*););
+    let proj_init_body = quote!((#(#proj_init,)*));
+    Ok((proj_item_body, proj_init_body))
 }
