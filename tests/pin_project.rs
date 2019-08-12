@@ -156,3 +156,11 @@ fn trait_bounds_on_type_generics() {
         Variant(&'a mut T),
     }
 }
+
+#[test]
+fn overlapping_lifetime_names() {
+    #[pin_project]
+    pub struct Foo<'_pin, T> {
+        field: &'_pin mut T,
+    }
+}

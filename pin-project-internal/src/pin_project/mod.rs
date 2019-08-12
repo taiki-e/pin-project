@@ -2,8 +2,10 @@ use proc_macro2::{Ident, Span, TokenStream};
 use quote::{quote, quote_spanned};
 use syn::{
     parse::{Parse, ParseStream},
-    Fields, FieldsNamed, FieldsUnnamed, Generics, Index, Item, ItemStruct, Meta, NestedMeta,
-    Result, Type,
+    punctuated::Punctuated,
+    token::Comma,
+    Fields, FieldsNamed, FieldsUnnamed, GenericParam, Generics, Index, Item, ItemStruct, Lifetime,
+    LifetimeDef, Meta, NestedMeta, Result, Type,
 };
 
 use crate::utils::crate_path;
@@ -153,10 +155,37 @@ fn ensure_not_packed(item: &ItemStruct) -> Result<TokenStream> {
     Ok(test_fn)
 }
 
+/// Determine the lifetime names. Ensure it doesn't overlap with any existing lifetime names.
+fn proj_lifetime(generics: &Punctuated<GenericParam, Comma>) -> Lifetime {
+    let mut lifetime_name = String::from("'_pin");
+    let existing_lifetimes: Vec<String> = generics
+        .iter()
+        .filter_map(|param| {
+            if let GenericParam::Lifetime(LifetimeDef { lifetime, .. }) = param {
+                Some(lifetime.to_string())
+            } else {
+                None
+            }
+        })
+        .collect();
+    while existing_lifetimes.iter().any(|name| *name == lifetime_name) {
+        lifetime_name.push('_');
+    }
+    Lifetime::new(&lifetime_name, Span::call_site())
+}
+
 /// Makes the generics of projected type from the reference of the original generics.
-fn proj_generics(generics: &Generics) -> Generics {
+fn proj_generics(generics: &Generics, lifetime: &Lifetime) -> Generics {
     let mut generics = generics.clone();
-    generics.params.insert(0, syn::parse_quote!('__a));
+    generics.params.insert(
+        0,
+        GenericParam::Lifetime(LifetimeDef {
+            attrs: Vec::new(),
+            lifetime: lifetime.clone(),
+            colon_token: None,
+            bounds: Punctuated::new(),
+        }),
+    );
     generics
 }
 
