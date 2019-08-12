@@ -1,15 +1,12 @@
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{quote, ToTokens};
-use syn::{Field, Fields, FieldsNamed, FieldsUnnamed, ItemEnum, Lifetime, Result, Variant};
+use syn::{Field, Fields, FieldsNamed, FieldsUnnamed, ItemEnum, Result, Variant};
 
-use crate::utils::{proj_ident, Nothing, VecExt};
+use crate::utils::{Nothing, VecExt};
 
-use super::{proj_generics, proj_lifetime, Args, ImplUnpin, PIN};
+use super::{proj_generics, Context, PIN};
 
-pub(super) fn parse(args: Args, mut item: ItemEnum) -> Result<TokenStream> {
-    let mut impl_unpin = args.impl_unpin(&item.generics);
-    let lifetime = proj_lifetime(&item.generics.params);
-
+pub(super) fn parse(mut cx: Context, mut item: ItemEnum) -> Result<TokenStream> {
     if item.variants.is_empty() {
         return Err(error!(item, "cannot be implemented for enums without variants"));
     }
@@ -26,11 +23,12 @@ pub(super) fn parse(args: Args, mut item: ItemEnum) -> Result<TokenStream> {
         return Err(error!(item.variants, "cannot be implemented for enums that have no field"));
     }
 
-    let proj_ident = proj_ident(&item.ident);
-    let (proj_item_body, proj_arms) = variants(&mut item, &proj_ident, &lifetime, &mut impl_unpin)?;
+    let (proj_item_body, proj_arms) = variants(&mut cx, &mut item)?;
 
-    let ident = &item.ident;
-    let impl_drop = args.impl_drop(&item.generics);
+    let orig_ident = &cx.original;
+    let proj_ident = &cx.projected;
+    let lifetime = &cx.lifetime;
+    let impl_drop = cx.impl_drop(&item.generics);
     let proj_generics = proj_generics(&item.generics, &lifetime);
     let proj_ty_generics = proj_generics.split_for_impl().1;
     let (impl_generics, ty_generics, where_clause) = item.generics.split_for_impl();
@@ -38,11 +36,8 @@ pub(super) fn parse(args: Args, mut item: ItemEnum) -> Result<TokenStream> {
     let mut proj_items = quote! {
         enum #proj_ident #proj_generics #where_clause #proj_item_body
     };
-
-    proj_items.extend(impl_drop.build(ident));
-    proj_items.extend(impl_unpin.build(ident));
-    proj_items.extend(quote! {
-        impl #impl_generics #ident #ty_generics #where_clause {
+    let proj_method = quote! {
+        impl #impl_generics #orig_ident #ty_generics #where_clause {
             fn project<#lifetime>(self: ::core::pin::Pin<&#lifetime mut Self>) -> #proj_ident #proj_ty_generics {
                 unsafe {
                     match ::core::pin::Pin::get_unchecked_mut(self) {
@@ -51,7 +46,11 @@ pub(super) fn parse(args: Args, mut item: ItemEnum) -> Result<TokenStream> {
                 }
             }
         }
-    });
+    };
+
+    proj_items.extend(impl_drop.build(orig_ident));
+    proj_items.extend(cx.impl_unpin.build(orig_ident));
+    proj_items.extend(proj_method);
 
     let mut item = item.into_token_stream();
     item.extend(proj_items);
@@ -59,22 +58,16 @@ pub(super) fn parse(args: Args, mut item: ItemEnum) -> Result<TokenStream> {
 }
 
 fn variants(
-    ItemEnum { variants, ident: enum_ident, .. }: &mut ItemEnum,
-    proj_ident: &Ident,
-    lifetime: &Lifetime,
-    impl_unpin: &mut ImplUnpin,
+    cx: &mut Context,
+    ItemEnum { variants, .. }: &mut ItemEnum,
 ) -> Result<(TokenStream, TokenStream)> {
     let mut arm_vec = Vec::with_capacity(variants.len());
     let mut ty_vec = Vec::with_capacity(variants.len());
     for Variant { fields, ident, .. } in variants {
         let (proj_arm, proj_ty) = match fields {
-            Fields::Unnamed(fields) => {
-                unnamed(fields, ident, enum_ident, proj_ident, lifetime, impl_unpin)?
-            }
-            Fields::Named(fields) => {
-                named(fields, ident, enum_ident, proj_ident, lifetime, impl_unpin)?
-            }
-            Fields::Unit => unit(ident, enum_ident, proj_ident),
+            Fields::Unnamed(fields) => unnamed(cx, fields, ident)?,
+            Fields::Named(fields) => named(cx, fields, ident)?,
+            Fields::Unit => unit(cx, ident),
         };
         arm_vec.push(proj_arm);
         ty_vec.push(proj_ty);
@@ -86,12 +79,9 @@ fn variants(
 }
 
 fn named(
+    Context { original, projected, lifetime, impl_unpin, .. }: &mut Context,
     FieldsNamed { named: fields, .. }: &mut FieldsNamed,
     variant_ident: &Ident,
-    enum_ident: &Ident,
-    proj_ident: &Ident,
-    lifetime: &Lifetime,
-    impl_unpin: &mut ImplUnpin,
 ) -> Result<(TokenStream, TokenStream)> {
     let mut pat_vec = Vec::with_capacity(fields.len());
     let mut expr_vec = Vec::with_capacity(fields.len());
@@ -110,19 +100,16 @@ fn named(
     }
 
     let proj_arm = quote! {
-        #enum_ident::#variant_ident { #(#pat_vec),* } => #proj_ident::#variant_ident { #(#expr_vec),* }
+        #original::#variant_ident { #(#pat_vec),* } => #projected::#variant_ident { #(#expr_vec),* }
     };
     let proj_ty = quote!(#variant_ident { #(#ty_vec),* });
     Ok((proj_arm, proj_ty))
 }
 
 fn unnamed(
+    Context { original, projected, lifetime, impl_unpin, .. }: &mut Context,
     FieldsUnnamed { unnamed: fields, .. }: &mut FieldsUnnamed,
     variant_ident: &Ident,
-    enum_ident: &Ident,
-    proj_ident: &Ident,
-    lifetime: &Lifetime,
-    impl_unpin: &mut ImplUnpin,
 ) -> Result<(TokenStream, TokenStream)> {
     let mut pat_vec = Vec::with_capacity(fields.len());
     let mut expr_vec = Vec::with_capacity(fields.len());
@@ -142,19 +129,18 @@ fn unnamed(
     }
 
     let proj_arm = quote! {
-        #enum_ident::#variant_ident(#(#pat_vec),*) => #proj_ident::#variant_ident(#(#expr_vec),*)
+        #original::#variant_ident(#(#pat_vec),*) => #projected::#variant_ident(#(#expr_vec),*)
     };
     let proj_ty = quote!(#variant_ident(#(#ty_vec),*));
     Ok((proj_arm, proj_ty))
 }
 
 fn unit(
+    Context { original, projected, .. }: &mut Context,
     variant_ident: &Ident,
-    enum_ident: &Ident,
-    proj_ident: &Ident,
 ) -> (TokenStream, TokenStream) {
     let proj_arm = quote! {
-        #enum_ident::#variant_ident => #proj_ident::#variant_ident
+        #original::#variant_ident => #projected::#variant_ident
     };
     let proj_ty = quote!(#variant_ident);
     (proj_arm, proj_ty)

@@ -8,7 +8,7 @@ use syn::{
     LifetimeDef, Meta, NestedMeta, Result, Type,
 };
 
-use crate::utils::crate_path;
+use crate::utils::{crate_path, proj_ident};
 
 mod enums;
 mod structs;
@@ -20,20 +20,10 @@ pub(super) fn attribute(args: TokenStream, input: TokenStream) -> TokenStream {
     parse(args, input).unwrap_or_else(|e| e.to_compile_error())
 }
 
-#[derive(Clone, Copy)]
+#[allow(dead_code)] // https://github.com/rust-lang/rust/issues/56750
 struct Args {
     pinned_drop: Option<Span>,
     unsafe_unpin: Option<Span>,
-}
-
-impl Args {
-    fn impl_drop(self, generics: &Generics) -> ImplDrop<'_> {
-        ImplDrop::new(generics, self.pinned_drop)
-    }
-
-    fn impl_unpin(self, generics: &Generics) -> ImplUnpin {
-        ImplUnpin::new(generics, self.unsafe_unpin)
-    }
 }
 
 impl Parse for Args {
@@ -52,19 +42,45 @@ impl Parse for Args {
     }
 }
 
+struct Context {
+    /// Name of the original type.
+    original: Ident,
+    /// Name of the projected type.
+    projected: Ident,
+
+    lifetime: Lifetime,
+    impl_unpin: ImplUnpin,
+    pinned_drop: Option<Span>,
+}
+
+impl Context {
+    fn new(args: TokenStream, original: Ident, generics: &Generics) -> Result<Self> {
+        let Args { pinned_drop, unsafe_unpin } = syn::parse2(args)?;
+        let projected = proj_ident(&original);
+        let lifetime = proj_lifetime(&generics.params);
+        let impl_unpin = ImplUnpin::new(generics, unsafe_unpin);
+        Ok(Self { original, projected, lifetime, impl_unpin, pinned_drop })
+    }
+
+    fn impl_drop<'a>(&self, generics: &'a Generics) -> ImplDrop<'a> {
+        ImplDrop::new(generics, self.pinned_drop)
+    }
+}
+
 fn parse(args: TokenStream, input: TokenStream) -> Result<TokenStream> {
-    let args = syn::parse2(args)?;
     match syn::parse2(input)? {
         Item::Struct(item) => {
+            let cx = Context::new(args, item.ident.clone(), &item.generics)?;
             let packed_check = ensure_not_packed(&item)?;
-            let mut res = structs::parse(args, item)?;
+            let mut res = structs::parse(cx, item)?;
             res.extend(packed_check);
             Ok(res)
         }
         Item::Enum(item) => {
+            let cx = Context::new(args, item.ident.clone(), &item.generics)?;
             // We don't need to check for '#[repr(packed)]',
             // since it does not apply to enums
-            enums::parse(args, item)
+            enums::parse(cx, item)
         }
         item => Err(error!(item, "may only be used on structs or enums")),
     }
