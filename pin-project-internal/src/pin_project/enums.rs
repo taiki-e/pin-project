@@ -1,13 +1,14 @@
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{quote, ToTokens};
-use syn::{Field, Fields, FieldsNamed, FieldsUnnamed, ItemEnum, Result, Variant};
+use syn::{Field, Fields, FieldsNamed, FieldsUnnamed, ItemEnum, Lifetime, Result, Variant};
 
 use crate::utils::{proj_ident, Nothing, VecExt};
 
-use super::{proj_generics, Args, ImplUnpin, PIN};
+use super::{proj_generics, proj_lifetime, Args, ImplUnpin, PIN};
 
 pub(super) fn parse(args: Args, mut item: ItemEnum) -> Result<TokenStream> {
     let mut impl_unpin = args.impl_unpin(&item.generics);
+    let lifetime = proj_lifetime(&item.generics.params);
 
     if item.variants.is_empty() {
         return Err(error!(item, "cannot be implemented for enums without variants"));
@@ -26,11 +27,11 @@ pub(super) fn parse(args: Args, mut item: ItemEnum) -> Result<TokenStream> {
     }
 
     let proj_ident = proj_ident(&item.ident);
-    let (proj_item_body, proj_arms) = variants(&mut item, &proj_ident, &mut impl_unpin)?;
+    let (proj_item_body, proj_arms) = variants(&mut item, &proj_ident, &lifetime, &mut impl_unpin)?;
 
     let ident = &item.ident;
     let impl_drop = args.impl_drop(&item.generics);
-    let proj_generics = proj_generics(&item.generics);
+    let proj_generics = proj_generics(&item.generics, &lifetime);
     let proj_ty_generics = proj_generics.split_for_impl().1;
     let (impl_generics, ty_generics, where_clause) = item.generics.split_for_impl();
 
@@ -42,7 +43,7 @@ pub(super) fn parse(args: Args, mut item: ItemEnum) -> Result<TokenStream> {
     proj_items.extend(impl_unpin.build(ident));
     proj_items.extend(quote! {
         impl #impl_generics #ident #ty_generics #where_clause {
-            fn project<'__a>(self: ::core::pin::Pin<&'__a mut Self>) -> #proj_ident #proj_ty_generics {
+            fn project<#lifetime>(self: ::core::pin::Pin<&#lifetime mut Self>) -> #proj_ident #proj_ty_generics {
                 unsafe {
                     match ::core::pin::Pin::get_unchecked_mut(self) {
                         #proj_arms
@@ -60,14 +61,19 @@ pub(super) fn parse(args: Args, mut item: ItemEnum) -> Result<TokenStream> {
 fn variants(
     ItemEnum { variants, ident: enum_ident, .. }: &mut ItemEnum,
     proj_ident: &Ident,
+    lifetime: &Lifetime,
     impl_unpin: &mut ImplUnpin,
 ) -> Result<(TokenStream, TokenStream)> {
     let mut arm_vec = Vec::with_capacity(variants.len());
     let mut ty_vec = Vec::with_capacity(variants.len());
     for Variant { fields, ident, .. } in variants {
         let (proj_arm, proj_ty) = match fields {
-            Fields::Unnamed(fields) => unnamed(fields, ident, enum_ident, proj_ident, impl_unpin)?,
-            Fields::Named(fields) => named(fields, ident, enum_ident, proj_ident, impl_unpin)?,
+            Fields::Unnamed(fields) => {
+                unnamed(fields, ident, enum_ident, proj_ident, lifetime, impl_unpin)?
+            }
+            Fields::Named(fields) => {
+                named(fields, ident, enum_ident, proj_ident, lifetime, impl_unpin)?
+            }
             Fields::Unit => unit(ident, enum_ident, proj_ident),
         };
         arm_vec.push(proj_arm);
@@ -84,6 +90,7 @@ fn named(
     variant_ident: &Ident,
     enum_ident: &Ident,
     proj_ident: &Ident,
+    lifetime: &Lifetime,
     impl_unpin: &mut ImplUnpin,
 ) -> Result<(TokenStream, TokenStream)> {
     let mut pat_vec = Vec::with_capacity(fields.len());
@@ -94,10 +101,10 @@ fn named(
             let _: Nothing = syn::parse2(attr.tts)?;
             impl_unpin.push(ty);
             expr_vec.push(quote!(#ident: ::core::pin::Pin::new_unchecked(#ident)));
-            ty_vec.push(quote!(#ident: ::core::pin::Pin<&'__a mut #ty>));
+            ty_vec.push(quote!(#ident: ::core::pin::Pin<&#lifetime mut #ty>));
         } else {
             expr_vec.push(quote!(#ident: #ident));
-            ty_vec.push(quote!(#ident: &'__a mut #ty));
+            ty_vec.push(quote!(#ident: &#lifetime mut #ty));
         }
         pat_vec.push(ident);
     }
@@ -114,6 +121,7 @@ fn unnamed(
     variant_ident: &Ident,
     enum_ident: &Ident,
     proj_ident: &Ident,
+    lifetime: &Lifetime,
     impl_unpin: &mut ImplUnpin,
 ) -> Result<(TokenStream, TokenStream)> {
     let mut pat_vec = Vec::with_capacity(fields.len());
@@ -125,10 +133,10 @@ fn unnamed(
             let _: Nothing = syn::parse2(attr.tts)?;
             impl_unpin.push(ty);
             expr_vec.push(quote!(::core::pin::Pin::new_unchecked(#x)));
-            ty_vec.push(quote!(::core::pin::Pin<&'__a mut #ty>));
+            ty_vec.push(quote!(::core::pin::Pin<&#lifetime mut #ty>));
         } else {
             expr_vec.push(quote!(#x));
-            ty_vec.push(quote!(&'__a mut #ty));
+            ty_vec.push(quote!(&#lifetime mut #ty));
         }
         pat_vec.push(x);
     }
