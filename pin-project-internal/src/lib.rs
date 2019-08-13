@@ -20,7 +20,7 @@ mod pinned_drop;
 mod project;
 
 use proc_macro::TokenStream;
-use utils::Nothing;
+use syn::parse::Nothing;
 
 // TODO: Move this doc into pin-project crate when https://github.com/rust-lang/rust/pull/62855 merged.
 /// An attribute that creates a projection struct covering all the fields.

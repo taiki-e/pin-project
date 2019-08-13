@@ -30,6 +30,5 @@ jobs:
     - ${{ if eq(parameters.rust, 'nightly') }}:
       - script: |
           cargo update -Zminimal-versions
-          cat Cargo.lock
           cargo check --all --all-features
         displayName: cargo check -Zminimal-versions

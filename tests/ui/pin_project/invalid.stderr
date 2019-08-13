@@ -2,25 +2,25 @@ error: unexpected token
  --> $DIR/invalid.rs:9:10
   |
 9 |     #[pin()] //~ ERROR unexpected token
-  |          ^^
+  |          ^
 
 error: unexpected token
   --> $DIR/invalid.rs:14:18
    |
 14 | struct B<T>(#[pin(foo)] T); //~ ERROR unexpected token
-   |                  ^^^^^
+   |                  ^
 
 error: unexpected token
   --> $DIR/invalid.rs:18:12
    |
 18 |     A(#[pin(foo)] T), //~ ERROR unexpected token
-   |            ^^^^^
+   |            ^
 
 error: unexpected token
   --> $DIR/invalid.rs:24:14
    |
 24 |         #[pin(foo)] //~ ERROR unexpected token
-   |              ^^^^^
+   |              ^
 
 error: aborting due to 4 previous errors
 

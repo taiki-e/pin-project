@@ -1,8 +1,8 @@
-use proc_macro2::{Ident, Span, TokenStream};
-use quote::{quote, ToTokens};
-use syn::{Field, Fields, FieldsNamed, FieldsUnnamed, ItemEnum, Result, Variant};
+use proc_macro2::{Ident, TokenStream};
+use quote::{format_ident, quote, ToTokens};
+use syn::{parse::Nothing, Field, Fields, FieldsNamed, FieldsUnnamed, ItemEnum, Result, Variant};
 
-use crate::utils::{Nothing, VecExt};
+use crate::utils::VecExt;
 
 use super::{proj_generics, Context, PIN};
 
@@ -88,7 +88,7 @@ fn named(
     let mut ty_vec = Vec::with_capacity(fields.len());
     for Field { attrs, ident, ty, .. } in fields {
         if let Some(attr) = attrs.find_remove(PIN) {
-            let _: Nothing = syn::parse2(attr.tts)?;
+            let _: Nothing = syn::parse2(attr.tokens)?;
             impl_unpin.push(ty);
             expr_vec.push(quote!(#ident: ::core::pin::Pin::new_unchecked(#ident)));
             ty_vec.push(quote!(#ident: ::core::pin::Pin<&#lifetime mut #ty>));
@@ -115,9 +115,9 @@ fn unnamed(
     let mut expr_vec = Vec::with_capacity(fields.len());
     let mut ty_vec = Vec::with_capacity(fields.len());
     for (i, Field { attrs, ty, .. }) in fields.iter_mut().enumerate() {
-        let x = Ident::new(&format!("_x{}", i), Span::call_site());
+        let x = format_ident!("_x{}", i);
         if let Some(attr) = attrs.find_remove(PIN) {
-            let _: Nothing = syn::parse2(attr.tts)?;
+            let _: Nothing = syn::parse2(attr.tokens)?;
             impl_unpin.push(ty);
             expr_vec.push(quote!(::core::pin::Pin::new_unchecked(#x)));
             ty_vec.push(quote!(::core::pin::Pin<&#lifetime mut #ty>));

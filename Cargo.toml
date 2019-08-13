@@ -11,6 +11,9 @@ keywords = ["pin", "macros", "attribute"]
 categories = ["rust-patterns"]
 description = "A crate for safe and ergonomic pin-projection."
 
+[package.metadata.docs.rs]
+all-features = true
+
 [workspace]
 members = ["pin-project-internal"]
 
@@ -25,6 +28,3 @@ pin-project-internal = { version = "=0.4.0-alpha.1", path = "pin-project-interna
 
 [dev-dependencies]
 compiletest = { version = "0.3.21", package = "compiletest_rs", features = ["stable", "tmp"] }
-
-[package.metadata.docs.rs]
-all-features = true
