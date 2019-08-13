@@ -39,7 +39,7 @@ trait Replace {
 
 impl Replace for Local {
     fn replace(&mut self, register: &mut Register) {
-        self.pats.replace(register);
+        self.pat.replace(register);
     }
 }
 
@@ -47,11 +47,12 @@ impl Replace for Expr {
     fn replace(&mut self, register: &mut Register) {
         match self {
             Expr::If(expr) => expr.replace(register),
-            Expr::ForLoop(ExprForLoop { pat, .. }) => pat.replace(register),
-            Expr::Let(ExprLet { pats, .. }) => pats.replace(register),
+            Expr::ForLoop(ExprForLoop { pat, .. }) | Expr::Let(ExprLet { pat, .. }) => {
+                pat.replace(register)
+            }
 
             Expr::Match(ExprMatch { arms, .. }) => {
-                arms.iter_mut().for_each(|Arm { pats, .. }| pats.replace(register))
+                arms.iter_mut().for_each(|Arm { pat, .. }| pat.replace(register))
             }
 
             Expr::Block(ExprBlock { block, .. }) | Expr::Unsafe(ExprUnsafe { block, .. }) => {
@@ -93,12 +94,13 @@ impl Replace for Pat {
     fn replace(&mut self, register: &mut Register) {
         match self {
             Pat::Ident(PatIdent { subpat: Some((_, pat)), .. })
-            | Pat::Ref(PatRef { pat, .. })
-            | Pat::Box(PatBox { pat, .. }) => pat.replace(register),
+            | Pat::Reference(PatReference { pat, .. })
+            | Pat::Box(PatBox { pat, .. })
+            | Pat::Type(PatType { pat, .. }) => pat.replace(register),
 
             Pat::Struct(PatStruct { path, .. })
             | Pat::TupleStruct(PatTupleStruct { path, .. })
-            | Pat::Path(PatPath { qself: None, path }) => path.replace(register),
+            | Pat::Path(PatPath { qself: None, path, .. }) => path.replace(register),
 
             _ => {}
         }
@@ -196,12 +198,12 @@ impl AttrsMut for Local {
 }
 
 macro_rules! attrs_impl {
-    ($($Expr:ident),*) => {
+    ($($Expr:ident($Struct:ident),)*) => {
         impl AttrsMut for Expr {
             fn attrs_mut<T, F: FnOnce(&mut Vec<Attribute>) -> T>(&mut self, f: F) -> T {
                 match self {
-                    $(Expr::$Expr(expr) => f(&mut expr.attrs),)*
-                    Expr::Verbatim(_) => f(&mut Vec::with_capacity(0)),
+                    $(Expr::$Expr($Struct { attrs, .. }))|* => f(attrs),
+                    _ => f(&mut Vec::new()),
                 }
             }
         }
@@ -209,43 +211,43 @@ macro_rules! attrs_impl {
 }
 
 attrs_impl! {
-    Box,
-    InPlace,
-    Array,
-    Call,
-    MethodCall,
-    Tuple,
-    Binary,
-    Unary,
-    Lit,
-    Cast,
-    Type,
-    Let,
-    If,
-    While,
-    ForLoop,
-    Loop,
-    Match,
-    Closure,
-    Unsafe,
-    Block,
-    Assign,
-    AssignOp,
-    Field,
-    Index,
-    Range,
-    Path,
-    Reference,
-    Break,
-    Continue,
-    Return,
-    Macro,
-    Struct,
-    Repeat,
-    Paren,
-    Group,
-    Try,
-    Async,
-    TryBlock,
-    Yield
+    Array(ExprArray),
+    Assign(ExprAssign),
+    AssignOp(ExprAssignOp),
+    Async(ExprAsync),
+    Await(ExprAwait),
+    Binary(ExprBinary),
+    Block(ExprBlock),
+    Box(ExprBox),
+    Break(ExprBreak),
+    Call(ExprCall),
+    Cast(ExprCast),
+    Closure(ExprClosure),
+    Continue(ExprContinue),
+    Field(ExprField),
+    ForLoop(ExprForLoop),
+    Group(ExprGroup),
+    If(ExprIf),
+    Index(ExprIndex),
+    Let(ExprLet),
+    Lit(ExprLit),
+    Loop(ExprLoop),
+    Macro(ExprMacro),
+    Match(ExprMatch),
+    MethodCall(ExprMethodCall),
+    Paren(ExprParen),
+    Path(ExprPath),
+    Range(ExprRange),
+    Reference(ExprReference),
+    Repeat(ExprRepeat),
+    Return(ExprReturn),
+    Struct(ExprStruct),
+    Try(ExprTry),
+    TryBlock(ExprTryBlock),
+    Tuple(ExprTuple),
+    Type(ExprType),
+    Unary(ExprUnary),
+    Unsafe(ExprUnsafe),
+    While(ExprWhile),
+    Yield(ExprYield),
 }
