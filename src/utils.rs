@@ -13,7 +13,7 @@ pub(crate) trait VecExt {
 impl VecExt for Vec<Attribute> {
     fn find_remove(&mut self, ident: &str) -> bool {
         self.iter()
-            .position(|Attribute { path, tts, .. }| path.is_ident(ident) && tts.is_empty())
+            .position(|Attribute { path, tokens, .. }| path.is_ident(ident) && tokens.is_empty())
             .map(|i| self.remove(i))
             .is_some()
     }
