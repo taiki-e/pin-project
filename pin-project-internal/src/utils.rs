@@ -1,12 +1,10 @@
-use proc_macro2::{Ident, Span};
-use syn::{
-    parse::{Parse, ParseStream, Result},
-    Attribute,
-};
+use proc_macro2::Ident;
+use quote::format_ident;
+use syn::Attribute;
 
 /// Makes the ident of projected type from the reference of the original ident.
 pub(crate) fn proj_ident(ident: &Ident) -> Ident {
-    Ident::new(&format!("__{}Projection", ident), ident.span())
+    format_ident!("__{}Projection", ident, span = ident.span())
 }
 
 pub(crate) trait VecExt {
@@ -16,16 +14,6 @@ pub(crate) trait VecExt {
 impl VecExt for Vec<Attribute> {
     fn find_remove(&mut self, ident: &str) -> Option<Attribute> {
         self.iter().position(|attr| attr.path.is_ident(ident)).map(|i| self.remove(i))
-    }
-}
-
-// See https://github.com/dtolnay/syn/commit/82a3aed7ecfd07fc2f7f322b01d2413ffea6c5e7
-/// An empty syntax tree node that consumes no tokens when parsed.
-pub(crate) struct Nothing;
-
-impl Parse for Nothing {
-    fn parse(_input: ParseStream<'_>) -> Result<Self> {
-        Ok(Self)
     }
 }
 
@@ -41,9 +29,9 @@ pub(crate) fn crate_path() -> Ident {
     // of the crate that's calling us.
     let cur_crate = std::env::var("CARGO_PKG_NAME")
         .expect("Could not find CARGO_PKG_NAME environemnt variable");
-    Ident::new(
+    format_ident!(
+        "{}",
         if cur_crate == "pin-project" { "pin_project" } else { crate::PIN_PROJECT_CRATE.as_str() },
-        Span::call_site(),
     )
 }
 
@@ -51,7 +39,7 @@ pub(crate) fn crate_path() -> Ident {
 /// assume that the 'pin-project' dependency has not been renamed
 #[cfg(not(feature = "renamed"))]
 pub(crate) fn crate_path() -> Ident {
-    Ident::new("pin_project", Span::call_site())
+    format_ident!("pin_project")
 }
 
 macro_rules! error {

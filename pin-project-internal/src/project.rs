@@ -1,14 +1,14 @@
 use proc_macro2::TokenStream;
 use quote::ToTokens;
 use syn::{
+    parse::Nothing,
     punctuated::Punctuated,
     token::Or,
     visit_mut::{self, VisitMut},
-    Arm, Expr, ExprMatch, Ident, Item, ItemFn, Local, Pat, PatBox, PatIdent, PatPath, PatRef,
-    PatStruct, PatTupleStruct, Path, Result, Stmt,
+    *,
 };
 
-use crate::utils::{proj_ident, Nothing, VecExt};
+use crate::utils::{proj_ident, VecExt};
 
 /// The attribute name.
 const NAME: &str = "project";
@@ -38,13 +38,13 @@ trait Replace {
 
 impl Replace for Local {
     fn replace(&mut self, register: &mut Register) {
-        self.pats.replace(register);
+        self.pat.replace(register);
     }
 }
 
 impl Replace for ExprMatch {
     fn replace(&mut self, register: &mut Register) {
-        self.arms.iter_mut().for_each(|Arm { pats, .. }| pats.replace(register))
+        self.arms.iter_mut().for_each(|Arm { pat, .. }| pat.replace(register))
     }
 }
 
@@ -58,12 +58,13 @@ impl Replace for Pat {
     fn replace(&mut self, register: &mut Register) {
         match self {
             Pat::Ident(PatIdent { subpat: Some((_, pat)), .. })
-            | Pat::Ref(PatRef { pat, .. })
-            | Pat::Box(PatBox { pat, .. }) => pat.replace(register), // | Pat::Type(PatBox { pat, .. }) // syn 1.0
+            | Pat::Reference(PatReference { pat, .. })
+            | Pat::Box(PatBox { pat, .. })
+            | Pat::Type(PatType { pat, .. }) => pat.replace(register),
 
             Pat::Struct(PatStruct { path, .. })
             | Pat::TupleStruct(PatTupleStruct { path, .. })
-            | Pat::Path(PatPath { qself: None, path }) => path.replace(register),
+            | Pat::Path(PatPath { qself: None, path, .. }) => path.replace(register),
 
             _ => {}
         }
@@ -117,7 +118,7 @@ impl VisitMut for Dummy {
                 $this.attrs.find_remove(NAME).map_or_else(
                     || Ok(()),
                     |attr| {
-                        syn::parse2::<Nothing>(attr.tts)
+                        syn::parse2::<Nothing>(attr.tokens)
                             .map(|_| $this.replace(&mut Register::default()))
                     },
                 )
@@ -135,6 +136,7 @@ impl VisitMut for Dummy {
         }
     }
 
-    // Stop at item bounds
-    fn visit_item_mut(&mut self, _: &mut Item) {}
+    fn visit_item_mut(&mut self, _: &mut Item) {
+        // Do not recurse into nested items.
+    }
 }

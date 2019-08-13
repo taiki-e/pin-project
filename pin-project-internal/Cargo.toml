@@ -10,6 +10,9 @@ keywords = ["pin", "macros", "attribute"]
 categories = ["rust-patterns"]
 description = "An interal crate to support pin_project - do not use directly"
 
+[package.metadata.docs.rs]
+all-features = true
+
 [lib]
 proc-macro = true
 
@@ -20,18 +23,15 @@ project_attr = ["syn/visit-mut"]
 renamed = ["proc-macro-crate", "serde", "lazy_static"]
 
 [dependencies]
-proc-macro2 = "0.4.13"
-quote = "0.6.8"
-syn = { version = "0.15.29", features = ["full"] }
+proc-macro2 = "1.0"
+quote = "1.0"
+syn = { version = "1.0", features = ["full"] }
 
 proc-macro-crate = { version = "0.1.4", optional = true }
 # Required until a new toml-rs release is made with https://github.com/alexcrichton/toml-rs/pull/311,
 # and proc-macro-crate updates to that new version of toml-rs.
 serde = { version = "1.0.97", optional = true }
-lazy_static = { version = "1.3.0", optional = true }
+lazy_static = { version = "1.3", optional = true }
 
 [dev-dependencies]
 pin-project = { version = "=0.4.0-alpha.1", path = ".." }
-
-[package.metadata.docs.rs]
-all-features = true

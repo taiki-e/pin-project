@@ -1,5 +1,5 @@
 use proc_macro2::{Ident, Span, TokenStream};
-use quote::{quote, quote_spanned};
+use quote::{format_ident, quote, quote_spanned};
 use syn::{
     parse::{Parse, ParseStream},
     punctuated::Punctuated,
@@ -89,12 +89,12 @@ fn parse(args: TokenStream, input: TokenStream) -> Result<TokenStream> {
 fn ensure_not_packed(item: &ItemStruct) -> Result<TokenStream> {
     for meta in item.attrs.iter().filter_map(|attr| attr.parse_meta().ok()) {
         if let Meta::List(l) = meta {
-            if l.ident == "repr" {
-                for repr in l.nested.iter() {
-                    if let NestedMeta::Meta(Meta::Word(w)) = repr {
-                        if w == "packed" {
+            if l.path.is_ident("repr") {
+                for repr in &l.nested {
+                    if let NestedMeta::Meta(Meta::Path(p)) = repr {
+                        if p.is_ident("packed") {
                             return Err(error!(
-                                w,
+                                p,
                                 "pin_project may not be used on #[repr(packed)] types"
                             ));
                         }
@@ -141,7 +141,7 @@ fn ensure_not_packed(item: &ItemStruct) -> Result<TokenStream> {
     let mut field_refs = vec![];
     match &item.fields {
         Fields::Named(FieldsNamed { named, .. }) => {
-            for field in named.iter() {
+            for field in named {
                 let ident = field.ident.as_ref().unwrap();
                 field_refs.push(quote!(&val.#ident;));
             }
@@ -158,11 +158,9 @@ fn ensure_not_packed(item: &ItemStruct) -> Result<TokenStream> {
     let (impl_generics, ty_generics, where_clause) = item.generics.split_for_impl();
 
     let struct_name = &item.ident;
-    let method_name = Ident::new(
-        &("__pin_project_assert_not_repr_packed_".to_string() + &item.ident.to_string()),
-        Span::call_site(),
-    );
+    let method_name = format_ident!("__pin_project_assert_not_repr_packed_{}", item.ident);
     let test_fn = quote! {
+        #[allow(nonstandard_style)]
         #[deny(safe_packed_borrows)]
         fn #method_name #impl_generics (val: #struct_name #ty_generics) #where_clause {
             #(#field_refs)*

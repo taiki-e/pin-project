@@ -1,8 +1,8 @@
 use proc_macro2::TokenStream;
 use quote::{quote, ToTokens};
-use syn::{Field, Fields, FieldsNamed, FieldsUnnamed, Index, ItemStruct, Result};
+use syn::{parse::Nothing, Field, Fields, FieldsNamed, FieldsUnnamed, Index, ItemStruct, Result};
 
-use crate::utils::{Nothing, VecExt};
+use crate::utils::VecExt;
 
 use super::{proj_generics, Context, PIN};
 
@@ -59,7 +59,7 @@ fn named(
     let mut proj_init = Vec::with_capacity(fields.len());
     for Field { attrs, ident, ty, .. } in fields {
         if let Some(attr) = attrs.find_remove(PIN) {
-            let _: Nothing = syn::parse2(attr.tts)?;
+            let _: Nothing = syn::parse2(attr.tokens)?;
             impl_unpin.push(ty);
             proj_fields.push(quote!(#ident: ::core::pin::Pin<&#lifetime mut #ty>));
             proj_init.push(quote!(#ident: ::core::pin::Pin::new_unchecked(&mut this.#ident)));
@@ -83,7 +83,7 @@ fn unnamed(
     for (i, Field { attrs, ty, .. }) in fields.iter_mut().enumerate() {
         let i = Index::from(i);
         if let Some(attr) = attrs.find_remove(PIN) {
-            let _: Nothing = syn::parse2(attr.tts)?;
+            let _: Nothing = syn::parse2(attr.tokens)?;
             impl_unpin.push(ty);
             proj_fields.push(quote!(::core::pin::Pin<&#lifetime mut #ty>));
             proj_init.push(quote!(::core::pin::Pin::new_unchecked(&mut this.#i)));
