@@ -2,6 +2,7 @@ trigger:
 - master
 - staging
 - trying
+- v0.3
 
 variables:
   RUSTFLAGS: -Dwarnings
