@@ -1,5 +1,9 @@
 # Unreleased
 
+# 0.4.0-alpha.2 - 2019-08-13
+
+* Updated `proc-macro2`, `syn`, and `quote` to 1.0.
+
 # 0.4.0-alpha.1 - 2019-08-11
 
 * **Pin projection has become a safe operation.**

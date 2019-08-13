@@ -74,12 +74,12 @@
 //!
 //! See [`pin_project`] attribute for more details.
 //!
-//! [`pin_project`]: https://docs.rs/pin-project-internal/0.4.0-alpha.1/pin_project_internal/attr.pin_project.html
-//! [`pinned_drop`]: https://docs.rs/pin-project-internal/0.4.0-alpha.1/pin_project_internal/attr.pinned_drop.html
-//! [`project`]: https://docs.rs/pin-project-internal/0.4.0-alpha.1/pin_project_internal/attr.project.html
+//! [`pin_project`]: https://docs.rs/pin-project-internal/0.4.0-alpha.2/pin_project_internal/attr.pin_project.html
+//! [`pinned_drop`]: https://docs.rs/pin-project-internal/0.4.0-alpha.2/pin_project_internal/attr.pinned_drop.html
+//! [`project`]: https://docs.rs/pin-project-internal/0.4.0-alpha.2/pin_project_internal/attr.project.html
 
 #![recursion_limit = "256"]
-#![doc(html_root_url = "https://docs.rs/pin-project/0.4.0-alpha.1")]
+#![doc(html_root_url = "https://docs.rs/pin-project/0.4.0-alpha.2")]
 #![doc(test(attr(deny(warnings), allow(dead_code, unused_assignments, unused_variables))))]
 #![no_std]
 #![warn(unsafe_code)]
@@ -151,7 +151,7 @@ pub use pin_project_internal::project;
 /// ```
 ///
 /// [`PhantomPinned`]: core::marker::PhantomPinned
-/// [`pin_project`]: https://docs.rs/pin-project-internal/0.4.0-alpha.1/pin_project_internal/attr.pin_project.html
+/// [`pin_project`]: https://docs.rs/pin-project-internal/0.4.0-alpha.2/pin_project_internal/attr.pin_project.html
 #[allow(unsafe_code)]
 pub unsafe trait UnsafeUnpin {}
 
