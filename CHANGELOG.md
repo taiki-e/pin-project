@@ -1,6 +1,6 @@
 # Unreleased
 
-# 0.3.5 - 2019-08-13
+# 0.3.5 - 2019-08-14
 
 * Updated `proc-macro2`, `syn`, and `quote` to 1.0.
 
