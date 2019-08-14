@@ -20,6 +20,10 @@
 
 See also [tracking issue for 0.4 release](https://github.com/taiki-e/pin-project/issues/21).
 
+# 0.3.5 - 2019-08-14
+
+* Updated `proc-macro2`, `syn`, and `quote` to 1.0.
+
 # 0.3.4 - 2019-07-21
 
 * Improved error messages.
