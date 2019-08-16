@@ -4,7 +4,7 @@ use syn::Attribute;
 
 /// Makes the ident of projected type from the reference of the original ident.
 pub(crate) fn proj_ident(ident: &Ident) -> Ident {
-    format_ident!("__{}Projection", ident, span = ident.span())
+    format_ident!("__{}Projection", ident)
 }
 
 pub(crate) trait VecExt {
