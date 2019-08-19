@@ -7,7 +7,7 @@ use crate::utils::VecExt;
 use super::{proj_generics, Context, PIN};
 
 pub(super) fn parse(mut cx: Context, mut item: ItemStruct) -> Result<TokenStream> {
-    let (proj_item_body, proj_init_body) = match &mut item.fields {
+    let (proj_fields, proj_init) = match &mut item.fields {
         Fields::Named(FieldsNamed { named: fields, .. })
         | Fields::Unnamed(FieldsUnnamed { unnamed: fields, .. })
             if fields.is_empty() =>
@@ -29,14 +29,14 @@ pub(super) fn parse(mut cx: Context, mut item: ItemStruct) -> Result<TokenStream
     let (impl_generics, ty_generics, where_clause) = item.generics.split_for_impl();
 
     let mut proj_items = quote! {
-        struct #proj_ident #proj_generics #where_clause #proj_item_body
+        struct #proj_ident #proj_generics #where_clause #proj_fields
     };
     let proj_method = quote! {
         impl #impl_generics #orig_ident #ty_generics #where_clause {
             fn project<#lifetime>(self: ::core::pin::Pin<&#lifetime mut Self>) -> #proj_ident #proj_ty_generics {
                 unsafe {
                     let this = ::core::pin::Pin::get_unchecked_mut(self);
-                    #proj_ident #proj_init_body
+                    #proj_ident #proj_init
                 }
             }
         }
@@ -69,9 +69,9 @@ fn named(
         }
     }
 
-    let proj_item_body = quote!({ #(#proj_fields,)* });
-    let proj_init_body = quote!({ #(#proj_init,)* });
-    Ok((proj_item_body, proj_init_body))
+    let proj_fields = quote!({ #(#proj_fields,)* });
+    let proj_init = quote!({ #(#proj_init,)* });
+    Ok((proj_fields, proj_init))
 }
 
 fn unnamed(
@@ -93,7 +93,7 @@ fn unnamed(
         }
     }
 
-    let proj_item_body = quote!((#(#proj_fields,)*););
-    let proj_init_body = quote!((#(#proj_init,)*));
-    Ok((proj_item_body, proj_init_body))
+    let proj_fields = quote!((#(#proj_fields,)*););
+    let proj_init = quote!((#(#proj_init,)*));
+    Ok((proj_fields, proj_init))
 }
