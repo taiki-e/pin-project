@@ -26,4 +26,10 @@ enum D<T> {
     },
 }
 
+#[pin_project(UnsafeUnpin,,)] //~ ERROR unexpected token
+struct E<T> {
+    #[pin]
+    future: T,
+}
+
 fn main() {}

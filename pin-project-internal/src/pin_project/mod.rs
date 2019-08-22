@@ -37,6 +37,10 @@ impl Parse for Args {
                 "UnsafeUnpin" => unsafe_unpin = Some(i.span()),
                 _ => return Err(error!(i, "an invalid argument was passed")),
             }
+
+            if !input.is_empty() {
+                let _: Comma = input.parse()?;
+            }
         }
         Ok(Self { pinned_drop, unsafe_unpin })
     }

@@ -4,7 +4,7 @@
 #![allow(dead_code)]
 
 use core::pin::Pin;
-use pin_project::pin_project;
+use pin_project::{pin_project, pinned_drop, UnsafeUnpin};
 
 #[test]
 fn test_pin_project() {
@@ -163,4 +163,20 @@ fn overlapping_lifetime_names() {
     pub struct Foo<'_pin, T> {
         field: &'_pin mut T,
     }
+}
+
+#[test]
+fn combine() {
+    #[pin_project(PinnedDrop, UnsafeUnpin)]
+    pub struct Foo<T> {
+        field_1: u8,
+        #[pin]
+        field_2: T,
+    }
+
+    #[pinned_drop]
+    fn do_drop<T>(_: Pin<&mut Foo<T>>) {}
+
+    #[allow(unsafe_code)]
+    unsafe impl<T: Unpin> UnsafeUnpin for Foo<T> {}
 }
