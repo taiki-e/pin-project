@@ -281,6 +281,7 @@ impl<'a> ImplDrop<'a> {
                 // which will then comflict with the explicit MustNotImplDrop impl below.
                 // This will result in a compilation error, which is exactly what we want
                 trait #trait_ident {}
+                #[allow(clippy::drop_bounds)]
                 impl<T: ::core::ops::Drop> #trait_ident for T {}
                 impl #impl_generics #trait_ident for #ident #ty_generics #where_clause {}
             }
