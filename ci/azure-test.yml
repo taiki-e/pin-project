@@ -1,33 +1,24 @@
 parameters:
+  vmImage: ubuntu-16.04
   cmd: check
 
 jobs:
 - job: ${{ parameters.name }}
-  displayName: ${{ parameters.displayName }} ${{ parameters.rust }}
-  strategy:
-    matrix:
-      Linux:
-        vmImage: ubuntu-16.04
-
-      ${{ if parameters.cross }}:
-        MacOS:
-          vmImage: macOS-10.13
-        Windows:
-          vmImage: vs2017-win2016
   pool:
-    vmImage: $(vmImage)
+    vmImage: ${{ parameters.vmImage }}
 
   steps:
     - template: azure-install-rust.yml
       parameters:
-        rust: ${{ parameters.rust }}
+        toolchain: ${{ parameters.toolchain }}
 
     - script: |
         cargo ${{ parameters.cmd }} --all
         cargo ${{ parameters.cmd }} --all --all-features
       displayName: cargo ${{ parameters.cmd }}
 
-    - ${{ if eq(parameters.rust, 'nightly') }}:
+    - ${{ if eq(parameters.toolchain, 'nightly') }}:
+      # Refs: https://github.com/rust-lang/cargo/issues/5657
       - script: |
           cargo update -Zminimal-versions
           cargo check --all --all-features
