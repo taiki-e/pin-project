@@ -87,20 +87,19 @@ fn parse(args: TokenStream, input: TokenStream) -> Result<TokenStream> {
     match syn::parse2(input)? {
         Item::Struct(item) => {
             let mut cx = Context::new(args, item.ident.clone(), &item.generics)?;
-            let mut res = make_proj_trait(&mut cx)?;
 
-            let packed_check = ensure_not_packed(&item)?;
-            res.extend(structs::parse(cx, item)?);
-            res.extend(packed_check);
+            let mut res = structs::parse(&mut cx, item.clone())?;
+            res.extend(ensure_not_packed(&item)?);
+            res.extend(make_proj_trait(&mut cx)?);
             Ok(res)
         }
         Item::Enum(item) => {
             let mut cx = Context::new(args, item.ident.clone(), &item.generics)?;
-            let mut res = make_proj_trait(&mut cx)?;
 
             // We don't need to check for '#[repr(packed)]',
             // since it does not apply to enums
-            res.extend(enums::parse(cx, item));
+            let mut res = enums::parse(&mut cx, item.clone())?;
+            res.extend(make_proj_trait(&mut cx)?);
             Ok(res)
         }
         item => Err(error!(item, "may only be used on structs or enums")),
@@ -253,7 +252,7 @@ impl<'a> ImplDrop<'a> {
         Self { generics, pinned_drop }
     }
 
-    fn build(self, ident: &Ident) -> TokenStream {
+    fn build(&mut self, ident: &Ident) -> TokenStream {
         let (impl_generics, ty_generics, where_clause) = self.generics.split_for_impl();
 
         if let Some(pinned_drop) = self.pinned_drop {
@@ -325,7 +324,7 @@ impl ImplUnpin {
     }
 
     /// Creates `Unpin` implementation.
-    fn build(self, ident: &Ident) -> TokenStream {
+    fn build(&mut self, ident: &Ident) -> TokenStream {
         let (impl_generics, ty_generics, where_clause) = self.generics.split_for_impl();
         quote! {
             impl #impl_generics ::core::marker::Unpin for #ident #ty_generics #where_clause {}

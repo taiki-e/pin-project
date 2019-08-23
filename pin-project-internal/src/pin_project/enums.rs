@@ -6,7 +6,7 @@ use crate::utils::VecExt;
 
 use super::{proj_generics, Context, PIN};
 
-pub(super) fn parse(mut cx: Context, mut item: ItemEnum) -> Result<TokenStream> {
+pub(super) fn parse(cx: &mut Context, mut item: ItemEnum) -> Result<TokenStream> {
     if item.variants.is_empty() {
         return Err(error!(item, "cannot be implemented for enums without variants"));
     }
@@ -23,9 +23,9 @@ pub(super) fn parse(mut cx: Context, mut item: ItemEnum) -> Result<TokenStream> 
         return Err(error!(item.variants, "cannot be implemented for enums that have no field"));
     }
 
-    let (proj_variants, proj_arms) = variants(&mut cx, &mut item)?;
+    let (proj_variants, proj_arms) = variants(cx, &mut item)?;
 
-    let impl_drop = cx.impl_drop(&item.generics);
+    let mut impl_drop = cx.impl_drop(&item.generics);
     let Context { original, projected, lifetime, impl_unpin, .. } = cx;
     let proj_generics = proj_generics(&item.generics, &lifetime);
     let proj_ty_generics = proj_generics.split_for_impl().1;
