@@ -48,7 +48,19 @@ use syn::parse::Nothing;
 ///
 /// 2. The destructor of the struct must not move structural fields out of its argument.
 ///
-///    To enforce this, this attribute will automatically generate a `Drop` impl.
+///    To enforce this, this attribute will generate code like this:
+///
+///    ```rust
+///    struct MyStruct {}
+///    trait MyStructMustNotImplDrop {}
+///    impl<T: Drop> MyStructMustNotImplDrop for T {}
+///    impl MyStructMustNotImplDrop for MyStruct {}
+///    ```
+///
+///    If you attempt to provide an Drop impl, the blanket impl will
+///    then apply to your type, causing a compile-time error due to
+///    the conflict with the second impl.
+///
 ///    If you wish to provide a custom `Drop` impl, you can annotate a function
 ///    with `#[pinned_drop]`. This function takes a pinned version of your struct -
 ///    that is, `Pin<&mut MyStruct>` where `MyStruct` is the type of your struct.
