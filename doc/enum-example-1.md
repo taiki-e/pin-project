@@ -20,14 +20,18 @@ impl<T, U> Foo<T, U> {
     }
 }
 
-// Automatically create the Drop implementation.
-impl<T, U> Drop for Foo<T, U> {
-    fn drop(&mut self) {
-        // Do nothing. The precense of this Drop
-        // impl ensures that the user can't provide one of their own
-    }
-}
-
 // Automatically create the appropriate conditional Unpin implementation.
 impl<T, U> Unpin for Foo<T, U> where T: Unpin {}
+
+// Ensure that enum does not implement `Drop`.
+// There are two possible cases:
+// 1. The user type does not implement Drop. In this case,
+// the first blanked impl will not apply to it. This code
+// will compile, as there is only one impl of MustNotImplDrop for the user type
+// 2. The user type does impl Drop. This will make the blanket impl applicable,
+// which will then comflict with the explicit MustNotImplDrop impl below.
+// This will result in a compilation error, which is exactly what we want.
+trait FooMustNotImplDrop {}
+impl<T: Drop> FooMustNotImplDrop for T {}
+impl<T, U> FooMustNotImplDrop for Foo<T, U> {}
 ```

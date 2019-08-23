@@ -332,7 +332,7 @@ pub fn pinned_drop(args: TokenStream, input: TokenStream) -> TokenStream {
 }
 
 // TODO: Move this doc into pin-project crate when https://github.com/rust-lang/rust/pull/62855 merged.
-/// An attribute to support pattern matching.
+/// An attribute to provide way to refer to the projected type.
 ///
 /// *This attribute is available if pin-project is built with the
 /// `"project_attr"` feature.*
