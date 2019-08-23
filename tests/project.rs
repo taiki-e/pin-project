@@ -82,6 +82,14 @@ fn project_stmt_expr() {
         }
         Baz::None => {}
     }
+
+    #[project]
+    let val = match &mut baz {
+        Baz::Variant1(_, _) => true,
+        Baz::Variant2 { .. } => false,
+        Baz::None => false,
+    };
+    assert_eq!(val, true);
 }
 
 #[test]
