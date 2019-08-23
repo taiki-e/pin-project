@@ -123,12 +123,11 @@ fn test_pin_project() {
 
 #[test]
 fn enum_project_set() {
-
     #[pin_project]
     #[derive(Eq, PartialEq, Debug)]
     enum Bar {
         Variant1(#[pin] u8),
-        Variant2(bool)
+        Variant2(bool),
     }
 
     let mut bar = Bar::Variant1(25);
@@ -139,8 +138,8 @@ fn enum_project_set() {
         __BarProjection::Variant1(val) => {
             let new_bar = Bar::Variant2(val.as_ref().get_ref() == &25);
             bar_orig.set(new_bar);
-        },
-        _ => unreachable!()
+        }
+        _ => unreachable!(),
     }
 
     assert_eq!(bar, Bar::Variant2(true));

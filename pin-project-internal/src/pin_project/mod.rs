@@ -4,7 +4,7 @@ use syn::{
     parse::{Parse, ParseStream},
     punctuated::Punctuated,
     token::Comma,
-    *
+    *,
 };
 
 use crate::utils::{crate_path, proj_ident, proj_trait_ident};
@@ -67,7 +67,15 @@ impl Context {
         let lifetime = proj_lifetime(&generics.params);
         let impl_unpin = ImplUnpin::new(generics, unsafe_unpin);
         let projected_trait = proj_trait_ident(&original);
-        Ok(Self { original, projected, projected_trait, lifetime, impl_unpin, pinned_drop, generics: generics.clone() })
+        Ok(Self {
+            original,
+            projected,
+            projected_trait,
+            lifetime,
+            impl_unpin,
+            pinned_drop,
+            generics: generics.clone(),
+        })
     }
 
     fn impl_drop<'a>(&self, generics: &'a Generics) -> ImplDrop<'a> {
@@ -76,7 +84,6 @@ impl Context {
 }
 
 fn parse(args: TokenStream, input: TokenStream) -> Result<TokenStream> {
-
     match syn::parse2(input)? {
         Item::Struct(item) => {
             let mut cx = Context::new(args, item.ident.clone(), &item.generics)?;
@@ -101,7 +108,7 @@ fn parse(args: TokenStream, input: TokenStream) -> Result<TokenStream> {
 }
 
 fn make_proj_trait(cx: &mut Context) -> Result<TokenStream> {
-    let proj_trait = &cx.projected_trait; 
+    let proj_trait = &cx.projected_trait;
     let lifetime = &cx.lifetime;
     let proj_ident = &cx.projected;
     let proj_generics = proj_generics(&cx.generics, &cx.lifetime);
@@ -114,7 +121,6 @@ fn make_proj_trait(cx: &mut Context) -> Result<TokenStream> {
             fn project<#lifetime>(&#lifetime mut self) -> #proj_ident #proj_ty_generics #orig_where_clause;
         }
     })
-
 }
 
 fn ensure_not_packed(item: &ItemStruct) -> Result<TokenStream> {

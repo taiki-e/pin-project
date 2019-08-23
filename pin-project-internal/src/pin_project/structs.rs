@@ -36,7 +36,7 @@ pub(super) fn parse(mut cx: Context, mut item: ItemStruct) -> Result<TokenStream
         impl #impl_generics #proj_trait #ty_generics for ::core::pin::Pin<&mut #orig_ident #ty_generics> #where_clause {
             fn project<#lifetime>(&#lifetime mut self) -> #proj_ident #proj_ty_generics #where_clause {
                 unsafe {
-                    let this = self.as_mut().get_unchecked_mut(); 
+                    let this = self.as_mut().get_unchecked_mut();
                     #proj_ident #proj_init
                 }
             }
