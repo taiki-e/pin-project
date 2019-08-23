@@ -1,5 +1,7 @@
 # Unreleased
 
+# 0.4.0-alpha.4 - 2019-08-23
+
 * Avoided clippy::drop_bounds lint in generated code.
 
 # 0.4.0-alpha.3 - 2019-08-23
