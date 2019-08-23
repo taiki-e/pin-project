@@ -8,7 +8,7 @@ steps:
       rustup default $RUSTUP_TOOLCHAIN
       echo "##vso[task.setvariable variable=PATH;]$PATH:$HOME/.cargo/bin"
     env:
-      RUSTUP_TOOLCHAIN: ${{ parameters.rust }}
+      RUSTUP_TOOLCHAIN: ${{ parameters.toolchain }}
     displayName: Install rust (*nix)
     condition: not(eq(variables['Agent.OS'], 'Windows_NT'))
 
@@ -21,13 +21,13 @@ steps:
       rustup default %RUSTUP_TOOLCHAIN%
       echo "##vso[task.setvariable variable=PATH;]%PATH%;%USERPROFILE%\.cargo\bin"
     env:
-      RUSTUP_TOOLCHAIN: ${{ parameters.rust }}
+      RUSTUP_TOOLCHAIN: ${{ parameters.toolchain }}
     displayName: Install rust (windows)
     condition: eq(variables['Agent.OS'], 'Windows_NT')
 
   # All platforms.
   - script: |
-        rustup toolchain list
-        rustc -Vv
-        cargo -V
+      rustup toolchain list
+      rustc -Vv
+      cargo -V
     displayName: Query rust and cargo versions

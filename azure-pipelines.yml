@@ -1,3 +1,12 @@
+# Refs: https://docs.microsoft.com/en-us/azure/devops/pipelines/build/triggers?view=azure-devops&tabs=yaml
+schedules:
+- cron: "0 1 * * *"
+  displayName: Cron (Daily)
+  branches:
+    include:
+      - master
+  always: true
+
 trigger:
 - master
 - staging
@@ -14,41 +23,85 @@ jobs:
 # Tests are not run as tests may require newer versions of rust.
 - template: ci/azure-test.yml
   parameters:
+    toolchain: 1.33.0
     name: minrust
-    rust: 1.33.0
 
 - template: ci/azure-test.yml
   parameters:
+    toolchain: stable
     name: stable
-    rust: stable
-
 - template: ci/azure-test.yml
   parameters:
+    toolchain: beta
     name: beta
-    rust: beta
-
 - template: ci/azure-test.yml
   parameters:
+    toolchain: nightly
     name: nightly
-    rust: nightly
     cmd: test
 
-- template: ci/azure-compiletest.yml
-  parameters:
-    name: compiletest
-    rust: nightly
+- job: compiletest
+  pool:
+    vmImage: ubuntu-16.04
+  steps:
+    - template: ci/azure-install-rust.yml
+      parameters:
+        toolchain: nightly
+    - script: |
+        cargo clean
+        RUSTFLAGS='--cfg compiletest' cargo test -p pin-project --all-features --test compiletest
+      displayName: compiletest
 
-- template: ci/azure-clippy.yml
-  parameters:
-    name: clippy
-    rust: nightly
+- job: clippy
+  pool:
+    vmImage: ubuntu-16.04
+  steps:
+    - template: ci/azure-install-rust.yml
+      parameters:
+        toolchain: nightly
+    - script: |
+        set +e
+        if rustup component add clippy; then
+          set -e
+        else
+          # If clippy is unavailable on the latest nightly,
+          # use the latest toolchain with clippy available.
+          # Refs: https://github.com/rust-lang/rustup-components-history#the-web-part
+          set -e
+          target=`curl https://rust-lang.github.io/rustup-components-history/x86_64-unknown-linux-gnu/clippy`
+          echo "'clippy' is unavailable on the toolchain 'nightly', use the toolchain 'nightly-$target' instead"
+          rustup toolchain install nightly-$target
+          rustup default nightly-$target
+          rustup component add clippy
+          rustup toolchain list
+          rustc -Vv
+          cargo -V
+        fi
+        cargo clippy --version
+      displayName: Install clippy
+    - script: |
+        cargo clippy --all --all-features
+      displayName: cargo clippy
 
-- template: ci/azure-rustfmt.yml
-  parameters:
-    name: rustfmt
-    rust: stable
+- job: rustfmt
+  pool:
+    vmImage: ubuntu-16.04
+  steps:
+    - template: ci/azure-install-rust.yml
+      parameters:
+        toolchain: stable
+    - script: |
+        cargo fmt --version
+        cargo fmt --all -- --check
+      displayName: cargo fmt -- --check
 
-- template: ci/azure-rustdoc.yml
-  parameters:
-    name: rustdoc
-    rust: nightly
+- job: rustdoc
+  pool:
+    vmImage: ubuntu-16.04
+  steps:
+    - template: ci/azure-install-rust.yml
+      parameters:
+        toolchain: nightly
+    - script: |
+        RUSTDOCFLAGS=-Dwarnings cargo doc --no-deps --all --all-features
+      displayName: cargo doc
