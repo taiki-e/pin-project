@@ -19,7 +19,8 @@ fn test_pin_project() {
 
     let mut foo = Foo { field1: 1, field2: 2 };
 
-    let foo = Pin::new(&mut foo).project();
+    let mut foo_orig = Pin::new(&mut foo);
+    let foo = foo_orig.project();
 
     let x: Pin<&mut i32> = foo.field1;
     assert_eq!(*x, 1);
@@ -27,9 +28,13 @@ fn test_pin_project() {
     let y: &mut i32 = foo.field2;
     assert_eq!(*y, 2);
 
+    assert_eq!(foo_orig.as_ref().field1, 1);
+    assert_eq!(foo_orig.as_ref().field2, 2);
+
     let mut foo = Foo { field1: 1, field2: 2 };
 
-    let foo = Pin::new(&mut foo).project();
+    let mut foo = Pin::new(&mut foo);
+    let foo = foo.project();
 
     let __FooProjection { field1, field2 } = foo;
     let _: Pin<&mut i32> = field1;
@@ -42,7 +47,8 @@ fn test_pin_project() {
 
     let mut bar = Bar(1, 2);
 
-    let bar = Pin::new(&mut bar).project();
+    let mut bar = Pin::new(&mut bar);
+    let bar = bar.project();
 
     let x: Pin<&mut i32> = bar.0;
     assert_eq!(*x, 1);
@@ -53,6 +59,7 @@ fn test_pin_project() {
     // enum
 
     #[pin_project]
+    #[derive(Eq, PartialEq, Debug)]
     enum Baz<A, B, C, D> {
         Variant1(#[pin] A, B),
         Variant2 {
@@ -65,7 +72,8 @@ fn test_pin_project() {
 
     let mut baz = Baz::Variant1(1, 2);
 
-    let baz = Pin::new(&mut baz).project();
+    let mut baz_orig = Pin::new(&mut baz);
+    let baz = baz_orig.project();
 
     match baz {
         __BazProjection::Variant1(x, y) => {
@@ -82,9 +90,12 @@ fn test_pin_project() {
         __BazProjection::None => {}
     }
 
+    assert_eq!(Pin::into_ref(baz_orig).get_ref(), &Baz::Variant1(1, 2));
+
     let mut baz = Baz::Variant2 { field1: 3, field2: 4 };
 
-    let mut baz = Pin::new(&mut baz).project();
+    let mut baz = Pin::new(&mut baz);
+    let mut baz = baz.project();
 
     match &mut baz {
         __BazProjection::Variant1(x, y) => {
@@ -108,6 +119,31 @@ fn test_pin_project() {
         let y: &mut i32 = field2;
         assert_eq!(*y, 4);
     }
+}
+
+#[test]
+fn enum_project_set() {
+
+    #[pin_project]
+    #[derive(Eq, PartialEq, Debug)]
+    enum Bar {
+        Variant1(#[pin] u8),
+        Variant2(bool)
+    }
+
+    let mut bar = Bar::Variant1(25);
+    let mut bar_orig = Pin::new(&mut bar);
+    let bar_proj = bar_orig.project();
+
+    match bar_proj {
+        __BarProjection::Variant1(val) => {
+            let new_bar = Bar::Variant2(val.as_ref().get_ref() == &25);
+            bar_orig.set(new_bar);
+        },
+        _ => unreachable!()
+    }
+
+    assert_eq!(bar, Bar::Variant2(true));
 }
 
 #[test]

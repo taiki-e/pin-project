@@ -29,16 +29,17 @@ pub(super) fn parse(mut cx: Context, mut item: ItemEnum) -> Result<TokenStream> 
     let Context { original, projected, lifetime, impl_unpin, .. } = cx;
     let proj_generics = proj_generics(&item.generics, &lifetime);
     let proj_ty_generics = proj_generics.split_for_impl().1;
+    let proj_trait = &cx.projected_trait;
     let (impl_generics, ty_generics, where_clause) = item.generics.split_for_impl();
 
     let mut proj_items = quote! {
         enum #projected #proj_generics #where_clause { #(#proj_variants,)* }
     };
     let proj_method = quote! {
-        impl #impl_generics #original #ty_generics #where_clause {
-            fn project<#lifetime>(self: ::core::pin::Pin<&#lifetime mut Self>) -> #projected #proj_ty_generics {
+        impl #impl_generics #proj_trait #ty_generics for ::core::pin::Pin<&mut #original #ty_generics> #where_clause {
+            fn project<#lifetime>(&#lifetime mut self) -> #projected #proj_ty_generics #where_clause {
                 unsafe {
-                    match ::core::pin::Pin::get_unchecked_mut(self) {
+                    match self.as_mut().get_unchecked_mut() {
                         #(#proj_arms,)*
                     }
                 }

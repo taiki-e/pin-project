@@ -7,6 +7,10 @@ pub(crate) fn proj_ident(ident: &Ident) -> Ident {
     format_ident!("__{}Projection", ident)
 }
 
+pub(crate) fn proj_trait_ident(ident: &Ident) -> Ident {
+    format_ident!("__{}ProjectionTrait", ident)
+}
+
 pub(crate) trait VecExt {
     fn find_remove(&mut self, ident: &str) -> Option<Attribute>;
 }
