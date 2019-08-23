@@ -92,7 +92,7 @@ use syn::parse::Nothing;
 /// }
 ///
 /// impl<T, U> Foo<T, U> {
-///     fn baz(self: Pin<&mut Self>) {
+///     fn baz(mut self: Pin<&mut Self>) {
 ///         let this = self.project();
 ///         let _: Pin<&mut T> = this.future; // Pinned reference to the field
 ///         let _: &mut U = this.field; // Normal reference to the field
@@ -115,7 +115,7 @@ use syn::parse::Nothing;
 /// }
 ///
 /// impl<T, U> Foo<T, U> {
-///     fn baz(self: Pin<&mut Self>) {
+///     fn baz(mut self: Pin<&mut Self>) {
 ///         let this = self.project();
 ///         let _: Pin<&mut T> = this.future; // Pinned reference to the field
 ///         let _: &mut U = this.field; // Normal reference to the field
@@ -162,7 +162,7 @@ use syn::parse::Nothing;
 /// }
 ///
 /// #[pinned_drop]
-/// fn my_drop_fn<T: Debug, U: Debug>(foo: Pin<&mut Foo<T, U>>) {
+/// fn my_drop_fn<T: Debug, U: Debug>(mut foo: Pin<&mut Foo<T, U>>) {
 ///     let foo = foo.project();
 ///     println!("Dropping pinned field: {:?}", foo.pinned_field);
 ///     println!("Dropping unpin field: {:?}", foo.unpin_field);
@@ -193,7 +193,7 @@ use syn::parse::Nothing;
 /// }
 ///
 /// impl<T, U> Foo<T, U> {
-///     fn baz(self: Pin<&mut Self>) {
+///     fn baz(mut self: Pin<&mut Self>) {
 ///         let this = self.project();
 ///         let _: Pin<&mut T> = this.future;
 ///         let _: &mut U = this.field;
@@ -211,7 +211,7 @@ use syn::parse::Nothing;
 /// struct Foo<T, U>(#[pin] T, U);
 ///
 /// impl<T, U> Foo<T, U> {
-///     fn baz(self: Pin<&mut Self>) {
+///     fn baz(mut self: Pin<&mut Self>) {
 ///         let this = self.project();
 ///         let _: Pin<&mut T> = this.0;
 ///         let _: &mut U = this.1;
@@ -250,7 +250,7 @@ use syn::parse::Nothing;
 /// # #[cfg(feature = "project_attr")]
 /// impl<A, B, C> Foo<A, B, C> {
 ///     #[project] // Nightly does not need a dummy attribute to the function.
-///     fn baz(self: Pin<&mut Self>) {
+///     fn baz(mut self: Pin<&mut Self>) {
 ///         #[project]
 ///         match self.project() {
 ///             Foo::Tuple(x, y) => {
@@ -347,7 +347,7 @@ pub fn pinned_drop(args: TokenStream, input: TokenStream) -> TokenStream {
 ///
 /// impl<T, U> Foo<T, U> {
 ///     #[project] // Nightly does not need a dummy attribute to the function.
-///     fn baz(self: Pin<&mut Self>) {
+///     fn baz(mut self: Pin<&mut Self>) {
 ///         #[project]
 ///         let Foo { future, field } = self.project();
 ///
@@ -372,7 +372,7 @@ pub fn pinned_drop(args: TokenStream, input: TokenStream) -> TokenStream {
 ///
 /// impl<A, B, C> Foo<A, B, C> {
 ///     #[project] // Nightly does not need a dummy attribute to the function.
-///     fn baz(self: Pin<&mut Self>) {
+///     fn baz(mut self: Pin<&mut Self>) {
 ///         #[project]
 ///         match self.project() {
 ///             Foo::Tuple(x, y) => {

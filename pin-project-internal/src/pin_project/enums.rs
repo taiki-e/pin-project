@@ -6,7 +6,7 @@ use crate::utils::VecExt;
 
 use super::{proj_generics, Context, PIN};
 
-pub(super) fn parse(mut cx: Context, mut item: ItemEnum) -> Result<TokenStream> {
+pub(super) fn parse(cx: &mut Context, mut item: ItemEnum) -> Result<TokenStream> {
     if item.variants.is_empty() {
         return Err(error!(item, "cannot be implemented for enums without variants"));
     }
@@ -23,22 +23,23 @@ pub(super) fn parse(mut cx: Context, mut item: ItemEnum) -> Result<TokenStream> 
         return Err(error!(item.variants, "cannot be implemented for enums that have no field"));
     }
 
-    let (proj_variants, proj_arms) = variants(&mut cx, &mut item)?;
+    let (proj_variants, proj_arms) = variants(cx, &mut item)?;
 
-    let impl_drop = cx.impl_drop(&item.generics);
+    let mut impl_drop = cx.impl_drop(&item.generics);
     let Context { original, projected, lifetime, impl_unpin, .. } = cx;
     let proj_generics = proj_generics(&item.generics, &lifetime);
     let proj_ty_generics = proj_generics.split_for_impl().1;
+    let proj_trait = &cx.projected_trait;
     let (impl_generics, ty_generics, where_clause) = item.generics.split_for_impl();
 
     let mut proj_items = quote! {
         enum #projected #proj_generics #where_clause { #(#proj_variants,)* }
     };
     let proj_method = quote! {
-        impl #impl_generics #original #ty_generics #where_clause {
-            fn project<#lifetime>(self: ::core::pin::Pin<&#lifetime mut Self>) -> #projected #proj_ty_generics {
+        impl #impl_generics #proj_trait #ty_generics for ::core::pin::Pin<&mut #original #ty_generics> #where_clause {
+            fn project<#lifetime>(&#lifetime mut self) -> #projected #proj_ty_generics #where_clause {
                 unsafe {
-                    match ::core::pin::Pin::get_unchecked_mut(self) {
+                    match self.as_mut().get_unchecked_mut() {
                         #(#proj_arms,)*
                     }
                 }

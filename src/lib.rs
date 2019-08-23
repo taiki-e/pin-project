@@ -22,7 +22,7 @@
 //! }
 //!
 //! impl<T, U> Foo<T, U> {
-//!     fn baz(self: Pin<&mut Self>) {
+//!     fn baz(mut self: Pin<&mut Self>) {
 //!         let this = self.project();
 //!         let _: Pin<&mut T> = this.future; // Pinned reference to the field
 //!         let _: &mut U = this.field; // Normal reference to the field

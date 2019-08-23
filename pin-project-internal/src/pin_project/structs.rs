@@ -6,7 +6,7 @@ use crate::utils::VecExt;
 
 use super::{proj_generics, Context, PIN};
 
-pub(super) fn parse(mut cx: Context, mut item: ItemStruct) -> Result<TokenStream> {
+pub(super) fn parse(cx: &mut Context, mut item: ItemStruct) -> Result<TokenStream> {
     let (proj_fields, proj_init) = match &mut item.fields {
         Fields::Named(FieldsNamed { named: fields, .. })
         | Fields::Unnamed(FieldsUnnamed { unnamed: fields, .. })
@@ -16,26 +16,27 @@ pub(super) fn parse(mut cx: Context, mut item: ItemStruct) -> Result<TokenStream
         }
         Fields::Unit => return Err(error!(item, "cannot be implemented for structs with units")),
 
-        Fields::Named(fields) => named(&mut cx, fields)?,
-        Fields::Unnamed(fields) => unnamed(&mut cx, fields)?,
+        Fields::Named(fields) => named(cx, fields)?,
+        Fields::Unnamed(fields) => unnamed(cx, fields)?,
     };
 
     let orig_ident = &cx.original;
     let proj_ident = &cx.projected;
     let lifetime = &cx.lifetime;
-    let impl_drop = cx.impl_drop(&item.generics);
+    let mut impl_drop = cx.impl_drop(&item.generics);
     let proj_generics = proj_generics(&item.generics, &cx.lifetime);
     let proj_ty_generics = proj_generics.split_for_impl().1;
+    let proj_trait = &cx.projected_trait;
     let (impl_generics, ty_generics, where_clause) = item.generics.split_for_impl();
 
     let mut proj_items = quote! {
         struct #proj_ident #proj_generics #where_clause #proj_fields
     };
     let proj_method = quote! {
-        impl #impl_generics #orig_ident #ty_generics #where_clause {
-            fn project<#lifetime>(self: ::core::pin::Pin<&#lifetime mut Self>) -> #proj_ident #proj_ty_generics {
+        impl #impl_generics #proj_trait #ty_generics for ::core::pin::Pin<&mut #orig_ident #ty_generics> #where_clause {
+            fn project<#lifetime>(&#lifetime mut self) -> #proj_ident #proj_ty_generics #where_clause {
                 unsafe {
-                    let this = ::core::pin::Pin::get_unchecked_mut(self);
+                    let this = self.as_mut().get_unchecked_mut();
                     #proj_ident #proj_init
                 }
             }
