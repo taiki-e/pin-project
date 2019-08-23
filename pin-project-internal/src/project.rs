@@ -8,7 +8,7 @@ use syn::{
     *,
 };
 
-use crate::utils::{proj_generics, proj_ident, proj_lifetime_name, VecExt};
+use crate::utils::{proj_generics, proj_ident, proj_lifetime_name, VecExt, DEFAULT_LIFETIME_NAME};
 
 /// The attribute name.
 const NAME: &str = "project";
@@ -46,7 +46,7 @@ impl Replace for ItemImpl {
 
         replace_ident(ident);
 
-        let mut lifetime_name = String::from("'_pin");
+        let mut lifetime_name = String::from(DEFAULT_LIFETIME_NAME);
         proj_lifetime_name(&mut lifetime_name, &self.generics.params);
         self.items
             .iter_mut()

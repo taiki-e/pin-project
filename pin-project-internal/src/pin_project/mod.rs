@@ -2,12 +2,13 @@ use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote, quote_spanned};
 use syn::{
     parse::{Parse, ParseStream},
-    punctuated::Punctuated,
     token::Comma,
     *,
 };
 
-use crate::utils::{self, crate_path, proj_ident, proj_trait_ident};
+use crate::utils::{
+    self, crate_path, proj_ident, proj_lifetime_name, proj_trait_ident, DEFAULT_LIFETIME_NAME,
+};
 
 mod enums;
 mod structs;
@@ -72,9 +73,12 @@ impl Context {
         let Args { pinned_drop, unsafe_unpin } = syn::parse2(args)?;
         let proj_ident = proj_ident(orig_ident);
         let proj_trait = proj_trait_ident(orig_ident);
-        let lifetime = proj_lifetime(&generics.params);
-        let mut generics = generics.clone();
 
+        let mut lifetime_name = String::from(DEFAULT_LIFETIME_NAME);
+        proj_lifetime_name(&mut lifetime_name, &generics.params);
+        let lifetime = Lifetime::new(&lifetime_name, Span::call_site());
+
+        let mut generics = generics.clone();
         let mut impl_unpin = generics.make_where_clause().clone();
         if let Some(unsafe_unpin) = unsafe_unpin {
             let crate_path = crate_path();
@@ -96,6 +100,13 @@ impl Context {
             unsafe_unpin: unsafe_unpin.is_some(),
             pinned_drop,
         })
+    }
+
+    /// Makes the generics of projected type from the reference of the original generics.
+    fn proj_generics(&self) -> Generics {
+        let mut generics = self.generics.clone();
+        utils::proj_generics(&mut generics, self.lifetime.clone());
+        generics
     }
 
     fn push_unpin_bounds(&mut self, ty: &Type) {
@@ -176,7 +187,7 @@ impl Context {
 
     fn make_proj_trait(&self) -> TokenStream {
         let Self { proj_ident, proj_trait, lifetime, .. } = self;
-        let proj_generics = proj_generics(&self.generics, lifetime);
+        let proj_generics = self.proj_generics();
         let proj_ty_generics = proj_generics.split_for_impl().1;
 
         let (orig_generics, _, orig_where_clause) = self.generics.split_for_impl();
@@ -298,18 +309,4 @@ fn ensure_not_packed(item: &ItemStruct) -> Result<TokenStream> {
         }
     };
     Ok(test_fn)
-}
-
-/// Determine the lifetime names. Ensure it doesn't overlap with any existing lifetime names.
-fn proj_lifetime(generics: &Punctuated<GenericParam, Comma>) -> Lifetime {
-    let mut lifetime_name = String::from("'_pin");
-    utils::proj_lifetime_name(&mut lifetime_name, generics);
-    Lifetime::new(&lifetime_name, Span::call_site())
-}
-
-/// Makes the generics of projected type from the reference of the original generics.
-fn proj_generics(generics: &Generics, lifetime: &Lifetime) -> Generics {
-    let mut generics = generics.clone();
-    utils::proj_generics(&mut generics, lifetime.clone());
-    generics
 }

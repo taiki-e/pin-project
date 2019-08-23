@@ -4,7 +4,7 @@ use syn::{parse::Nothing, Field, Fields, FieldsNamed, FieldsUnnamed, ItemEnum, R
 
 use crate::utils::VecExt;
 
-use super::{proj_generics, Context, PIN};
+use super::{Context, PIN};
 
 pub(super) fn parse(cx: &mut Context, mut item: ItemEnum) -> Result<TokenStream> {
     if item.variants.is_empty() {
@@ -26,7 +26,7 @@ pub(super) fn parse(cx: &mut Context, mut item: ItemEnum) -> Result<TokenStream>
     let (proj_variants, proj_arms) = variants(cx, &mut item)?;
 
     let Context { proj_ident, proj_trait, orig_ident, lifetime, .. } = &cx;
-    let proj_generics = proj_generics(&item.generics, lifetime);
+    let proj_generics = cx.proj_generics();
     let proj_ty_generics = proj_generics.split_for_impl().1;
     let (impl_generics, ty_generics, where_clause) = item.generics.split_for_impl();
 
