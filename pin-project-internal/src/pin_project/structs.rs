@@ -4,7 +4,7 @@ use syn::{parse::Nothing, Field, Fields, FieldsNamed, FieldsUnnamed, Index, Item
 
 use crate::utils::VecExt;
 
-use super::{proj_generics, Context, PIN};
+use super::{Context, PIN};
 
 pub(super) fn parse(cx: &mut Context, mut item: ItemStruct) -> Result<TokenStream> {
     let (proj_fields, proj_init) = match &mut item.fields {
@@ -20,19 +20,15 @@ pub(super) fn parse(cx: &mut Context, mut item: ItemStruct) -> Result<TokenStrea
         Fields::Unnamed(fields) => unnamed(cx, fields)?,
     };
 
-    let orig_ident = &cx.original;
-    let proj_ident = &cx.projected;
-    let lifetime = &cx.lifetime;
-    let mut impl_drop = cx.impl_drop(&item.generics);
-    let proj_generics = proj_generics(&item.generics, &cx.lifetime);
+    let Context { proj_ident, proj_trait, orig_ident, lifetime, .. } = &cx;
+    let proj_generics = cx.proj_generics();
     let proj_ty_generics = proj_generics.split_for_impl().1;
-    let proj_trait = &cx.projected_trait;
     let (impl_generics, ty_generics, where_clause) = item.generics.split_for_impl();
 
     let mut proj_items = quote! {
         struct #proj_ident #proj_generics #where_clause #proj_fields
     };
-    let proj_method = quote! {
+    proj_items.extend(quote! {
         impl #impl_generics #proj_trait #ty_generics for ::core::pin::Pin<&mut #orig_ident #ty_generics> #where_clause {
             fn project<#lifetime>(&#lifetime mut self) -> #proj_ident #proj_ty_generics #where_clause {
                 unsafe {
@@ -41,11 +37,7 @@ pub(super) fn parse(cx: &mut Context, mut item: ItemStruct) -> Result<TokenStrea
                 }
             }
         }
-    };
-
-    proj_items.extend(impl_drop.build(orig_ident));
-    proj_items.extend(cx.impl_unpin.build(orig_ident));
-    proj_items.extend(proj_method);
+    });
 
     let mut item = item.into_token_stream();
     item.extend(proj_items);
@@ -53,7 +45,7 @@ pub(super) fn parse(cx: &mut Context, mut item: ItemStruct) -> Result<TokenStrea
 }
 
 fn named(
-    Context { lifetime, impl_unpin, .. }: &mut Context,
+    cx: &mut Context,
     FieldsNamed { named: fields, .. }: &mut FieldsNamed,
 ) -> Result<(TokenStream, TokenStream)> {
     let mut proj_fields = Vec::with_capacity(fields.len());
@@ -61,10 +53,12 @@ fn named(
     for Field { attrs, ident, ty, .. } in fields {
         if let Some(attr) = attrs.find_remove(PIN) {
             let _: Nothing = syn::parse2(attr.tokens)?;
-            impl_unpin.push(ty);
+            cx.push_unpin_bounds(ty);
+            let lifetime = &cx.lifetime;
             proj_fields.push(quote!(#ident: ::core::pin::Pin<&#lifetime mut #ty>));
             proj_init.push(quote!(#ident: ::core::pin::Pin::new_unchecked(&mut this.#ident)));
         } else {
+            let lifetime = &cx.lifetime;
             proj_fields.push(quote!(#ident: &#lifetime mut #ty));
             proj_init.push(quote!(#ident: &mut this.#ident));
         }
@@ -76,7 +70,7 @@ fn named(
 }
 
 fn unnamed(
-    Context { lifetime, impl_unpin, .. }: &mut Context,
+    cx: &mut Context,
     FieldsUnnamed { unnamed: fields, .. }: &mut FieldsUnnamed,
 ) -> Result<(TokenStream, TokenStream)> {
     let mut proj_fields = Vec::with_capacity(fields.len());
@@ -85,10 +79,12 @@ fn unnamed(
         let i = Index::from(i);
         if let Some(attr) = attrs.find_remove(PIN) {
             let _: Nothing = syn::parse2(attr.tokens)?;
-            impl_unpin.push(ty);
+            cx.push_unpin_bounds(ty);
+            let lifetime = &cx.lifetime;
             proj_fields.push(quote!(::core::pin::Pin<&#lifetime mut #ty>));
             proj_init.push(quote!(::core::pin::Pin::new_unchecked(&mut this.#i)));
         } else {
+            let lifetime = &cx.lifetime;
             proj_fields.push(quote!(&#lifetime mut #ty));
             proj_init.push(quote!(&mut this.#i));
         }

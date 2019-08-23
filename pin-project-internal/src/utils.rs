@@ -5,6 +5,8 @@ use syn::{
     Attribute, GenericParam, Generics, Ident, Lifetime, LifetimeDef,
 };
 
+pub(crate) const DEFAULT_LIFETIME_NAME: &str = "'_pin";
+
 /// Makes the ident of projected type from the reference of the original ident.
 pub(crate) fn proj_ident(ident: &Ident) -> Ident {
     format_ident!("__{}Projection", ident)
