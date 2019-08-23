@@ -53,73 +53,170 @@ struct Context {
     /// Name of the trait generated
     /// to provide a 'project' method
     projected_trait: Ident,
+
+    /// Generics of original type.
     generics: Generics,
 
+    /// Lifetime added to projected type.
     lifetime: Lifetime,
-    impl_unpin: ImplUnpin,
+
+    /// Where-clause for conditional Unpin implementation.
+    impl_unpin: WhereClause,
+
+    unsafe_unpin: bool,
     pinned_drop: Option<Span>,
 }
 
 impl Context {
-    fn new(args: TokenStream, original: Ident, generics: &Generics) -> Result<Self> {
+    fn new(args: TokenStream, original: &Ident, generics: &Generics) -> Result<Self> {
         let Args { pinned_drop, unsafe_unpin } = syn::parse2(args)?;
-        let projected = proj_ident(&original);
+        let projected = proj_ident(original);
+        let projected_trait = proj_trait_ident(original);
         let lifetime = proj_lifetime(&generics.params);
-        let impl_unpin = ImplUnpin::new(generics, unsafe_unpin);
-        let projected_trait = proj_trait_ident(&original);
+        let mut generics = generics.clone();
+
+        let mut impl_unpin = generics.make_where_clause().clone();
+        if let Some(unsafe_unpin) = unsafe_unpin {
+            let crate_path = crate_path();
+            impl_unpin.predicates.push(
+                syn::parse2(quote_spanned! { unsafe_unpin =>
+                    ::#crate_path::__private::Wrapper<Self>: ::#crate_path::UnsafeUnpin
+                })
+                .unwrap(),
+            );
+        }
+
         Ok(Self {
-            original,
+            original: original.clone(),
             projected,
             projected_trait,
+            generics,
             lifetime,
             impl_unpin,
+            unsafe_unpin: unsafe_unpin.is_some(),
             pinned_drop,
-            generics: generics.clone(),
         })
     }
 
-    fn impl_drop<'a>(&self, generics: &'a Generics) -> ImplDrop<'a> {
-        ImplDrop::new(generics, self.pinned_drop)
+    fn push_unpin_bounds(&mut self, ty: &Type) {
+        // We only add bounds for automatically generated impls
+        if !self.unsafe_unpin {
+            self.impl_unpin.predicates.push(syn::parse_quote!(#ty: ::core::marker::Unpin));
+        }
+    }
+
+    /// Makes conditional `Unpin` implementation for original type.
+    fn make_unpin_impl(&self) -> TokenStream {
+        let orig_ident = &self.original;
+        let (impl_generics, ty_generics, _) = self.generics.split_for_impl();
+        let where_clause = &self.impl_unpin;
+
+        quote! {
+            impl #impl_generics ::core::marker::Unpin for #orig_ident #ty_generics #where_clause {}
+        }
+    }
+
+    /// Makes `Drop` implementation for original type.
+    fn make_drop_impl(&self) -> TokenStream {
+        let orig_ident = &self.original;
+        let (impl_generics, ty_generics, where_clause) = self.generics.split_for_impl();
+
+        if let Some(pinned_drop) = self.pinned_drop {
+            let crate_path = crate_path();
+            let call = quote_spanned! { pinned_drop =>
+                ::#crate_path::__private::UnsafePinnedDrop::pinned_drop(pinned_self)
+            };
+
+            quote! {
+                impl #impl_generics ::core::ops::Drop for #orig_ident #ty_generics #where_clause {
+                    fn drop(&mut self) {
+                        // Safety - we're in 'drop', so we know that 'self' will
+                        // never move again
+                        let pinned_self = unsafe { ::core::pin::Pin::new_unchecked(self) };
+                        // We call `pinned_drop` only once. Since `UnsafePinnedDrop::pinned_drop`
+                        // is an unsafe function and a private API, it is never called again in safe
+                        // code *unless the user uses a maliciously crafted macro*.
+                        unsafe {
+                            #call;
+                        }
+                    }
+                }
+            }
+        } else {
+            // If the user does not provide a pinned_drop impl,
+            // we need to ensure that they don't provide a `Drop` impl of their
+            // own.
+            // Based on https://github.com/upsuper/assert-impl/blob/f503255b292ab0ba8d085b657f4065403cfa46eb/src/lib.rs#L80-L87
+            //
+            // We create a new identifier for each struct, so that the traits
+            // for different types do not conflcit with each other
+            //
+            // Another approach would be to provide an empty Drop impl,
+            // which would conflict with a user-provided Drop impl.
+            // However, this would trigger the compiler's special handling
+            // of Drop types (e.g. fields cannot be moved out of a Drop type).
+            // This approach prevents the creation of needless Drop impls,
+            // giving users more flexibility
+            let trait_ident = format_ident!("{}MustNotImplDrop", orig_ident);
+            quote! {
+                // There are two possible cases:
+                // 1. The user type does not implement Drop. In this case,
+                // the first blanked impl will not apply to it. This code
+                // will compile, as there is only one impl of MustNotImplDrop for the user type
+                // 2. The user type does impl Drop. This will make the blanket impl applicable,
+                // which will then comflict with the explicit MustNotImplDrop impl below.
+                // This will result in a compilation error, which is exactly what we want
+                trait #trait_ident {}
+                #[allow(clippy::drop_bounds)]
+                impl<T: ::core::ops::Drop> #trait_ident for T {}
+                impl #impl_generics #trait_ident for #orig_ident #ty_generics #where_clause {}
+            }
+        }
+    }
+
+    fn make_proj_trait(&self) -> TokenStream {
+        let proj_trait = &self.projected_trait;
+        let lifetime = &self.lifetime;
+        let proj_ident = &self.projected;
+        let proj_generics = proj_generics(&self.generics, &self.lifetime);
+        let proj_ty_generics = proj_generics.split_for_impl().1;
+
+        let (orig_generics, _, orig_where_clause) = self.generics.split_for_impl();
+
+        quote! {
+            trait #proj_trait #orig_generics {
+                fn project<#lifetime>(&#lifetime mut self) -> #proj_ident #proj_ty_generics #orig_where_clause;
+            }
+        }
     }
 }
 
 fn parse(args: TokenStream, input: TokenStream) -> Result<TokenStream> {
     match syn::parse2(input)? {
         Item::Struct(item) => {
-            let mut cx = Context::new(args, item.ident.clone(), &item.generics)?;
+            let mut cx = Context::new(args, &item.ident, &item.generics)?;
 
-            let mut res = structs::parse(&mut cx, item.clone())?;
-            res.extend(ensure_not_packed(&item)?);
-            res.extend(make_proj_trait(&mut cx)?);
+            let packed_check = ensure_not_packed(&item)?;
+            let mut res = structs::parse(&mut cx, item)?;
+            res.extend(packed_check);
+            res.extend(cx.make_drop_impl());
+            res.extend(cx.make_unpin_impl());
+            res.extend(cx.make_proj_trait());
             Ok(res)
         }
         Item::Enum(item) => {
-            let mut cx = Context::new(args, item.ident.clone(), &item.generics)?;
+            let mut cx = Context::new(args, &item.ident, &item.generics)?;
 
             // We don't need to check for '#[repr(packed)]',
             // since it does not apply to enums
-            let mut res = enums::parse(&mut cx, item.clone())?;
-            res.extend(make_proj_trait(&mut cx)?);
+            let mut res = enums::parse(&mut cx, item)?;
+            res.extend(cx.make_drop_impl());
+            res.extend(cx.make_unpin_impl());
+            res.extend(cx.make_proj_trait());
             Ok(res)
         }
         item => Err(error!(item, "may only be used on structs or enums")),
     }
-}
-
-fn make_proj_trait(cx: &mut Context) -> Result<TokenStream> {
-    let proj_trait = &cx.projected_trait;
-    let lifetime = &cx.lifetime;
-    let proj_ident = &cx.projected;
-    let proj_generics = proj_generics(&cx.generics, &cx.lifetime);
-    let proj_ty_generics = proj_generics.split_for_impl().1;
-
-    let (orig_generics, _orig_ty_generics, orig_where_clause) = cx.generics.split_for_impl();
-
-    Ok(quote! {
-        trait #proj_trait #orig_generics {
-            fn project<#lifetime>(&#lifetime mut self) -> #proj_ident #proj_ty_generics #orig_where_clause;
-        }
-    })
 }
 
 fn ensure_not_packed(item: &ItemStruct) -> Result<TokenStream> {
@@ -217,117 +314,4 @@ fn proj_generics(generics: &Generics, lifetime: &Lifetime) -> Generics {
     let mut generics = generics.clone();
     utils::proj_generics(&mut generics, lifetime.clone());
     generics
-}
-
-// =================================================================================================
-// Drop implementation
-
-struct ImplDrop<'a> {
-    generics: &'a Generics,
-    pinned_drop: Option<Span>,
-}
-
-impl<'a> ImplDrop<'a> {
-    fn new(generics: &'a Generics, pinned_drop: Option<Span>) -> Self {
-        Self { generics, pinned_drop }
-    }
-
-    fn build(&mut self, ident: &Ident) -> TokenStream {
-        let (impl_generics, ty_generics, where_clause) = self.generics.split_for_impl();
-
-        if let Some(pinned_drop) = self.pinned_drop {
-            let crate_path = crate_path();
-            let call = quote_spanned! { pinned_drop =>
-                ::#crate_path::__private::UnsafePinnedDrop::pinned_drop(pinned_self)
-            };
-
-            quote! {
-                impl #impl_generics ::core::ops::Drop for #ident #ty_generics #where_clause {
-                    fn drop(&mut self) {
-                        // Safety - we're in 'drop', so we know that 'self' will
-                        // never move again
-                        let pinned_self = unsafe { ::core::pin::Pin::new_unchecked(self) };
-                        // We call `pinned_drop` only once. Since `UnsafePinnedDrop::pinned_drop`
-                        // is an unsafe function and a private API, it is never called again in safe
-                        // code *unless the user uses a maliciously crafted macro*.
-                        unsafe {
-                            #call;
-                        }
-                    }
-                }
-            }
-        } else {
-            // If the user does not provide a pinned_drop impl,
-            // we need to ensure that they don't provide a `Drop` impl of their
-            // own.
-            // Based on https://github.com/upsuper/assert-impl/blob/f503255b292ab0ba8d085b657f4065403cfa46eb/src/lib.rs#L80-L87
-            //
-            // We create a new identifier for each struct, so that the traits
-            // for different types do not conflcit with each other
-            //
-            // Another approach would be to provide an empty Drop impl,
-            // which would conflict with a user-provided Drop impl.
-            // However, this would trigger the compiler's special handling
-            // of Drop types (e.g. fields cannot be moved out of a Drop type).
-            // This approach prevents the creation of needless Drop impls,
-            // giving users more flexibility
-            let trait_ident = format_ident!("{}MustNotImplDrop", ident);
-            quote! {
-                // There are two possible cases:
-                // 1. The user type does not implement Drop. In this case,
-                // the first blanked impl will not apply to it. This code
-                // will compile, as there is only one impl of MustNotImplDrop for the user type
-                // 2. The user type does impl Drop. This will make the blanket impl applicable,
-                // which will then comflict with the explicit MustNotImplDrop impl below.
-                // This will result in a compilation error, which is exactly what we want
-                trait #trait_ident {}
-                #[allow(clippy::drop_bounds)]
-                impl<T: ::core::ops::Drop> #trait_ident for T {}
-                impl #impl_generics #trait_ident for #ident #ty_generics #where_clause {}
-            }
-        }
-    }
-}
-
-// =================================================================================================
-// conditional Unpin implementation
-
-struct ImplUnpin {
-    generics: Generics,
-    unsafe_unpin: bool,
-}
-
-impl ImplUnpin {
-    fn new(generics: &Generics, unsafe_unpin: Option<Span>) -> Self {
-        let mut generics = generics.clone();
-        if let Some(unsafe_unpin) = unsafe_unpin {
-            let crate_path = crate_path();
-            generics.make_where_clause().predicates.push(
-                syn::parse2(quote_spanned! { unsafe_unpin =>
-                    ::#crate_path::__private::Wrapper<Self>: ::#crate_path::UnsafeUnpin
-                })
-                .unwrap(),
-            );
-        }
-
-        Self { generics, unsafe_unpin: unsafe_unpin.is_some() }
-    }
-
-    fn push(&mut self, ty: &Type) {
-        // We only add bounds for automatically generated impls
-        if !self.unsafe_unpin {
-            self.generics
-                .make_where_clause()
-                .predicates
-                .push(syn::parse_quote!(#ty: ::core::marker::Unpin));
-        }
-    }
-
-    /// Creates `Unpin` implementation.
-    fn build(&mut self, ident: &Ident) -> TokenStream {
-        let (impl_generics, ty_generics, where_clause) = self.generics.split_for_impl();
-        quote! {
-            impl #impl_generics ::core::marker::Unpin for #ident #ty_generics #where_clause {}
-        }
-    }
 }
