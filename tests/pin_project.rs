@@ -172,6 +172,29 @@ fn where_clause_and_associated_type_fields() {
 }
 
 #[test]
+fn test_move_out() {
+    struct NotCopy;
+
+    #[pin_project]
+    struct Foo {
+        val: NotCopy,
+    }
+
+    let foo = Foo { val: NotCopy };
+    let _val: NotCopy = foo.val;
+
+    #[pin_project]
+    enum Bar {
+        Variant(NotCopy),
+    }
+
+    let bar = Bar::Variant(NotCopy);
+    let _val: NotCopy = match bar {
+        Bar::Variant(val) => val,
+    };
+}
+
+#[test]
 fn trait_bounds_on_type_generics() {
     // struct
 

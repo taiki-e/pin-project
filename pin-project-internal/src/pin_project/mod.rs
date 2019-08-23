@@ -277,13 +277,32 @@ impl<'a> ImplDrop<'a> {
                 }
             }
         } else {
+            // If the user does not provide a pinned_drop impl,
+            // we need to ensure that they don't provide a `Drop` impl of their
+            // own.
+            // Based on https://github.com/upsuper/assert-impl/blob/f503255b292ab0ba8d085b657f4065403cfa46eb/src/lib.rs#L80-L87
+            //
+            // We create a new identifier for each struct, so that the traits
+            // for different types do not conflcit with each other
+            //
+            // Another approach would be to provide an empty Drop impl,
+            // which would conflict with a user-provided Drop impl.
+            // However, this would trigger the compiler's special handling
+            // of Drop types (e.g. fields cannot be moved out of a Drop type).
+            // This approach prevents the creation of needless Drop impls,
+            // giving users more flexibility
+            let trait_ident = format_ident!("{}MustNotImplDrop", ident);
             quote! {
-                impl #impl_generics ::core::ops::Drop for #ident #ty_generics #where_clause {
-                    fn drop(&mut self) {
-                        // Do nothing. The precense of this Drop
-                        // impl ensures that the user can't provide one of their own
-                    }
-                }
+                // There are two possible cases:
+                // 1. The user type does not implement Drop. In this case,
+                // the first blanked impl will not apply to it. This code
+                // will compile, as there is only one impl of MustNotImplDrop for the user type
+                // 2. The user type does impl Drop. This will make the blanket impl applicable,
+                // which will then comflict with the explicit MustNotImplDrop impl below.
+                // This will result in a compilation error, which is exactly what we want
+                trait #trait_ident {}
+                impl<T: ::core::ops::Drop> #trait_ident for T {}
+                impl #impl_generics #trait_ident for #ident #ty_generics #where_clause {}
             }
         }
     }
