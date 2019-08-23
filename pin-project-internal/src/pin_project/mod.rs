@@ -47,12 +47,12 @@ impl Parse for Args {
 
 struct Context {
     /// Name of the original type.
-    original: Ident,
+    orig_ident: Ident,
     /// Name of the projected type.
-    projected: Ident,
+    proj_ident: Ident,
     /// Name of the trait generated
     /// to provide a 'project' method
-    projected_trait: Ident,
+    proj_trait: Ident,
 
     /// Generics of original type.
     generics: Generics,
@@ -68,10 +68,10 @@ struct Context {
 }
 
 impl Context {
-    fn new(args: TokenStream, original: &Ident, generics: &Generics) -> Result<Self> {
+    fn new(args: TokenStream, orig_ident: &Ident, generics: &Generics) -> Result<Self> {
         let Args { pinned_drop, unsafe_unpin } = syn::parse2(args)?;
-        let projected = proj_ident(original);
-        let projected_trait = proj_trait_ident(original);
+        let proj_ident = proj_ident(orig_ident);
+        let proj_trait = proj_trait_ident(orig_ident);
         let lifetime = proj_lifetime(&generics.params);
         let mut generics = generics.clone();
 
@@ -87,9 +87,9 @@ impl Context {
         }
 
         Ok(Self {
-            original: original.clone(),
-            projected,
-            projected_trait,
+            orig_ident: orig_ident.clone(),
+            proj_ident,
+            proj_trait,
             generics,
             lifetime,
             impl_unpin,
@@ -107,7 +107,7 @@ impl Context {
 
     /// Makes conditional `Unpin` implementation for original type.
     fn make_unpin_impl(&self) -> TokenStream {
-        let orig_ident = &self.original;
+        let orig_ident = &self.orig_ident;
         let (impl_generics, ty_generics, _) = self.generics.split_for_impl();
         let where_clause = &self.impl_unpin;
 
@@ -118,7 +118,7 @@ impl Context {
 
     /// Makes `Drop` implementation for original type.
     fn make_drop_impl(&self) -> TokenStream {
-        let orig_ident = &self.original;
+        let orig_ident = &self.orig_ident;
         let (impl_generics, ty_generics, where_clause) = self.generics.split_for_impl();
 
         if let Some(pinned_drop) = self.pinned_drop {
@@ -175,10 +175,8 @@ impl Context {
     }
 
     fn make_proj_trait(&self) -> TokenStream {
-        let proj_trait = &self.projected_trait;
-        let lifetime = &self.lifetime;
-        let proj_ident = &self.projected;
-        let proj_generics = proj_generics(&self.generics, &self.lifetime);
+        let Self { proj_ident, proj_trait, lifetime, .. } = self;
+        let proj_generics = proj_generics(&self.generics, lifetime);
         let proj_ty_generics = proj_generics.split_for_impl().1;
 
         let (orig_generics, _, orig_where_clause) = self.generics.split_for_impl();

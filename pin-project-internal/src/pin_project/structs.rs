@@ -20,12 +20,9 @@ pub(super) fn parse(cx: &mut Context, mut item: ItemStruct) -> Result<TokenStrea
         Fields::Unnamed(fields) => unnamed(cx, fields)?,
     };
 
-    let orig_ident = &cx.original;
-    let proj_ident = &cx.projected;
-    let lifetime = &cx.lifetime;
+    let Context { proj_ident, proj_trait, orig_ident, lifetime, .. } = &cx;
     let proj_generics = proj_generics(&item.generics, lifetime);
     let proj_ty_generics = proj_generics.split_for_impl().1;
-    let proj_trait = &cx.projected_trait;
     let (impl_generics, ty_generics, where_clause) = item.generics.split_for_impl();
 
     let mut proj_items = quote! {

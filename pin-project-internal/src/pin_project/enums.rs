@@ -25,18 +25,17 @@ pub(super) fn parse(cx: &mut Context, mut item: ItemEnum) -> Result<TokenStream>
 
     let (proj_variants, proj_arms) = variants(cx, &mut item)?;
 
-    let Context { original, projected, lifetime, .. } = &cx;
+    let Context { proj_ident, proj_trait, orig_ident, lifetime, .. } = &cx;
     let proj_generics = proj_generics(&item.generics, lifetime);
     let proj_ty_generics = proj_generics.split_for_impl().1;
-    let proj_trait = &cx.projected_trait;
     let (impl_generics, ty_generics, where_clause) = item.generics.split_for_impl();
 
     let mut proj_items = quote! {
-        enum #projected #proj_generics #where_clause { #(#proj_variants,)* }
+        enum #proj_ident #proj_generics #where_clause { #(#proj_variants,)* }
     };
     proj_items.extend(quote! {
-        impl #impl_generics #proj_trait #ty_generics for ::core::pin::Pin<&mut #original #ty_generics> #where_clause {
-            fn project<#lifetime>(&#lifetime mut self) -> #projected #proj_ty_generics #where_clause {
+        impl #impl_generics #proj_trait #ty_generics for ::core::pin::Pin<&mut #orig_ident #ty_generics> #where_clause {
+            fn project<#lifetime>(&#lifetime mut self) -> #proj_ident #proj_ty_generics #where_clause {
                 unsafe {
                     match self.as_mut().get_unchecked_mut() {
                         #(#proj_arms,)*
@@ -60,8 +59,8 @@ fn variants(cx: &mut Context, item: &mut ItemEnum) -> Result<(Vec<TokenStream>, 
             Fields::Named(fields) => named(cx, fields)?,
             Fields::Unit => (TokenStream::new(), TokenStream::new(), TokenStream::new()),
         };
-        let Context { original, projected, .. } = &cx;
-        let proj_arm = quote!(#original::#ident #proj_pat => #projected::#ident #proj_body );
+        let Context { orig_ident, proj_ident, .. } = &cx;
+        let proj_arm = quote!(#orig_ident::#ident #proj_pat => #proj_ident::#ident #proj_body );
         let proj_variant = quote!(#ident #proj_field);
         proj_arms.push(proj_arm);
         proj_variants.push(proj_variant);
