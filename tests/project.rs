@@ -10,7 +10,7 @@ use pin_project::{pin_project, project};
 
 #[project] // Nightly does not need a dummy attribute to the function.
 #[test]
-fn test_project_attr() {
+fn project_stmt_expr() {
     // struct
 
     #[pin_project]
@@ -85,7 +85,7 @@ fn test_project_attr() {
 }
 
 #[test]
-fn test_project_attr_nightly() {
+fn project_stmt_expr_nightly() {
     // enum
 
     #[pin_project]
@@ -135,4 +135,66 @@ fn test_project_attr_nightly() {
         }
         Baz::None => {}
     };
+}
+
+#[test]
+fn project_impl() {
+    #[pin_project]
+    struct HasGenerics<T, U> {
+        #[pin]
+        field1: T,
+        field2: U,
+    }
+
+    #[project]
+    impl<T, U> HasGenerics<T, U> {
+        fn a(self) {
+            let Self { field1, field2 } = self;
+
+            let _x: Pin<&mut T> = field1;
+            let _y: &mut U = field2;
+        }
+    }
+
+    #[pin_project]
+    struct NoneGenerics {
+        #[pin]
+        field1: i32,
+        field2: u32,
+    }
+
+    #[project]
+    impl NoneGenerics {}
+
+    #[pin_project]
+    struct HasLifetimes<'a, T, U> {
+        #[pin]
+        field1: &'a mut T,
+        field2: U,
+    }
+
+    #[project]
+    impl<T, U> HasLifetimes<'_, T, U> {}
+
+    #[pin_project]
+    struct HasOverlappingLifetimes<'_pin, T, U> {
+        #[pin]
+        field1: &'_pin mut T,
+        field2: U,
+    }
+
+    #[project]
+    impl<'_pin, T, U> HasOverlappingLifetimes<'_pin, T, U> {}
+
+    #[pin_project]
+    struct HasOverlappingLifetimes2<T, U> {
+        #[pin]
+        field1: T,
+        field2: U,
+    }
+
+    #[project]
+    impl<T, U> HasOverlappingLifetimes2<T, U> {
+        fn foo<'_pin>(&'_pin self) {}
+    }
 }

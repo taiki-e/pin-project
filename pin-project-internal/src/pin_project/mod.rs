@@ -7,7 +7,7 @@ use syn::{
     *,
 };
 
-use crate::utils::{crate_path, proj_ident, proj_trait_ident};
+use crate::utils::{self, crate_path, proj_ident, proj_trait_ident};
 
 mod enums;
 mod structs;
@@ -208,34 +208,14 @@ fn ensure_not_packed(item: &ItemStruct) -> Result<TokenStream> {
 /// Determine the lifetime names. Ensure it doesn't overlap with any existing lifetime names.
 fn proj_lifetime(generics: &Punctuated<GenericParam, Comma>) -> Lifetime {
     let mut lifetime_name = String::from("'_pin");
-    let existing_lifetimes: Vec<String> = generics
-        .iter()
-        .filter_map(|param| {
-            if let GenericParam::Lifetime(LifetimeDef { lifetime, .. }) = param {
-                Some(lifetime.to_string())
-            } else {
-                None
-            }
-        })
-        .collect();
-    while existing_lifetimes.iter().any(|name| *name == lifetime_name) {
-        lifetime_name.push('_');
-    }
+    utils::proj_lifetime_name(&mut lifetime_name, generics);
     Lifetime::new(&lifetime_name, Span::call_site())
 }
 
 /// Makes the generics of projected type from the reference of the original generics.
 fn proj_generics(generics: &Generics, lifetime: &Lifetime) -> Generics {
     let mut generics = generics.clone();
-    generics.params.insert(
-        0,
-        GenericParam::Lifetime(LifetimeDef {
-            attrs: Vec::new(),
-            lifetime: lifetime.clone(),
-            colon_token: None,
-            bounds: Punctuated::new(),
-        }),
-    );
+    utils::proj_generics(&mut generics, lifetime.clone());
     generics
 }
 
@@ -277,13 +257,32 @@ impl<'a> ImplDrop<'a> {
                 }
             }
         } else {
+            // If the user does not provide a pinned_drop impl,
+            // we need to ensure that they don't provide a `Drop` impl of their
+            // own.
+            // Based on https://github.com/upsuper/assert-impl/blob/f503255b292ab0ba8d085b657f4065403cfa46eb/src/lib.rs#L80-L87
+            //
+            // We create a new identifier for each struct, so that the traits
+            // for different types do not conflcit with each other
+            //
+            // Another approach would be to provide an empty Drop impl,
+            // which would conflict with a user-provided Drop impl.
+            // However, this would trigger the compiler's special handling
+            // of Drop types (e.g. fields cannot be moved out of a Drop type).
+            // This approach prevents the creation of needless Drop impls,
+            // giving users more flexibility
+            let trait_ident = format_ident!("{}MustNotImplDrop", ident);
             quote! {
-                impl #impl_generics ::core::ops::Drop for #ident #ty_generics #where_clause {
-                    fn drop(&mut self) {
-                        // Do nothing. The precense of this Drop
-                        // impl ensures that the user can't provide one of their own
-                    }
-                }
+                // There are two possible cases:
+                // 1. The user type does not implement Drop. In this case,
+                // the first blanked impl will not apply to it. This code
+                // will compile, as there is only one impl of MustNotImplDrop for the user type
+                // 2. The user type does impl Drop. This will make the blanket impl applicable,
+                // which will then comflict with the explicit MustNotImplDrop impl below.
+                // This will result in a compilation error, which is exactly what we want
+                trait #trait_ident {}
+                impl<T: ::core::ops::Drop> #trait_ident for T {}
+                impl #impl_generics #trait_ident for #ident #ty_generics #where_clause {}
             }
         }
     }
