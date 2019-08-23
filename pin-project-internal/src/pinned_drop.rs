@@ -31,7 +31,7 @@ fn parse_arg(arg: &FnArg) -> Result<&Type> {
         }
     }
 
-    Err(error!(&arg, "#[pinned_drop] function must take a argument `Pin<&mut Type>`"))
+    Err(error!(arg, "#[pinned_drop] function must take a argument `Pin<&mut Type>`"))
 }
 
 fn parse(input: TokenStream) -> Result<TokenStream> {

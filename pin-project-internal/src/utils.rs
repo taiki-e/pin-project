@@ -1,6 +1,9 @@
-use proc_macro2::Ident;
 use quote::format_ident;
-use syn::Attribute;
+use syn::{
+    punctuated::Punctuated,
+    token::{self, Comma},
+    Attribute, GenericParam, Generics, Ident, Lifetime, LifetimeDef,
+};
 
 /// Makes the ident of projected type from the reference of the original ident.
 pub(crate) fn proj_ident(ident: &Ident) -> Ident {
@@ -9,6 +12,46 @@ pub(crate) fn proj_ident(ident: &Ident) -> Ident {
 
 pub(crate) fn proj_trait_ident(ident: &Ident) -> Ident {
     format_ident!("__{}ProjectionTrait", ident)
+}
+
+/// Determine the lifetime names. Ensure it doesn't overlap with any existing lifetime names.
+pub(crate) fn proj_lifetime_name(
+    lifetime_name: &mut String,
+    generics: &Punctuated<GenericParam, Comma>,
+) {
+    let existing_lifetimes: Vec<String> = generics
+        .iter()
+        .filter_map(|param| {
+            if let GenericParam::Lifetime(LifetimeDef { lifetime, .. }) = param {
+                Some(lifetime.to_string())
+            } else {
+                None
+            }
+        })
+        .collect();
+    while existing_lifetimes.iter().any(|name| name.starts_with(&**lifetime_name)) {
+        lifetime_name.push('_');
+    }
+}
+
+/// Makes the generics of projected type from the reference of the original generics.
+pub(crate) fn proj_generics(generics: &mut Generics, lifetime: Lifetime) {
+    if let lt_token @ None = &mut generics.lt_token {
+        *lt_token = Some(token::Lt::default())
+    }
+    if let gt_token @ None = &mut generics.gt_token {
+        *gt_token = Some(token::Gt::default())
+    }
+
+    generics.params.insert(
+        0,
+        GenericParam::Lifetime(LifetimeDef {
+            attrs: Vec::new(),
+            lifetime,
+            colon_token: None,
+            bounds: Punctuated::new(),
+        }),
+    );
 }
 
 pub(crate) trait VecExt {
@@ -48,7 +91,7 @@ pub(crate) fn crate_path() -> Ident {
 
 macro_rules! error {
     ($span:expr, $msg:expr) => {
-        syn::Error::new_spanned($span, $msg)
+        syn::Error::new_spanned(&$span, $msg)
     };
     ($span:expr, $($tt:tt)*) => {
         error!($span, format!($($tt)*))

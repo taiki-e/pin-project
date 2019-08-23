@@ -1,4 +1,4 @@
-use proc_macro2::TokenStream;
+use proc_macro2::{Span, TokenStream};
 use quote::ToTokens;
 use syn::{
     parse::Nothing,
@@ -8,7 +8,7 @@ use syn::{
     *,
 };
 
-use crate::utils::{proj_ident, VecExt};
+use crate::utils::{proj_generics, proj_ident, proj_lifetime_name, VecExt};
 
 /// The attribute name.
 const NAME: &str = "project";
@@ -25,6 +25,7 @@ fn parse(input: TokenStream) -> Result<TokenStream> {
         }
         Stmt::Local(local) => local.replace(&mut Register::default()),
         Stmt::Item(Item::Fn(ItemFn { block, .. })) => Dummy.visit_block_mut(block),
+        Stmt::Item(Item::Impl(item)) => item.replace(&mut Register::default()),
         _ => {}
     }
 
@@ -34,6 +35,37 @@ fn parse(input: TokenStream) -> Result<TokenStream> {
 trait Replace {
     /// Replace the original ident with the ident of projected type.
     fn replace(&mut self, register: &mut Register);
+}
+
+impl Replace for ItemImpl {
+    fn replace(&mut self, _: &mut Register) {
+        let PathSegment { ident, arguments } = match &mut *self.self_ty {
+            Type::Path(TypePath { qself: None, path }) => path.segments.last_mut().unwrap(),
+            _ => return,
+        };
+
+        replace_ident(ident);
+
+        let mut lifetime_name = String::from("'_pin");
+        proj_lifetime_name(&mut lifetime_name, &self.generics.params);
+        self.items
+            .iter_mut()
+            .filter_map(|i| if let ImplItem::Method(i) = i { Some(i) } else { None })
+            .for_each(|item| proj_lifetime_name(&mut lifetime_name, &item.sig.generics.params));
+        let lifetime = Lifetime::new(&lifetime_name, Span::call_site());
+
+        proj_generics(&mut self.generics, syn::parse_quote!(#lifetime));
+
+        match arguments {
+            PathArguments::None => {
+                *arguments = PathArguments::AngleBracketed(syn::parse_quote!(<#lifetime>));
+            }
+            PathArguments::AngleBracketed(args) => {
+                args.args.insert(0, syn::parse_quote!(#lifetime));
+            }
+            PathArguments::Parenthesized(_) => unreachable!(),
+        }
+    }
 }
 
 impl Replace for Local {
@@ -83,9 +115,13 @@ impl Replace for Path {
 
         if register.0.is_none() || register.eq(&self.segments[0].ident, len) {
             register.update(&self.segments[0].ident, len);
-            self.segments[0].ident = proj_ident(&self.segments[0].ident)
+            replace_ident(&mut self.segments[0].ident);
         }
     }
+}
+
+fn replace_ident(ident: &mut Ident) {
+    *ident = proj_ident(ident);
 }
 
 #[derive(Default)]

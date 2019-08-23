@@ -7,7 +7,7 @@ use syn::{
     *,
 };
 
-use crate::utils::{crate_path, proj_ident, proj_trait_ident};
+use crate::utils::{self, crate_path, proj_ident, proj_trait_ident};
 
 mod enums;
 mod structs;
@@ -208,34 +208,14 @@ fn ensure_not_packed(item: &ItemStruct) -> Result<TokenStream> {
 /// Determine the lifetime names. Ensure it doesn't overlap with any existing lifetime names.
 fn proj_lifetime(generics: &Punctuated<GenericParam, Comma>) -> Lifetime {
     let mut lifetime_name = String::from("'_pin");
-    let existing_lifetimes: Vec<String> = generics
-        .iter()
-        .filter_map(|param| {
-            if let GenericParam::Lifetime(LifetimeDef { lifetime, .. }) = param {
-                Some(lifetime.to_string())
-            } else {
-                None
-            }
-        })
-        .collect();
-    while existing_lifetimes.iter().any(|name| *name == lifetime_name) {
-        lifetime_name.push('_');
-    }
+    utils::proj_lifetime_name(&mut lifetime_name, generics);
     Lifetime::new(&lifetime_name, Span::call_site())
 }
 
 /// Makes the generics of projected type from the reference of the original generics.
 fn proj_generics(generics: &Generics, lifetime: &Lifetime) -> Generics {
     let mut generics = generics.clone();
-    generics.params.insert(
-        0,
-        GenericParam::Lifetime(LifetimeDef {
-            attrs: Vec::new(),
-            lifetime: lifetime.clone(),
-            colon_token: None,
-            bounds: Punctuated::new(),
-        }),
-    );
+    utils::proj_generics(&mut generics, lifetime.clone());
     generics
 }
 

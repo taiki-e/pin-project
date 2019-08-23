@@ -289,7 +289,7 @@ pub fn pin_project(args: TokenStream, input: TokenStream) -> TokenStream {
 /// `Pin<&mut Self>`. In particular, it will never be called more than once,
 /// just like [`Drop::drop`].
 ///
-/// Example:
+/// ## Example
 ///
 /// ```rust
 /// use pin_project::{pin_project, pinned_drop};
@@ -325,14 +325,55 @@ pub fn pinned_drop(args: TokenStream, input: TokenStream) -> TokenStream {
 /// *This attribute is available if pin-project is built with the
 /// `"project_attr"` feature.*
 ///
-/// The attribute at the expression position is not stable, so you need to use
-/// a dummy `#[project]` attribute for the function.
+/// The following three syntaxes are supported.
 ///
-/// ## Examples
+/// ## `impl` blocks
 ///
-/// The following two syntaxes are supported.
+/// All methods (and associated functions) in `#[project] impl` block become
+/// methods of the projected type. If you want to implement methods on the
+/// original type, you need to create another (non-`#[project]`) `impl` block.
 ///
-/// ### `let` bindings
+/// To call a method implemented in `#[project] impl` block, you need to first
+/// get the projected-type with `let this = self.project();`.
+///
+/// ### Examples
+///
+/// ```rust
+/// use pin_project::{pin_project, project};
+/// use std::pin::Pin;
+///
+/// #[pin_project]
+/// struct Foo<T, U> {
+///     #[pin]
+///     future: T,
+///     field: U,
+/// }
+///
+/// // impl for the original type
+/// impl<T, U> Foo<T, U> {
+///     fn bar(mut self: Pin<&mut Self>) {
+///         self.project().baz()
+///     }
+/// }
+///
+/// // impl for the projected type
+/// #[project]
+/// impl<T, U> Foo<T, U> {
+///     fn baz(self) {
+///         let Self { future, field } = self;
+///
+///         let _: Pin<&mut T> = future;
+///         let _: &mut U = field;
+///     }
+/// }
+/// ```
+///
+/// ## `let` bindings
+///
+/// *The attribute at the expression position is not stable, so you need to use
+/// a dummy `#[project]` attribute for the function.*
+///
+/// ### Examples
 ///
 /// ```rust
 /// use pin_project::{pin_project, project};
@@ -357,7 +398,12 @@ pub fn pinned_drop(args: TokenStream, input: TokenStream) -> TokenStream {
 /// }
 /// ```
 ///
-/// ### `match` expressions
+/// ## `match` expressions
+///
+/// *The attribute at the expression position is not stable, so you need to use
+/// a dummy `#[project]` attribute for the function.*
+///
+/// ### Examples
 ///
 /// ```rust
 /// use pin_project::{project, pin_project};
