@@ -90,6 +90,16 @@ fn project_stmt_expr() {
         Baz::None => false,
     };
     assert_eq!(val, true);
+
+    struct A<T>(T);
+
+    #[project]
+    let A(x) = match &mut baz {
+        Baz::Variant1(_, _) => A(true),
+        Baz::Variant2 { .. } => A(false),
+        Baz::None => A(false),
+    };
+    assert!(x);
 }
 
 #[test]

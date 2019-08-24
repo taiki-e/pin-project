@@ -79,6 +79,10 @@ impl Replace for Local {
                 expr.replace(register);
             }
         }
+
+        // TODO: If `pat` is a replaceable pattern, submit an error and
+        // suggest splitting the initializer into separate let bindings.
+        self.pat.replace(register);
     }
 }
 
