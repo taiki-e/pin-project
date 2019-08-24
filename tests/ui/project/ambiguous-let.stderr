@@ -1,0 +1,15 @@
+error: Both initializer expression and pattern are replaceable, you need to split the initializer expression into separate let bindings to avoid ambiguity
+  --> $DIR/ambiguous-let.rs:22:9
+   |
+22 |     let Struct(x) = match foo.project() {
+   |         ^^^^^^^^^
+
+error[E0425]: cannot find value `x` in this scope
+  --> $DIR/ambiguous-let.rs:26:13
+   |
+26 |     assert!(x);
+   |             ^ not found in this scope
+
+error: aborting due to 2 previous errors
+
+For more information about this error, try `rustc --explain E0425`.

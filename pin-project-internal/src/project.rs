@@ -21,7 +21,7 @@ fn parse(input: TokenStream) -> Result<TokenStream> {
         Stmt::Expr(Expr::Match(expr)) | Stmt::Semi(Expr::Match(expr), _) => {
             Context::default().replace_expr_match(expr)
         }
-        Stmt::Local(local) => Context::default().replace_local(local),
+        Stmt::Local(local) => Context::default().replace_local(local)?,
         Stmt::Item(Item::Fn(ItemFn { block, .. })) => Dummy.visit_block_mut(block),
         Stmt::Item(Item::Impl(item)) => replace_item_impl(item),
         _ => {}
@@ -50,37 +50,48 @@ impl Context {
         }
     }
 
-    fn replace_local(&mut self, local: &mut Local) {
-        // We need to use two 'if let' expressions
-        // here, since we can't pattern-match through
-        // a Box
-        if let Some((_, expr)) = &mut local.init {
-            if let Expr::Match(expr) = &mut **expr {
-                self.replace_expr_match(expr);
-            }
+    fn replace_local(&mut self, local: &mut Local) -> Result<()> {
+        if let Some(Expr::Match(expr)) = local.init.as_mut().map(|(_, expr)| &mut **expr) {
+            self.replace_expr_match(expr);
         }
 
-        // TODO: If `self.replaced` is `true` and `local.pat` is a replaceable pattern,
-        // submit an error and suggest splitting the initializer into separate let bindings.
-        self.replace_pat(&mut local.pat);
+        if self.replaced {
+            if is_replaceable(&local.pat, false) {
+                return Err(error!(
+                    local.pat,
+                    "Both initializer expression and pattern are replaceable, \
+                     you need to split the initializer expression into separate let bindings \
+                     to avoid ambiguity"
+                ));
+            }
+        } else {
+            self.replace_pat(&mut local.pat, false);
+        }
+
+        Ok(())
     }
 
     fn replace_expr_match(&mut self, expr: &mut ExprMatch) {
-        expr.arms.iter_mut().for_each(|Arm { pat, .. }| self.replace_pat(pat))
+        expr.arms.iter_mut().for_each(|Arm { pat, .. }| self.replace_pat(pat, true))
     }
 
-    fn replace_pat(&mut self, pat: &mut Pat) {
+    fn replace_pat(&mut self, pat: &mut Pat, allow_pat_path: bool) {
         match pat {
             Pat::Ident(PatIdent { subpat: Some((_, pat)), .. })
             | Pat::Reference(PatReference { pat, .. })
             | Pat::Box(PatBox { pat, .. })
-            | Pat::Type(PatType { pat, .. }) => self.replace_pat(pat),
+            | Pat::Type(PatType { pat, .. }) => self.replace_pat(pat, allow_pat_path),
 
-            Pat::Struct(PatStruct { path, .. })
-            | Pat::TupleStruct(PatTupleStruct { path, .. })
-            | Pat::Path(PatPath { qself: None, path, .. }) => self.replace_path(path),
+            Pat::Or(PatOr { cases, .. }) => {
+                cases.iter_mut().for_each(|pat| self.replace_pat(pat, allow_pat_path))
+            }
 
-            Pat::Or(PatOr { cases, .. }) => cases.iter_mut().for_each(|pat| self.replace_pat(pat)),
+            Pat::Struct(PatStruct { path, .. }) | Pat::TupleStruct(PatTupleStruct { path, .. }) => {
+                self.replace_path(path)
+            }
+            Pat::Path(PatPath { qself: None, path, .. }) if allow_pat_path => {
+                self.replace_path(path)
+            }
             _ => {}
         }
     }
@@ -99,6 +110,21 @@ impl Context {
             self.replaced = true;
             replace_ident(&mut path.segments[0].ident);
         }
+    }
+}
+
+fn is_replaceable(pat: &Pat, allow_pat_path: bool) -> bool {
+    match pat {
+        Pat::Ident(PatIdent { subpat: Some((_, pat)), .. })
+        | Pat::Reference(PatReference { pat, .. })
+        | Pat::Box(PatBox { pat, .. })
+        | Pat::Type(PatType { pat, .. }) => is_replaceable(pat, allow_pat_path),
+
+        Pat::Or(PatOr { cases, .. }) => cases.iter().any(|pat| is_replaceable(pat, allow_pat_path)),
+
+        Pat::Struct(_) | Pat::TupleStruct(_) => true,
+        Pat::Path(PatPath { qself: None, .. }) => allow_pat_path,
+        _ => false,
     }
 }
 
@@ -153,9 +179,10 @@ impl VisitMut for Dummy {
         };
 
         if let Some(attr) = attr {
-            let res = syn::parse2::<Nothing>(attr.tokens).map(|_| match node {
+            let res = syn::parse2::<Nothing>(attr.tokens).and_then(|_| match node {
                 Stmt::Expr(Expr::Match(expr)) | Stmt::Semi(Expr::Match(expr), _) => {
-                    Context::default().replace_expr_match(expr)
+                    Context::default().replace_expr_match(expr);
+                    Ok(())
                 }
                 Stmt::Local(local) => Context::default().replace_local(local),
                 _ => unreachable!(),
