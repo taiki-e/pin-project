@@ -70,7 +70,6 @@ impl Replace for ItemImpl {
 
 impl Replace for Local {
     fn replace(&mut self, register: &mut Register) {
-        self.pat.replace(register);
         // We need to use two 'if let' expressions
         // here, since we can't pattern-match through
         // a Box
@@ -79,6 +78,10 @@ impl Replace for Local {
                 expr.replace(register);
             }
         }
+
+        // TODO: If `pat` is a replaceable pattern, submit an error and
+        // suggest splitting the initializer into separate let bindings.
+        self.pat.replace(register);
     }
 }
 
