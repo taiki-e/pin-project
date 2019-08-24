@@ -71,6 +71,14 @@ impl Replace for ItemImpl {
 impl Replace for Local {
     fn replace(&mut self, register: &mut Register) {
         self.pat.replace(register);
+        // We need to use two 'if let' expressions
+        // here, since we can't pattern-match through
+        // a Box
+        if let Some((_, expr)) = &mut self.init {
+            if let Expr::Match(expr) = &mut **expr {
+                expr.replace(register);
+            }
+        }
     }
 }
 
