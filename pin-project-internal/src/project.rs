@@ -17,15 +17,36 @@ pub(super) fn attribute(input: TokenStream) -> TokenStream {
     parse(input).unwrap_or_else(|e| e.to_compile_error())
 }
 
+#[derive(Default)]
+struct Context {
+    register: Option<(Ident, usize)>,
+    replaced: bool,
+}
+
+impl Context {
+    fn update(&mut self, ident: &Ident, len: usize) {
+        if self.register.is_none() {
+            self.register = Some((ident.clone(), len));
+        }
+    }
+
+    fn compare_paths(&self, ident: &Ident, len: usize) -> bool {
+        match &self.register {
+            Some((i, l)) => *l == len && ident == i,
+            None => false,
+        }
+    }
+}
+
 fn parse(input: TokenStream) -> Result<TokenStream> {
     let mut stmt = syn::parse2(input)?;
     match &mut stmt {
         Stmt::Expr(Expr::Match(expr)) | Stmt::Semi(Expr::Match(expr), _) => {
-            expr.replace(&mut Register::default())
+            expr.replace(&mut Context::default())
         }
-        Stmt::Local(local) => local.replace(&mut Register::default()),
+        Stmt::Local(local) => local.replace(&mut Context::default()),
         Stmt::Item(Item::Fn(ItemFn { block, .. })) => Dummy.visit_block_mut(block),
-        Stmt::Item(Item::Impl(item)) => item.replace(&mut Register::default()),
+        Stmt::Item(Item::Impl(item)) => item.replace(&mut Context::default()),
         _ => {}
     }
 
@@ -34,11 +55,11 @@ fn parse(input: TokenStream) -> Result<TokenStream> {
 
 trait Replace {
     /// Replace the original ident with the ident of projected type.
-    fn replace(&mut self, register: &mut Register);
+    fn replace(&mut self, cx: &mut Context);
 }
 
 impl Replace for ItemImpl {
-    fn replace(&mut self, _: &mut Register) {
+    fn replace(&mut self, _: &mut Context) {
         let PathSegment { ident, arguments } = match &mut *self.self_ty {
             Type::Path(TypePath { qself: None, path }) => path.segments.last_mut().unwrap(),
             _ => return,
@@ -69,45 +90,45 @@ impl Replace for ItemImpl {
 }
 
 impl Replace for Local {
-    fn replace(&mut self, register: &mut Register) {
+    fn replace(&mut self, cx: &mut Context) {
         // We need to use two 'if let' expressions
         // here, since we can't pattern-match through
         // a Box
         if let Some((_, expr)) = &mut self.init {
             if let Expr::Match(expr) = &mut **expr {
-                expr.replace(register);
+                expr.replace(cx);
             }
         }
 
-        // TODO: If `pat` is a replaceable pattern, submit an error and
-        // suggest splitting the initializer into separate let bindings.
-        self.pat.replace(register);
+        // TODO: If `cx.replaced` is `true` and `self.pat` is a replaceable pattern,
+        // submit an error and suggest splitting the initializer into separate let bindings.
+        self.pat.replace(cx);
     }
 }
 
 impl Replace for ExprMatch {
-    fn replace(&mut self, register: &mut Register) {
-        self.arms.iter_mut().for_each(|Arm { pat, .. }| pat.replace(register))
+    fn replace(&mut self, cx: &mut Context) {
+        self.arms.iter_mut().for_each(|Arm { pat, .. }| pat.replace(cx))
     }
 }
 
 impl Replace for Punctuated<Pat, Or> {
-    fn replace(&mut self, register: &mut Register) {
-        self.iter_mut().for_each(|pat| pat.replace(register));
+    fn replace(&mut self, cx: &mut Context) {
+        self.iter_mut().for_each(|pat| pat.replace(cx));
     }
 }
 
 impl Replace for Pat {
-    fn replace(&mut self, register: &mut Register) {
+    fn replace(&mut self, cx: &mut Context) {
         match self {
             Pat::Ident(PatIdent { subpat: Some((_, pat)), .. })
             | Pat::Reference(PatReference { pat, .. })
             | Pat::Box(PatBox { pat, .. })
-            | Pat::Type(PatType { pat, .. }) => pat.replace(register),
+            | Pat::Type(PatType { pat, .. }) => pat.replace(cx),
 
             Pat::Struct(PatStruct { path, .. })
             | Pat::TupleStruct(PatTupleStruct { path, .. })
-            | Pat::Path(PatPath { qself: None, path, .. }) => path.replace(register),
+            | Pat::Path(PatPath { qself: None, path, .. }) => path.replace(cx),
 
             _ => {}
         }
@@ -115,7 +136,7 @@ impl Replace for Pat {
 }
 
 impl Replace for Path {
-    fn replace(&mut self, register: &mut Register) {
+    fn replace(&mut self, cx: &mut Context) {
         let len = match self.segments.len() {
             // 1: struct
             // 2: enum
@@ -124,8 +145,9 @@ impl Replace for Path {
             _ => return,
         };
 
-        if register.0.is_none() || register.eq(&self.segments[0].ident, len) {
-            register.update(&self.segments[0].ident, len);
+        if cx.register.is_none() || cx.compare_paths(&self.segments[0].ident, len) {
+            cx.update(&self.segments[0].ident, len);
+            cx.replaced = true;
             replace_ident(&mut self.segments[0].ident);
         }
     }
@@ -133,24 +155,6 @@ impl Replace for Path {
 
 fn replace_ident(ident: &mut Ident) {
     *ident = proj_ident(ident);
-}
-
-#[derive(Default)]
-struct Register(Option<(Ident, usize)>);
-
-impl Register {
-    fn update(&mut self, ident: &Ident, len: usize) {
-        if self.0.is_none() {
-            self.0 = Some((ident.clone(), len));
-        }
-    }
-
-    fn eq(&self, ident: &Ident, len: usize) -> bool {
-        match &self.0 {
-            Some((i, l)) => *l == len && ident == i,
-            None => false,
-        }
-    }
 }
 
 // =================================================================================================
@@ -166,7 +170,7 @@ impl VisitMut for Dummy {
                     || Ok(()),
                     |attr| {
                         syn::parse2::<Nothing>(attr.tokens)
-                            .map(|_| $this.replace(&mut Register::default()))
+                            .map(|_| $this.replace(&mut Context::default()))
                     },
                 )
             }};
