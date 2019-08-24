@@ -2,8 +2,6 @@ use proc_macro2::{Span, TokenStream};
 use quote::ToTokens;
 use syn::{
     parse::Nothing,
-    punctuated::Punctuated,
-    token::Or,
     visit_mut::{self, VisitMut},
     *,
 };
@@ -15,6 +13,21 @@ const NAME: &str = "project";
 
 pub(super) fn attribute(input: TokenStream) -> TokenStream {
     parse(input).unwrap_or_else(|e| e.to_compile_error())
+}
+
+fn parse(input: TokenStream) -> Result<TokenStream> {
+    let mut stmt = syn::parse2(input)?;
+    match &mut stmt {
+        Stmt::Expr(Expr::Match(expr)) | Stmt::Semi(Expr::Match(expr), _) => {
+            Context::default().replace_expr_match(expr)
+        }
+        Stmt::Local(local) => Context::default().replace_local(local),
+        Stmt::Item(Item::Fn(ItemFn { block, .. })) => Dummy.visit_block_mut(block),
+        Stmt::Item(Item::Impl(item)) => replace_item_impl(item),
+        _ => {}
+    }
+
+    Ok(stmt.into_token_stream())
 }
 
 #[derive(Default)]
@@ -36,108 +49,44 @@ impl Context {
             None => false,
         }
     }
-}
 
-fn parse(input: TokenStream) -> Result<TokenStream> {
-    let mut stmt = syn::parse2(input)?;
-    match &mut stmt {
-        Stmt::Expr(Expr::Match(expr)) | Stmt::Semi(Expr::Match(expr), _) => {
-            expr.replace(&mut Context::default())
-        }
-        Stmt::Local(local) => local.replace(&mut Context::default()),
-        Stmt::Item(Item::Fn(ItemFn { block, .. })) => Dummy.visit_block_mut(block),
-        Stmt::Item(Item::Impl(item)) => item.replace(&mut Context::default()),
-        _ => {}
-    }
-
-    Ok(stmt.into_token_stream())
-}
-
-trait Replace {
-    /// Replace the original ident with the ident of projected type.
-    fn replace(&mut self, cx: &mut Context);
-}
-
-impl Replace for ItemImpl {
-    fn replace(&mut self, _: &mut Context) {
-        let PathSegment { ident, arguments } = match &mut *self.self_ty {
-            Type::Path(TypePath { qself: None, path }) => path.segments.last_mut().unwrap(),
-            _ => return,
-        };
-
-        replace_ident(ident);
-
-        let mut lifetime_name = String::from(DEFAULT_LIFETIME_NAME);
-        proj_lifetime_name(&mut lifetime_name, &self.generics.params);
-        self.items
-            .iter_mut()
-            .filter_map(|i| if let ImplItem::Method(i) = i { Some(i) } else { None })
-            .for_each(|item| proj_lifetime_name(&mut lifetime_name, &item.sig.generics.params));
-        let lifetime = Lifetime::new(&lifetime_name, Span::call_site());
-
-        proj_generics(&mut self.generics, syn::parse_quote!(#lifetime));
-
-        match arguments {
-            PathArguments::None => {
-                *arguments = PathArguments::AngleBracketed(syn::parse_quote!(<#lifetime>));
-            }
-            PathArguments::AngleBracketed(args) => {
-                args.args.insert(0, syn::parse_quote!(#lifetime));
-            }
-            PathArguments::Parenthesized(_) => unreachable!(),
-        }
-    }
-}
-
-impl Replace for Local {
-    fn replace(&mut self, cx: &mut Context) {
+    fn replace_local(&mut self, local: &mut Local) {
         // We need to use two 'if let' expressions
         // here, since we can't pattern-match through
         // a Box
-        if let Some((_, expr)) = &mut self.init {
+        if let Some((_, expr)) = &mut local.init {
             if let Expr::Match(expr) = &mut **expr {
-                expr.replace(cx);
+                self.replace_expr_match(expr);
             }
         }
 
-        // TODO: If `cx.replaced` is `true` and `self.pat` is a replaceable pattern,
+        // TODO: If `self.replaced` is `true` and `local.pat` is a replaceable pattern,
         // submit an error and suggest splitting the initializer into separate let bindings.
-        self.pat.replace(cx);
+        self.replace_pat(&mut local.pat);
     }
-}
 
-impl Replace for ExprMatch {
-    fn replace(&mut self, cx: &mut Context) {
-        self.arms.iter_mut().for_each(|Arm { pat, .. }| pat.replace(cx))
+    fn replace_expr_match(&mut self, expr: &mut ExprMatch) {
+        expr.arms.iter_mut().for_each(|Arm { pat, .. }| self.replace_pat(pat))
     }
-}
 
-impl Replace for Punctuated<Pat, Or> {
-    fn replace(&mut self, cx: &mut Context) {
-        self.iter_mut().for_each(|pat| pat.replace(cx));
-    }
-}
-
-impl Replace for Pat {
-    fn replace(&mut self, cx: &mut Context) {
-        match self {
+    fn replace_pat(&mut self, pat: &mut Pat) {
+        match pat {
             Pat::Ident(PatIdent { subpat: Some((_, pat)), .. })
             | Pat::Reference(PatReference { pat, .. })
             | Pat::Box(PatBox { pat, .. })
-            | Pat::Type(PatType { pat, .. }) => pat.replace(cx),
+            | Pat::Type(PatType { pat, .. }) => self.replace_pat(pat),
 
             Pat::Struct(PatStruct { path, .. })
             | Pat::TupleStruct(PatTupleStruct { path, .. })
-            | Pat::Path(PatPath { qself: None, path, .. }) => path.replace(cx),
+            | Pat::Path(PatPath { qself: None, path, .. }) => self.replace_path(path),
 
+            Pat::Or(PatOr { cases, .. }) => cases.iter_mut().for_each(|pat| self.replace_pat(pat)),
             _ => {}
         }
     }
-}
 
-impl Replace for Path {
-    fn replace(&mut self, cx: &mut Context) {
-        let len = match self.segments.len() {
+    fn replace_path(&mut self, path: &mut Path) {
+        let len = match path.segments.len() {
             // 1: struct
             // 2: enum
             len @ 1 | len @ 2 => len,
@@ -145,11 +94,40 @@ impl Replace for Path {
             _ => return,
         };
 
-        if cx.register.is_none() || cx.compare_paths(&self.segments[0].ident, len) {
-            cx.update(&self.segments[0].ident, len);
-            cx.replaced = true;
-            replace_ident(&mut self.segments[0].ident);
+        if self.register.is_none() || self.compare_paths(&path.segments[0].ident, len) {
+            self.update(&path.segments[0].ident, len);
+            self.replaced = true;
+            replace_ident(&mut path.segments[0].ident);
         }
+    }
+}
+
+fn replace_item_impl(item: &mut ItemImpl) {
+    let PathSegment { ident, arguments } = match &mut *item.self_ty {
+        Type::Path(TypePath { qself: None, path }) => path.segments.last_mut().unwrap(),
+        _ => return,
+    };
+
+    replace_ident(ident);
+
+    let mut lifetime_name = String::from(DEFAULT_LIFETIME_NAME);
+    proj_lifetime_name(&mut lifetime_name, &item.generics.params);
+    item.items
+        .iter_mut()
+        .filter_map(|i| if let ImplItem::Method(i) = i { Some(i) } else { None })
+        .for_each(|item| proj_lifetime_name(&mut lifetime_name, &item.sig.generics.params));
+    let lifetime = Lifetime::new(&lifetime_name, Span::call_site());
+
+    proj_generics(&mut item.generics, syn::parse_quote!(#lifetime));
+
+    match arguments {
+        PathArguments::None => {
+            *arguments = PathArguments::AngleBracketed(syn::parse_quote!(<#lifetime>));
+        }
+        PathArguments::AngleBracketed(args) => {
+            args.args.insert(0, syn::parse_quote!(#lifetime));
+        }
+        PathArguments::Parenthesized(_) => unreachable!(),
     }
 }
 
@@ -163,27 +141,29 @@ fn replace_ident(ident: &mut Ident) {
 struct Dummy;
 
 impl VisitMut for Dummy {
-    fn visit_stmt_mut(&mut self, stmt: &mut Stmt) {
-        macro_rules! parse_attr {
-            ($this:expr) => {{
-                $this.attrs.find_remove(NAME).map_or_else(
-                    || Ok(()),
-                    |attr| {
-                        syn::parse2::<Nothing>(attr.tokens)
-                            .map(|_| $this.replace(&mut Context::default()))
-                    },
-                )
-            }};
-        }
+    fn visit_stmt_mut(&mut self, node: &mut Stmt) {
+        visit_mut::visit_stmt_mut(self, node);
 
-        visit_mut::visit_stmt_mut(self, stmt);
-
-        if let Err(e) = match stmt {
-            Stmt::Expr(Expr::Match(expr)) | Stmt::Semi(Expr::Match(expr), _) => parse_attr!(expr),
-            Stmt::Local(local) => parse_attr!(local),
+        let attr = match node {
+            Stmt::Expr(Expr::Match(expr)) | Stmt::Semi(Expr::Match(expr), _) => {
+                expr.attrs.find_remove(NAME)
+            }
+            Stmt::Local(local) => local.attrs.find_remove(NAME),
             _ => return,
-        } {
-            *stmt = Stmt::Expr(syn::parse2(e.to_compile_error()).unwrap())
+        };
+
+        if let Some(attr) = attr {
+            let res = syn::parse2::<Nothing>(attr.tokens).map(|_| match node {
+                Stmt::Expr(Expr::Match(expr)) | Stmt::Semi(Expr::Match(expr), _) => {
+                    Context::default().replace_expr_match(expr)
+                }
+                Stmt::Local(local) => Context::default().replace_local(local),
+                _ => unreachable!(),
+            });
+
+            if let Err(e) = res {
+                *node = Stmt::Expr(syn::parse2(e.to_compile_error()).unwrap())
+            }
         }
     }
 
