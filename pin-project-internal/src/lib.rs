@@ -1,7 +1,7 @@
 //! An interal crate to support pin_project - **do not use directly**
 
 #![recursion_limit = "256"]
-#![doc(html_root_url = "https://docs.rs/pin-project-internal/0.4.0-alpha.4")]
+#![doc(html_root_url = "https://docs.rs/pin-project-internal/0.4.0-alpha.5")]
 #![doc(test(attr(deny(warnings), allow(dead_code, unused_assignments, unused_variables))))]
 #![warn(unsafe_code)]
 #![warn(rust_2018_idioms, unreachable_pub)]
@@ -284,7 +284,7 @@ use syn::parse::Nothing;
 ///
 /// [`Pin::as_mut`]: core::pin::Pin::as_mut
 /// [`drop`]: Drop::drop
-/// [`UnsafeUnpin`]: https://docs.rs/pin-project/0.4.0-alpha.4/pin_project/trait.UnsafeUnpin.html
+/// [`UnsafeUnpin`]: https://docs.rs/pin-project/0.4.0-alpha.5/pin_project/trait.UnsafeUnpin.html
 /// [`project`]: ./attr.project.html
 /// [`pinned_drop`]: ./attr.pinned_drop.html
 #[proc_macro_attribute]

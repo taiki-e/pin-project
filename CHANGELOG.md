@@ -1,5 +1,11 @@
 # Unreleased
 
+# 0.4.0-alpha.5 - 2019-08-24
+
+* [`#[project]` attribute now supports `match` expressions at the position of the initializer expression of `let` expressions.][51]
+
+[51]: https://github.com/taiki-e/pin-project/pull/51
+
 # 0.4.0-alpha.4 - 2019-08-23
 
 * Avoided clippy::drop_bounds lint in generated code.
