@@ -53,7 +53,7 @@ fn named(
     for Field { attrs, ident, ty, .. } in fields {
         if let Some(attr) = attrs.find_remove(PIN) {
             let _: Nothing = syn::parse2(attr.tokens)?;
-            cx.push_unpin_bounds(ty);
+            cx.push_unpin_bounds(ty.clone());
             let lifetime = &cx.lifetime;
             proj_fields.push(quote!(#ident: ::core::pin::Pin<&#lifetime mut #ty>));
             proj_init.push(quote!(#ident: ::core::pin::Pin::new_unchecked(&mut this.#ident)));
@@ -79,7 +79,7 @@ fn unnamed(
         let i = Index::from(i);
         if let Some(attr) = attrs.find_remove(PIN) {
             let _: Nothing = syn::parse2(attr.tokens)?;
-            cx.push_unpin_bounds(ty);
+            cx.push_unpin_bounds(ty.clone());
             let lifetime = &cx.lifetime;
             proj_fields.push(quote!(::core::pin::Pin<&#lifetime mut #ty>));
             proj_init.push(quote!(::core::pin::Pin::new_unchecked(&mut this.#i)));

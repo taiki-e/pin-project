@@ -6,6 +6,12 @@
 //! * [`pinned_drop`] - An attribute for annotating a function that implements `Drop`.
 //! * [`project`] - An attribute to support pattern matching.
 //!
+//! NOTE: While this crate supports stable Rust, it currently requires
+//! nightly Rust in order for rustdoc to correctly document auto-generated
+//! `Unpin` impls. This does not affect the runtime functionality of this crate,
+//! nor does it affect the safety of the api provided by this crate.
+//!
+//!
 //! ## Examples
 //!
 //! [`pin_project`] attribute creates a projection struct covering all the fields.

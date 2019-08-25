@@ -35,3 +35,6 @@ lazy_static = { version = "1.3", optional = true }
 
 [dev-dependencies]
 pin-project = { version = "0.4.0-alpha", path = ".." }
+
+[build-dependencies]
+rustc_version = "0.2.3"
