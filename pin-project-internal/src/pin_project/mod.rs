@@ -64,6 +64,8 @@ struct Context {
     /// Where-clause for conditional Unpin implementation.
     impl_unpin: WhereClause,
 
+    pinned_fields: Vec<Type>,
+
     unsafe_unpin: bool,
     pinned_drop: Option<Span>,
 }
@@ -97,6 +99,7 @@ impl Context {
             generics,
             lifetime,
             impl_unpin,
+            pinned_fields: vec![],
             unsafe_unpin: unsafe_unpin.is_some(),
             pinned_drop,
         })
@@ -109,21 +112,143 @@ impl Context {
         generics
     }
 
-    fn push_unpin_bounds(&mut self, ty: &Type) {
-        // We only add bounds for automatically generated impls
-        if !self.unsafe_unpin {
-            self.impl_unpin.predicates.push(syn::parse_quote!(#ty: ::core::marker::Unpin));
-        }
+    fn push_unpin_bounds(&mut self, ty: Type) {
+        self.pinned_fields.push(ty);
     }
 
     /// Makes conditional `Unpin` implementation for original type.
     fn make_unpin_impl(&self) -> TokenStream {
         let orig_ident = &self.orig_ident;
         let (impl_generics, ty_generics, _) = self.generics.split_for_impl();
+        let type_params: Vec<_> = self.generics.type_params().map(|t| t.ident.clone()).collect();
         let where_clause = &self.impl_unpin;
 
-        quote! {
-            impl #impl_generics ::core::marker::Unpin for #orig_ident #ty_generics #where_clause {}
+        if self.unsafe_unpin {
+            quote! {
+                impl #impl_generics ::core::marker::Unpin for #orig_ident #ty_generics #where_clause {}
+            }
+        } else {
+            let make_span = || {
+                #[cfg(feature = "RUSTC_IS_NIGHTLY")]
+                {
+                    proc_macro::Span::def_site().into()
+                }
+
+                #[cfg(not(feature = "RUSTC_IS_NIGHTLY"))]
+                {
+                    Span::call_site()
+                }
+            };
+
+            let struct_ident = Ident::new(&format!("__UnpinStruct{}", orig_ident), make_span());
+            let always_unpin_ident = Ident::new("AlwaysUnpin", make_span());
+
+            // Generate a field in our new struct for every
+            // pinned field in the original type
+            let fields: Vec<_> = self
+                .pinned_fields
+                .iter()
+                .enumerate()
+                .map(|(i, ty)| {
+                    let field_ident = format_ident!("__field{}", i);
+                    quote! {
+                        #field_ident: #ty
+                    }
+                })
+                .collect();
+
+            // We could try to determine the subset of type parameters
+            // and lifetimes that are actually used by the pinned fields
+            // (as opposed to those only used by unpinned fields).
+            // However, this would be tricky and error-prone, since
+            // it's possible for users to create types that would alias
+            // with generic parameters (e.g. 'struct T').
+            //
+            // Instead, we generate a use of every single type parameter
+            // and lifetime used in the original struct. For type parameters,
+            // we generate code like this:
+            //
+            // ```rust
+            // struct AlwaysUnpin<T: ?Sized>(PhantomData<T>) {}
+            // impl<T: ?Sized> Unpin for AlwaysUnpin<T> {}
+            //
+            // ...
+            // _field: AlwaysUnpin<(A, B, C)>
+            // ```
+            //
+            // This ensures that any unused type paramters
+            // don't end up with Unpin bounds
+            let lifetime_fields: Vec<_> = self
+                .generics
+                .lifetimes()
+                .enumerate()
+                .map(|(i, l)| {
+                    let field_ident = format_ident!("__lifetime{}", i);
+                    quote! {
+                        #field_ident: &#l ()
+                    }
+                })
+                .collect();
+
+            let scope_ident = format_ident!("__unpin_scope_{}", orig_ident);
+
+            let full_generics = &self.generics;
+            let mut full_where_clause = where_clause.clone();
+
+            let unpin_clause: WherePredicate = syn::parse_quote! {
+                #struct_ident #ty_generics: ::core::marker::Unpin
+            };
+
+            full_where_clause.predicates.push(unpin_clause);
+
+            let inner_data = quote! {
+
+                struct #always_unpin_ident <T: ?Sized> {
+                    val: ::core::marker::PhantomData<T>
+                }
+
+                impl<T: ?Sized> ::core::marker::Unpin for #always_unpin_ident <T> {}
+
+                // This needs to be public, due to the limitations of the
+                // 'public in private' error.
+                //
+                // Out goal is to implement the public trait Unpin for
+                // a potentially public user type. Because of this, rust
+                // requires that any types mentioned in the where clause of
+                // our Unpin impl also be public. This means that our generated
+                // '__UnpinStruct' type must also be public. However, we take
+                // steps to ensure that the user can never actually reference
+                // this 'public' type. These steps are described below
+                pub struct #struct_ident #full_generics #where_clause {
+                    __pin_project_use_generics: #always_unpin_ident <(#(#type_params),*)>,
+
+                    #(#fields,)*
+                    #(#lifetime_fields,)*
+                }
+
+                impl #impl_generics ::core::marker::Unpin for #orig_ident #ty_generics #full_where_clause {}
+            };
+
+            if cfg!(feature = "RUSTC_IS_NIGHTLY") {
+                // On nightly, we use def-site hygiene to make it impossible
+                // for user code to refer to any of the types we define.
+                // This allows us to omit wrapping the generated types
+                // in an fn() scope, allowing rustdoc to properly document
+                // them.
+                inner_data
+            } else {
+                // When we're not on nightly, we need to create an enclosing fn() scope
+                // for all of our generated items. This makes it impossible for
+                // user code to refer to any of our generated types, but has
+                // the advantage of preventing Rustdoc from displaying
+                // docs for any of our types. In particular, users cannot see
+                // the automatically generated Unpin impl for the '__UnpinStruct$Name' types
+                quote! {
+                    fn #scope_ident() {
+                        inner_data
+                    }
+                }
+            }
         }
     }
 

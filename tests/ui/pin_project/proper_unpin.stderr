@@ -1,0 +1,19 @@
+error[E0277]: the trait bound `T: std::marker::Unpin` is not satisfied in `__UnpinStructFoo<T, U>`
+  --> $DIR/proper_unpin.rs:22:5
+   |
+22 |     is_unpin::<Foo<T, U>>(); //~ ERROR E0277
+   |     ^^^^^^^^^^^^^^^^^^^^^ within `__UnpinStructFoo<T, U>`, the trait `std::marker::Unpin` is not implemented for `T`
+   |
+   = help: consider adding a `where T: std::marker::Unpin` bound
+   = note: required because it appears within the type `Inner<T>`
+   = note: required because it appears within the type `__UnpinStructFoo<T, U>`
+   = note: required because of the requirements on the impl of `std::marker::Unpin` for `Foo<T, U>`
+note: required by `is_unpin`
+  --> $DIR/proper_unpin.rs:19:1
+   |
+19 | fn is_unpin<T: Unpin>() {}
+   | ^^^^^^^^^^^^^^^^^^^^^^^
+
+error: aborting due to previous error
+
+For more information about this error, try `rustc --explain E0277`.
