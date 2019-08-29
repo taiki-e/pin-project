@@ -18,6 +18,13 @@ jobs:
       displayName: cargo ${{ parameters.cmd }}
 
     - ${{ if eq(parameters.toolchain, 'nightly') }}:
+      - script: |
+          cargo ${{ parameters.cmd }} --all
+          cargo ${{ parameters.cmd }} --all --all-features
+        env:
+          RUSTFLAGS: -Dwarnings -Zallow-features=proc_macro_hygiene,stmt_expr_attributes
+        displayName: cargo ${{ parameters.cmd }} -Zallow-features
+
       # Refs: https://github.com/rust-lang/cargo/issues/5657
       - script: |
           cargo update -Zminimal-versions
