@@ -1,6 +1,6 @@
 parameters:
   vmImage: ubuntu-16.04
-  cmd: check
+  cmd: test
 
 jobs:
 - job: ${{ parameters.name }}
@@ -12,12 +12,31 @@ jobs:
       parameters:
         toolchain: ${{ parameters.toolchain }}
 
-    - script: |
-        cargo ${{ parameters.cmd }} --all
-        cargo ${{ parameters.cmd }} --all --all-features
-      displayName: cargo ${{ parameters.cmd }}
+    - ${{ if and(not(eq(parameters.toolchain, 'nightly')), not(eq(parameters.cmd, 'test'))) }}:
+      - script: |
+          cargo ${{ parameters.cmd }} --all
+          cargo ${{ parameters.cmd }} --all --all-features
+        displayName: cargo ${{ parameters.cmd }}
+
+    - ${{ if and(not(eq(parameters.toolchain, 'nightly')), eq(parameters.cmd, 'test')) }}:
+      - script: |
+          cargo ${{ parameters.cmd }} --all --tests
+          cargo check --all --all-features
+        displayName: cargo ${{ parameters.cmd }}
 
     - ${{ if eq(parameters.toolchain, 'nightly') }}:
+      - script: |
+          cargo ${{ parameters.cmd }} --all
+          cargo ${{ parameters.cmd }} --all --all-features
+        displayName: cargo ${{ parameters.cmd }}
+
+      - script: |
+          cargo ${{ parameters.cmd }} --all
+          cargo ${{ parameters.cmd }} --all --all-features
+        env:
+          RUSTFLAGS: -Dwarnings -Zallow-features=proc_macro_hygiene,stmt_expr_attributes
+        displayName: cargo ${{ parameters.cmd }} -Zallow-features
+
       # Refs: https://github.com/rust-lang/cargo/issues/5657
       - script: |
           cargo update -Zminimal-versions

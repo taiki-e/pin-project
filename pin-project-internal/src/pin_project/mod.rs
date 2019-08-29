@@ -55,6 +55,8 @@ struct Context {
     /// to provide a 'project' method
     proj_trait: Ident,
 
+    /// Visibility of original type.
+    vis: Visibility,
     /// Generics of original type.
     generics: Generics,
 
@@ -71,7 +73,12 @@ struct Context {
 }
 
 impl Context {
-    fn new(args: TokenStream, orig_ident: &Ident, generics: &Generics) -> Result<Self> {
+    fn new(
+        args: TokenStream,
+        orig_ident: &Ident,
+        vis: &Visibility,
+        generics: &Generics,
+    ) -> Result<Self> {
         let Args { pinned_drop, unsafe_unpin } = syn::parse2(args)?;
         let proj_ident = proj_ident(orig_ident);
         let proj_trait = proj_trait_ident(orig_ident);
@@ -96,6 +103,7 @@ impl Context {
             orig_ident: orig_ident.clone(),
             proj_ident,
             proj_trait,
+            vis: vis.clone(),
             generics,
             lifetime,
             impl_unpin,
@@ -140,8 +148,8 @@ impl Context {
                 }
             };
 
-            let struct_ident = Ident::new(&format!("__UnpinStruct{}", orig_ident), make_span());
-            let always_unpin_ident = Ident::new("AlwaysUnpin", make_span());
+            let struct_ident = format_ident!("__UnpinStruct{}", orig_ident, span = make_span());
+            let always_unpin_ident = format_ident!("AlwaysUnpin{}", orig_ident, span = make_span());
 
             // Generate a field in our new struct for every
             // pinned field in the original type
@@ -192,6 +200,7 @@ impl Context {
 
             let scope_ident = format_ident!("__unpin_scope_{}", orig_ident);
 
+            let vis = &self.vis;
             let full_generics = &self.generics;
             let mut full_where_clause = where_clause.clone();
 
@@ -219,7 +228,7 @@ impl Context {
                 // '__UnpinStruct' type must also be public. However, we take
                 // steps to ensure that the user can never actually reference
                 // this 'public' type. These steps are described below
-                pub struct #struct_ident #full_generics #where_clause {
+                #vis struct #struct_ident #full_generics #where_clause {
                     __pin_project_use_generics: #always_unpin_ident <(#(#type_params),*)>,
 
                     #(#fields,)*
@@ -244,8 +253,9 @@ impl Context {
                 // docs for any of our types. In particular, users cannot see
                 // the automatically generated Unpin impl for the '__UnpinStruct$Name' types
                 quote! {
+                    #[allow(non_snake_case)]
                     fn #scope_ident() {
-                        inner_data
+                        #inner_data
                     }
                 }
             }
@@ -328,7 +338,7 @@ impl Context {
 fn parse(args: TokenStream, input: TokenStream) -> Result<TokenStream> {
     match syn::parse2(input)? {
         Item::Struct(item) => {
-            let mut cx = Context::new(args, &item.ident, &item.generics)?;
+            let mut cx = Context::new(args, &item.ident, &item.vis, &item.generics)?;
 
             let packed_check = ensure_not_packed(&item)?;
             let mut res = structs::parse(&mut cx, item)?;
@@ -339,7 +349,7 @@ fn parse(args: TokenStream, input: TokenStream) -> Result<TokenStream> {
             Ok(res)
         }
         Item::Enum(item) => {
-            let mut cx = Context::new(args, &item.ident, &item.generics)?;
+            let mut cx = Context::new(args, &item.ident, &item.vis, &item.generics)?;
 
             // We don't need to check for '#[repr(packed)]',
             // since it does not apply to enums
@@ -427,7 +437,7 @@ fn ensure_not_packed(item: &ItemStruct) -> Result<TokenStream> {
     let struct_name = &item.ident;
     let method_name = format_ident!("__pin_project_assert_not_repr_packed_{}", item.ident);
     let test_fn = quote! {
-        #[allow(nonstandard_style)]
+        #[allow(non_snake_case)]
         #[deny(safe_packed_borrows)]
         fn #method_name #impl_generics (val: #struct_name #ty_generics) #where_clause {
             #(#field_refs)*
