@@ -25,6 +25,7 @@ jobs:
   parameters:
     toolchain: 1.33.0
     name: minrust
+    cmd: check
 
 - template: ci/azure-test.yml
   parameters:
@@ -38,7 +39,6 @@ jobs:
   parameters:
     toolchain: nightly
     name: nightly
-    cmd: test
 
 - job: compiletest
   pool:
