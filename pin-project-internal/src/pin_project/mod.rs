@@ -129,12 +129,12 @@ impl Context {
             }
         } else {
             let make_span = || {
-                #[cfg(feature = "RUSTC_IS_NIGHTLY")]
+                #[cfg(proc_macro_def_site)]
                 {
                     proc_macro::Span::def_site().into()
                 }
 
-                #[cfg(not(feature = "RUSTC_IS_NIGHTLY"))]
+                #[cfg(not(proc_macro_def_site))]
                 {
                     Span::call_site()
                 }
@@ -229,7 +229,7 @@ impl Context {
                 impl #impl_generics ::core::marker::Unpin for #orig_ident #ty_generics #full_where_clause {}
             };
 
-            if cfg!(feature = "RUSTC_IS_NIGHTLY") {
+            if cfg!(proc_macro_def_site) {
                 // On nightly, we use def-site hygiene to make it impossible
                 // for user code to refer to any of the types we define.
                 // This allows us to omit wrapping the generated types

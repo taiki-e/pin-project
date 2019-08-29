@@ -8,7 +8,7 @@
 #![warn(single_use_lifetimes)]
 #![warn(clippy::all, clippy::pedantic)]
 #![allow(clippy::use_self)]
-#![cfg_attr(feature = "RUSTC_IS_NIGHTLY", feature(proc_macro_def_site))]
+#![cfg_attr(proc_macro_def_site, feature(proc_macro_def_site))]
 
 extern crate proc_macro;
 
