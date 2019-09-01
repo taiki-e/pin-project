@@ -1,5 +1,11 @@
 # Unreleased
 
+# 0.4.0-alpha.6 - 2019-09-01
+
+* [Allowed using `#[pin_project]` type with private field types][53]
+
+[53]: https://github.com/taiki-e/pin-project/pull/53
+
 # 0.4.0-alpha.5 - 2019-08-24
 
 * [`#[project]` attribute now supports `match` expressions at the position of the initializer expression of `let` expressions.][51]
