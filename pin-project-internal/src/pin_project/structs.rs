@@ -26,6 +26,7 @@ pub(super) fn parse(cx: &mut Context, mut item: ItemStruct) -> Result<TokenStrea
     let (impl_generics, ty_generics, where_clause) = item.generics.split_for_impl();
 
     let mut proj_items = quote! {
+        #[allow(dead_code)]
         struct #proj_ident #proj_generics #where_clause #proj_fields
     };
     proj_items.extend(quote! {
