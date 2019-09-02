@@ -1,5 +1,11 @@
 # Unreleased
 
+# 0.4.0-alpha.7 - 2019-09-03
+
+* [Applied `#[allow(dead_code)]` to generated types.][57]
+
+[57]: https://github.com/taiki-e/pin-project/pull/57
+
 # 0.4.0-alpha.6 - 2019-09-01
 
 * [Allowed using `#[pin_project]` type with private field types][53]
