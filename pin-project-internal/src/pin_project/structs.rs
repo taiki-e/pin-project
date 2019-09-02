@@ -12,9 +12,17 @@ pub(super) fn parse(cx: &mut Context, mut item: ItemStruct) -> Result<TokenStrea
         | Fields::Unnamed(FieldsUnnamed { unnamed: fields, .. })
             if fields.is_empty() =>
         {
-            return Err(error!(item.fields, "cannot be implemented for structs with zero fields"))
+            return Err(error!(
+                item.fields,
+                "#[pin_project] attribute may not be used on structs with zero fields"
+            ))
         }
-        Fields::Unit => return Err(error!(item, "cannot be implemented for structs with units")),
+        Fields::Unit => {
+            return Err(error!(
+                item,
+                "#[pin_project] attribute may not be used on structs with units"
+            ))
+        }
 
         Fields::Named(fields) => named(cx, fields)?,
         Fields::Unnamed(fields) => unnamed(cx, fields)?,

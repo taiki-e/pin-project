@@ -1,31 +1,31 @@
 error: unexpected token
- --> $DIR/invalid.rs:9:10
+ --> $DIR/invalid.rs:7:10
   |
-9 |     #[pin()] //~ ERROR unexpected token
+7 |     #[pin()] //~ ERROR unexpected token
   |          ^
 
 error: unexpected token
-  --> $DIR/invalid.rs:14:18
+  --> $DIR/invalid.rs:12:18
    |
-14 | struct B<T>(#[pin(foo)] T); //~ ERROR unexpected token
+12 | struct B<T>(#[pin(foo)] T); //~ ERROR unexpected token
    |                  ^
 
 error: unexpected token
-  --> $DIR/invalid.rs:18:12
+  --> $DIR/invalid.rs:16:12
    |
-18 |     A(#[pin(foo)] T), //~ ERROR unexpected token
+16 |     A(#[pin(foo)] T), //~ ERROR unexpected token
    |            ^
 
 error: unexpected token
-  --> $DIR/invalid.rs:24:14
+  --> $DIR/invalid.rs:22:14
    |
-24 |         #[pin(foo)] //~ ERROR unexpected token
+22 |         #[pin(foo)] //~ ERROR unexpected token
    |              ^
 
 error: expected identifier
-  --> $DIR/invalid.rs:29:27
+  --> $DIR/invalid.rs:27:27
    |
-29 | #[pin_project(UnsafeUnpin,,)] //~ ERROR unexpected token
+27 | #[pin_project(UnsafeUnpin,,)] //~ ERROR expected identifier
    |                           ^
 
 error: aborting due to 5 previous errors

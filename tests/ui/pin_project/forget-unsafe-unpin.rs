@@ -1,7 +1,5 @@
 // run-pass
 
-#![deny(warnings, unsafe_code)]
-
 use pin_project::pin_project;
 
 // FIXME

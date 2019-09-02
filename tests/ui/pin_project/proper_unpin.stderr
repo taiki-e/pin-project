@@ -1,10 +1,10 @@
 error[E0277]: the trait bound `T: std::marker::Unpin` is not satisfied in `__UnpinStructFoo<T, U>`
-  --> $DIR/proper_unpin.rs:22:5
+  --> $DIR/proper_unpin.rs:20:5
    |
-19 | fn is_unpin<T: Unpin>() {}
+17 | fn is_unpin<T: Unpin>() {}
    | ----------------------- required by `is_unpin`
 ...
-22 |     is_unpin::<Foo<T, U>>(); //~ ERROR E0277
+20 |     is_unpin::<Foo<T, U>>(); //~ ERROR E0277
    |     ^^^^^^^^^^^^^^^^^^^^^ within `__UnpinStructFoo<T, U>`, the trait `std::marker::Unpin` is not implemented for `T`
    |
    = help: consider adding a `where T: std::marker::Unpin` bound

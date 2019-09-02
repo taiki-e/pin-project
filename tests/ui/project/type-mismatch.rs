@@ -1,6 +1,5 @@
 // compile-fail
 
-#![deny(warnings, unsafe_code)]
 #![feature(proc_macro_hygiene, stmt_expr_attributes)]
 
 use pin_project::{pin_project, project};

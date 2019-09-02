@@ -1,7 +1,5 @@
 // compile-fail
 
-#![deny(warnings, unsafe_code)]
-
 use pin_project::{pin_project, project};
 use std::pin::Pin;
 
@@ -20,6 +18,7 @@ fn foo() {
 
     #[project]
     let Struct(x) = match foo.project() {
+        //~^ ERROR Both initializer expression and pattern are replaceable, you need to split the initializer expression into separate let bindings to avoid ambiguity
         Enum::A(_) => Struct(true),
         Enum::B(_) => unreachable!(),
     };

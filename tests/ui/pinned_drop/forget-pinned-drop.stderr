@@ -1,8 +1,8 @@
-error[E0277]: the trait bound `Foo<'a>: pin_project::__private::UnsafePinnedDrop` is not satisfied
- --> $DIR/forget-pinned-drop.rs:8:15
+error[E0277]: the trait bound `Foo: pin_project::__private::UnsafePinnedDrop` is not satisfied
+ --> $DIR/forget-pinned-drop.rs:6:15
   |
-8 | #[pin_project(PinnedDrop)]
-  |               ^^^^^^^^^^ the trait `pin_project::__private::UnsafePinnedDrop` is not implemented for `Foo<'a>`
+6 | #[pin_project(PinnedDrop)] //~ ERROR E0277
+  |               ^^^^^^^^^^ the trait `pin_project::__private::UnsafePinnedDrop` is not implemented for `Foo`
   |
   = note: required by `pin_project::__private::UnsafePinnedDrop::pinned_drop`
 

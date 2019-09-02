@@ -1,38 +1,38 @@
-error: cannot be implemented for structs with zero fields
- --> $DIR/unsupported.rs:8:16
+error: #[pin_project] attribute may not be used on structs with zero fields
+ --> $DIR/unsupported.rs:6:16
   |
-8 | struct Struct1 {} //~ ERROR cannot be implemented for structs with zero fields
+6 | struct Struct1 {} //~ ERROR may not be used on structs with zero fields
   |                ^^
 
-error: cannot be implemented for structs with zero fields
-  --> $DIR/unsupported.rs:11:15
-   |
-11 | struct Struct2(); //~ ERROR cannot be implemented for structs with zero fields
-   |               ^^
+error: #[pin_project] attribute may not be used on structs with zero fields
+ --> $DIR/unsupported.rs:9:15
+  |
+9 | struct Struct2(); //~ ERROR may not be used on structs with zero fields
+  |               ^^
 
-error: cannot be implemented for structs with units
-  --> $DIR/unsupported.rs:14:1
+error: #[pin_project] attribute may not be used on structs with units
+  --> $DIR/unsupported.rs:12:1
    |
-14 | struct Struct3; //~ ERROR cannot be implemented for structs with units
+12 | struct Struct3; //~ ERROR may not be used on structs with units
    | ^^^^^^^^^^^^^^^
 
-error: cannot be implemented for enums without variants
-  --> $DIR/unsupported.rs:17:1
+error: #[pin_project] attribute may not be used on enums without variants
+  --> $DIR/unsupported.rs:15:1
    |
-17 | enum Enum1 {} //~ ERROR cannot be implemented for enums without variants
+15 | enum Enum1 {} //~ ERROR may not be used on enums without variants
    | ^^^^^^^^^^^^^
 
-error: cannot be implemented for enums with discriminants
-  --> $DIR/unsupported.rs:21:9
+error: #[pin_project] attribute may not be used on enums with discriminants
+  --> $DIR/unsupported.rs:19:9
    |
-21 |     A = 2, //~ ERROR cannot be implemented for enums with discriminants
+19 |     A = 2, //~ ERROR may not be used on enums with discriminants
    |         ^
 
-error: cannot be implemented for enums that have no field
-  --> $DIR/unsupported.rs:26:5
+error: #[pin_project] attribute may not be used on enums that have no field
+  --> $DIR/unsupported.rs:24:5
    |
-26 | /     A, //~ ERROR cannot be implemented for enums that have no field
-27 | |     B,
+24 | /     A, //~ ERROR may not be used on enums that have no field
+25 | |     B,
    | |______^
 
 error: aborting due to 6 previous errors

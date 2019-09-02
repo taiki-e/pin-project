@@ -1,7 +1,5 @@
 // compile-fail
 
-#![deny(warnings, unsafe_code)]
-
 use pin_project::pin_project;
 
 #[pin_project]
@@ -26,7 +24,7 @@ enum D<T> {
     },
 }
 
-#[pin_project(UnsafeUnpin,,)] //~ ERROR unexpected token
+#[pin_project(UnsafeUnpin,,)] //~ ERROR expected identifier
 struct E<T> {
     #[pin]
     future: T,

@@ -1,15 +1,12 @@
 // compile-fail
 
-#![deny(warnings, unsafe_code)]
-
-use core::pin::Pin;
 use pin_project::{pin_project, pinned_drop};
+use std::pin::Pin;
 
-#[pin_project(PinnedDrop)]
-pub struct Foo<'a> {
-    was_dropped: &'a mut bool,
+#[pin_project(PinnedDrop)] //~ ERROR E0277
+pub struct Foo {
     #[pin]
-    field_2: u8,
+    field: u8,
 }
 
 fn main() {}
