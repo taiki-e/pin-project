@@ -1,7 +1,7 @@
 error[E0308]: mismatched types
-  --> $DIR/type-mismatch.rs:41:9
+  --> $DIR/type-mismatch.rs:40:9
    |
-41 |         None => {} //~ ERROR mismatched types
+40 |         None => {} //~ ERROR mismatched types
    |         ^^^^ expected enum `span::__BazProjection`, found enum `std::option::Option`
    |
    = note: expected type `span::__BazProjection<'_, {integer}, {integer}, _, _>`

@@ -1,19 +1,19 @@
 error[E0119]: conflicting implementations of trait `FooMustNotImplDrop` for type `Foo<_, _>`:
- --> $DIR/drop_conflict.rs:8:1
+ --> $DIR/drop_conflict.rs:6:1
   |
-8 | #[pin_project] //~ ERROR E0119
+6 | #[pin_project] //~ ERROR E0119
   | ^^^^^^^^^^^^^^
   | |
   | first implementation here
   | conflicting implementation for `Foo<_, _>`
 
 error[E0119]: conflicting implementations of trait `std::ops::Drop` for type `Bar<_, _>`:
-  --> $DIR/drop_conflict.rs:19:1
+  --> $DIR/drop_conflict.rs:17:1
    |
-19 | #[pin_project(PinnedDrop)] //~ ERROR E0119
+17 | #[pin_project(PinnedDrop)] //~ ERROR E0119
    | ^^^^^^^^^^^^^^^^^^^^^^^^^^ conflicting implementation for `Bar<_, _>`
 ...
-29 | impl<T, U> Drop for Bar<T, U> {
+27 | impl<T, U> Drop for Bar<T, U> {
    | ----------------------------- first implementation here
 
 error: aborting due to 2 previous errors

@@ -1,7 +1,5 @@
 // compile-fail
 
-#![deny(warnings, unsafe_code)]
-
 use pin_project::{pin_project, project};
 
 #[pin_project]

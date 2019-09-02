@@ -35,7 +35,12 @@ impl Parse for Args {
             match &*i.to_string() {
                 "PinnedDrop" => pinned_drop = Some(i.span()),
                 "UnsafeUnpin" => unsafe_unpin = Some(i.span()),
-                _ => return Err(error!(i, "an invalid argument was passed")),
+                _ => {
+                    return Err(error!(
+                        i,
+                        "an invalid argument was passed to #[pin_project] attribute"
+                    ))
+                }
             }
 
             if !input.is_empty() {
@@ -363,7 +368,7 @@ fn parse(args: TokenStream, input: TokenStream) -> Result<TokenStream> {
             res.extend(cx.make_proj_trait());
             Ok(res)
         }
-        item => Err(error!(item, "may only be used on structs or enums")),
+        item => Err(error!(item, "#[pin_project] attribute may only be used on structs or enums")),
     }
 }
 
@@ -376,7 +381,7 @@ fn ensure_not_packed(item: &ItemStruct) -> Result<TokenStream> {
                         if p.is_ident("packed") {
                             return Err(error!(
                                 p,
-                                "pin_project may not be used on #[repr(packed)] types"
+                                "#[pin_project] attribute may not be used on #[repr(packed)] types"
                             ));
                         }
                     }

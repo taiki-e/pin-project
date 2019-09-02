@@ -8,11 +8,14 @@ use super::{Context, PIN};
 
 pub(super) fn parse(cx: &mut Context, mut item: ItemEnum) -> Result<TokenStream> {
     if item.variants.is_empty() {
-        return Err(error!(item, "cannot be implemented for enums without variants"));
+        return Err(error!(
+            item,
+            "#[pin_project] attribute may not be used on enums without variants"
+        ));
     }
     let has_field = item.variants.iter().try_fold(false, |has_field, v| {
         if let Some((_, e)) = &v.discriminant {
-            Err(error!(e, "cannot be implemented for enums with discriminants"))
+            Err(error!(e, "#[pin_project] attribute may not be used on enums with discriminants"))
         } else if let Fields::Unit = v.fields {
             Ok(has_field)
         } else {
@@ -20,7 +23,10 @@ pub(super) fn parse(cx: &mut Context, mut item: ItemEnum) -> Result<TokenStream>
         }
     })?;
     if !has_field {
-        return Err(error!(item.variants, "cannot be implemented for enums that have no field"));
+        return Err(error!(
+            item.variants,
+            "#[pin_project] attribute may not be used on enums that have no field"
+        ));
     }
 
     let (proj_variants, proj_arms) = variants(cx, &mut item)?;

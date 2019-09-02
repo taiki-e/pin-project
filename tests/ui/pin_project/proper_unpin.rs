@@ -1,19 +1,17 @@
 // compile-fail
 
-#![deny(warnings, unsafe_code)]
-
 use pin_project::{pin_project, pinned_drop};
 use std::pin::Pin;
 
 struct Inner<T> {
-    val: T
+    val: T,
 }
 
 #[pin_project]
 struct Foo<T, U> {
     #[pin]
     inner: Inner<T>,
-    other: U
+    other: U,
 }
 
 fn is_unpin<T: Unpin>() {}
