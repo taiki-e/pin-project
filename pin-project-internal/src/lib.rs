@@ -2,10 +2,9 @@
 
 #![recursion_limit = "256"]
 #![doc(html_root_url = "https://docs.rs/pin-project-internal/0.4.0-alpha.8")]
-#![doc(test(attr(deny(warnings), allow(dead_code, unused_assignments, unused_variables))))]
+#![doc(test(no_crate_inject, attr(deny(warnings, rust_2018_idioms), allow(dead_code))))]
 #![warn(unsafe_code)]
-#![warn(rust_2018_idioms, unreachable_pub)]
-#![warn(single_use_lifetimes)]
+#![warn(rust_2018_idioms, unreachable_pub, single_use_lifetimes)]
 #![warn(clippy::all, clippy::pedantic)]
 #![allow(clippy::use_self)]
 #![cfg_attr(proc_macro_def_site, feature(proc_macro_def_site))]

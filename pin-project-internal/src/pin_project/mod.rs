@@ -292,6 +292,7 @@ impl Context {
             };
 
             quote! {
+                #[allow(single_use_lifetimes)]
                 impl #impl_generics ::core::ops::Drop for #orig_ident #ty_generics #where_clause {
                     fn drop(&mut self) {
                         // Safety - we're in 'drop', so we know that 'self' will
@@ -333,6 +334,7 @@ impl Context {
                 trait #trait_ident {}
                 #[allow(clippy::drop_bounds)]
                 impl<T: ::core::ops::Drop> #trait_ident for T {}
+                #[allow(single_use_lifetimes)]
                 impl #impl_generics #trait_ident for #orig_ident #ty_generics #where_clause {}
             }
         }
@@ -455,6 +457,7 @@ fn ensure_not_packed(item: &ItemStruct) -> Result<TokenStream> {
     let struct_name = &item.ident;
     let method_name = format_ident!("__pin_project_assert_not_repr_packed_{}", item.ident);
     let test_fn = quote! {
+        #[allow(single_use_lifetimes)]
         #[allow(non_snake_case)]
         #[deny(safe_packed_borrows)]
         fn #method_name #impl_generics (val: #struct_name #ty_generics) #where_clause {

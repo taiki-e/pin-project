@@ -1,6 +1,6 @@
 #![no_std]
 #![warn(unsafe_code)]
-#![warn(rust_2018_idioms)]
+#![warn(rust_2018_idioms, single_use_lifetimes)]
 #![allow(dead_code)]
 
 use core::pin::Pin;
