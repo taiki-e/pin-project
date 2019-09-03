@@ -34,17 +34,22 @@ pub(super) fn parse(cx: &mut Context, mut item: ItemEnum) -> Result<TokenStream>
     let Context { proj_ident, proj_trait, orig_ident, lifetime, .. } = &cx;
     let proj_generics = cx.proj_generics();
     let proj_ty_generics = proj_generics.split_for_impl().1;
+
     let (impl_generics, ty_generics, where_clause) = item.generics.split_for_impl();
 
     let mut proj_items = quote! {
         #[allow(dead_code)]
         enum #proj_ident #proj_generics #where_clause { #(#proj_variants,)* }
     };
+
+    let crate_path = crate::utils::crate_path();
+
     proj_items.extend(quote! {
-        impl #impl_generics #proj_trait #ty_generics for ::core::pin::Pin<&mut #orig_ident #ty_generics> #where_clause {
-            fn project<#lifetime>(&#lifetime mut self) -> #proj_ident #proj_ty_generics #where_clause {
+        impl #impl_generics #proj_trait #ty_generics for ::core::pin::Pin<&#lifetime mut #orig_ident #ty_generics> #where_clause {
+            fn project(&mut self) -> #proj_ident #proj_ty_generics #where_clause {
+                use #crate_path::ProjectThrough;
                 unsafe {
-                    match self.as_mut().get_unchecked_mut() {
+                    match self.proj_through().get_unchecked_mut() {
                         #(#proj_arms,)*
                     }
                 }

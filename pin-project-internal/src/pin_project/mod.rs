@@ -75,6 +75,15 @@ struct Context {
 
     unsafe_unpin: bool,
     pinned_drop: Option<Span>,
+
+    proj_trait_generics: Generics,
+}
+
+struct ProjTraitGenerics<'a> {
+    impl_generics: ImplGenerics<'a>,
+    ty_generics: TypeGenerics<'a>,
+    where_clause: Option<&'a WhereClause>,
+    orig_ty_generics: TypeGenerics<'a>
 }
 
 impl Context {
@@ -104,6 +113,10 @@ impl Context {
             );
         }
 
+        let mut proj_trait_generics = generics.clone();
+        crate::utils::proj_generics(&mut proj_trait_generics, lifetime.clone());
+
+
         Ok(Self {
             orig_ident: orig_ident.clone(),
             proj_ident,
@@ -115,6 +128,7 @@ impl Context {
             pinned_fields: vec![],
             unsafe_unpin: unsafe_unpin.is_some(),
             pinned_drop,
+            proj_trait_generics
         })
     }
 
@@ -123,6 +137,21 @@ impl Context {
         let mut generics = self.generics.clone();
         utils::proj_generics(&mut generics, self.lifetime.clone());
         generics
+    }
+
+    fn proj_trait_generics<'a>(&'a self) -> ProjTraitGenerics<'a> {
+        //let mut orig_generics_for_impl = orig.clone();
+        //crate::utils::proj_generics(&mut orig_generics_for_impl, self.lifetime.clone());
+        //let (impl_generics, modified_ty_generics, _) = orig_generics_for_impl.split_for_impl();
+        let (impl_generics, modified_ty_generics, _) = self.proj_trait_generics.split_for_impl();
+
+        let (_, ty_generics, where_clause) = self.generics.split_for_impl();
+        ProjTraitGenerics {
+            impl_generics,
+            ty_generics: modified_ty_generics,
+            where_clause,
+            orig_ty_generics: ty_generics
+        }
     }
 
     fn push_unpin_bounds(&mut self, ty: Type) {
@@ -343,11 +372,15 @@ impl Context {
         let proj_generics = self.proj_generics();
         let proj_ty_generics = proj_generics.split_for_impl().1;
 
-        let (orig_generics, _, orig_where_clause) = self.generics.split_for_impl();
+        let mut trait_generics = self.generics.clone();
+        crate::utils::proj_generics(&mut trait_generics, lifetime.clone());
+        //trait_generics.params.push(GenericParam::Lifetime(LifetimeDef::new(lifetime.clone())));
+
+        let (orig_generics, _, orig_where_clause) = trait_generics.split_for_impl();
 
         quote! {
             trait #proj_trait #orig_generics {
-                fn project<#lifetime>(&#lifetime mut self) -> #proj_ident #proj_ty_generics #orig_where_clause;
+                fn project(&mut self) -> #proj_ident #proj_ty_generics #orig_where_clause;
             }
         }
     }

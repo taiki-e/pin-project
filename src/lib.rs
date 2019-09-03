@@ -93,6 +93,7 @@
 #![warn(single_use_lifetimes)]
 #![warn(clippy::all, clippy::pedantic)]
 #![allow(clippy::use_self)]
+#![feature(pin_into_inner)]
 
 #[doc(hidden)]
 pub use pin_project_internal::pin_project;
@@ -161,6 +162,25 @@ pub use pin_project_internal::project;
 #[allow(unsafe_code)]
 pub unsafe trait UnsafeUnpin {}
 
+
+use core::pin::Pin;
+
+pub trait ProjectThrough<'a> {
+    type Target;
+    fn proj_through(&mut self) -> Pin<&'a mut Self::Target>;
+}
+
+impl<'a, T> ProjectThrough<'a> for Pin<&'a mut T> {
+    type Target = T;
+    fn proj_through(&mut self) -> Pin<&'a mut Self::Target> {
+        let as_mut: Pin<&mut T> = self.as_mut();
+        let raw_mut: &mut T = unsafe { Pin::into_inner_unchecked(as_mut) };
+        let raw_transmuted: &'a mut T = unsafe { core::mem::transmute(raw_mut) };
+        
+        unsafe { Pin::new_unchecked(raw_transmuted) }
+    }
+}
+
 #[doc(hidden)]
 pub mod __private {
     use super::UnsafeUnpin;
@@ -180,6 +200,8 @@ pub mod __private {
         #[doc(hidden)]
         unsafe fn pinned_drop(self: Pin<&mut Self>);
     }
+
+
 
     // This is an internal helper struct used by `pin-project-internal`.
     // This allows us to force an error if the user tries to provide

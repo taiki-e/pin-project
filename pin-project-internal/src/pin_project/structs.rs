@@ -4,7 +4,7 @@ use syn::{parse::Nothing, Field, Fields, FieldsNamed, FieldsUnnamed, Index, Item
 
 use crate::utils::VecExt;
 
-use super::{Context, PIN};
+use super::{Context, ProjTraitGenerics, PIN};
 
 pub(super) fn parse(cx: &mut Context, mut item: ItemStruct) -> Result<TokenStream> {
     let (proj_fields, proj_init) = match &mut item.fields {
@@ -31,17 +31,30 @@ pub(super) fn parse(cx: &mut Context, mut item: ItemStruct) -> Result<TokenStrea
     let Context { proj_ident, proj_trait, orig_ident, lifetime, .. } = &cx;
     let proj_generics = cx.proj_generics();
     let proj_ty_generics = proj_generics.split_for_impl().1;
-    let (impl_generics, ty_generics, where_clause) = item.generics.split_for_impl();
+
+
+    /*let mut orig_generics_for_impl = item.generics.clone();
+    crate::utils::proj_generics(&mut orig_generics_for_impl, lifetime.clone());
+    let (impl_generics, modified_ty_generics, _) = orig_generics_for_impl.split_for_impl();
+
+    let (_, ty_generics, where_clause) = item.generics.split_for_impl();*/
+
+    let ProjTraitGenerics { impl_generics, ty_generics, where_clause, orig_ty_generics }
+        = cx.proj_trait_generics();
 
     let mut proj_items = quote! {
         #[allow(dead_code)]
         struct #proj_ident #proj_generics #where_clause #proj_fields
     };
+
+    let crate_path = crate::utils::crate_path();
+
     proj_items.extend(quote! {
-        impl #impl_generics #proj_trait #ty_generics for ::core::pin::Pin<&mut #orig_ident #ty_generics> #where_clause {
-            fn project<#lifetime>(&#lifetime mut self) -> #proj_ident #proj_ty_generics #where_clause {
+        impl #impl_generics #proj_trait #ty_generics for ::core::pin::Pin<&#lifetime mut #orig_ident #orig_ty_generics> #where_clause {
+            fn project(&mut self) -> #proj_ident #proj_ty_generics #where_clause {
                 unsafe {
-                    let this = self.as_mut().get_unchecked_mut();
+                    use #crate_path::ProjectThrough;
+                    let this = self.proj_through().get_unchecked_mut();
                     #proj_ident #proj_init
                 }
             }
