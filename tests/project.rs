@@ -1,6 +1,6 @@
 #![no_std]
 #![warn(unsafe_code)]
-#![warn(rust_2018_idioms)]
+#![warn(rust_2018_idioms, single_use_lifetimes)]
 #![allow(dead_code)]
 #![cfg(feature = "project_attr")]
 
@@ -137,6 +137,7 @@ fn project_impl() {
         field2: U,
     }
 
+    #[allow(single_use_lifetimes)]
     #[project]
     impl<'_pin, T, U> HasOverlappingLifetimes<'_pin, T, U> {}
 
@@ -147,6 +148,7 @@ fn project_impl() {
         field2: U,
     }
 
+    #[allow(single_use_lifetimes)]
     #[project]
     impl<T, U> HasOverlappingLifetimes2<T, U> {
         fn foo<'_pin>(&'_pin self) {}
