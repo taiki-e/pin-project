@@ -1,6 +1,15 @@
 # Unreleased
 
-# 0.4.0-alpha.7 - 2019-09-03
+# 0.4.0-alpha.8 - 2019-09-03
+
+* [Improved document of generated code.][62]. Also added an option to control the document of generated code. See [taiki-e/pin-project#62][62] for more details.
+
+* [Improved error messages][61]
+
+[61]: https://github.com/taiki-e/pin-project/pull/61
+[62]: https://github.com/taiki-e/pin-project/pull/62
+
+# 0.4.0-alpha.7 - 2019-09-02
 
 * [Applied `#[allow(dead_code)]` to generated types.][57]
 
