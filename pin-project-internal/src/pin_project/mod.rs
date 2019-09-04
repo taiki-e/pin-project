@@ -8,6 +8,7 @@ use syn::{
 
 use crate::utils::{
     self, crate_path, proj_ident, proj_lifetime_name, proj_trait_ident, DEFAULT_LIFETIME_NAME,
+    TRAIT_LIFETIME_NAME
 };
 
 mod enums;
@@ -67,6 +68,9 @@ struct Context {
 
     /// Lifetime added to projected type.
     lifetime: Lifetime,
+    
+    /// Lifetime on the generated projection trait
+    trait_lifetime: Lifetime,
 
     /// Where-clause for conditional Unpin implementation.
     impl_unpin: WhereClause,
@@ -92,6 +96,10 @@ impl Context {
         proj_lifetime_name(&mut lifetime_name, &generics.params);
         let lifetime = Lifetime::new(&lifetime_name, Span::call_site());
 
+        let mut trait_lifetime_name = String::from(TRAIT_LIFETIME_NAME);
+        proj_lifetime_name(&mut trait_lifetime_name, &generics.params);
+        let trait_lifetime = Lifetime::new(&trait_lifetime_name, Span::call_site());
+
         let mut generics = generics.clone();
         let mut impl_unpin = generics.make_where_clause().clone();
         if let Some(unsafe_unpin) = unsafe_unpin {
@@ -111,6 +119,7 @@ impl Context {
             vis: vis.clone(),
             generics,
             lifetime,
+            trait_lifetime,
             impl_unpin,
             pinned_fields: vec![],
             unsafe_unpin: unsafe_unpin.is_some(),
@@ -118,10 +127,44 @@ impl Context {
         })
     }
 
+    /// Creates an implementation of the projection trait.
+    /// The provided TokenStream will be used as the body of the
+    /// 'project' and 'project_into' implementations
+    fn make_trait_impl(&self, project_body: &TokenStream, project_into_body: &TokenStream) -> TokenStream {
+        let Context { proj_ident, proj_trait, orig_ident, lifetime, trait_lifetime, .. } = &self;
+        let proj_generics = self.proj_generics();
+
+        let project_into_generics = self.project_into_generics();
+
+        let proj_ty_generics = proj_generics.split_for_impl().1;
+        let (impl_generics, project_into_ty_generics, _) = project_into_generics.split_for_impl();
+        let (_, ty_generics, where_clause) = self.generics.split_for_impl();
+
+
+        quote! {
+            impl #impl_generics #proj_trait #project_into_ty_generics for ::core::pin::Pin<&#trait_lifetime mut #orig_ident #ty_generics> #where_clause {
+                fn project<#lifetime>(&#lifetime mut self) -> #proj_ident #proj_ty_generics #where_clause {
+                    #project_body
+                }
+
+                fn project_into(self) -> #proj_ident #project_into_ty_generics #where_clause {
+                    #project_into_body
+                }
+            }
+        }
+    }
+
     /// Makes the generics of projected type from the reference of the original generics.
     fn proj_generics(&self) -> Generics {
         let mut generics = self.generics.clone();
         utils::proj_generics(&mut generics, self.lifetime.clone());
+        generics
+    }
+
+    /// Makes the generics for the 'project_into' method
+    fn project_into_generics(&self) -> Generics {
+        let mut generics = self.generics.clone();
+        utils::proj_generics(&mut generics, self.trait_lifetime.clone());
         generics
     }
 
@@ -345,11 +388,16 @@ impl Context {
         let proj_generics = self.proj_generics();
         let proj_ty_generics = proj_generics.split_for_impl().1;
 
-        let (orig_generics, _, orig_where_clause) = self.generics.split_for_impl();
+        // Add trait lifetime to trait generics
+        let mut trait_generics = self.generics.clone();
+        utils::proj_generics(&mut trait_generics, self.trait_lifetime.clone());
+
+        let (trait_generics, trait_ty_generics, orig_where_clause) = trait_generics.split_for_impl();
 
         quote! {
-            trait #proj_trait #orig_generics {
+            trait #proj_trait #trait_generics {
                 fn project<#lifetime>(&#lifetime mut self) -> #proj_ident #proj_ty_generics #orig_where_clause;
+                fn project_into(self) -> #proj_ident #trait_ty_generics #orig_where_clause;
             }
         }
     }

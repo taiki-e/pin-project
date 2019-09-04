@@ -262,3 +262,36 @@ fn test_private_type_in_public_type() {
         OtherVariant(u8),
     }
 }
+
+#[test]
+fn test_lifetime_project() {
+    #[pin_project::pin_project]
+    struct Struct<T, U> {
+        #[pin]
+        pinned: T,
+        unpinned: U,
+    }
+
+    #[pin_project::pin_project]
+    enum Enum<T, U> {
+        Variant {
+            #[pin]
+            pinned: T,
+            unpinned: U,
+        }
+    }
+
+    impl<T, U> Struct<T, U> {
+        fn get_pin_mut<'a>(self: Pin<&'a mut Self>) -> Pin<&'a mut T> {
+            self.project_into().pinned
+        }
+    }
+
+    impl<T, U> Enum<T, U> {
+        fn get_pin_mut<'a>(self: Pin<&'a mut Self>) -> Pin<&'a mut T> {
+            match self.project_into() {
+                __EnumProjection::Variant { pinned, .. } => pinned
+            }
+        }
+    }
+}

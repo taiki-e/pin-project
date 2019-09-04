@@ -31,6 +31,32 @@ use syn::parse::Nothing;
 /// the field.
 /// - For the other fields, makes the unpinned reference to the field.
 ///
+/// The following methods are implemented on the original `#[pin_project]` type:
+///
+/// ```ignore
+/// fn project(&mut Pin<&mut Self>) -> ProjectedType;
+/// fn project_into(Pin<&mut Self>) -> ProjectedType;
+/// ```
+///
+/// The `project` method takes a mutable reference to a pinned
+/// type, and returns a projection struct. This is the method
+/// you'll usually want to use - since it takes a mutable reference,
+/// it can be called multiple times, and allows you to use
+/// the original Pin type later on (e.g. to call Pin::set)
+///
+/// The `project_into` type takes a pinned type by value (consuming it),
+/// and returns a projection struct. The difference between this and the `project`
+/// method lies in the lifetime. While the type returned by `project` only lives
+/// as long as the 'outer' mutable reference, the type returned by this method
+/// lives for as long as the original Pin. This can be useful when returning a pin
+/// projection from a method:
+///
+/// ```ignore
+/// fn get_pin_mut<'a>(mut self: Pin<&'a mut Self>) -> Pin<&'a mut T> {
+///     self.project_into().pinned
+/// }
+/// ```
+///
 /// ## Safety
 ///
 /// This attribute is completely safe. In the absence of other `unsafe` code *that you write*,
