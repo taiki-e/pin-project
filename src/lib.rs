@@ -93,7 +93,6 @@
 #![warn(single_use_lifetimes)]
 #![warn(clippy::all, clippy::pedantic)]
 #![allow(clippy::use_self)]
-#![feature(pin_into_inner)]
 
 #[doc(hidden)]
 pub use pin_project_internal::pin_project;
@@ -175,7 +174,7 @@ impl<'a, T> ProjectThrough<'a> for Pin<&'a mut T> {
     fn proj_through(&mut self) -> Pin<&'a mut Self::Target> {
         let as_mut: Pin<&mut T> = self.as_mut();
         #[allow(unsafe_code)]
-        let raw_mut: &mut T = unsafe { Pin::into_inner_unchecked(as_mut) };
+        let raw_mut: &mut T = unsafe { Pin::get_unchecked_mut(as_mut) };
         #[allow(unsafe_code)]
         let raw_transmuted: &'a mut T = unsafe { core::mem::transmute(raw_mut) };
         #[allow(unsafe_code)]
