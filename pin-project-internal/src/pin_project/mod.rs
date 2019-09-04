@@ -192,14 +192,17 @@ impl Context {
                 {
                     proc_macro::Span::def_site().into()
                 }
-
                 #[cfg(not(proc_macro_def_site))]
                 {
                     Span::call_site()
                 }
             };
 
-            let struct_ident = format_ident!("UnpinStruct{}", orig_ident, span = make_span());
+            let struct_ident = if cfg!(proc_macro_def_site) {
+                format_ident!("UnpinStruct{}", orig_ident, span = make_span())
+            } else {
+                format_ident!("__UnpinStruct{}", orig_ident)
+            };
             let always_unpin_ident = format_ident!("AlwaysUnpin{}", orig_ident, span = make_span());
 
             // Generate a field in our new struct for every
