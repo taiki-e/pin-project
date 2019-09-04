@@ -1,5 +1,19 @@
 # Unreleased
 
+# 0.4.0-alpha.9 - 2019-09-05
+
+* [Added 'project_into' method to #[pin_project] types][69]. This can be useful when returning a pin projection from a method.
+  ```rust
+  fn get_pin_mut(self: Pin<&mut Self>) -> Pin<&mut T> {
+      self.project_into().pinned
+  }
+  ```
+
+* [Prevented UnpinStruct from appearing in the document by default.][71] See [taiki-e/pin-project#71][71] for more details.
+
+[69]: https://github.com/taiki-e/pin-project/pull/69
+[71]: https://github.com/taiki-e/pin-project/pull/69
+
 # 0.4.0-alpha.8 - 2019-09-03
 
 * [Improved document of generated code.][62]. Also added an option to control the document of generated code. See [taiki-e/pin-project#62][62] for more details.
