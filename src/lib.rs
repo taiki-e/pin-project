@@ -174,9 +174,11 @@ impl<'a, T> ProjectThrough<'a> for Pin<&'a mut T> {
     type Target = T;
     fn proj_through(&mut self) -> Pin<&'a mut Self::Target> {
         let as_mut: Pin<&mut T> = self.as_mut();
+        #[allow(unsafe_code)]
         let raw_mut: &mut T = unsafe { Pin::into_inner_unchecked(as_mut) };
+        #[allow(unsafe_code)]
         let raw_transmuted: &'a mut T = unsafe { core::mem::transmute(raw_mut) };
-        
+        #[allow(unsafe_code)]
         unsafe { Pin::new_unchecked(raw_transmuted) }
     }
 }
