@@ -138,7 +138,7 @@ impl Context {
         generics
     }
 
-    fn proj_trait_generics<'a>(&'a self) -> ProjTraitGenerics<'a> {
+    fn proj_trait_generics(&self) -> ProjTraitGenerics<'_> {
         //let mut orig_generics_for_impl = orig.clone();
         //crate::utils::proj_generics(&mut orig_generics_for_impl, self.lifetime.clone());
         //let (impl_generics, modified_ty_generics, _) = orig_generics_for_impl.split_for_impl();
