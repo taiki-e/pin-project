@@ -6,6 +6,7 @@ use syn::{
 };
 
 pub(crate) const DEFAULT_LIFETIME_NAME: &str = "'_pin";
+pub(crate) const TRAIT_LIFETIME_NAME: &str = "'_outer_pin";
 
 /// Makes the ident of projected type from the reference of the original ident.
 pub(crate) fn proj_ident(ident: &Ident) -> Ident {

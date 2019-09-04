@@ -28,26 +28,31 @@ pub(super) fn parse(cx: &mut Context, mut item: ItemStruct) -> Result<TokenStrea
         Fields::Unnamed(fields) => unnamed(cx, fields)?,
     };
 
-    let Context { proj_ident, proj_trait, orig_ident, lifetime, .. } = &cx;
+    let proj_ident = &cx.proj_ident;
     let proj_generics = cx.proj_generics();
-    let proj_ty_generics = proj_generics.split_for_impl().1;
-    let (impl_generics, ty_generics, where_clause) = item.generics.split_for_impl();
+    let where_clause = item.generics.split_for_impl().2;
 
     let mut proj_items = quote! {
         #[allow(clippy::mut_mut)]
         #[allow(dead_code)]
         struct #proj_ident #proj_generics #where_clause #proj_fields
     };
-    proj_items.extend(quote! {
-        impl #impl_generics #proj_trait #ty_generics for ::core::pin::Pin<&mut #orig_ident #ty_generics> #where_clause {
-            fn project<#lifetime>(&#lifetime mut self) -> #proj_ident #proj_ty_generics #where_clause {
-                unsafe {
-                    let this = self.as_mut().get_unchecked_mut();
-                    #proj_ident #proj_init
-                }
-            }
+
+    let project_body = quote! {
+        unsafe {
+            let this = self.as_mut().get_unchecked_mut();
+            #proj_ident #proj_init
         }
-    });
+    };
+
+    let project_into_body = quote! {
+        unsafe {
+            let this = self.get_unchecked_mut();
+            #proj_ident #proj_init
+        }
+    };
+
+    proj_items.extend(cx.make_trait_impl(&project_body, &project_into_body));
 
     let mut item = item.into_token_stream();
     item.extend(proj_items);
