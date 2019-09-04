@@ -42,7 +42,7 @@ use syn::parse::Nothing;
 /// type, and returns a projection struct. This is the method
 /// you'll usually want to use - since it takes a mutable reference,
 /// it can be called multiple times, and allows you to use
-/// the original Pin type later on (e.g. to call Pin::set)
+/// the original Pin type later on (e.g. to call [`Pin::set`](core::pin::Pin::set))
 ///
 /// The `project_into` type takes a pinned type by value (consuming it),
 /// and returns a projection struct. The difference between this and the `project`

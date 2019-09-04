@@ -38,7 +38,6 @@ pub(super) fn parse(cx: &mut Context, mut item: ItemStruct) -> Result<TokenStrea
         struct #proj_ident #proj_generics #where_clause #proj_fields
     };
 
-
     let project_body = quote! {
         unsafe {
             let this = self.as_mut().get_unchecked_mut();

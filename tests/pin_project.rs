@@ -278,7 +278,7 @@ fn test_lifetime_project() {
             #[pin]
             pinned: T,
             unpinned: U,
-        }
+        },
     }
 
     impl<T, U> Struct<T, U> {
@@ -290,7 +290,7 @@ fn test_lifetime_project() {
     impl<T, U> Enum<T, U> {
         fn get_pin_mut<'a>(self: Pin<&'a mut Self>) -> Pin<&'a mut T> {
             match self.project_into() {
-                __EnumProjection::Variant { pinned, .. } => pinned
+                __EnumProjection::Variant { pinned, .. } => pinned,
             }
         }
     }

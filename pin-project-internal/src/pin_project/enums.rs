@@ -35,7 +35,6 @@ pub(super) fn parse(cx: &mut Context, mut item: ItemEnum) -> Result<TokenStream>
     let proj_generics = cx.proj_generics();
     let where_clause = item.generics.split_for_impl().2;
 
-
     let mut proj_items = quote! {
         #[allow(clippy::mut_mut)]
         #[allow(dead_code)]

@@ -8,7 +8,7 @@ use syn::{
 
 use crate::utils::{
     self, crate_path, proj_ident, proj_lifetime_name, proj_trait_ident, DEFAULT_LIFETIME_NAME,
-    TRAIT_LIFETIME_NAME
+    TRAIT_LIFETIME_NAME,
 };
 
 mod enums;
@@ -68,7 +68,7 @@ struct Context {
 
     /// Lifetime added to projected type.
     lifetime: Lifetime,
-    
+
     /// Lifetime on the generated projection trait
     trait_lifetime: Lifetime,
 
@@ -130,7 +130,11 @@ impl Context {
     /// Creates an implementation of the projection trait.
     /// The provided TokenStream will be used as the body of the
     /// 'project' and 'project_into' implementations
-    fn make_trait_impl(&self, project_body: &TokenStream, project_into_body: &TokenStream) -> TokenStream {
+    fn make_trait_impl(
+        &self,
+        project_body: &TokenStream,
+        project_into_body: &TokenStream,
+    ) -> TokenStream {
         let Context { proj_ident, proj_trait, orig_ident, lifetime, trait_lifetime, .. } = &self;
         let proj_generics = self.proj_generics();
 
@@ -139,7 +143,6 @@ impl Context {
         let proj_ty_generics = proj_generics.split_for_impl().1;
         let (impl_generics, project_into_ty_generics, _) = project_into_generics.split_for_impl();
         let (_, ty_generics, where_clause) = self.generics.split_for_impl();
-
 
         quote! {
             impl #impl_generics #proj_trait #project_into_ty_generics for ::core::pin::Pin<&#trait_lifetime mut #orig_ident #ty_generics> #where_clause {
@@ -392,7 +395,8 @@ impl Context {
         let mut trait_generics = self.generics.clone();
         utils::proj_generics(&mut trait_generics, self.trait_lifetime.clone());
 
-        let (trait_generics, trait_ty_generics, orig_where_clause) = trait_generics.split_for_impl();
+        let (trait_generics, trait_ty_generics, orig_where_clause) =
+            trait_generics.split_for_impl();
 
         quote! {
             trait #proj_trait #trait_generics {
