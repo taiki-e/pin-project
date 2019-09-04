@@ -32,15 +32,14 @@ pub(super) fn parse(cx: &mut Context, mut item: ItemStruct) -> Result<TokenStrea
     let proj_generics = cx.proj_generics();
     let proj_ty_generics = proj_generics.split_for_impl().1;
 
-
     /*let mut orig_generics_for_impl = item.generics.clone();
     crate::utils::proj_generics(&mut orig_generics_for_impl, lifetime.clone());
     let (impl_generics, modified_ty_generics, _) = orig_generics_for_impl.split_for_impl();
 
     let (_, ty_generics, where_clause) = item.generics.split_for_impl();*/
 
-    let ProjTraitGenerics { impl_generics, ty_generics, where_clause, orig_ty_generics }
-        = cx.proj_trait_generics();
+    let ProjTraitGenerics { impl_generics, ty_generics, where_clause, orig_ty_generics } =
+        cx.proj_trait_generics();
 
     let mut proj_items = quote! {
         #[allow(dead_code)]

@@ -161,7 +161,6 @@ pub use pin_project_internal::project;
 #[allow(unsafe_code)]
 pub unsafe trait UnsafeUnpin {}
 
-
 use core::pin::Pin;
 
 /// A helper trait to allow projecting through a mutable reference,
@@ -175,7 +174,7 @@ use core::pin::Pin;
 ///
 /// This can cause issues when trying to return the result of a pin projection
 /// from a method - e.g. `fn foo<'a>(mut self: Pin<&'a mut Self>) -> Pin<&'a mut T>`
-/// 
+///
 /// The ProjectThrough trait was introduced to solve this issue.
 /// Normally, you'll never need to interact with this type
 /// directly - it's used internally by pin-project to allow expressing
@@ -228,7 +227,9 @@ impl<'a, T> ProjectThrough<'a> for Pin<&'a mut T> {
 
         // Finally, we construct a Pin from our 'upgraded' mutable reference
         #[allow(unsafe_code)]
-        unsafe { Pin::new_unchecked(raw_transmuted) }
+        unsafe {
+            Pin::new_unchecked(raw_transmuted)
+        }
     }
 }
 
@@ -251,8 +252,6 @@ pub mod __private {
         #[doc(hidden)]
         unsafe fn pinned_drop(self: Pin<&mut Self>);
     }
-
-
 
     // This is an internal helper struct used by `pin-project-internal`.
     // This allows us to force an error if the user tries to provide

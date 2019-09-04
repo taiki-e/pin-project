@@ -35,9 +35,8 @@ pub(super) fn parse(cx: &mut Context, mut item: ItemEnum) -> Result<TokenStream>
     let proj_generics = cx.proj_generics();
     let proj_ty_generics = proj_generics.split_for_impl().1;
 
-    let ProjTraitGenerics { impl_generics, ty_generics, where_clause, orig_ty_generics }
-        = cx.proj_trait_generics();
-
+    let ProjTraitGenerics { impl_generics, ty_generics, where_clause, orig_ty_generics } =
+        cx.proj_trait_generics();
 
     let mut proj_items = quote! {
         #[allow(dead_code)]

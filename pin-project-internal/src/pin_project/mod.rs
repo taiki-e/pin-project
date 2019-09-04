@@ -83,7 +83,7 @@ struct ProjTraitGenerics<'a> {
     impl_generics: ImplGenerics<'a>,
     ty_generics: TypeGenerics<'a>,
     where_clause: Option<&'a WhereClause>,
-    orig_ty_generics: TypeGenerics<'a>
+    orig_ty_generics: TypeGenerics<'a>,
 }
 
 impl Context {
@@ -116,7 +116,6 @@ impl Context {
         let mut proj_trait_generics = generics.clone();
         crate::utils::proj_generics(&mut proj_trait_generics, lifetime.clone());
 
-
         Ok(Self {
             orig_ident: orig_ident.clone(),
             proj_ident,
@@ -128,7 +127,7 @@ impl Context {
             pinned_fields: vec![],
             unsafe_unpin: unsafe_unpin.is_some(),
             pinned_drop,
-            proj_trait_generics
+            proj_trait_generics,
         })
     }
 
@@ -150,7 +149,7 @@ impl Context {
             impl_generics,
             ty_generics: modified_ty_generics,
             where_clause,
-            orig_ty_generics: ty_generics
+            orig_ty_generics: ty_generics,
         }
     }
 

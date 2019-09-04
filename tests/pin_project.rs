@@ -265,16 +265,16 @@ fn test_private_type_in_public_type() {
 
 #[test]
 fn test_lifetime_project() {
-	#[pin_project::pin_project]
-	struct Struct<T, U> {
-		#[pin]
-		pinned: T,
-		unpinned: U,
-	}
+    #[pin_project::pin_project]
+    struct Struct<T, U> {
+        #[pin]
+        pinned: T,
+        unpinned: U,
+    }
 
-	impl<T, U> Struct<T, U> {
-		fn get_pin_mut<'a>(mut self: Pin<&'a mut Self>) -> Pin<&'a mut T> {
-			self.project().pinned
-		}
-	}
+    impl<T, U> Struct<T, U> {
+        fn get_pin_mut<'a>(mut self: Pin<&'a mut Self>) -> Pin<&'a mut T> {
+            self.project().pinned
+        }
+    }
 }
