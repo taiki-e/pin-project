@@ -4,7 +4,7 @@ use syn::{parse::Nothing, Field, Fields, FieldsNamed, FieldsUnnamed, ItemEnum, R
 
 use crate::utils::VecExt;
 
-use super::{Context, PIN};
+use super::{Context, ProjTraitGenerics, PIN};
 
 pub(super) fn parse(cx: &mut Context, mut item: ItemEnum) -> Result<TokenStream> {
     if item.variants.is_empty() {
@@ -37,6 +37,10 @@ pub(super) fn parse(cx: &mut Context, mut item: ItemEnum) -> Result<TokenStream>
 
     let (impl_generics, ty_generics, where_clause) = item.generics.split_for_impl();
 
+    let ProjTraitGenerics { impl_generics, ty_generics, where_clause, orig_ty_generics }
+        = cx.proj_trait_generics();
+
+
     let mut proj_items = quote! {
         #[allow(dead_code)]
         enum #proj_ident #proj_generics #where_clause { #(#proj_variants,)* }
@@ -45,7 +49,7 @@ pub(super) fn parse(cx: &mut Context, mut item: ItemEnum) -> Result<TokenStream>
     let crate_path = crate::utils::crate_path();
 
     proj_items.extend(quote! {
-        impl #impl_generics #proj_trait #ty_generics for ::core::pin::Pin<&#lifetime mut #orig_ident #ty_generics> #where_clause {
+        impl #impl_generics #proj_trait #ty_generics for ::core::pin::Pin<&#lifetime mut #orig_ident #orig_ty_generics> #where_clause {
             fn project(&mut self) -> #proj_ident #proj_ty_generics #where_clause {
                 use #crate_path::ProjectThrough;
                 unsafe {
