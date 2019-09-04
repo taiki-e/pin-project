@@ -164,6 +164,22 @@ pub unsafe trait UnsafeUnpin {}
 
 use core::pin::Pin;
 
+/// A helper trait to allow projecting through a mutable reference,
+/// while preserving lifetimes.
+///
+/// Normally, `Pin::as_mut` can be used to convert a '&mut Pin' to a owned 'Pin'
+/// However, since 'Pin::as_mut' needs to work with generic DerefMut impls,
+/// it loses lifetime information. Specifically, it returns a 'Pin<&'a mut P::Target>',
+/// where 'a is tied to the lifetime of the original '&mut Pin'. If you started
+/// with a `&mut Pin<'pin &mut T>`, the 'pin lifetime is lost.
+///
+/// This can cause issues when trying to return the result of a pin projection
+/// from a method - e.g. `fn foo<'a>(mut self: Pin<&'a mut Self>) -> Pin<&'a mut T>`
+/// 
+/// The ProjectThrough trait was introduced to solve this issue.
+/// Normally, you'll never need to interact with this type
+/// directly - it's used internally by pin-project to allow expressing
+/// the proper lifetime.
 pub trait ProjectThrough<'a> {
     type Target;
     fn proj_through(&mut self) -> Pin<&'a mut Self::Target>;
@@ -172,11 +188,45 @@ pub trait ProjectThrough<'a> {
 impl<'a, T> ProjectThrough<'a> for Pin<&'a mut T> {
     type Target = T;
     fn proj_through(&mut self) -> Pin<&'a mut Self::Target> {
-        let as_mut: Pin<&mut T> = self.as_mut();
+        // This method is fairly tricky. We start out with
+        // a `&'p mut Pin<&'a mut T>`, which we want
+        // to convert into a `Pin<&'a mut T>`
+        //
+        // Effectively, we want to discard the outer '&mut'
+        // reference, and just work with the inner 'Pin'
+        // We accomplish this in four steps:
+        //
+        // First, call Pin::as_mut(self). This
+        // converts our '&'p mut Pin<&'a mut T>` to
+        // a `Pin<&mut T>`. This is *almost* what we want -
+        // however, the lifetime is wrong. Since 'as_mut'
+        // uses the `DerefMut` impl of `&mut T`, it loses
+        // the lifetime associated with the `&mut T`.
+        // However, we know that we're dealing with a
+        // `Pin<&mut T>`, so we can soundly recover the original
+        // lifetime.
+        //
+        // This relies on the following property:
+        // The lifetime of the reference returned by <&'a mut T as DerefMut>::deref_mut
+        // is the same as 'a. In order words, calling deref_mut on a mutable reference
+        // is a no-op.
+        let as_mut: Pin<&mut T> = Pin::as_mut(self);
+
+        // Next, we unwrap the Pin<&mut T> by calling 'Pin::get_unchecked_mut'.
+        // This gives us access to the underlying mutable reference
         #[allow(unsafe_code)]
         let raw_mut: &mut T = unsafe { Pin::get_unchecked_mut(as_mut) };
+
+        // NExt, we transmute the mutable reference, changing its lifetime to 'a.
+        // Here, we rely on the behavior of DerefMut for mutable references
+        // described above.
+        //
+        // This is the core of this method - everything else is just to deconstruct
+        // and reconstrut a Pin
         #[allow(unsafe_code)]
         let raw_transmuted: &'a mut T = unsafe { core::mem::transmute(raw_mut) };
+
+        // Finally, we construct a Pin from our 'upgraded' mutable reference
         #[allow(unsafe_code)]
         unsafe { Pin::new_unchecked(raw_transmuted) }
     }
