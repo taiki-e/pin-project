@@ -192,14 +192,17 @@ impl Context {
                 {
                     proc_macro::Span::def_site().into()
                 }
-
                 #[cfg(not(proc_macro_def_site))]
                 {
                     Span::call_site()
                 }
             };
 
-            let struct_ident = format_ident!("__UnpinStruct{}", orig_ident, span = make_span());
+            let struct_ident = if cfg!(proc_macro_def_site) {
+                format_ident!("UnpinStruct{}", orig_ident, span = make_span())
+            } else {
+                format_ident!("__UnpinStruct{}", orig_ident)
+            };
             let always_unpin_ident = format_ident!("AlwaysUnpin{}", orig_ident, span = make_span());
 
             // Generate a field in our new struct for every
@@ -292,6 +295,7 @@ impl Context {
                 ///
                 /// [taiki-e/pin-project#53]: https://github.com/taiki-e/pin-project/pull/53#issuecomment-525906867
                 /// [rust-lang/rust#63281]: https://github.com/rust-lang/rust/issues/63281
+                #[allow(dead_code)]
                 #vis struct #struct_ident #full_generics #where_clause {
                     __pin_project_use_generics: #always_unpin_ident <(#(#type_params),*)>,
 

@@ -49,7 +49,7 @@ jobs:
         toolchain: nightly
     - script: |
         cargo clean
-        RUSTFLAGS='--cfg compiletest' cargo test -p pin-project --all-features --test compiletest
+        RUSTFLAGS='--cfg compiletest --cfg pin_project_show_unpin_struct' cargo test -p pin-project --all-features --test compiletest
       displayName: compiletest
 
 - job: clippy
