@@ -15,62 +15,22 @@
 //! use std::pin::Pin;
 //!
 //! #[pin_project]
-//! struct Foo<T, U> {
+//! struct Struct<T, U> {
 //!     #[pin]
-//!     future: T,
-//!     field: U,
+//!     pinned: T,
+//!     unpinned: U,
 //! }
 //!
-//! impl<T, U> Foo<T, U> {
-//!     fn baz(mut self: Pin<&mut Self>) {
+//! impl<T, U> Struct<T, U> {
+//!     fn foo(mut self: Pin<&mut Self>) {
 //!         let this = self.project();
-//!         let _: Pin<&mut T> = this.future; // Pinned reference to the field
-//!         let _: &mut U = this.field; // Normal reference to the field
+//!         let _: Pin<&mut T> = this.pinned; // Pinned reference to the field
+//!         let _: &mut U = this.unpinned; // Normal reference to the field
 //!     }
 //! }
 //! ```
 //!
-//! <details>
-//! <summary>Code like this will be generated:</summary>
-//!
-//! ```rust
-//! struct Foo<T, U> {
-//!     future: T,
-//!     field: U,
-//! }
-//!
-//! struct __FooProjection<'__a, T, U> {
-//!     future: ::core::pin::Pin<&'__a mut T>,
-//!     field: &'__a mut U,
-//! }
-//!
-//! impl<T, U> Foo<T, U> {
-//!     fn project<'__a>(self: ::core::pin::Pin<&'__a mut Self>) -> __FooProjection<'__a, T, U> {
-//!         unsafe {
-//!             let this = ::core::pin::Pin::get_unchecked_mut(self);
-//!             __FooProjection {
-//!                 future: ::core::pin::Pin::new_unchecked(&mut this.future),
-//!                 field: &mut this.field,
-//!             }
-//!         }
-//!     }
-//! }
-//!
-//! // Automatically create the Drop implementation.
-//! impl<T, U> Drop for Foo<T, U> {
-//!     fn drop(&mut self) {
-//!         // Do nothing. The precense of this Drop
-//!         // impl ensures that the user can't provide one of their own
-//!     }
-//! }
-//!
-//! // Automatically create the appropriate conditional Unpin implementation.
-//! impl<T, U> Unpin for Foo<T, U> where T: Unpin {}
-//! ```
-//!
-//! </details>
-//!
-//! <br>
+//! [Code like this will be generated](https://github.com/taiki-e/pin-project/blob/master/examples/struct-default.rs)
 //!
 //! See [`pin_project`] attribute for more details.
 //!
@@ -78,10 +38,14 @@
 //! [`pinned_drop`]: https://docs.rs/pin-project-internal/0.4.0-alpha.9/pin_project_internal/attr.pinned_drop.html
 //! [`project`]: https://docs.rs/pin-project-internal/0.4.0-alpha.9/pin_project_internal/attr.project.html
 
+#![no_std]
 #![recursion_limit = "256"]
 #![doc(html_root_url = "https://docs.rs/pin-project/0.4.0-alpha.9")]
-#![doc(test(no_crate_inject, attr(deny(warnings, rust_2018_idioms), allow(dead_code))))]
-#![no_std]
+#![doc(test(
+    no_crate_inject,
+    attr(deny(warnings, rust_2018_idioms, single_use_lifetimes), allow(dead_code))
+))]
+#![warn(missing_docs)]
 #![warn(unsafe_code)]
 #![warn(rust_2018_idioms, unreachable_pub, single_use_lifetimes)]
 #![warn(clippy::all, clippy::pedantic)]
@@ -154,6 +118,7 @@ pub use pin_project_internal::project;
 #[allow(unsafe_code)]
 pub unsafe trait UnsafeUnpin {}
 
+// Not public API.
 #[doc(hidden)]
 pub mod __private {
     use super::UnsafeUnpin;

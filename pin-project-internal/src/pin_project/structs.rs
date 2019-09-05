@@ -33,8 +33,8 @@ pub(super) fn parse(cx: &mut Context, mut item: ItemStruct) -> Result<TokenStrea
     let where_clause = item.generics.split_for_impl().2;
 
     let mut proj_items = quote! {
-        #[allow(clippy::mut_mut)]
-        #[allow(dead_code)]
+        #[allow(clippy::mut_mut)] // This lint warns `&mut &mut <ty>`.
+        #[allow(dead_code)] // This lint warns unused fields/variants.
         struct #proj_ident #proj_generics #where_clause #proj_fields
     };
 

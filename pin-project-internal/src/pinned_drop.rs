@@ -59,11 +59,10 @@ fn parse(input: TokenStream) -> Result<TokenStream> {
             unsafe fn pinned_drop(self: ::core::pin::Pin<&mut Self>) {
                 // Declare the #[pinned_drop] function *inside* our pinned_drop function
                 // This guarantees that it's impossible for any other user code
-                // to call it
+                // to call it.
                 #item
                 // #[pinned_drop] function is a free function - if it were part of a trait impl,
-                // it would be possible for user code to call it by directly invoking
-                // the trait.
+                // it would be possible for user code to call it by directly invoking the trait.
                 #fn_name(self);
             }
         }

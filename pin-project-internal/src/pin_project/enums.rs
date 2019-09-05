@@ -36,8 +36,8 @@ pub(super) fn parse(cx: &mut Context, mut item: ItemEnum) -> Result<TokenStream>
     let where_clause = item.generics.split_for_impl().2;
 
     let mut proj_items = quote! {
-        #[allow(clippy::mut_mut)]
-        #[allow(dead_code)]
+        #[allow(clippy::mut_mut)] // This lint warns `&mut &mut <ty>`.
+        #[allow(dead_code)] // This lint warns unused fields/variants.
         enum #proj_ident #proj_generics #where_clause { #(#proj_variants,)* }
     };
 

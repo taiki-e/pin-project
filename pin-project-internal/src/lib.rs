@@ -2,7 +2,10 @@
 
 #![recursion_limit = "256"]
 #![doc(html_root_url = "https://docs.rs/pin-project-internal/0.4.0-alpha.9")]
-#![doc(test(no_crate_inject, attr(deny(warnings, rust_2018_idioms), allow(dead_code))))]
+#![doc(test(
+    no_crate_inject,
+    attr(deny(warnings, rust_2018_idioms, single_use_lifetimes), allow(dead_code))
+))]
 #![warn(unsafe_code)]
 #![warn(rust_2018_idioms, unreachable_pub, single_use_lifetimes)]
 #![warn(clippy::all, clippy::pedantic)]
@@ -33,16 +36,21 @@ use syn::parse::Nothing;
 ///
 /// The following methods are implemented on the original `#[pin_project]` type:
 ///
-/// ```ignore
-/// fn project(&mut Pin<&mut Self>) -> ProjectedType;
-/// fn project_into(Pin<&mut Self>) -> ProjectedType;
+/// ```
+/// # #![feature(arbitrary_self_types)]
+/// # use std::pin::Pin;
+/// # type ProjectedType = ();
+/// # trait ProjectionTrait {
+/// fn project(self: &mut Pin<&mut Self>) -> ProjectedType;
+/// fn project_into(self: Pin<&mut Self>) -> ProjectedType;
+/// # }
 /// ```
 ///
 /// The `project` method takes a mutable reference to a pinned
 /// type, and returns a projection struct. This is the method
 /// you'll usually want to use - since it takes a mutable reference,
 /// it can be called multiple times, and allows you to use
-/// the original Pin type later on (e.g. to call [`Pin::set`](core::pin::Pin::set))
+/// the original Pin type later on (e.g. to call [`Pin::set`]).
 ///
 /// The `project_into` type takes a pinned type by value (consuming it),
 /// and returns a projection struct. The difference between this and the `project`
@@ -51,10 +59,19 @@ use syn::parse::Nothing;
 /// lives for as long as the original Pin. This can be useful when returning a pin
 /// projection from a method:
 ///
-/// ```ignore
-/// fn get_pin_mut<'a>(mut self: Pin<&'a mut Self>) -> Pin<&'a mut T> {
+/// ```
+/// # use pin_project::pin_project;
+/// # use std::pin::Pin;
+/// # #[pin_project]
+/// # struct Struct<T> {
+/// #     #[pin]
+/// #     pinned: T,
+/// # }
+/// # impl<T> Struct<T> {
+/// fn get_pin_mut(self: Pin<&mut Self>) -> Pin<&mut T> {
 ///     self.project_into().pinned
 /// }
+/// # }
 /// ```
 ///
 /// ## Safety
@@ -65,7 +82,7 @@ use syn::parse::Nothing;
 /// This is accomplished by enforcing the four requirements for pin projection
 /// stated in [the Rust documentation](https://doc.rust-lang.org/beta/std/pin/index.html#projections-and-structural-pinning):
 ///
-/// 1. The struct must only be Unpin if all the structural fields are Unpin
+/// 1. The struct must only be Unpin if all the structural fields are Unpin.
 ///
 ///	   To enforce this, this attribute will automatically generate an `Unpin` implementation
 ///    for you, which will require that all structurally pinned fields be `Unpin`
@@ -97,7 +114,7 @@ use syn::parse::Nothing;
 ///    fields in safe code in your destructor.
 ///
 /// 3. You must make sure that you uphold the Drop guarantee: once your struct is pinned,
-///    the memory that contains the content is not overwritten or deallocated without calling the content's destructors
+///    the memory that contains the content is not overwritten or deallocated without calling the content's destructors.
 ///
 ///    Safe code doesn't need to worry about this - the only wait to violate this requirement
 ///    is to manually deallocate memory (which is `unsafe`), or to overwite a field with something else.
@@ -309,6 +326,7 @@ use syn::parse::Nothing;
 /// See also [`project`] attribute.
 ///
 /// [`Pin::as_mut`]: core::pin::Pin::as_mut
+/// [`Pin::set`]: core::pin::Pin::set
 /// [`drop`]: Drop::drop
 /// [`UnsafeUnpin`]: https://docs.rs/pin-project/0.4.0-alpha.9/pin_project/trait.UnsafeUnpin.html
 /// [`project`]: ./attr.project.html
@@ -348,7 +366,7 @@ pub fn pin_project(args: TokenStream, input: TokenStream) -> TokenStream {
 /// }
 /// ```
 ///
-/// See ["pinned-drop" section of `pin_project` attribute][pinned-drop] for more.
+/// See ["pinned-drop" section of `pin_project` attribute][pinned-drop] for more details.
 ///
 /// [pinned-drop]: ./attr.pin_project.html#pinned_drop
 #[proc_macro_attribute]
