@@ -8,11 +8,12 @@ use syn::{
 pub(crate) const DEFAULT_LIFETIME_NAME: &str = "'_pin";
 pub(crate) const TRAIT_LIFETIME_NAME: &str = "'_outer_pin";
 
-/// Makes the ident of projected type from the reference of the original ident.
+/// Creates the ident of projected type from the ident of the original type.
 pub(crate) fn proj_ident(ident: &Ident) -> Ident {
     format_ident!("__{}Projection", ident)
 }
 
+/// Creates the ident of projected trait from the ident of the original type.
 pub(crate) fn proj_trait_ident(ident: &Ident) -> Ident {
     format_ident!("__{}ProjectionTrait", ident)
 }
@@ -37,13 +38,13 @@ pub(crate) fn proj_lifetime_name(
     }
 }
 
-/// Makes the generics of projected type from the reference of the original generics.
+/// Creates the generics of projected type from the generics of the original type.
 pub(crate) fn proj_generics(generics: &mut Generics, lifetime: Lifetime) {
-    if let lt_token @ None = &mut generics.lt_token {
-        *lt_token = Some(token::Lt::default())
+    if generics.lt_token.is_none() {
+        generics.lt_token = Some(token::Lt::default())
     }
-    if let gt_token @ None = &mut generics.gt_token {
-        *gt_token = Some(token::Gt::default())
+    if generics.gt_token.is_none() {
+        generics.gt_token = Some(token::Gt::default())
     }
 
     generics.params.insert(
@@ -68,7 +69,7 @@ impl VecExt for Vec<Attribute> {
 }
 
 /// If the 'renamed' feature is enabled, we detect
-/// the actual name of the 'pin-project' crate in the consumer's Cargo.toml
+/// the actual name of the 'pin-project' crate in the consumer's Cargo.toml.
 #[cfg(feature = "renamed")]
 pub(crate) fn crate_path() -> Ident {
     // This is fairly subtle.
@@ -86,7 +87,7 @@ pub(crate) fn crate_path() -> Ident {
 }
 
 /// If the 'renamed' feature is not enabled, we just
-/// assume that the 'pin-project' dependency has not been renamed
+/// assume that the 'pin-project' dependency has not been renamed.
 #[cfg(not(feature = "renamed"))]
 pub(crate) fn crate_path() -> Ident {
     format_ident!("pin_project")

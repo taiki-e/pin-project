@@ -19,7 +19,7 @@
 
 A crate for safe and ergonomic pin-projection.
 
-[Documentation](https://docs.rs/pin-project/)
+[Documentation][docs-url]
 
 ## Usage
 
@@ -41,22 +41,24 @@ use pin_project::pin_project;
 use std::pin::Pin;
 
 #[pin_project]
-struct Foo<T, U> {
+struct Struct<T, U> {
     #[pin]
-    future: T,
-    field: U,
+    pinned: T,
+    unpinned: U,
 }
 
-impl<T, U> Foo<T, U> {
-    fn baz(mut self: Pin<&mut Self>) {
+impl<T, U> Struct<T, U> {
+    fn foo(mut self: Pin<&mut Self>) {
         let this = self.project();
-        let _: Pin<&mut T> = this.future; // Pinned reference to the field
-        let _: &mut U = this.field; // Normal reference to the field
+        let _: Pin<&mut T> = this.pinned; // Pinned reference to the field
+        let _: &mut U = this.unpinned; // Normal reference to the field
     }
 }
 ```
 
-[Code like this will be generated](doc/struct-example-1.md)
+[Code like this will be generated](examples/struct-default.rs)
+
+See [`pin_project`] attribute for more details.
 
 [`pin_project`]: https://docs.rs/pin-project/0.4.0-alpha.9/pin_project/attr.pin_project.html
 

@@ -55,29 +55,32 @@ impl Parse for Args {
 struct Context {
     /// Name of the original type.
     orig_ident: Ident,
+
     /// Name of the projected type.
     proj_ident: Ident,
-    /// Name of the trait generated
-    /// to provide a 'project' method
+
+    /// Name of the trait generated to provide a 'project' method.
     proj_trait: Ident,
 
-    /// Visibility of original type.
+    /// Visibility of the original type.
     vis: Visibility,
-    /// Generics of original type.
+
+    /// Generics of the original type.
     generics: Generics,
 
-    /// Lifetime added to projected type.
+    /// Lifetime on the generated projected type.
     lifetime: Lifetime,
 
-    /// Lifetime on the generated projection trait
+    /// Lifetime on the generated projection trait.
     trait_lifetime: Lifetime,
 
-    /// Where-clause for conditional Unpin implementation.
+    /// `where`-clause for conditional `Unpin` implementation.
     impl_unpin: WhereClause,
 
     pinned_fields: Vec<Type>,
 
     unsafe_unpin: bool,
+
     pinned_drop: Option<Span>,
 }
 
@@ -127,44 +130,14 @@ impl Context {
         })
     }
 
-    /// Creates an implementation of the projection trait.
-    /// The provided TokenStream will be used as the body of the
-    /// 'project' and 'project_into' implementations
-    fn make_trait_impl(
-        &self,
-        project_body: &TokenStream,
-        project_into_body: &TokenStream,
-    ) -> TokenStream {
-        let Context { proj_ident, proj_trait, orig_ident, lifetime, trait_lifetime, .. } = &self;
-        let proj_generics = self.proj_generics();
-
-        let project_into_generics = self.project_into_generics();
-
-        let proj_ty_generics = proj_generics.split_for_impl().1;
-        let (impl_generics, project_into_ty_generics, _) = project_into_generics.split_for_impl();
-        let (_, ty_generics, where_clause) = self.generics.split_for_impl();
-
-        quote! {
-            impl #impl_generics #proj_trait #project_into_ty_generics for ::core::pin::Pin<&#trait_lifetime mut #orig_ident #ty_generics> #where_clause {
-                fn project<#lifetime>(&#lifetime mut self) -> #proj_ident #proj_ty_generics #where_clause {
-                    #project_body
-                }
-
-                fn project_into(self) -> #proj_ident #project_into_ty_generics #where_clause {
-                    #project_into_body
-                }
-            }
-        }
-    }
-
-    /// Makes the generics of projected type from the reference of the original generics.
+    /// Creates the generics of projected type.
     fn proj_generics(&self) -> Generics {
         let mut generics = self.generics.clone();
         utils::proj_generics(&mut generics, self.lifetime.clone());
         generics
     }
 
-    /// Makes the generics for the 'project_into' method
+    /// Creates the generics for the 'project_into' method.
     fn project_into_generics(&self) -> Generics {
         let mut generics = self.generics.clone();
         utils::proj_generics(&mut generics, self.trait_lifetime.clone());
@@ -175,7 +148,7 @@ impl Context {
         self.pinned_fields.push(ty);
     }
 
-    /// Makes conditional `Unpin` implementation for original type.
+    /// Creates conditional `Unpin` implementation for original type.
     fn make_unpin_impl(&self) -> TokenStream {
         let orig_ident = &self.orig_ident;
         let (impl_generics, ty_generics, _) = self.generics.split_for_impl();
@@ -206,7 +179,7 @@ impl Context {
             let always_unpin_ident = format_ident!("AlwaysUnpin{}", orig_ident, span = make_span());
 
             // Generate a field in our new struct for every
-            // pinned field in the original type
+            // pinned field in the original type.
             let fields: Vec<_> = self
                 .pinned_fields
                 .iter()
@@ -239,7 +212,7 @@ impl Context {
             // ```
             //
             // This ensures that any unused type paramters
-            // don't end up with Unpin bounds
+            // don't end up with Unpin bounds.
             let lifetime_fields: Vec<_> = self
                 .generics
                 .lifetimes()
@@ -265,15 +238,14 @@ impl Context {
             full_where_clause.predicates.push(unpin_clause);
 
             let inner_data = quote! {
-
                 struct #always_unpin_ident <T: ?Sized> {
                     val: ::core::marker::PhantomData<T>
                 }
 
                 impl<T: ?Sized> ::core::marker::Unpin for #always_unpin_ident <T> {}
 
-                // This needs to be public, due to the limitations of the
-                // 'public in private' error.
+                // This needs to have the same visibility as the original type,
+                // due to the limitations of the 'public in private' error.
                 //
                 // Out goal is to implement the public trait Unpin for
                 // a potentially public user type. Because of this, rust
@@ -281,7 +253,7 @@ impl Context {
                 // our Unpin impl also be public. This means that our generated
                 // '__UnpinStruct' type must also be public. However, we take
                 // steps to ensure that the user can never actually reference
-                // this 'public' type. These steps are described below
+                // this 'public' type. These steps are described below.
                 //
                 /// A struct generated by pin-project to correctly document the
                 /// automatically generated `Unpin` implementation.
@@ -319,7 +291,7 @@ impl Context {
                 // user code to refer to any of our generated types, but has
                 // the advantage of preventing Rustdoc from displaying
                 // docs for any of our types. In particular, users cannot see
-                // the automatically generated Unpin impl for the '__UnpinStruct$Name' types
+                // the automatically generated Unpin impl for the '__UnpinStruct$Name' types.
                 quote! {
                     #[allow(non_snake_case)]
                     fn #scope_ident() {
@@ -330,7 +302,7 @@ impl Context {
         }
     }
 
-    /// Makes `Drop` implementation for original type.
+    /// Creates `Drop` implementation for original type.
     fn make_drop_impl(&self) -> TokenStream {
         let orig_ident = &self.orig_ident;
         let (impl_generics, ty_generics, where_clause) = self.generics.split_for_impl();
@@ -346,7 +318,7 @@ impl Context {
                 impl #impl_generics ::core::ops::Drop for #orig_ident #ty_generics #where_clause {
                     fn drop(&mut self) {
                         // Safety - we're in 'drop', so we know that 'self' will
-                        // never move again
+                        // never move again.
                         let pinned_self = unsafe { ::core::pin::Pin::new_unchecked(self) };
                         // We call `pinned_drop` only once. Since `UnsafePinnedDrop::pinned_drop`
                         // is an unsafe function and a private API, it is never called again in safe
@@ -364,14 +336,14 @@ impl Context {
             // Based on https://github.com/upsuper/assert-impl/blob/f503255b292ab0ba8d085b657f4065403cfa46eb/src/lib.rs#L80-L87
             //
             // We create a new identifier for each struct, so that the traits
-            // for different types do not conflcit with each other
+            // for different types do not conflcit with each other.
             //
             // Another approach would be to provide an empty Drop impl,
             // which would conflict with a user-provided Drop impl.
             // However, this would trigger the compiler's special handling
             // of Drop types (e.g. fields cannot be moved out of a Drop type).
             // This approach prevents the creation of needless Drop impls,
-            // giving users more flexibility
+            // giving users more flexibility.
             let trait_ident = format_ident!("{}MustNotImplDrop", orig_ident);
             quote! {
                 // There are two possible cases:
@@ -380,7 +352,7 @@ impl Context {
                 // will compile, as there is only one impl of MustNotImplDrop for the user type
                 // 2. The user type does impl Drop. This will make the blanket impl applicable,
                 // which will then comflict with the explicit MustNotImplDrop impl below.
-                // This will result in a compilation error, which is exactly what we want
+                // This will result in a compilation error, which is exactly what we want.
                 trait #trait_ident {}
                 #[allow(clippy::drop_bounds)]
                 impl<T: ::core::ops::Drop> #trait_ident for T {}
@@ -390,12 +362,42 @@ impl Context {
         }
     }
 
+    /// Creates a definition of the projection trait.
+    fn make_trait_impl(
+        &self,
+        project_body: &TokenStream,
+        project_into_body: &TokenStream,
+    ) -> TokenStream {
+        let Context { proj_ident, proj_trait, orig_ident, lifetime, trait_lifetime, .. } = &self;
+        let proj_generics = self.proj_generics();
+
+        let project_into_generics = self.project_into_generics();
+
+        let proj_ty_generics = proj_generics.split_for_impl().1;
+        let (impl_generics, project_into_ty_generics, _) = project_into_generics.split_for_impl();
+        let (_, ty_generics, where_clause) = self.generics.split_for_impl();
+
+        quote! {
+            impl #impl_generics #proj_trait #project_into_ty_generics
+                for ::core::pin::Pin<&#trait_lifetime mut #orig_ident #ty_generics> #where_clause
+            {
+                fn project<#lifetime>(&#lifetime mut self) -> #proj_ident #proj_ty_generics #where_clause {
+                    #project_body
+                }
+                fn project_into(self) -> #proj_ident #project_into_ty_generics #where_clause {
+                    #project_into_body
+                }
+            }
+        }
+    }
+
+    /// Creates an implementation of the projection trait.
     fn make_proj_trait(&self) -> TokenStream {
         let Self { proj_ident, proj_trait, lifetime, .. } = self;
         let proj_generics = self.proj_generics();
         let proj_ty_generics = proj_generics.split_for_impl().1;
 
-        // Add trait lifetime to trait generics
+        // Add trait lifetime to trait generics.
         let mut trait_generics = self.generics.clone();
         utils::proj_generics(&mut trait_generics, self.trait_lifetime.clone());
 
@@ -428,7 +430,7 @@ fn parse(args: TokenStream, input: TokenStream) -> Result<TokenStream> {
             let mut cx = Context::new(args, &item.ident, &item.vis, &item.generics)?;
 
             // We don't need to check for '#[repr(packed)]',
-            // since it does not apply to enums
+            // since it does not apply to enums.
             let mut res = enums::parse(&mut cx, item)?;
             res.extend(cx.make_drop_impl());
             res.extend(cx.make_unpin_impl());
@@ -460,7 +462,7 @@ fn ensure_not_packed(item: &ItemStruct) -> Result<TokenStream> {
     // Workaround for https://github.com/taiki-e/pin-project/issues/32
     // Through the tricky use of proc macros, it's possible to bypass
     // the above check for the 'repr' attribute.
-    // To ensure that it's impossible to use pin projections on a #[repr(packed)][
+    // To ensure that it's impossible to use pin projections on a #[repr(packed)]
     // struct, we generate code like this:
     //
     // #[deny(safe_packed_borrows)]
@@ -481,16 +483,18 @@ fn ensure_not_packed(item: &ItemStruct) -> Result<TokenStream> {
     // circumstances, we'll detect the #[repr(packed)] attribute, and generate
     // a much nicer error above.
     //
-    // There is one exception: If the type of a struct field has a alignemtn of 1
+    // There is one exception: If the type of a struct field has an alignment of 1
     // (e.g. u8), it is always safe to take a reference to it, even if the struct
-    // is #[repr(packed)]. If the struct is composed entirely of types of alignent 1,
+    // is #[repr(packed)]. If the struct is composed entirely of types of alignment 1,
     // our generated method will not trigger an error if the struct is #[repr(packed)]
     //
     // Fortunately, this should have no observable consequence - #[repr(packed)]
     // is essentially a no-op on such a type. Nevertheless, we include a test
     // to ensure that the compiler doesn't ever try to copy the fields on
     // such a struct when trying to drop it - which is reason we prevent
-    // #[repr(packed)] in the first place
+    // #[repr(packed)] in the first place.
+    //
+    // See also https://github.com/taiki-e/pin-project/pull/34.
     let mut field_refs = vec![];
     match &item.fields {
         Fields::Named(FieldsNamed { named, .. }) => {
