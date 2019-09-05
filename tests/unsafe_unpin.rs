@@ -9,9 +9,9 @@ use pin_project::{pin_project, UnsafeUnpin};
 fn unsafe_unpin() {
     #[pin_project(UnsafeUnpin)]
     pub struct Blah<T> {
-        field_1: u8,
+        field1: u8,
         #[pin]
-        field_2: Option<T>,
+        field2: Option<T>,
     }
 
     #[allow(unsafe_code)]
