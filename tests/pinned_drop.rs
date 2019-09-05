@@ -6,21 +6,42 @@
 use core::pin::Pin;
 use pin_project::{pin_project, pinned_drop};
 
-#[pin_project(PinnedDrop)]
-pub struct Foo<'a> {
-    was_dropped: &'a mut bool,
-    #[pin]
-    field_2: u8,
-}
+#[test]
+fn safe_project() {
+    #[pin_project(PinnedDrop)]
+    pub struct Foo<'a> {
+        was_dropped: &'a mut bool,
+        #[pin]
+        field: u8,
+    }
 
-#[pinned_drop]
-fn do_drop(mut foo: Pin<&mut Foo<'_>>) {
-    **foo.project().was_dropped = true;
+    #[pinned_drop]
+    fn do_drop(mut foo: Pin<&mut Foo<'_>>) {
+        **foo.project().was_dropped = true;
+    }
+
+    let mut was_dropped = false;
+    drop(Foo { was_dropped: &mut was_dropped, field: 42 });
+    assert!(was_dropped);
 }
 
 #[test]
-fn safe_project() {
-    let mut was_dropped = false;
-    drop(Foo { was_dropped: &mut was_dropped, field_2: 42 });
-    assert!(was_dropped);
+fn overlapping_drop_fn_names() {
+    #[pin_project(PinnedDrop)]
+    pub struct Foo {
+        #[pin]
+        field: u8,
+    }
+
+    #[pinned_drop]
+    fn do_drop(_: Pin<&mut Foo>) {}
+
+    #[pin_project(PinnedDrop)]
+    pub struct Bar {
+        #[pin]
+        field: u8,
+    }
+
+    #[pinned_drop]
+    fn do_drop(_: Pin<&mut Bar>) {}
 }

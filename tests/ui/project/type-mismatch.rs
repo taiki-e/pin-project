@@ -41,7 +41,8 @@ fn span() {
     }
 }
 
-// FIXME: `#[project]` for stmt/expr loses span
+// `#[project]` loses span.
+// Refs: https://github.com/rust-lang/rust/issues/43081
 fn loses_span() {
     // enum
 
