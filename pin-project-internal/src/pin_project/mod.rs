@@ -32,13 +32,23 @@ impl Parse for Args {
         let mut pinned_drop = None;
         let mut unsafe_unpin = None;
         while !input.is_empty() {
-            let i = input.parse::<Ident>()?;
-            match &*i.to_string() {
-                "PinnedDrop" => pinned_drop = Some(i.span()),
-                "UnsafeUnpin" => unsafe_unpin = Some(i.span()),
+            let arg = input.parse::<Ident>()?;
+            match &*arg.to_string() {
+                "PinnedDrop" => {
+                    if pinned_drop.is_some() {
+                        return Err(error!(arg, "duplicate `PinnedDrop` argument"));
+                    }
+                    pinned_drop = Some(arg.span());
+                }
+                "UnsafeUnpin" => {
+                    if unsafe_unpin.is_some() {
+                        return Err(error!(arg, "duplicate `UnsafeUnpin` argument"));
+                    }
+                    unsafe_unpin = Some(arg.span());
+                }
                 _ => {
                     return Err(error!(
-                        i,
+                        arg,
                         "an invalid argument was passed to #[pin_project] attribute"
                     ))
                 }
