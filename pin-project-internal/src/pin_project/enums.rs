@@ -42,22 +42,17 @@ pub(super) fn parse(cx: &mut Context, mut item: ItemEnum) -> Result<TokenStream>
     };
 
     let project_body = quote! {
-        unsafe {
-            match self.as_mut().get_unchecked_mut() {
-                #(#proj_arms,)*
-            }
+        match self.as_mut().get_unchecked_mut() {
+            #(#proj_arms,)*
         }
     };
-
     let project_into_body = quote! {
-        unsafe {
-            match self.get_unchecked_mut() {
-                #(#proj_arms,)*
-            }
+        match self.get_unchecked_mut() {
+            #(#proj_arms,)*
         }
     };
 
-    proj_items.extend(cx.make_trait_impl(&project_body, &project_into_body));
+    proj_items.extend(cx.make_proj_impl(&project_body, &project_into_body));
 
     let mut item = item.into_token_stream();
     item.extend(proj_items);

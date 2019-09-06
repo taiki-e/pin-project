@@ -27,11 +27,6 @@ enum __EnumProjection<'_pin, T, U> {
     Unpinned(&'_pin mut U),
 }
 
-trait __EnumProjectionTrait<'_outer_pin, T, U> {
-    fn project<'_pin>(&'_pin mut self) -> __EnumProjection<'_pin, T, U>;
-    fn project_into(self) -> __EnumProjection<'_outer_pin, T, U>;
-}
-
 impl<'_outer_pin, T, U> __EnumProjectionTrait<'_outer_pin, T, U>
     for ::core::pin::Pin<&'_outer_pin mut Enum<T, U>>
 {
@@ -51,6 +46,11 @@ impl<'_outer_pin, T, U> __EnumProjectionTrait<'_outer_pin, T, U>
             }
         }
     }
+}
+
+trait __EnumProjectionTrait<'_outer_pin, T, U> {
+    fn project<'_pin>(&'_pin mut self) -> __EnumProjection<'_pin, T, U>;
+    fn project_into(self) -> __EnumProjection<'_outer_pin, T, U>;
 }
 
 // Automatically create the appropriate conditional Unpin implementation.
