@@ -28,11 +28,6 @@ struct __StructProjection<'_pin, T, U> {
     unpinned: &'_pin mut U,
 }
 
-trait __StructProjectionTrait<'_outer_pin, T, U> {
-    fn project<'_pin>(&'_pin mut self) -> __StructProjection<'_pin, T, U>;
-    fn project_into(self) -> __StructProjection<'_outer_pin, T, U>;
-}
-
 impl<'_outer_pin, T, U> __StructProjectionTrait<'_outer_pin, T, U>
     for ::core::pin::Pin<&'_outer_pin mut Struct<T, U>>
 {
@@ -54,6 +49,11 @@ impl<'_outer_pin, T, U> __StructProjectionTrait<'_outer_pin, T, U>
             }
         }
     }
+}
+
+trait __StructProjectionTrait<'_outer_pin, T, U> {
+    fn project<'_pin>(&'_pin mut self) -> __StructProjection<'_pin, T, U>;
+    fn project_into(self) -> __StructProjection<'_outer_pin, T, U>;
 }
 
 // Automatically create the appropriate conditional `Unpin` implementation.

@@ -15,13 +15,13 @@ pub(super) fn parse(cx: &mut Context, mut item: ItemStruct) -> Result<TokenStrea
             return Err(error!(
                 item.fields,
                 "#[pin_project] attribute may not be used on structs with zero fields"
-            ))
+            ));
         }
         Fields::Unit => {
             return Err(error!(
                 item,
                 "#[pin_project] attribute may not be used on structs with units"
-            ))
+            ));
         }
 
         Fields::Named(fields) => named(cx, fields)?,
@@ -39,20 +39,15 @@ pub(super) fn parse(cx: &mut Context, mut item: ItemStruct) -> Result<TokenStrea
     };
 
     let project_body = quote! {
-        unsafe {
-            let this = self.as_mut().get_unchecked_mut();
-            #proj_ident #proj_init
-        }
+        let this = self.as_mut().get_unchecked_mut();
+        #proj_ident #proj_init
     };
-
     let project_into_body = quote! {
-        unsafe {
-            let this = self.get_unchecked_mut();
-            #proj_ident #proj_init
-        }
+        let this = self.get_unchecked_mut();
+        #proj_ident #proj_init
     };
 
-    proj_items.extend(cx.make_trait_impl(&project_body, &project_into_body));
+    proj_items.extend(cx.make_proj_impl(&project_body, &project_into_body));
 
     let mut item = item.into_token_stream();
     item.extend(proj_items);

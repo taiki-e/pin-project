@@ -89,9 +89,28 @@ jobs:
   steps:
     - template: ci/azure-install-rust.yml
       parameters:
-        toolchain: stable
+        toolchain: nightly
     - script: |
+        set +e
+        if rustup component add rustfmt; then
+          set -e
+        else
+          # If rustfmt is unavailable on the latest nightly,
+          # use the latest toolchain with rustfmt available.
+          # Refs: https://github.com/rust-lang/rustup-components-history#the-web-part
+          set -e
+          target=`curl https://rust-lang.github.io/rustup-components-history/x86_64-unknown-linux-gnu/rustfmt`
+          echo "'rustfmt' is unavailable on the toolchain 'nightly', use the toolchain 'nightly-$target' instead"
+          rustup toolchain install nightly-$target
+          rustup default nightly-$target
+          rustup component add rustfmt
+          rustup toolchain list
+          rustc -Vv
+          cargo -V
+        fi
         cargo fmt --version
+      displayName: Install rustfmt
+    - script: |
         cargo fmt --all -- --check
       displayName: cargo fmt -- --check
 
