@@ -60,3 +60,8 @@ pub fn add_pinned_field(_: TokenStream, input: TokenStream) -> TokenStream {
         unreachable!()
     }
 }
+
+#[proc_macro_attribute]
+pub fn hidden_repr(attr: TokenStream, item: TokenStream) -> TokenStream {
+    format!("#[repr({})] {}", attr, item).parse().unwrap()
+}

@@ -1,0 +1,17 @@
+error[E0277]: the trait bound `std::marker::PhantomPinned: std::marker::Unpin` is not satisfied in `UnpinStructBar<std::marker::PhantomPinned>`
+  --> $DIR/proper_unpin.rs:28:5
+   |
+24 | fn is_unpin<T: Unpin>() {}
+   | ----------------------- required by `is_unpin`
+...
+28 |     is_unpin::<Bar<PhantomPinned>>(); //~ ERROR E0277
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ within `UnpinStructBar<std::marker::PhantomPinned>`, the trait `std::marker::Unpin` is not implemented for `std::marker::PhantomPinned`
+   |
+   = help: the following implementations were found:
+             <std::marker::PhantomPinned as std::marker::Unpin>
+   = note: required because it appears within the type `UnpinStructBar<std::marker::PhantomPinned>`
+   = note: required because of the requirements on the impl of `std::marker::Unpin` for `Bar<std::marker::PhantomPinned>`
+
+error: aborting due to previous error
+
+For more information about this error, try `rustc --explain E0277`.
