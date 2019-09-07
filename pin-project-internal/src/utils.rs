@@ -58,13 +58,21 @@ pub(crate) fn proj_generics(generics: &mut Generics, lifetime: Lifetime) {
     );
 }
 
+pub(crate) fn collect_cfg(attrs: &[Attribute]) -> Vec<Attribute> {
+    attrs.iter().filter(|attr| attr.path.is_ident("cfg")).cloned().collect()
+}
+
 pub(crate) trait VecExt {
+    fn position(&self, ident: &str) -> Option<usize>;
     fn find_remove(&mut self, ident: &str) -> Option<Attribute>;
 }
 
 impl VecExt for Vec<Attribute> {
+    fn position(&self, ident: &str) -> Option<usize> {
+        self.iter().position(|attr| attr.path.is_ident(ident))
+    }
     fn find_remove(&mut self, ident: &str) -> Option<Attribute> {
-        self.iter().position(|attr| attr.path.is_ident(ident)).map(|i| self.remove(i))
+        self.position(ident).map(|i| self.remove(i))
     }
 }
 

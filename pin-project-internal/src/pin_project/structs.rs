@@ -1,10 +1,10 @@
 use proc_macro2::TokenStream;
 use quote::{quote, ToTokens};
-use syn::{parse::Nothing, Field, Fields, FieldsNamed, FieldsUnnamed, Index, ItemStruct, Result};
+use syn::{Field, Fields, FieldsNamed, FieldsUnnamed, Index, ItemStruct, Result};
 
-use crate::utils::VecExt;
+use crate::utils::collect_cfg;
 
-use super::{Context, PIN};
+use super::Context;
 
 pub(super) fn parse(cx: &mut Context, mut item: ItemStruct) -> Result<TokenStream> {
     let (proj_fields, proj_init) = match &mut item.fields {
@@ -19,7 +19,7 @@ pub(super) fn parse(cx: &mut Context, mut item: ItemStruct) -> Result<TokenStrea
         }
         Fields::Unit => {
             return Err(error!(
-                item,
+                item.ident,
                 "#[pin_project] attribute may not be used on structs with units"
             ));
         }
@@ -61,16 +61,23 @@ fn named(
     let mut proj_fields = Vec::with_capacity(fields.len());
     let mut proj_init = Vec::with_capacity(fields.len());
     for Field { attrs, ident, ty, .. } in fields {
-        if let Some(attr) = attrs.find_remove(PIN) {
-            let _: Nothing = syn::parse2(attr.tokens)?;
-            cx.push_unpin_bounds(ty.clone());
+        let cfg = collect_cfg(attrs);
+        if cx.find_pin_attr(attrs)? {
             let lifetime = &cx.lifetime;
-            proj_fields.push(quote!(#ident: ::core::pin::Pin<&#lifetime mut #ty>));
-            proj_init.push(quote!(#ident: ::core::pin::Pin::new_unchecked(&mut this.#ident)));
+            proj_fields.push(quote! {
+                #(#cfg)* #ident: ::core::pin::Pin<&#lifetime mut #ty>
+            });
+            proj_init.push(quote! {
+                #(#cfg)* #ident: ::core::pin::Pin::new_unchecked(&mut this.#ident)
+            });
         } else {
             let lifetime = &cx.lifetime;
-            proj_fields.push(quote!(#ident: &#lifetime mut #ty));
-            proj_init.push(quote!(#ident: &mut this.#ident));
+            proj_fields.push(quote! {
+                #(#cfg)* #ident: &#lifetime mut #ty
+            });
+            proj_init.push(quote! {
+                #(#cfg)* #ident: &mut this.#ident
+            });
         }
     }
 
@@ -85,18 +92,31 @@ fn unnamed(
 ) -> Result<(TokenStream, TokenStream)> {
     let mut proj_fields = Vec::with_capacity(fields.len());
     let mut proj_init = Vec::with_capacity(fields.len());
-    for (i, Field { attrs, ty, .. }) in fields.iter_mut().enumerate() {
-        let i = Index::from(i);
-        if let Some(attr) = attrs.find_remove(PIN) {
-            let _: Nothing = syn::parse2(attr.tokens)?;
-            cx.push_unpin_bounds(ty.clone());
+    for (index, Field { attrs, ty, .. }) in fields.iter_mut().enumerate() {
+        let index = Index::from(index);
+        let cfg = collect_cfg(attrs);
+        if !cfg.is_empty() {
+            return Err(error!(
+                cfg.first(),
+                "`cfg` attributes on the field of tuple structs are not supported"
+            ));
+        }
+        if cx.find_pin_attr(attrs)? {
             let lifetime = &cx.lifetime;
-            proj_fields.push(quote!(::core::pin::Pin<&#lifetime mut #ty>));
-            proj_init.push(quote!(::core::pin::Pin::new_unchecked(&mut this.#i)));
+            proj_fields.push(quote! {
+                ::core::pin::Pin<&#lifetime mut #ty>
+            });
+            proj_init.push(quote! {
+                ::core::pin::Pin::new_unchecked(&mut this.#index)
+            });
         } else {
             let lifetime = &cx.lifetime;
-            proj_fields.push(quote!(&#lifetime mut #ty));
-            proj_init.push(quote!(&mut this.#i));
+            proj_fields.push(quote! {
+                &#lifetime mut #ty
+            });
+            proj_init.push(quote! {
+                &mut this.#index
+            });
         }
     }
 

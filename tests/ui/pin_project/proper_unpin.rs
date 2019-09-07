@@ -1,6 +1,6 @@
 // compile-fail
 
-use pin_project::{pin_project, pinned_drop};
+use pin_project::pin_project;
 use std::pin::Pin;
 
 struct Inner<T> {

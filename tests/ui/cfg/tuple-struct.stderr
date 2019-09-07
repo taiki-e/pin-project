@@ -1,0 +1,8 @@
+error: `cfg` attributes on the field of tuple structs are not supported
+  --> $DIR/tuple-struct.rs:12:5
+   |
+12 |     #[cfg(unix)] //~ ERROR `cfg` attributes on the field of tuple structs are not supported
+   |     ^^^^^^^^^^^^
+
+error: aborting due to previous error
+

@@ -11,12 +11,11 @@ use crate::utils::{proj_generics, proj_ident, proj_lifetime_name, VecExt, DEFAUL
 /// The attribute name.
 const NAME: &str = "project";
 
-pub(super) fn attribute(input: TokenStream) -> TokenStream {
+pub(crate) fn attribute(input: Stmt) -> TokenStream {
     parse(input).unwrap_or_else(|e| e.to_compile_error())
 }
 
-fn parse(input: TokenStream) -> Result<TokenStream> {
-    let mut stmt = syn::parse2(input)?;
+fn parse(mut stmt: Stmt) -> Result<TokenStream> {
     match &mut stmt {
         Stmt::Expr(Expr::Match(expr)) | Stmt::Semi(Expr::Match(expr), _) => {
             Context::default().replace_expr_match(expr)

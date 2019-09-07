@@ -11,16 +11,16 @@ error: #[pin_project] attribute may not be used on structs with zero fields
   |               ^^
 
 error: #[pin_project] attribute may not be used on structs with units
-  --> $DIR/unsupported.rs:12:1
+  --> $DIR/unsupported.rs:12:8
    |
 12 | struct Struct3; //~ ERROR may not be used on structs with units
-   | ^^^^^^^^^^^^^^^
+   |        ^^^^^^^
 
 error: #[pin_project] attribute may not be used on enums without variants
-  --> $DIR/unsupported.rs:15:1
+  --> $DIR/unsupported.rs:15:12
    |
 15 | enum Enum1 {} //~ ERROR may not be used on enums without variants
-   | ^^^^^^^^^^^^^
+   |            ^^
 
 error: #[pin_project] attribute may not be used on enums with discriminants
   --> $DIR/unsupported.rs:19:9

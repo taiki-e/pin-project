@@ -1,14 +1,15 @@
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote, quote_spanned};
 use syn::{
+    parse::Nothing,
     parse::{Parse, ParseStream},
     token::Comma,
     *,
 };
 
 use crate::utils::{
-    self, crate_path, proj_ident, proj_lifetime_name, proj_trait_ident, DEFAULT_LIFETIME_NAME,
-    TRAIT_LIFETIME_NAME,
+    self, collect_cfg, crate_path, proj_ident, proj_lifetime_name, proj_trait_ident, VecExt,
+    DEFAULT_LIFETIME_NAME, TRAIT_LIFETIME_NAME,
 };
 
 mod enums;
@@ -17,8 +18,201 @@ mod structs;
 /// The annotation for pinned type.
 const PIN: &str = "pin";
 
-pub(super) fn attribute(args: TokenStream, input: TokenStream) -> TokenStream {
-    parse(args, input).unwrap_or_else(|e| e.to_compile_error())
+pub(crate) fn attribute(args: TokenStream, input: Item) -> TokenStream {
+    parse_attribute(args, input).unwrap_or_else(|e| e.to_compile_error())
+}
+
+pub(crate) fn derive(input: DeriveInput) -> TokenStream {
+    let DeriveInput { vis, ident, generics, mut data, .. } = input;
+    let mut cx = DeriveContext::new(ident, vis, generics);
+    match &mut data {
+        Data::Struct(data) => cx.fields(&mut data.fields),
+        Data::Enum(data) => cx.variants(data),
+        Data::Union(_) => unreachable!(),
+    }
+
+    cx.make_unpin_impl()
+}
+
+struct DeriveContext {
+    /// Name of the original type.
+    orig_ident: Ident,
+
+    /// Visibility of the original type.
+    vis: Visibility,
+
+    /// Generics of the original type.
+    generics: Generics,
+
+    /// Types of the pinned fields.
+    pinned_fields: Vec<Type>,
+}
+
+impl DeriveContext {
+    fn new(orig_ident: Ident, vis: Visibility, generics: Generics) -> Self {
+        Self { orig_ident, vis, generics, pinned_fields: Vec::new() }
+    }
+
+    fn variants(&mut self, data: &mut DataEnum) {
+        for Variant { fields, .. } in &mut data.variants {
+            self.fields(fields)
+        }
+    }
+
+    fn fields(&mut self, fields: &mut Fields) {
+        let fields = match fields {
+            Fields::Unnamed(fields) => &mut fields.unnamed,
+            Fields::Named(fields) => &mut fields.named,
+            Fields::Unit => return,
+        };
+
+        for Field { attrs, ty, .. } in fields {
+            if let Some(attr) = attrs.position(PIN).and_then(|i| attrs.get(i)) {
+                let _: Nothing = syn::parse2(attr.tokens.clone()).unwrap();
+                self.pinned_fields.push(ty.clone());
+            }
+        }
+    }
+
+    /// Creates conditional `Unpin` implementation for original type.
+    fn make_unpin_impl(&mut self) -> TokenStream {
+        let where_clause = self.generics.make_where_clause().clone();
+        let orig_ident = &self.orig_ident;
+        let (impl_generics, ty_generics, _) = self.generics.split_for_impl();
+        let type_params: Vec<_> = self.generics.type_params().map(|t| t.ident.clone()).collect();
+
+        let make_span = || {
+            #[cfg(proc_macro_def_site)]
+            {
+                proc_macro::Span::def_site().into()
+            }
+            #[cfg(not(proc_macro_def_site))]
+            {
+                Span::call_site()
+            }
+        };
+
+        let struct_ident = if cfg!(proc_macro_def_site) {
+            format_ident!("UnpinStruct{}", orig_ident, span = make_span())
+        } else {
+            format_ident!("__UnpinStruct{}", orig_ident)
+        };
+        let always_unpin_ident = format_ident!("AlwaysUnpin{}", orig_ident, span = make_span());
+
+        // Generate a field in our new struct for every
+        // pinned field in the original type.
+        let fields: Vec<_> = self
+            .pinned_fields
+            .iter()
+            .enumerate()
+            .map(|(i, ty)| {
+                let field_ident = format_ident!("__field{}", i);
+                quote! {
+                    #field_ident: #ty
+                }
+            })
+            .collect();
+
+        // We could try to determine the subset of type parameters
+        // and lifetimes that are actually used by the pinned fields
+        // (as opposed to those only used by unpinned fields).
+        // However, this would be tricky and error-prone, since
+        // it's possible for users to create types that would alias
+        // with generic parameters (e.g. 'struct T').
+        //
+        // Instead, we generate a use of every single type parameter
+        // and lifetime used in the original struct. For type parameters,
+        // we generate code like this:
+        //
+        // ```rust
+        // struct AlwaysUnpin<T: ?Sized>(PhantomData<T>) {}
+        // impl<T: ?Sized> Unpin for AlwaysUnpin<T> {}
+        //
+        // ...
+        // _field: AlwaysUnpin<(A, B, C)>
+        // ```
+        //
+        // This ensures that any unused type paramters
+        // don't end up with Unpin bounds.
+        let lifetime_fields: Vec<_> = self
+            .generics
+            .lifetimes()
+            .enumerate()
+            .map(|(i, l)| {
+                let field_ident = format_ident!("__lifetime{}", i);
+                quote! {
+                    #field_ident: &#l ()
+                }
+            })
+            .collect();
+
+        let scope_ident = format_ident!("__unpin_scope_{}", orig_ident);
+
+        let vis = &self.vis;
+        let full_generics = &self.generics;
+        let mut full_where_clause = where_clause.clone();
+
+        let unpin_clause: WherePredicate = syn::parse_quote! {
+            #struct_ident #ty_generics: ::core::marker::Unpin
+        };
+
+        full_where_clause.predicates.push(unpin_clause);
+
+        let attrs = if cfg!(proc_macro_def_site) { quote!() } else { quote!(#[doc(hidden)]) };
+
+        let inner_data = quote! {
+            struct #always_unpin_ident <T: ?Sized> {
+                val: ::core::marker::PhantomData<T>
+            }
+
+            impl<T: ?Sized> ::core::marker::Unpin for #always_unpin_ident <T> {}
+
+            // This needs to have the same visibility as the original type,
+            // due to the limitations of the 'public in private' error.
+            //
+            // Out goal is to implement the public trait Unpin for
+            // a potentially public user type. Because of this, rust
+            // requires that any types mentioned in the where clause of
+            // our Unpin impl also be public. This means that our generated
+            // '__UnpinStruct' type must also be public. However, we take
+            // steps to ensure that the user can never actually reference
+            // this 'public' type. These steps are described below.
+            //
+            // See also https://github.com/taiki-e/pin-project/pull/53.
+            #[allow(dead_code)]
+            #attrs
+            #vis struct #struct_ident #full_generics #where_clause {
+                __pin_project_use_generics: #always_unpin_ident <(#(#type_params),*)>,
+
+                #(#fields,)*
+                #(#lifetime_fields,)*
+            }
+
+            impl #impl_generics ::core::marker::Unpin for #orig_ident #ty_generics #full_where_clause {}
+        };
+
+        if cfg!(proc_macro_def_site) {
+            // On nightly, we use def-site hygiene to make it impossible
+            // for user code to refer to any of the types we define.
+            // This allows us to omit wrapping the generated types
+            // in an fn() scope, allowing rustdoc to properly document
+            // them.
+            inner_data
+        } else {
+            // When we're not on nightly, we need to create an enclosing fn() scope
+            // for all of our generated items. This makes it impossible for
+            // user code to refer to any of our generated types, but has
+            // the advantage of preventing Rustdoc from displaying
+            // docs for any of our types. In particular, users cannot see
+            // the automatically generated Unpin impl for the '__UnpinStruct$Name' types.
+            quote! {
+                #[allow(non_snake_case)]
+                fn #scope_ident() {
+                    #inner_data
+                }
+            }
+        }
+    }
 }
 
 #[allow(dead_code)] // https://github.com/rust-lang/rust/issues/56750
@@ -63,6 +257,8 @@ impl Parse for Args {
 }
 
 struct Context {
+    crate_path: Ident,
+
     /// Name of the original type.
     orig_ident: Ident,
 
@@ -71,9 +267,6 @@ struct Context {
 
     /// Name of the trait generated to provide a 'project' method.
     proj_trait: Ident,
-
-    /// Visibility of the original type.
-    vis: Visibility,
 
     /// Generics of the original type.
     generics: Generics,
@@ -84,12 +277,7 @@ struct Context {
     /// Lifetime on the generated projection trait.
     trait_lifetime: Lifetime,
 
-    /// `where`-clause for conditional `Unpin` implementation.
-    impl_unpin: WhereClause,
-
-    pinned_fields: Vec<Type>,
-
-    unsafe_unpin: bool,
+    unsafe_unpin: Option<Span>,
 
     pinned_drop: Option<Span>,
 }
@@ -97,13 +285,21 @@ struct Context {
 impl Context {
     fn new(
         args: TokenStream,
-        orig_ident: &Ident,
-        vis: &Visibility,
-        generics: &Generics,
+        attrs: &mut Vec<Attribute>,
+        orig_ident: Ident,
+        generics: Generics,
     ) -> Result<Self> {
         let Args { pinned_drop, unsafe_unpin } = syn::parse2(args)?;
-        let proj_ident = proj_ident(orig_ident);
-        let proj_trait = proj_trait_ident(orig_ident);
+
+        let crate_path = crate_path();
+        if unsafe_unpin.is_none() {
+            attrs.push(
+                syn::parse_quote!(#[derive(#crate_path::__private::__PinProjectAutoImplUnpin)]),
+            );
+        }
+
+        let proj_ident = proj_ident(&orig_ident);
+        let proj_trait = proj_trait_ident(&orig_ident);
 
         let mut lifetime_name = String::from(DEFAULT_LIFETIME_NAME);
         proj_lifetime_name(&mut lifetime_name, &generics.params);
@@ -113,29 +309,15 @@ impl Context {
         proj_lifetime_name(&mut trait_lifetime_name, &generics.params);
         let trait_lifetime = Lifetime::new(&trait_lifetime_name, Span::call_site());
 
-        let mut generics = generics.clone();
-        let mut impl_unpin = generics.make_where_clause().clone();
-        if let Some(unsafe_unpin) = unsafe_unpin {
-            let crate_path = crate_path();
-            impl_unpin.predicates.push(
-                syn::parse2(quote_spanned! { unsafe_unpin =>
-                    ::#crate_path::__private::Wrapper<Self>: ::#crate_path::UnsafeUnpin
-                })
-                .unwrap(),
-            );
-        }
-
         Ok(Self {
-            orig_ident: orig_ident.clone(),
+            crate_path,
+            orig_ident,
             proj_ident,
             proj_trait,
-            vis: vis.clone(),
             generics,
             lifetime,
             trait_lifetime,
-            impl_unpin,
-            pinned_fields: vec![],
-            unsafe_unpin: unsafe_unpin.is_some(),
+            unsafe_unpin,
             pinned_drop,
         })
     }
@@ -154,153 +336,49 @@ impl Context {
         generics
     }
 
-    fn push_unpin_bounds(&mut self, ty: Type) {
-        self.pinned_fields.push(ty);
+    fn find_pin_attr(&self, attrs: &mut Vec<Attribute>) -> Result<bool> {
+        if let Some(pos) = attrs.position(PIN) {
+            let tokens = if self.unsafe_unpin.is_some() {
+                attrs.remove(pos).tokens
+            } else {
+                attrs[pos].tokens.clone()
+            };
+            let _: Nothing = syn::parse2(tokens)?;
+            Ok(true)
+        } else {
+            Ok(false)
+        }
     }
 
-    /// Creates conditional `Unpin` implementation for original type.
-    fn make_unpin_impl(&self) -> TokenStream {
+    /// Creates `Unpin` implementation for original type if `UnsafeUnpin` argument used.
+    fn make_unpin_impl(&mut self) -> TokenStream {
+        let unsafe_unpin = if let Some(unsafe_unpin) = self.unsafe_unpin {
+            unsafe_unpin
+        } else {
+            // To generate the correct `Unpin` implementation,
+            // we need to collect the types of the pinned fields.
+            // However, since proc-macro-attribute is applied before cfg,
+            // we cannot be collecting field types at this timing.
+            // So instead of generating the `Unpin` implementation here,
+            // we need to delegate automatic generation of the `Unpin`
+            // implementation to proc-macro-derive.
+            return TokenStream::new();
+        };
+
+        let mut where_clause = self.generics.make_where_clause().clone();
+        let crate_path = &self.crate_path;
         let orig_ident = &self.orig_ident;
         let (impl_generics, ty_generics, _) = self.generics.split_for_impl();
-        let type_params: Vec<_> = self.generics.type_params().map(|t| t.ident.clone()).collect();
-        let where_clause = &self.impl_unpin;
 
-        if self.unsafe_unpin {
-            quote! {
-                impl #impl_generics ::core::marker::Unpin for #orig_ident #ty_generics #where_clause {}
-            }
-        } else {
-            let make_span = || {
-                #[cfg(proc_macro_def_site)]
-                {
-                    proc_macro::Span::def_site().into()
-                }
-                #[cfg(not(proc_macro_def_site))]
-                {
-                    Span::call_site()
-                }
-            };
+        where_clause.predicates.push(
+            syn::parse2(quote_spanned! { unsafe_unpin =>
+                ::#crate_path::__private::Wrapper<Self>: ::#crate_path::UnsafeUnpin
+            })
+            .unwrap(),
+        );
 
-            let struct_ident = if cfg!(proc_macro_def_site) {
-                format_ident!("UnpinStruct{}", orig_ident, span = make_span())
-            } else {
-                format_ident!("__UnpinStruct{}", orig_ident)
-            };
-            let always_unpin_ident = format_ident!("AlwaysUnpin{}", orig_ident, span = make_span());
-
-            // Generate a field in our new struct for every
-            // pinned field in the original type.
-            let fields: Vec<_> = self
-                .pinned_fields
-                .iter()
-                .enumerate()
-                .map(|(i, ty)| {
-                    let field_ident = format_ident!("__field{}", i);
-                    quote! {
-                        #field_ident: #ty
-                    }
-                })
-                .collect();
-
-            // We could try to determine the subset of type parameters
-            // and lifetimes that are actually used by the pinned fields
-            // (as opposed to those only used by unpinned fields).
-            // However, this would be tricky and error-prone, since
-            // it's possible for users to create types that would alias
-            // with generic parameters (e.g. 'struct T').
-            //
-            // Instead, we generate a use of every single type parameter
-            // and lifetime used in the original struct. For type parameters,
-            // we generate code like this:
-            //
-            // ```rust
-            // struct AlwaysUnpin<T: ?Sized>(PhantomData<T>) {}
-            // impl<T: ?Sized> Unpin for AlwaysUnpin<T> {}
-            //
-            // ...
-            // _field: AlwaysUnpin<(A, B, C)>
-            // ```
-            //
-            // This ensures that any unused type paramters
-            // don't end up with Unpin bounds.
-            let lifetime_fields: Vec<_> = self
-                .generics
-                .lifetimes()
-                .enumerate()
-                .map(|(i, l)| {
-                    let field_ident = format_ident!("__lifetime{}", i);
-                    quote! {
-                        #field_ident: &#l ()
-                    }
-                })
-                .collect();
-
-            let scope_ident = format_ident!("__unpin_scope_{}", orig_ident);
-
-            let vis = &self.vis;
-            let full_generics = &self.generics;
-            let mut full_where_clause = where_clause.clone();
-
-            let unpin_clause: WherePredicate = syn::parse_quote! {
-                #struct_ident #ty_generics: ::core::marker::Unpin
-            };
-
-            full_where_clause.predicates.push(unpin_clause);
-
-            let attrs = if cfg!(proc_macro_def_site) { quote!() } else { quote!(#[doc(hidden)]) };
-
-            let inner_data = quote! {
-                struct #always_unpin_ident <T: ?Sized> {
-                    val: ::core::marker::PhantomData<T>
-                }
-
-                impl<T: ?Sized> ::core::marker::Unpin for #always_unpin_ident <T> {}
-
-                // This needs to have the same visibility as the original type,
-                // due to the limitations of the 'public in private' error.
-                //
-                // Out goal is to implement the public trait Unpin for
-                // a potentially public user type. Because of this, rust
-                // requires that any types mentioned in the where clause of
-                // our Unpin impl also be public. This means that our generated
-                // '__UnpinStruct' type must also be public. However, we take
-                // steps to ensure that the user can never actually reference
-                // this 'public' type. These steps are described below.
-                //
-                // See also https://github.com/taiki-e/pin-project/pull/53.
-                #[allow(dead_code)]
-                #attrs
-                #vis struct #struct_ident #full_generics #where_clause {
-                    __pin_project_use_generics: #always_unpin_ident <(#(#type_params),*)>,
-
-                    #(#fields,)*
-                    #(#lifetime_fields,)*
-                }
-
-                impl #impl_generics ::core::marker::Unpin for #orig_ident #ty_generics #full_where_clause {}
-            };
-
-            if cfg!(proc_macro_def_site) {
-                // On nightly, we use def-site hygiene to make it impossible
-                // for user code to refer to any of the types we define.
-                // This allows us to omit wrapping the generated types
-                // in an fn() scope, allowing rustdoc to properly document
-                // them.
-                inner_data
-            } else {
-                // When we're not on nightly, we need to create an enclosing fn() scope
-                // for all of our generated items. This makes it impossible for
-                // user code to refer to any of our generated types, but has
-                // the advantage of preventing Rustdoc from displaying
-                // docs for any of our types. In particular, users cannot see
-                // the automatically generated Unpin impl for the '__UnpinStruct$Name' types.
-                quote! {
-                    #[allow(non_snake_case)]
-                    fn #scope_ident() {
-                        #inner_data
-                    }
-                }
-            }
+        quote! {
+            impl #impl_generics ::core::marker::Unpin for #orig_ident #ty_generics #where_clause {}
         }
     }
 
@@ -310,7 +388,7 @@ impl Context {
         let (impl_generics, ty_generics, where_clause) = self.generics.split_for_impl();
 
         if let Some(pinned_drop) = self.pinned_drop {
-            let crate_path = crate_path();
+            let crate_path = &self.crate_path;
             let call = quote_spanned! { pinned_drop =>
                 ::#crate_path::__private::UnsafePinnedDrop::pinned_drop(pinned_self)
             };
@@ -419,10 +497,11 @@ impl Context {
     }
 }
 
-fn parse(args: TokenStream, input: TokenStream) -> Result<TokenStream> {
-    match syn::parse2(input)? {
-        Item::Struct(item) => {
-            let mut cx = Context::new(args, &item.ident, &item.vis, &item.generics)?;
+fn parse_attribute(args: TokenStream, input: Item) -> Result<TokenStream> {
+    match input {
+        Item::Struct(mut item) => {
+            let mut cx =
+                Context::new(args, &mut item.attrs, item.ident.clone(), item.generics.clone())?;
 
             let packed_check = ensure_not_packed(&item)?;
             let mut res = structs::parse(&mut cx, item)?;
@@ -432,8 +511,9 @@ fn parse(args: TokenStream, input: TokenStream) -> Result<TokenStream> {
             res.extend(packed_check);
             Ok(res)
         }
-        Item::Enum(item) => {
-            let mut cx = Context::new(args, &item.ident, &item.vis, &item.generics)?;
+        Item::Enum(mut item) => {
+            let mut cx =
+                Context::new(args, &mut item.attrs, item.ident.clone(), item.generics.clone())?;
 
             // We don't need to check for '#[repr(packed)]',
             // since it does not apply to enums.
@@ -504,15 +584,19 @@ fn ensure_not_packed(item: &ItemStruct) -> Result<TokenStream> {
     let mut field_refs = vec![];
     match &item.fields {
         Fields::Named(FieldsNamed { named, .. }) => {
-            for field in named {
-                let ident = field.ident.as_ref().unwrap();
-                field_refs.push(quote!(&val.#ident;));
+            for Field { attrs, ident, .. } in named {
+                let cfg = collect_cfg(attrs);
+                field_refs.push(quote! {
+                    #(#cfg)* { &val.#ident; }
+                });
             }
         }
         Fields::Unnamed(FieldsUnnamed { unnamed, .. }) => {
-            for (i, _) in unnamed.iter().enumerate() {
-                let index = Index::from(i);
-                field_refs.push(quote!(&val.#index;));
+            for (index, _) in unnamed.iter().enumerate() {
+                let index = Index::from(index);
+                field_refs.push(quote! {
+                    &val.#index;
+                });
             }
         }
         Fields::Unit => {}

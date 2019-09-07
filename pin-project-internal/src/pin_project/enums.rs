@@ -1,16 +1,16 @@
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote, ToTokens};
-use syn::{parse::Nothing, Field, Fields, FieldsNamed, FieldsUnnamed, ItemEnum, Result, Variant};
+use syn::{Field, Fields, FieldsNamed, FieldsUnnamed, ItemEnum, Result, Variant};
 
-use crate::utils::VecExt;
+use crate::utils::collect_cfg;
 
-use super::{Context, PIN};
+use super::Context;
 
 pub(super) fn parse(cx: &mut Context, mut item: ItemEnum) -> Result<TokenStream> {
     if item.variants.is_empty() {
-        return Err(error!(
-            item,
-            "#[pin_project] attribute may not be used on enums without variants"
+        return Err(syn::Error::new(
+            item.brace_token.span,
+            "#[pin_project] attribute may not be used on enums without variants",
         ));
     }
     let has_field = item.variants.iter().try_fold(false, |has_field, v| {
@@ -62,17 +62,22 @@ pub(super) fn parse(cx: &mut Context, mut item: ItemEnum) -> Result<TokenStream>
 fn variants(cx: &mut Context, item: &mut ItemEnum) -> Result<(Vec<TokenStream>, Vec<TokenStream>)> {
     let mut proj_variants = Vec::with_capacity(item.variants.len());
     let mut proj_arms = Vec::with_capacity(item.variants.len());
-    for Variant { fields, ident, .. } in &mut item.variants {
+    for Variant { attrs, fields, ident, .. } in &mut item.variants {
         let (proj_pat, proj_body, proj_fields) = match fields {
             Fields::Unnamed(fields) => unnamed(cx, fields)?,
             Fields::Named(fields) => named(cx, fields)?,
             Fields::Unit => (TokenStream::new(), TokenStream::new(), TokenStream::new()),
         };
+        let cfg = collect_cfg(attrs);
         let Context { orig_ident, proj_ident, .. } = &cx;
-        let proj_arm = quote!(#orig_ident::#ident #proj_pat => #proj_ident::#ident #proj_body );
-        let proj_variant = quote!(#ident #proj_fields);
-        proj_arms.push(proj_arm);
-        proj_variants.push(proj_variant);
+        proj_variants.push(quote! {
+            #(#cfg)* #ident #proj_fields
+        });
+        proj_arms.push(quote! {
+            #(#cfg)* #orig_ident::#ident #proj_pat => {
+                #proj_ident::#ident #proj_body
+            }
+        });
     }
 
     Ok((proj_variants, proj_arms))
@@ -86,18 +91,27 @@ fn named(
     let mut proj_body = Vec::with_capacity(fields.len());
     let mut proj_fields = Vec::with_capacity(fields.len());
     for Field { attrs, ident, ty, .. } in fields {
-        if let Some(attr) = attrs.find_remove(PIN) {
-            let _: Nothing = syn::parse2(attr.tokens)?;
-            cx.push_unpin_bounds(ty.clone());
+        let cfg = collect_cfg(attrs);
+        if cx.find_pin_attr(attrs)? {
             let lifetime = &cx.lifetime;
-            proj_fields.push(quote!(#ident: ::core::pin::Pin<&#lifetime mut #ty>));
-            proj_body.push(quote!(#ident: ::core::pin::Pin::new_unchecked(#ident)));
+            proj_fields.push(quote! {
+                #(#cfg)* #ident: ::core::pin::Pin<&#lifetime mut #ty>
+            });
+            proj_body.push(quote! {
+                #(#cfg)* #ident: ::core::pin::Pin::new_unchecked(#ident)
+            });
         } else {
             let lifetime = &cx.lifetime;
-            proj_fields.push(quote!(#ident: &#lifetime mut #ty));
-            proj_body.push(quote!(#ident));
+            proj_fields.push(quote! {
+                #(#cfg)* #ident: &#lifetime mut #ty
+            });
+            proj_body.push(quote! {
+                #(#cfg)* #ident: #ident
+            });
         }
-        proj_pat.push(ident);
+        proj_pat.push(quote! {
+            #(#cfg)* #ident
+        });
     }
 
     let proj_pat = quote!({ #(#proj_pat),* });
@@ -114,19 +128,34 @@ fn unnamed(
     let mut proj_body = Vec::with_capacity(fields.len());
     let mut proj_fields = Vec::with_capacity(fields.len());
     for (i, Field { attrs, ty, .. }) in fields.iter_mut().enumerate() {
-        let x = format_ident!("_x{}", i);
-        if let Some(attr) = attrs.find_remove(PIN) {
-            let _: Nothing = syn::parse2(attr.tokens)?;
-            cx.push_unpin_bounds(ty.clone());
+        let id = format_ident!("_x{}", i);
+        let cfg = collect_cfg(attrs);
+        if !cfg.is_empty() {
+            return Err(error!(
+                cfg.first(),
+                "`cfg` attributes on the field of tuple variants are not supported"
+            ));
+        }
+        if cx.find_pin_attr(attrs)? {
             let lifetime = &cx.lifetime;
-            proj_fields.push(quote!(::core::pin::Pin<&#lifetime mut #ty>));
-            proj_body.push(quote!(::core::pin::Pin::new_unchecked(#x)));
+            proj_fields.push(quote! {
+                ::core::pin::Pin<&#lifetime mut #ty>
+            });
+            proj_body.push(quote! {
+                ::core::pin::Pin::new_unchecked(#id)
+            });
         } else {
             let lifetime = &cx.lifetime;
-            proj_fields.push(quote!(&#lifetime mut #ty));
-            proj_body.push(quote!(#x));
+            proj_fields.push(quote! {
+                &#lifetime mut #ty
+            });
+            proj_body.push(quote! {
+                #id
+            });
         }
-        proj_pat.push(x);
+        proj_pat.push(quote! {
+            #id
+        });
     }
 
     let proj_pat = quote!((#(#proj_pat),*));
