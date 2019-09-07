@@ -1,31 +1,36 @@
 use proc_macro2::TokenStream;
 use quote::{quote, ToTokens};
-use syn::{Field, Fields, FieldsNamed, FieldsUnnamed, Index, ItemStruct, Result};
+use syn::{Field, Fields, FieldsNamed, FieldsUnnamed, Ident, Index, ItemStruct, Result};
 
 use crate::utils::collect_cfg;
 
 use super::Context;
 
-pub(super) fn parse(cx: &mut Context, mut item: ItemStruct) -> Result<TokenStream> {
-    let (proj_fields, proj_init) = match &mut item.fields {
-        Fields::Named(FieldsNamed { named: fields, .. })
-        | Fields::Unnamed(FieldsUnnamed { unnamed: fields, .. })
-            if fields.is_empty() =>
+pub(super) fn validate(ident: &Ident, fields: &Fields) -> Result<()> {
+    match fields {
+        Fields::Named(FieldsNamed { named: f, .. })
+        | Fields::Unnamed(FieldsUnnamed { unnamed: f, .. })
+            if f.is_empty() =>
         {
-            return Err(error!(
-                item.fields,
+            Err(error!(
+                fields,
                 "#[pin_project] attribute may not be used on structs with zero fields"
-            ));
+            ))
         }
         Fields::Unit => {
-            return Err(error!(
-                item.ident,
-                "#[pin_project] attribute may not be used on structs with units"
-            ));
+            Err(error!(ident, "#[pin_project] attribute may not be used on structs with units"))
         }
+        _ => Ok(()),
+    }
+}
 
+pub(super) fn parse(cx: &mut Context, mut item: ItemStruct) -> Result<TokenStream> {
+    validate(&item.ident, &item.fields)?;
+
+    let (proj_fields, proj_init) = match &mut item.fields {
         Fields::Named(fields) => named(cx, fields)?,
         Fields::Unnamed(fields) => unnamed(cx, fields)?,
+        Fields::Unit => unreachable!(),
     };
 
     let proj_ident = &cx.proj_ident;

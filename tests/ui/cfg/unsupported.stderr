@@ -1,0 +1,13 @@
+error: #[pin_project] attribute may not be used on structs with zero fields
+
+error[E0392]: parameter `'_pin` is never used
+ --> $DIR/unsupported.rs:5:1
+  |
+5 | #[pin_project]
+  | ^^^^^^^^^^^^^^ unused parameter
+  |
+  = help: consider removing `'_pin` or using a marker such as `std::marker::PhantomData`
+
+error: aborting due to 2 previous errors
+
+For more information about this error, try `rustc --explain E0392`.

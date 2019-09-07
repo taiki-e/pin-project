@@ -1,19 +1,19 @@
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote, ToTokens};
-use syn::{Field, Fields, FieldsNamed, FieldsUnnamed, ItemEnum, Result, Variant};
+use syn::{token, Field, Fields, FieldsNamed, FieldsUnnamed, ItemEnum, Result, Variant};
 
 use crate::utils::collect_cfg;
 
-use super::Context;
+use super::{Context, Variants};
 
-pub(super) fn parse(cx: &mut Context, mut item: ItemEnum) -> Result<TokenStream> {
-    if item.variants.is_empty() {
+pub(super) fn validate(brace_token: token::Brace, variants: &Variants) -> Result<()> {
+    if variants.is_empty() {
         return Err(syn::Error::new(
-            item.brace_token.span,
+            brace_token.span,
             "#[pin_project] attribute may not be used on enums without variants",
         ));
     }
-    let has_field = item.variants.iter().try_fold(false, |has_field, v| {
+    let has_field = variants.iter().try_fold(false, |has_field, v| {
         if let Some((_, e)) = &v.discriminant {
             Err(error!(e, "#[pin_project] attribute may not be used on enums with discriminants"))
         } else if let Fields::Unit = v.fields {
@@ -22,12 +22,18 @@ pub(super) fn parse(cx: &mut Context, mut item: ItemEnum) -> Result<TokenStream>
             Ok(true)
         }
     })?;
-    if !has_field {
-        return Err(error!(
-            item.variants,
+    if has_field {
+        Ok(())
+    } else {
+        Err(error!(
+            variants,
             "#[pin_project] attribute may not be used on enums that have no field"
-        ));
+        ))
     }
+}
+
+pub(super) fn parse(cx: &mut Context, mut item: ItemEnum) -> Result<TokenStream> {
+    validate(item.brace_token, &item.variants)?;
 
     let (proj_variants, proj_arms) = variants(cx, &mut item)?;
 
