@@ -33,19 +33,19 @@ impl<'_outer_pin, T, U> __StructProjectionTrait<'_outer_pin, T, U>
 {
     fn project<'_pin>(&'_pin mut self) -> __StructProjection<'_pin, T, U> {
         unsafe {
-            let this = self.as_mut().get_unchecked_mut();
+            let Struct { pinned, unpinned } = self.as_mut().get_unchecked_mut();
             __StructProjection {
-                pinned: ::core::pin::Pin::new_unchecked(&mut this.pinned),
-                unpinned: &mut this.unpinned,
+                pinned: ::core::pin::Pin::new_unchecked(pinned),
+                unpinned: unpinned,
             }
         }
     }
     fn project_into(self) -> __StructProjection<'_outer_pin, T, U> {
         unsafe {
-            let this = self.get_unchecked_mut();
+            let Struct { pinned, unpinned } = self.get_unchecked_mut();
             __StructProjection {
-                pinned: ::core::pin::Pin::new_unchecked(&mut this.pinned),
-                unpinned: &mut this.unpinned,
+                pinned: ::core::pin::Pin::new_unchecked(pinned),
+                unpinned: unpinned,
             }
         }
     }
@@ -91,8 +91,12 @@ impl<T, U> StructMustNotImplDrop for Struct<T, U> {}
 #[allow(non_snake_case)]
 #[deny(safe_packed_borrows)]
 fn __pin_project_assert_not_repr_packed_Struct<T, U>(val: Struct<T, U>) {
-    &val.pinned;
-    &val.unpinned;
+    {
+        &val.pinned;
+    }
+    {
+        &val.unpinned;
+    }
 }
 
 fn main() {}
