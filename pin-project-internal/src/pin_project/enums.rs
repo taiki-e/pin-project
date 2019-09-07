@@ -70,8 +70,8 @@ fn variants(cx: &mut Context, item: &mut ItemEnum) -> Result<(Vec<TokenStream>, 
     let mut proj_arms = Vec::with_capacity(item.variants.len());
     for Variant { attrs, fields, ident, .. } in &mut item.variants {
         let (proj_pat, proj_body, proj_fields) = match fields {
-            Fields::Unnamed(fields) => unnamed(cx, fields)?,
             Fields::Named(fields) => named(cx, fields)?,
+            Fields::Unnamed(fields) => unnamed(cx, fields, false)?,
             Fields::Unit => (TokenStream::new(), TokenStream::new(), TokenStream::new()),
         };
         let cfg = collect_cfg(attrs);
@@ -89,7 +89,7 @@ fn variants(cx: &mut Context, item: &mut ItemEnum) -> Result<(Vec<TokenStream>, 
     Ok((proj_variants, proj_arms))
 }
 
-fn named(
+pub(super) fn named(
     cx: &mut Context,
     FieldsNamed { named: fields, .. }: &mut FieldsNamed,
 ) -> Result<(TokenStream, TokenStream, TokenStream)> {
@@ -126,9 +126,10 @@ fn named(
     Ok((proj_pat, proj_body, proj_fields))
 }
 
-fn unnamed(
+pub(super) fn unnamed(
     cx: &mut Context,
     FieldsUnnamed { unnamed: fields, .. }: &mut FieldsUnnamed,
+    is_struct: bool,
 ) -> Result<(TokenStream, TokenStream, TokenStream)> {
     let mut proj_pat = Vec::with_capacity(fields.len());
     let mut proj_body = Vec::with_capacity(fields.len());
@@ -139,7 +140,8 @@ fn unnamed(
         if !cfg.is_empty() {
             return Err(error!(
                 cfg.first(),
-                "`cfg` attributes on the field of tuple variants are not supported"
+                "`cfg` attributes on the field of tuple {} are not supported",
+                if is_struct { "structs" } else { "variants" }
             ));
         }
         if cx.find_pin_attr(attrs)? {
@@ -166,6 +168,7 @@ fn unnamed(
 
     let proj_pat = quote!((#(#proj_pat),*));
     let proj_body = quote!((#(#proj_body),*));
-    let proj_fields = quote!((#(#proj_fields),*));
+    let proj_fields =
+        if is_struct { quote!((#(#proj_fields),*);) } else { quote!((#(#proj_fields),*)) };
     Ok((proj_pat, proj_body, proj_fields))
 }
