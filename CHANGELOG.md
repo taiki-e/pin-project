@@ -1,5 +1,13 @@
 # Unreleased
 
+# 0.4.0-alpha.10 - 2019-09-07
+
+* [pin-project can now interoperate with `#[cfg()]`.][77]
+
+* Improved documentation.
+
+[77]: https://github.com/taiki-e/pin-project/pull/77
+
 # 0.4.0-alpha.9 - 2019-09-05
 
 * [Added 'project_into' method to #[pin_project] types][69]. This can be useful when returning a pin projection from a method.
