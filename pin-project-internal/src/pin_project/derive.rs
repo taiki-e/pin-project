@@ -11,17 +11,12 @@ pub(super) fn parse_derive(input: DeriveInput) -> Result<TokenStream> {
     let mut cx = DeriveContext::new(ident, vis, generics);
     match &mut data {
         Data::Struct(data) => {
-            // We need to check this on proc-macro-derive because cfg may reduce
-            // the fields. On the other hand, if we check this only on
-            // proc-macro-derive, it may generate unhelpful error messages.
-            // So, we need to check this on both proc-macro-attribute
-            // and proc-macro-derive.
-            super::structs::validate(&cx.ident, &data.fields)?;
-            cx.fields(&mut data.fields)
+            super::validate_struct(&cx.ident, &data.fields)?;
+            cx.visit_fields(&mut data.fields)
         }
         Data::Enum(data) => {
-            super::enums::validate(data.brace_token, &data.variants)?;
-            cx.variants(data)
+            super::validate_enum(data.brace_token, &data.variants)?;
+            cx.visit_variants(data)
         }
         Data::Union(_) => unreachable!(),
     }
@@ -48,13 +43,13 @@ impl DeriveContext {
         Self { ident, vis, generics, pinned_fields: Vec::new() }
     }
 
-    fn variants(&mut self, data: &mut DataEnum) {
+    fn visit_variants(&mut self, data: &mut DataEnum) {
         for Variant { fields, .. } in &mut data.variants {
-            self.fields(fields)
+            self.visit_fields(fields)
         }
     }
 
-    fn fields(&mut self, fields: &mut Fields) {
+    fn visit_fields(&mut self, fields: &mut Fields) {
         let fields = match fields {
             Fields::Unnamed(fields) => &mut fields.unnamed,
             Fields::Named(fields) => &mut fields.named,
