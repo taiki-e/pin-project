@@ -333,7 +333,8 @@ use syn::parse::Nothing;
 /// [`pinned_drop`]: ./attr.pinned_drop.html
 #[proc_macro_attribute]
 pub fn pin_project(args: TokenStream, input: TokenStream) -> TokenStream {
-    pin_project::attribute(args.into(), input.into()).into()
+    let input = syn::parse_macro_input!(input);
+    pin_project::attribute(args.into(), input).into()
 }
 
 // TODO: Move this doc into pin-project crate when https://github.com/rust-lang/rust/pull/62855 merged.
@@ -372,7 +373,8 @@ pub fn pin_project(args: TokenStream, input: TokenStream) -> TokenStream {
 #[proc_macro_attribute]
 pub fn pinned_drop(args: TokenStream, input: TokenStream) -> TokenStream {
     let _: Nothing = syn::parse_macro_input!(args);
-    pinned_drop::attribute(input.into()).into()
+    let input = syn::parse_macro_input!(input);
+    pinned_drop::attribute(&input).into()
 }
 
 // TODO: Move this doc into pin-project crate when https://github.com/rust-lang/rust/pull/62855 merged.
@@ -493,7 +495,15 @@ pub fn pinned_drop(args: TokenStream, input: TokenStream) -> TokenStream {
 #[proc_macro_attribute]
 pub fn project(args: TokenStream, input: TokenStream) -> TokenStream {
     let _: Nothing = syn::parse_macro_input!(args);
-    project::attribute(input.into()).into()
+    let input = syn::parse_macro_input!(input);
+    project::attribute(input).into()
+}
+
+#[doc(hidden)]
+#[proc_macro_derive(__PinProjectAutoImplUnpin, attributes(pin))]
+pub fn derive_unpin(input: TokenStream) -> TokenStream {
+    let input = syn::parse_macro_input!(input);
+    pin_project::derive(input).into()
 }
 
 #[cfg(feature = "renamed")]

@@ -124,6 +124,9 @@ pub mod __private {
     use super::UnsafeUnpin;
     use core::pin::Pin;
 
+    #[doc(hidden)]
+    pub use pin_project_internal::__PinProjectAutoImplUnpin;
+
     // This is an internal helper trait used by `pin-project-internal`.
     // This allows us to force an error if the user tries to provide
     // a regular `Drop` impl when they specify the `PinnedDrop` argument.

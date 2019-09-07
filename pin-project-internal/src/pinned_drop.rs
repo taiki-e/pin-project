@@ -7,7 +7,7 @@ use syn::{
 
 use crate::utils::crate_path;
 
-pub(super) fn attribute(input: TokenStream) -> TokenStream {
+pub(crate) fn attribute(input: &ItemFn) -> TokenStream {
     parse(input).unwrap_or_else(|e| e.to_compile_error())
 }
 
@@ -34,8 +34,7 @@ fn parse_arg(arg: &FnArg) -> Result<&Type> {
     Err(error!(arg, "#[pinned_drop] function must take a argument `Pin<&mut Type>`"))
 }
 
-fn parse(input: TokenStream) -> Result<TokenStream> {
-    let item: ItemFn = syn::parse2(input)?;
+fn parse(item: &ItemFn) -> Result<TokenStream> {
     if let ReturnType::Type(_, ty) = &item.sig.output {
         match &**ty {
             Type::Tuple(TypeTuple { elems, .. }) if elems.is_empty() => {}

@@ -1,0 +1,9 @@
+error[E0027]: pattern does not mention field `__field`
+  --> $DIR/field_sneaky.rs:12:14
+   |
+12 | #[pin_project] //~ ERROR pattern does not mention field `__field`
+   |              ^ missing field `__field`
+
+error: aborting due to previous error
+
+For more information about this error, try `rustc --explain E0027`.
