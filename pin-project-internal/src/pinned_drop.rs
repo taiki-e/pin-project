@@ -62,7 +62,7 @@ fn parse(item: &ItemFn) -> Result<TokenStream> {
                 #item
                 // #[pinned_drop] function is a free function - if it were part of a trait impl,
                 // it would be possible for user code to call it by directly invoking the trait.
-                #fn_name(self);
+                #fn_name(self)
             }
         }
     })

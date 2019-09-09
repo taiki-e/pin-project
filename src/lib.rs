@@ -30,9 +30,9 @@
 //! }
 //! ```
 //!
-//! [Code like this will be generated](https://github.com/taiki-e/pin-project/blob/master/examples/struct-default.rs)
+//! [Code like this will be generated](https://github.com/taiki-e/pin-project/blob/master/examples/struct-default-expanded.rs)
 //!
-//! See [`pin_project`] attribute for more details.
+//! There are examples and generated code of each feature in [examples](https://github.com/taiki-e/pin-project/blob/master/examples/README.md) directory.
 //!
 //! [`pin_project`]: https://docs.rs/pin-project-internal/0.4.0-alpha.10/pin_project_internal/attr.pin_project.html
 //! [`pinned_drop`]: https://docs.rs/pin-project-internal/0.4.0-alpha.10/pin_project_internal/attr.pinned_drop.html
