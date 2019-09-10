@@ -2,19 +2,19 @@
 
 use pin_project::pin_project;
 
-#[cfg(unix)]
-pub struct Unix;
-#[cfg(windows)]
-pub struct Windows;
+#[cfg(not(any()))]
+pub struct Foo;
+#[cfg(any())]
+pub struct Bar;
 
 #[pin_project]
 pub struct TupleStruct(
-    #[cfg(unix)] //~ ERROR `cfg` attributes on the field of tuple structs are not supported
+    #[cfg(not(any()))] //~ ERROR `cfg` attributes on the field of tuple structs are not supported
     #[pin]
-    Unix,
-    #[cfg(windows)]
+    Foo,
+    #[cfg(any())]
     #[pin]
-    Windows,
+    Bar,
 );
 
 fn main() {}

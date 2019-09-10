@@ -10,8 +10,8 @@ jobs:
       ${{ if parameters.cross }}:
         MacOS:
           vmImage: macOS-10.13
-        Windows:
-          vmImage: vs2017-win2016
+        # Windows:
+        #   vmImage: vs2017-win2016
   pool:
     vmImage: $(vmImage)
 
@@ -29,7 +29,7 @@ jobs:
     - ${{ if and(not(eq(parameters.toolchain, 'nightly')), eq(parameters.cmd, 'test')) }}:
       - script: |
           cargo ${{ parameters.cmd }} --all --tests
-          cargo check --all --all-features
+          cargo ${{ parameters.cmd }} --all --all-features --tests
         displayName: cargo ${{ parameters.cmd }}
 
     - ${{ if eq(parameters.toolchain, 'nightly') }}:
@@ -39,10 +39,7 @@ jobs:
         displayName: cargo ${{ parameters.cmd }}
 
       - script: |
-          cargo ${{ parameters.cmd }} --all
-          cargo ${{ parameters.cmd }} --all --all-features
-        env:
-          RUSTFLAGS: -Dwarnings -Zallow-features=proc_macro_hygiene,stmt_expr_attributes
+          RUSTFLAGS='-Dwarnings -Zallow-features=proc_macro_hygiene,stmt_expr_attributes' cargo ${{ parameters.cmd }} --all --all-features
         displayName: cargo ${{ parameters.cmd }} -Zallow-features
 
       # Refs: https://github.com/rust-lang/cargo/issues/5657

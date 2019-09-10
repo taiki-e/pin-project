@@ -1,16 +1,11 @@
-#![cfg(feature = "project_attr")]
-#![warn(unsafe_code)]
-#![warn(rust_2018_idioms, single_use_lifetimes)]
-#![allow(dead_code)]
+// run-pass
+
 #![feature(proc_macro_hygiene, stmt_expr_attributes)]
 
 use core::pin::Pin;
 use pin_project::{pin_project, project};
 
-#[test]
 fn project_stmt_expr_nightly() {
-    // enum
-
     #[pin_project]
     enum Baz<A, B, C, D> {
         Variant1(#[pin] A, B),
@@ -59,3 +54,5 @@ fn project_stmt_expr_nightly() {
         Baz::None => {}
     };
 }
+
+fn main() {}

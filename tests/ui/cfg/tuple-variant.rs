@@ -2,20 +2,20 @@
 
 use pin_project::pin_project;
 
-#[cfg(unix)]
-pub struct Unix;
-#[cfg(windows)]
-pub struct Windows;
+#[cfg(not(any()))]
+pub struct Foo;
+#[cfg(any())]
+pub struct Bar;
 
 #[pin_project]
 pub enum Field {
     Tuple(
-        #[cfg(unix)] //~ ERROR `cfg` attributes on the field of tuple variants are not supported
+        #[cfg(not(any()))] //~ ERROR `cfg` attributes on the field of tuple variants are not supported
         #[pin]
-        Unix,
-        #[cfg(windows)]
+        Foo,
+        #[cfg(any())]
         #[pin]
-        Windows,
+        Bar,
     ),
 }
 

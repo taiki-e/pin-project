@@ -7,12 +7,10 @@
 use core::marker::PhantomPinned;
 use pin_project::pin_project;
 
-#[cfg(all(unix, target_os = "macos"))]
-pub struct MacOS;
-#[cfg(all(unix, not(target_os = "macos")))]
+#[cfg(target_os = "linux")]
 pub struct Linux;
-#[cfg(windows)]
-pub struct Windows;
+#[cfg(not(target_os = "linux"))]
+pub struct Other;
 
 // Using `PhantomPinned: Unpin` without #![feature(trivial_bounds)] will result in an error.
 // Use this type to check that `cfg(any())` is working properly.
@@ -22,129 +20,101 @@ pub struct Any(PhantomPinned);
 fn struct_() {
     #[pin_project]
     pub struct SameName {
-        #[cfg(all(unix, target_os = "macos"))]
-        #[pin]
-        inner: MacOS,
-        #[cfg(all(unix, not(target_os = "macos")))]
+        #[cfg(target_os = "linux")]
         #[pin]
         inner: Linux,
-        #[cfg(windows)]
+        #[cfg(not(target_os = "linux"))]
         #[pin]
-        inner: Windows,
+        inner: Other,
         #[cfg(any())]
         #[pin]
         any: Any,
     }
 
-    #[cfg(all(unix, target_os = "macos"))]
-    let _x = SameName { inner: MacOS };
-    #[cfg(all(unix, not(target_os = "macos")))]
+    #[cfg(target_os = "linux")]
     let _x = SameName { inner: Linux };
-    #[cfg(windows)]
-    let _x = SameName { inner: Windows };
+    #[cfg(not(target_os = "linux"))]
+    let _x = SameName { inner: Other };
 
     #[pin_project]
     pub struct DifferentName {
-        #[cfg(all(unix, target_os = "macos"))]
-        #[pin]
-        m: MacOS,
-        #[cfg(all(unix, not(target_os = "macos")))]
+        #[cfg(target_os = "linux")]
         #[pin]
         l: Linux,
-        #[cfg(windows)]
+        #[cfg(not(target_os = "linux"))]
         #[pin]
-        w: Windows,
+        o: Other,
         #[cfg(any())]
         #[pin]
         a: Any,
     }
 
-    #[cfg(all(unix, target_os = "macos"))]
-    let _x = DifferentName { m: MacOS };
-    #[cfg(all(unix, not(target_os = "macos")))]
+    #[cfg(target_os = "linux")]
     let _x = DifferentName { l: Linux };
-    #[cfg(windows)]
-    let _x = DifferentName { w: Windows };
+    #[cfg(not(target_os = "linux"))]
+    let _x = DifferentName { o: Other };
 }
 
 #[test]
 fn enum_() {
     #[pin_project]
     pub enum Variant {
-        #[cfg(all(unix, target_os = "macos"))]
-        Inner(#[pin] MacOS),
-        #[cfg(all(unix, not(target_os = "macos")))]
+        #[cfg(target_os = "linux")]
         Inner(#[pin] Linux),
-        #[cfg(windows)]
-        Inner(#[pin] Windows),
+        #[cfg(not(target_os = "linux"))]
+        Inner(#[pin] Other),
 
-        #[cfg(all(unix, target_os = "macos"))]
-        MacOS(#[pin] MacOS),
-        #[cfg(all(unix, not(target_os = "macos")))]
+        #[cfg(target_os = "linux")]
         Linux(#[pin] Linux),
-        #[cfg(windows)]
-        Windows(#[pin] Windows),
+        #[cfg(not(target_os = "linux"))]
+        Other(#[pin] Other),
         #[cfg(any())]
         Any(#[pin] Any),
     }
 
-    #[cfg(all(unix, target_os = "macos"))]
-    let _x = Variant::Inner(MacOS);
-    #[cfg(all(unix, not(target_os = "macos")))]
+    #[cfg(target_os = "linux")]
     let _x = Variant::Inner(Linux);
-    #[cfg(windows)]
-    let _x = Variant::Inner(Windows);
+    #[cfg(not(target_os = "linux"))]
+    let _x = Variant::Inner(Other);
 
-    #[cfg(all(unix, target_os = "macos"))]
-    let _x = Variant::MacOS(MacOS);
-    #[cfg(all(unix, not(target_os = "macos")))]
+    #[cfg(target_os = "linux")]
     let _x = Variant::Linux(Linux);
-    #[cfg(windows)]
-    let _x = Variant::Windows(Windows);
+    #[cfg(not(target_os = "linux"))]
+    let _x = Variant::Other(Other);
 
     #[pin_project]
     pub enum Field {
         SameName {
-            #[cfg(all(unix, target_os = "macos"))]
-            #[pin]
-            inner: MacOS,
-            #[cfg(all(unix, not(target_os = "macos")))]
+            #[cfg(target_os = "linux")]
             #[pin]
             inner: Linux,
-            #[cfg(windows)]
+            #[cfg(not(target_os = "linux"))]
             #[pin]
-            inner: Windows,
+            inner: Other,
             #[cfg(any())]
             #[pin]
             any: Any,
         },
         DifferentName {
-            #[cfg(all(unix, target_os = "macos"))]
-            #[pin]
-            m: MacOS,
-            #[cfg(all(unix, not(target_os = "macos")))]
+            #[cfg(target_os = "linux")]
             #[pin]
             l: Linux,
-            #[cfg(windows)]
+            #[cfg(not(target_os = "linux"))]
             #[pin]
-            w: Windows,
+            w: Other,
             #[cfg(any())]
             #[pin]
             any: Any,
         },
     }
 
-    #[cfg(all(unix, target_os = "macos"))]
-    let _x = Field::SameName { inner: MacOS };
-    #[cfg(all(unix, not(target_os = "macos")))]
+    #[cfg(target_os = "linux")]
     let _x = Field::SameName { inner: Linux };
-    #[cfg(windows)]
-    let _x = Field::SameName { inner: Windows };
+    #[cfg(not(target_os = "linux"))]
+    let _x = Field::SameName { inner: Other };
 
-    #[cfg(all(unix, target_os = "macos"))]
-    let _x = Field::DifferentName { m: MacOS };
-    #[cfg(all(unix, not(target_os = "macos")))]
+    #[cfg(target_os = "linux")]
     let _x = Field::DifferentName { l: Linux };
-    #[cfg(windows)]
-    let _x = Field::DifferentName { w: Windows };
+    #[cfg(not(target_os = "linux"))]
+    let _x = Field::DifferentName { w: Other };
 }
