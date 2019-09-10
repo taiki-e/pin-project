@@ -65,3 +65,13 @@ pub fn add_pinned_field(_: TokenStream, input: TokenStream) -> TokenStream {
 pub fn hidden_repr(attr: TokenStream, item: TokenStream) -> TokenStream {
     format!("#[repr({})] {}", attr, item).parse().unwrap()
 }
+
+#[proc_macro_attribute]
+pub fn hidden_repr_cfg_any(attr: TokenStream, item: TokenStream) -> TokenStream {
+    format!("#[cfg_attr(any(), repr({}))] {}", attr, item).parse().unwrap()
+}
+
+#[proc_macro_attribute]
+pub fn hidden_repr_cfg_not_any(attr: TokenStream, item: TokenStream) -> TokenStream {
+    format!("#[cfg_attr(not(any()), repr({}))] {}", attr, item).parse().unwrap()
+}

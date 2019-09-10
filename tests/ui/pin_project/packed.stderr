@@ -1,14 +1,20 @@
 error: #[pin_project] attribute may not be used on #[repr(packed)] types
  --> $DIR/packed.rs:6:8
   |
-6 | #[repr(packed, C)] //~ ERROR may not be used on #[repr(packed)] type
+6 | #[repr(packed, C)] //~ ERROR may not be used on #[repr(packed)] types
   |        ^^^^^^
 
 error: #[pin_project] attribute may not be used on #[repr(packed)] types
   --> $DIR/packed.rs:13:8
    |
-13 | #[repr(packed, C)] //~ ERROR may not be used on #[repr(packed)] type
+13 | #[repr(packed, C)] //~ ERROR may not be used on #[repr(packed)] types
    |        ^^^^^^
 
-error: aborting due to 2 previous errors
+error: #[pin_project] attribute may not be used on #[repr(packed(N))] types
+  --> $DIR/packed.rs:21:8
+   |
+21 | #[repr(packed(2))] //~ ERROR may not be used on #[repr(packed(N))] types
+   |        ^^^^^^^^^
+
+error: aborting due to 3 previous errors
 

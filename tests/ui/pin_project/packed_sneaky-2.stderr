@@ -1,0 +1,16 @@
+error: #[pin_project] attribute may not be used on #[repr(packed)] types
+  --> $DIR/packed_sneaky-2.rs:9:1
+   |
+9  | / hidden_repr_macro! { //~ ERROR borrow of packed field is unsafe and requires unsafe function or block
+10 | |     #[pin_project]
+11 | |     struct B {
+12 | |         #[pin]
+13 | |         field: u32,
+14 | |     }
+15 | | }
+   | | ^ in this macro invocation
+   | |_|
+   | 
+
+error: aborting due to previous error
+

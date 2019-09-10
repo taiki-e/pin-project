@@ -338,14 +338,21 @@ fn ensure_not_packed(item: &ItemStruct) -> Result<TokenStream> {
     for meta in item.attrs.iter().filter_map(|attr| attr.parse_meta().ok()) {
         if let Meta::List(l) = meta {
             if l.path.is_ident("repr") {
-                for repr in &l.nested {
-                    if let NestedMeta::Meta(Meta::Path(p)) = repr {
-                        if p.is_ident("packed") {
+                for repr in l.nested.iter() {
+                    match repr {
+                        NestedMeta::Meta(Meta::Path(p)) if p.is_ident("packed") => {
                             return Err(error!(
                                 p,
                                 "#[pin_project] attribute may not be used on #[repr(packed)] types"
                             ));
                         }
+                        NestedMeta::Meta(Meta::List(l)) if l.path.is_ident("packed") => {
+                            return Err(error!(
+                                l,
+                                "#[pin_project] attribute may not be used on #[repr(packed(N))] types"
+                            ));
+                        }
+                        _ => {}
                     }
                 }
             }
@@ -394,7 +401,8 @@ fn ensure_not_packed(item: &ItemStruct) -> Result<TokenStream> {
             for Field { attrs, ident, .. } in named {
                 let cfg = collect_cfg(attrs);
                 field_refs.push(quote! {
-                    #(#cfg)* { &val.#ident; }
+                    #(#cfg)*
+                    { &val.#ident; }
                 });
             }
         }
