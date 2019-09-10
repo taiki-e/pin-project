@@ -1,11 +1,11 @@
 error: borrow of packed field is unsafe and requires unsafe function or block (error E0133)
-  --> $DIR/packed_sneaky.rs:20:1
+  --> $DIR/packed_sneaky-1.rs:20:1
    |
 20 | #[pin_project] //~ ERROR borrow of packed field is unsafe and requires unsafe function or block
    | ^^^^^^^^^^^^^^
    |
 note: lint level defined here
-  --> $DIR/packed_sneaky.rs:20:1
+  --> $DIR/packed_sneaky-1.rs:20:1
    |
 20 | #[pin_project] //~ ERROR borrow of packed field is unsafe and requires unsafe function or block
    | ^^^^^^^^^^^^^^
