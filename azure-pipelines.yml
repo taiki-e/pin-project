@@ -50,9 +50,7 @@ jobs:
         toolchain: nightly
     - script: |
         cargo clean
-        cargo test -p pin-project --all-features --test compiletest
-      env:
-        RUSTFLAGS: -Dwarnings --cfg compiletest --cfg pin_project_show_unpin_struct
+        RUSTFLAGS='--cfg compiletest --cfg pin_project_show_unpin_struct' cargo test -p pin-project --all-features --test compiletest
       displayName: compiletest
 
 - job: clippy
@@ -125,7 +123,5 @@ jobs:
       parameters:
         toolchain: nightly
     - script: |
-        cargo doc --no-deps --all --all-features
-      env:
-        RUSTDOCFLAGS: -Dwarnings
+        RUSTDOCFLAGS=-Dwarnings cargo doc --no-deps --all --all-features
       displayName: cargo doc
