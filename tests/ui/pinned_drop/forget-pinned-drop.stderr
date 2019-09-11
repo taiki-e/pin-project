@@ -4,7 +4,7 @@ error[E0277]: the trait bound `Foo: pin_project::__private::UnsafePinnedDrop` is
 6 | #[pin_project(PinnedDrop)] //~ ERROR E0277
   |               ^^^^^^^^^^ the trait `pin_project::__private::UnsafePinnedDrop` is not implemented for `Foo`
   |
-  = note: required by `pin_project::__private::UnsafePinnedDrop::pinned_drop`
+  = note: required by `pin_project::__private::UnsafePinnedDrop::drop`
 
 error: aborting due to previous error
 

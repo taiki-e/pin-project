@@ -15,32 +15,13 @@ fn safe_project() {
     }
 
     #[pinned_drop]
-    fn do_drop(mut foo: Pin<&mut Foo<'_>>) {
-        **foo.project().was_dropped = true;
+    impl PinnedDrop for Foo<'_> {
+        fn drop(mut self: Pin<&mut Self>) {
+            **self.project().was_dropped = true;
+        }
     }
 
     let mut was_dropped = false;
     drop(Foo { was_dropped: &mut was_dropped, field: 42 });
     assert!(was_dropped);
-}
-
-#[test]
-fn overlapping_drop_fn_names() {
-    #[pin_project(PinnedDrop)]
-    pub struct Foo {
-        #[pin]
-        field: u8,
-    }
-
-    #[pinned_drop]
-    fn do_drop(_: Pin<&mut Foo>) {}
-
-    #[pin_project(PinnedDrop)]
-    pub struct Bar {
-        #[pin]
-        field: u8,
-    }
-
-    #[pinned_drop]
-    fn do_drop(_: Pin<&mut Bar>) {}
 }

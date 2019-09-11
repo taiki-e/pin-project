@@ -22,7 +22,9 @@ struct Bar<T, U> {
 }
 
 #[pinned_drop]
-fn do_drop<T, U>(this: Pin<&mut Bar<T, U>>) {}
+impl<T, U> PinnedDrop for Bar<T, U> {
+    fn drop(self: Pin<&mut Self>) {}
+}
 
 impl<T, U> Drop for Bar<T, U> {
     fn drop(&mut self) {}

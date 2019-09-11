@@ -227,7 +227,7 @@ impl Context {
             let crate_path = &self.crate_path;
 
             let call = quote_spanned! { pinned_drop =>
-                ::#crate_path::__private::UnsafePinnedDrop::pinned_drop(pinned_self)
+                ::#crate_path::__private::UnsafePinnedDrop::drop(pinned_self)
             };
 
             quote! {
@@ -237,7 +237,7 @@ impl Context {
                         // Safety - we're in 'drop', so we know that 'self' will
                         // never move again.
                         let pinned_self = unsafe { ::core::pin::Pin::new_unchecked(self) };
-                        // We call `pinned_drop` only once. Since `UnsafePinnedDrop::pinned_drop`
+                        // We call `pinned_drop` only once. Since `UnsafePinnedDrop::drop`
                         // is an unsafe function and a private API, it is never called again in safe
                         // code *unless the user uses a maliciously crafted macro*.
                         unsafe {
