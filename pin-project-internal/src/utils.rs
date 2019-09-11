@@ -2,7 +2,7 @@ use quote::format_ident;
 use syn::{
     punctuated::Punctuated,
     token::{self, Comma},
-    Attribute, GenericParam, Generics, Ident, Lifetime, LifetimeDef,
+    *,
 };
 
 pub(crate) const DEFAULT_LIFETIME_NAME: &str = "'_pin";

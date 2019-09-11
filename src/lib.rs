@@ -139,7 +139,7 @@ pub mod __private {
         // Since calling it twice on the same object would be UB,
         // this method is unsafe.
         #[doc(hidden)]
-        unsafe fn pinned_drop(self: Pin<&mut Self>);
+        unsafe fn drop(self: Pin<&mut Self>);
     }
 
     // This is an internal helper struct used by `pin-project-internal`.

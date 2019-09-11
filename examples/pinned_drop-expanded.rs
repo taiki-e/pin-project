@@ -72,27 +72,22 @@ impl<'a, T> ::core::ops::Drop for Foo<'a, T> {
         // Safety - we're in 'drop', so we know that 'self' will
         // never move again.
         let pinned_self = unsafe { ::core::pin::Pin::new_unchecked(self) };
-        // We call `pinned_drop` only once. Since `UnsafePinnedDrop::pinned_drop`
+        // We call `pinned_drop` only once. Since `UnsafePinnedDrop::drop`
         // is an unsafe function and a private API, it is never called again in safe
         // code *unless the user uses a maliciously crafted macro*.
         unsafe {
-            ::pin_project::__private::UnsafePinnedDrop::pinned_drop(pinned_self);
+            ::pin_project::__private::UnsafePinnedDrop::drop(pinned_self);
         }
     }
 }
 
+// Users can implement `Drop` safely using `#[pinned_drop]`.
+// **Do not call or implement this trait directly.**
 unsafe impl<T> ::pin_project::__private::UnsafePinnedDrop for Foo<'_, T> {
-    unsafe fn pinned_drop(self: ::core::pin::Pin<&mut Self>) {
-        // Declare the #[pinned_drop] function *inside* our pinned_drop function
-        // This guarantees that it's impossible for any other user code
-        // to call it.
-        fn drop_foo<T>(mut foo: Pin<&mut Foo<'_, T>>) {
-            **foo.project().was_dropped = true;
-        }
-
-        // #[pinned_drop] function is a free function - if it were part of a trait impl,
-        // it would be possible for user code to call it by directly invoking the trait.
-        drop_foo(self)
+    // Since calling it twice on the same object would be UB,
+    // this method is unsafe.
+    unsafe fn drop(mut self: ::core::pin::Pin<&mut Self>) {
+        **self.project().was_dropped = true;
     }
 }
 

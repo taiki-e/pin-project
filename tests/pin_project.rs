@@ -236,7 +236,9 @@ fn combine() {
     }
 
     #[pinned_drop]
-    fn do_drop<T>(_: Pin<&mut Foo<T>>) {}
+    impl<T> PinnedDrop for Foo<T> {
+        fn drop(self: Pin<&mut Self>) {}
+    }
 
     #[allow(unsafe_code)]
     unsafe impl<T: Unpin> UnsafeUnpin for Foo<T> {}

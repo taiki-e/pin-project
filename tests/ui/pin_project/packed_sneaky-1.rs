@@ -31,6 +31,8 @@ struct D {
 }
 
 #[pinned_drop]
-fn drop_d(_: Pin<&mut D>) {}
+impl PinnedDrop for D {
+    fn drop(self: Pin<&mut Self>) {}
+}
 
 fn main() {}

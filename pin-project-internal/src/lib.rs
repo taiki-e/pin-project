@@ -190,18 +190,28 @@ use syn::parse::Nothing;
 /// times requires using [`.as_mut()`][`Pin::as_mut`] to avoid
 /// consuming the `Pin`.
 ///
+/// See also [`UnsafeUnpin`] trait.
+///
 /// ### `#[pinned_drop]`
 ///
 /// In order to correctly implement pin projections, a type's `Drop` impl must
 /// not move out of any stucturally pinned fields. Unfortunately, [`Drop::drop`]
 /// takes `&mut Self`, not `Pin<&mut Self>`.
 ///
-/// To ensure that this requirement is upheld, the `pin_project` attribute will
-/// provide a `Drop` impl for you. This `Drop` impl will delegate to a function
-/// annotated with `#[pinned_drop]` if you use the `PinnedDrop` argument to
-/// `#[pin_project]`. This function acts just like a normal [`drop`] impl, except
-/// for the fact that it takes `Pin<&mut Self>`. In particular, it will never be
-/// called more than once, just like [`Drop::drop`].
+/// To ensure that this requirement is upheld, the `#[pin_project]` attribute will
+/// provide a [`Drop`] impl for you. This `Drop` impl will delegate to an impl
+/// block annotated with `#[pinned_drop]` if you use the `PinnedDrop` argument
+/// to `#[pin_project]`. This impl block acts just like a normal [`Drop`] impl,
+/// except for the following two:
+///
+/// * `drop` method takes `Pin<&mut Self>`
+/// * Name of the trait is `PinnedDrop`.
+///
+/// `#[pin_project]` implements the actual [`Drop`] trait via `PinnedDrop` you
+/// implemented. To drop a type that implements `PinnedDrop`, use the [`drop`]
+/// function just like dropping a type that directly implements [`Drop`].
+///
+/// In particular, it will never be called more than once, just like [`Drop::drop`].
 ///
 /// For example:
 ///
@@ -217,10 +227,11 @@ use syn::parse::Nothing;
 /// }
 ///
 /// #[pinned_drop]
-/// fn my_drop_fn<T: Debug, U: Debug>(mut foo: Pin<&mut Foo<T, U>>) {
-///     let foo = foo.project();
-///     println!("Dropping pinned field: {:?}", foo.pinned_field);
-///     println!("Dropping unpin field: {:?}", foo.unpin_field);
+/// impl<T: Debug, U: Debug> PinnedDrop for Foo<T, U> {
+///     fn drop(self: Pin<&mut Self>) {
+///         println!("Dropping pinned field: {:?}", self.pinned_field);
+///         println!("Dropping unpin field: {:?}", self.unpin_field);
+///     }
 /// }
 ///
 /// fn main() {
@@ -338,11 +349,11 @@ pub fn pin_project(args: TokenStream, input: TokenStream) -> TokenStream {
 }
 
 // TODO: Move this doc into pin-project crate when https://github.com/rust-lang/rust/pull/62855 merged.
-/// An attribute for annotating a function that implements [`Drop`].
+/// An attribute for annotating an impl block that implements [`Drop`].
 ///
 /// This attribute is only needed when you wish to provide a [`Drop`]
-/// impl for your type. The function annotated with `#[pinned_drop]` acts just
-/// like a normal [`drop`](Drop::drop) impl, except for the fact that it takes
+/// impl for your type. The impl block annotated with `#[pinned_drop]` acts just
+/// like a normal [`Drop`] impl, except for the fact that `drop` method takes
 /// `Pin<&mut Self>`. In particular, it will never be called more than once,
 /// just like [`Drop::drop`].
 ///
@@ -358,8 +369,10 @@ pub fn pin_project(args: TokenStream, input: TokenStream) -> TokenStream {
 /// }
 ///
 /// #[pinned_drop]
-/// fn my_drop(foo: Pin<&mut Foo>) {
-///     println!("Dropping: {}", foo.field);
+/// impl PinnedDrop for Foo {
+///     fn drop(self: Pin<&mut Self>) {
+///         println!("Dropping: {}", self.field);
+///     }
 /// }
 ///
 /// fn main() {
@@ -374,7 +387,7 @@ pub fn pin_project(args: TokenStream, input: TokenStream) -> TokenStream {
 pub fn pinned_drop(args: TokenStream, input: TokenStream) -> TokenStream {
     let _: Nothing = syn::parse_macro_input!(args);
     let input = syn::parse_macro_input!(input);
-    pinned_drop::attribute(&input).into()
+    pinned_drop::attribute(input).into()
 }
 
 // TODO: Move this doc into pin-project crate when https://github.com/rust-lang/rust/pull/62855 merged.

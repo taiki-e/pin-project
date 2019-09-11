@@ -13,8 +13,10 @@ pub struct Foo<'a, T> {
 }
 
 #[pinned_drop]
-fn drop_foo<T>(mut this: Pin<&mut Foo<'_, T>>) {
-    **this.project().was_dropped = true;
+impl<T> PinnedDrop for Foo<'_, T> {
+    fn drop(mut self: Pin<&mut Self>) {
+        **self.project().was_dropped = true;
+    }
 }
 
 fn main() {}

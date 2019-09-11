@@ -1,22 +1,75 @@
 use proc_macro2::TokenStream;
-use quote::quote;
-use syn::{
-    FnArg, GenericArgument, ItemFn, PatType, PathArguments, Result, ReturnType, Type, TypePath,
-    TypeReference, TypeTuple,
-};
+use quote::{quote, quote_spanned, ToTokens};
+use syn::{parse::Nothing, spanned::Spanned, *};
 
 use crate::utils::crate_path;
 
-pub(crate) fn attribute(input: &ItemFn) -> TokenStream {
-    parse(input).unwrap_or_else(|e| e.to_compile_error())
+pub(crate) fn attribute(mut input: ItemImpl) -> TokenStream {
+    if let Err(e) = parse(&mut input) {
+        let crate_path = crate_path();
+        let self_ty = &input.self_ty;
+        let (impl_generics, _, where_clause) = input.generics.split_for_impl();
+
+        let mut tokens = e.to_compile_error();
+        // Generate a dummy `UnsafePinnedDrop` implementation.
+        // In many cases, `#[pinned_drop] impl` is declared after `#[pin_project]`.
+        // Therefore, if `pinned_drop` compile fails, you will also get an error
+        // about `UnsafePinnedDrop` not being implemented.
+        // This can be prevented to some extent by generating a dummy
+        // `UnsafePinnedDrop` implementation.
+        // We already know that we will get a compile error, so this won't
+        // accidentally compile successfully.
+        tokens.extend(quote! {
+            unsafe impl #impl_generics ::#crate_path::__private::UnsafePinnedDrop
+                for #self_ty #where_clause
+            {
+                unsafe fn drop(self: ::core::pin::Pin<&mut Self>) {}
+            }
+        });
+        tokens
+    } else {
+        input.into_token_stream()
+    }
 }
 
-fn parse_arg(arg: &FnArg) -> Result<&Type> {
-    if let FnArg::Typed(PatType { ty, .. }) = arg {
-        if let Type::Path(TypePath { qself: None, path }) = &**ty {
-            let ty = &path.segments[path.segments.len() - 1];
+fn parse_method(method: &ImplItemMethod) -> Result<()> {
+    fn get_ty_path(ty: &Type) -> Option<&Path> {
+        if let Type::Path(TypePath { qself: None, path }) = ty { Some(path) } else { None }
+    }
+
+    const INVALID_ARGUMENT: &str = "method `drop` must take an argument `self: Pin<&mut Self>`";
+
+    if method.sig.ident != "drop" {
+        return Err(error!(
+            method.sig.ident,
+            "method `{}` is not a member of trait `PinnedDrop", method.sig.ident,
+        ));
+    }
+
+    if let ReturnType::Type(_, ty) = &method.sig.output {
+        match &**ty {
+            Type::Tuple(TypeTuple { elems, .. }) if elems.is_empty() => {}
+            _ => return Err(error!(ty, "method `drop` must return the unit type")),
+        }
+    }
+
+    if method.sig.inputs.len() != 1 {
+        if method.sig.inputs.is_empty() {
+            return Err(syn::Error::new(method.sig.paren_token.span, INVALID_ARGUMENT));
+        } else {
+            return Err(error!(&method.sig.inputs, INVALID_ARGUMENT));
+        }
+    }
+
+    if let FnArg::Typed(PatType { pat, ty, .. }) = &method.sig.inputs[0] {
+        // !by_ref (mutability) ident !subpat: path
+        if let (Pat::Ident(PatIdent { by_ref: None, ident, subpat: None, .. }), Some(path)) =
+            (&**pat, get_ty_path(ty))
+        {
+            let ty = &path.segments.last().unwrap();
             if let PathArguments::AngleBracketed(args) = &ty.arguments {
-                if args.args.len() == 1 && ty.ident == "Pin" {
+                // (mut) self: (path::)Pin<args>
+                if ident == "self" && args.args.len() == 1 && ty.ident == "Pin" {
                     // &mut <elem>
                     if let GenericArgument::Type(Type::Reference(TypeReference {
                         mutability: Some(_),
@@ -24,46 +77,84 @@ fn parse_arg(arg: &FnArg) -> Result<&Type> {
                         ..
                     })) = &args.args[0]
                     {
-                        return Ok(&**elem);
+                        if get_ty_path(elem).map_or(false, |path| path.is_ident("Self")) {
+                            if method.sig.unsafety.is_some() {
+                                return Err(error!(
+                                    method.sig.unsafety,
+                                    "implementing the method `drop` is not unsafe"
+                                ));
+                            }
+                            return Ok(());
+                        }
                     }
                 }
             }
         }
     }
 
-    Err(error!(arg, "#[pinned_drop] function must take a argument `Pin<&mut Type>`"))
+    Err(error!(method.sig.inputs[0], INVALID_ARGUMENT))
 }
 
-fn parse(item: &ItemFn) -> Result<TokenStream> {
-    if let ReturnType::Type(_, ty) = &item.sig.output {
-        match &**ty {
-            Type::Tuple(TypeTuple { elems, .. }) if elems.is_empty() => {}
-            _ => return Err(error!(ty, "#[pinned_drop] function must return the unit type")),
+fn parse(item: &mut ItemImpl) -> Result<()> {
+    if let Some((_, path, _)) = &mut item.trait_ {
+        if path.is_ident("PinnedDrop") {
+            let crate_path = crate_path();
+
+            *path = syn::parse2(quote_spanned! { path.span() =>
+                ::#crate_path::__private::UnsafePinnedDrop
+            })
+            .unwrap();
+        } else {
+            return Err(error!(
+                path,
+                "#[pinned_drop] may only be used on implementation for the `PinnedDrop` trait"
+            ));
         }
-    }
-    if item.sig.inputs.len() != 1 {
+    } else {
         return Err(error!(
-            item.sig.inputs,
-            "#[pinned_drop] function must take exactly one argument"
+            item.self_ty,
+            "#[pinned_drop] may only be used on implementation for the `PinnedDrop` trait"
         ));
     }
 
-    let crate_path = crate_path();
-    let type_ = parse_arg(&item.sig.inputs[0])?;
-    let fn_name = &item.sig.ident;
-    let (impl_generics, _, where_clause) = item.sig.generics.split_for_impl();
+    if item.unsafety.is_some() {
+        return Err(error!(item.unsafety, "implementing the trait `PinnedDrop` is not unsafe"));
+    }
+    item.unsafety = Some(token::Unsafe::default());
 
-    Ok(quote! {
-        unsafe impl #impl_generics ::#crate_path::__private::UnsafePinnedDrop for #type_ #where_clause {
-            unsafe fn pinned_drop(self: ::core::pin::Pin<&mut Self>) {
-                // Declare the #[pinned_drop] function *inside* our pinned_drop function
-                // This guarantees that it's impossible for any other user code
-                // to call it.
-                #item
-                // #[pinned_drop] function is a free function - if it were part of a trait impl,
-                // it would be possible for user code to call it by directly invoking the trait.
-                #fn_name(self)
+    if item.items.is_empty() {
+        return Err(error!(item, "not all trait items implemented, missing: `drop`"));
+    } else {
+        for (i, item) in item.items.iter().enumerate() {
+            match item {
+                ImplItem::Const(item) => {
+                    return Err(error!(
+                        item,
+                        "const `{}` is not a member of trait `PinnedDrop`", item.ident
+                    ));
+                }
+                ImplItem::Type(item) => {
+                    return Err(error!(
+                        item,
+                        "type `{}` is not a member of trait `PinnedDrop`", item.ident
+                    ));
+                }
+                ImplItem::Method(method) => {
+                    parse_method(method)?;
+                    if i != 0 {
+                        return Err(error!(method, "duplicate definitions with name `drop`"));
+                    }
+                }
+                _ => {
+                    let _: Nothing = syn::parse2(item.to_token_stream())?;
+                }
             }
         }
-    })
+    }
+
+    if let ImplItem::Method(method) = &mut item.items[0] {
+        method.sig.unsafety = Some(token::Unsafe::default());
+    }
+
+    Ok(())
 }

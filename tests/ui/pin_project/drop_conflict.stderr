@@ -13,7 +13,7 @@ error[E0119]: conflicting implementations of trait `std::ops::Drop` for type `Ba
 17 | #[pin_project(PinnedDrop)] //~ ERROR E0119
    | ^^^^^^^^^^^^^^^^^^^^^^^^^^ conflicting implementation for `Bar<_, _>`
 ...
-27 | impl<T, U> Drop for Bar<T, U> {
+29 | impl<T, U> Drop for Bar<T, U> {
    | ----------------------------- first implementation here
 
 error: aborting due to 2 previous errors
