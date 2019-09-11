@@ -1,5 +1,11 @@
 # Unreleased
 
+# 0.4.0-alpha.11 - 2019-09-11
+
+* [Changed #[pinned_drop] to trait implementation.][86]
+
+[77]: https://github.com/taiki-e/pin-project/pull/86
+
 # 0.4.0-alpha.10 - 2019-09-07
 
 * [pin-project can now interoperate with `#[cfg()]`.][77]
