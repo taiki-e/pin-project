@@ -4,7 +4,20 @@
 
 * [Changed #[pinned_drop] to trait implementation.][86]
 
-[77]: https://github.com/taiki-e/pin-project/pull/86
+  ```rust
+  #[pinned_drop]
+  impl<T> PinnedDrop for Foo<'_, T> {
+      fn drop(mut self: Pin<&mut Self>) {
+          **self.project().was_dropped = true;
+      }
+  }
+  ```
+
+* Added some examples and generated code.
+
+* Improve error messages.
+
+[86]: https://github.com/taiki-e/pin-project/pull/86
 
 # 0.4.0-alpha.10 - 2019-09-07
 
