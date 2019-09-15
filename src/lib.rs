@@ -127,17 +127,22 @@ pub mod __private {
     #[doc(hidden)]
     pub use pin_project_internal::__PinProjectAutoImplUnpin;
 
-    // This is an internal helper trait used by `pin-project-internal`.
-    // This allows us to force an error if the user tries to provide
-    // a regular `Drop` impl when they specify the `PinnedDrop` argument.
+    // It is safe to implement PinnedDrop::drop, but it is not safe to call it.
+    // This is because destructors can be called multiple times (double dropping
+    // is unsound: rust-lang/rust#62360).
+    //
+    // Ideally, it would be desirable to be able to prohibit manual calls in the
+    // same way as Drop::drop, but the library cannot. So, by using macros and
+    // replacing them with private traits, we prevent users from calling
+    // PinnedDrop::drop.
     //
     // Users can implement `Drop` safely using `#[pinned_drop]`.
     // **Do not call or implement this trait directly.**
-    #[allow(unsafe_code)]
     #[doc(hidden)]
-    pub unsafe trait UnsafePinnedDrop {
+    pub trait PinnedDrop {
         // Since calling it twice on the same object would be UB,
         // this method is unsafe.
+        #[allow(unsafe_code)]
         #[doc(hidden)]
         unsafe fn drop(self: Pin<&mut Self>);
     }

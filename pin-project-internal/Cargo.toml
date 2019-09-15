@@ -8,7 +8,7 @@ repository = "https://github.com/taiki-e/pin-project"
 documentation = "https://docs.rs/pin-project-internal/"
 keywords = ["pin", "macros", "attribute"]
 categories = ["rust-patterns"]
-description = "An interal crate to support pin_project - do not use directly"
+description = "An internal crate to support pin_project - do not use directly"
 
 [package.metadata.docs.rs]
 all-features = true
