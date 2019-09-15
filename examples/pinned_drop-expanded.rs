@@ -72,18 +72,27 @@ impl<'a, T> ::core::ops::Drop for Foo<'a, T> {
         // Safety - we're in 'drop', so we know that 'self' will
         // never move again.
         let pinned_self = unsafe { ::core::pin::Pin::new_unchecked(self) };
-        // We call `pinned_drop` only once. Since `UnsafePinnedDrop::drop`
+        // We call `pinned_drop` only once. Since `PinnedDrop::drop`
         // is an unsafe function and a private API, it is never called again in safe
         // code *unless the user uses a maliciously crafted macro*.
         unsafe {
-            ::pin_project::__private::UnsafePinnedDrop::drop(pinned_self);
+            ::pin_project::__private::PinnedDrop::drop(pinned_self);
         }
     }
 }
 
+// It is safe to implement PinnedDrop::drop, but it is not safe to call it.
+// This is because destructors can be called multiple times (double dropping
+// is unsound: rust-lang/rust#62360).
+//
+// Ideally, it would be desirable to be able to prohibit manual calls in the
+// same way as Drop::drop, but the library cannot. So, by using macros and
+// replacing them with private traits, we prevent users from calling
+// PinnedDrop::drop.
+//
 // Users can implement `Drop` safely using `#[pinned_drop]`.
 // **Do not call or implement this trait directly.**
-unsafe impl<T> ::pin_project::__private::UnsafePinnedDrop for Foo<'_, T> {
+impl<T> ::pin_project::__private::PinnedDrop for Foo<'_, T> {
     // Since calling it twice on the same object would be UB,
     // this method is unsafe.
     unsafe fn drop(mut self: ::core::pin::Pin<&mut Self>) {
