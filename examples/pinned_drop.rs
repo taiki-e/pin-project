@@ -14,7 +14,7 @@ pub struct Foo<'a, T> {
 
 #[pinned_drop]
 impl<T> PinnedDrop for Foo<'_, T> {
-    fn drop(mut self: Pin<&mut Self>) {
+    fn drop(self: Pin<&mut Self>) {
         **self.project().was_dropped = true;
     }
 }

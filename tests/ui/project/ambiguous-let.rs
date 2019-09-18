@@ -14,10 +14,9 @@ struct Struct<T>(T);
 #[project]
 fn foo() {
     let mut foo: Enum<bool, bool> = Enum::A(true);
-    let mut foo = Pin::new(&mut foo);
 
     #[project]
-    let Struct(x) = match foo.project() {
+    let Struct(x) = match Pin::new(&mut foo).project() {
         //~^ ERROR Both initializer expression and pattern are replaceable, you need to split the initializer expression into separate let bindings to avoid ambiguity
         Enum::A(_) => Struct(true),
         Enum::B(_) => unreachable!(),

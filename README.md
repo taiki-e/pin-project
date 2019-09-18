@@ -48,7 +48,7 @@ struct Struct<T, U> {
 }
 
 impl<T, U> Struct<T, U> {
-    fn foo(mut self: Pin<&mut Self>) {
+    fn foo(self: Pin<&mut Self>) {
         let this = self.project();
         let _: Pin<&mut T> = this.pinned; // Pinned reference to the field
         let _: &mut U = this.unpinned; // Normal reference to the field

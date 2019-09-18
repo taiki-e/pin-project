@@ -33,26 +33,13 @@ struct __FooProjection<'_pin, T, U> {
     unpinned: &'_pin mut U,
 }
 
-impl<'_outer_pin, T, U> __FooProjectionTrait<'_outer_pin, T, U>
-    for ::core::pin::Pin<&'_outer_pin mut Foo<T, U>>
-{
-    fn project<'_pin>(&'_pin mut self) -> __FooProjection<'_pin, T, U> {
-        unsafe {
-            let Foo { pinned, unpinned } = self.as_mut().get_unchecked_mut();
-            __FooProjection { pinned: ::core::pin::Pin::new_unchecked(pinned), unpinned: unpinned }
-        }
-    }
-    fn project_into(self) -> __FooProjection<'_outer_pin, T, U> {
+impl<T, U> Foo<T, U> {
+    fn project<'_pin>(self: ::core::pin::Pin<&'_pin mut Self>) -> __FooProjection<'_pin, T, U> {
         unsafe {
             let Foo { pinned, unpinned } = self.get_unchecked_mut();
             __FooProjection { pinned: ::core::pin::Pin::new_unchecked(pinned), unpinned: unpinned }
         }
     }
-}
-
-trait __FooProjectionTrait<'_outer_pin, T, U> {
-    fn project<'_pin>(&'_pin mut self) -> __FooProjection<'_pin, T, U>;
-    fn project_into(self) -> __FooProjection<'_outer_pin, T, U>;
 }
 
 unsafe impl<T: Unpin, U> UnsafeUnpin for Foo<T, U> {}

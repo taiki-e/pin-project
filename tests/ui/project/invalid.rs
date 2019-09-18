@@ -1,6 +1,7 @@
 // compile-fail
 
 use pin_project::{pin_project, project};
+use std::pin::Pin;
 
 #[pin_project]
 struct A<T> {
@@ -10,9 +11,9 @@ struct A<T> {
 
 #[project]
 fn foo() {
-    let x = A { future: 0 };
+    let mut x = A { future: 0 };
     #[project(foo)] //~ ERROR unexpected token
-    let A { future } = x.project();
+    let A { future } = Pin::new(&mut x).project();
 }
 
 fn main() {}

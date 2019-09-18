@@ -19,10 +19,9 @@ fn project_stmt_expr() {
     }
 
     let mut foo = Foo { field1: 1, field2: 2 };
-    let mut foo = Pin::new(&mut foo);
 
     #[project]
-    let Foo { field1, field2 } = foo.project();
+    let Foo { field1, field2 } = Pin::new(&mut foo).project();
 
     let x: Pin<&mut i32> = field1;
     assert_eq!(*x, 1);
@@ -36,10 +35,9 @@ fn project_stmt_expr() {
     struct Bar<T, U>(#[pin] T, U);
 
     let mut bar = Bar(1, 2);
-    let mut bar = Pin::new(&mut bar);
 
     #[project]
-    let Bar(x, y) = bar.project();
+    let Bar(x, y) = Pin::new(&mut bar).project();
 
     let x: Pin<&mut i32> = x;
     assert_eq!(*x, 1);
@@ -62,8 +60,7 @@ fn project_stmt_expr() {
 
     let mut baz = Baz::Variant1(1, 2);
 
-    let mut baz = Pin::new(&mut baz);
-    let mut baz = baz.project();
+    let mut baz = Pin::new(&mut baz).project();
 
     #[project]
     match &mut baz {
