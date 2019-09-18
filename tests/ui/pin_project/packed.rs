@@ -18,7 +18,7 @@ struct B {
 }
 
 #[pin_project]
-#[repr(packed(2))] //~ ERROR may not be used on #[repr(packed(N))] types
+#[repr(packed(2))] //~ ERROR may not be used on #[repr(packed)] types
 struct C {
     #[pin]
     field: u32,
