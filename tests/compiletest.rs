@@ -1,6 +1,5 @@
 #![cfg(compiletest)]
 #![cfg(pin_project_show_unpin_struct)]
-#![cfg(feature = "project_attr")]
 #![warn(rust_2018_idioms, single_use_lifetimes)]
 
 use std::{env, path::PathBuf};

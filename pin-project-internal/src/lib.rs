@@ -19,7 +19,6 @@ mod utils;
 
 mod pin_project;
 mod pinned_drop;
-#[cfg(feature = "project_attr")]
 mod project;
 
 use proc_macro::TokenStream;
@@ -265,22 +264,16 @@ use syn::parse::Nothing;
 ///
 /// ### Enums
 ///
-/// `pin_project` also supports enums, but to use it ergonomically, you need
-/// to use the [`project`] attribute.
-///
-/// *This attribute is only available if pin-project is built
-/// with the `"project_attr"` feature.*
+/// `pin_project` also supports enums, but to use it, you need to use with the
+/// [`project`] attribute.
 ///
 /// The attribute at the expression position is not stable, so you need to use
 /// a dummy `#[project]` attribute for the function.
 ///
 /// ```rust
-/// # #[cfg(feature = "project_attr")]
 /// use pin_project::{project, pin_project};
-/// # #[cfg(feature = "project_attr")]
 /// use std::pin::Pin;
 ///
-/// # #[cfg(feature = "project_attr")]
 /// #[pin_project]
 /// enum Foo<A, B, C> {
 ///     Tuple(#[pin] A, B),
@@ -288,7 +281,6 @@ use syn::parse::Nothing;
 ///     Unit,
 /// }
 ///
-/// # #[cfg(feature = "project_attr")]
 /// impl<A, B, C> Foo<A, B, C> {
 ///     #[project] // Nightly does not need a dummy attribute to the function.
 ///     fn baz(self: Pin<&mut Self>) {
@@ -367,9 +359,6 @@ pub fn pinned_drop(args: TokenStream, input: TokenStream) -> TokenStream {
 
 // TODO: Move this doc into pin-project crate when https://github.com/rust-lang/rust/pull/62855 merged.
 /// An attribute to provide way to refer to the projected type.
-///
-/// *This attribute is available if pin-project is built with the
-/// `"project_attr"` feature.*
 ///
 /// The following three syntaxes are supported.
 ///
@@ -479,7 +468,6 @@ pub fn pinned_drop(args: TokenStream, input: TokenStream) -> TokenStream {
 ///     }
 /// }
 /// ```
-#[cfg(feature = "project_attr")]
 #[proc_macro_attribute]
 pub fn project(args: TokenStream, input: TokenStream) -> TokenStream {
     let _: Nothing = syn::parse_macro_input!(args);

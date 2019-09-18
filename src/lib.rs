@@ -57,7 +57,6 @@ pub use pin_project_internal::pin_project;
 #[doc(hidden)]
 pub use pin_project_internal::pinned_drop;
 
-#[cfg(feature = "project_attr")]
 #[doc(hidden)]
 pub use pin_project_internal::project;
 
