@@ -7,44 +7,42 @@ use syn::{
 };
 
 use crate::utils::{
-    self, collect_cfg, crate_path, proj_ident, proj_lifetime_name, proj_trait_ident, VecExt,
-    DEFAULT_LIFETIME_NAME, TRAIT_LIFETIME_NAME,
+    self, collect_cfg, crate_path, proj_ident, proj_lifetime_name, VecExt, DEFAULT_LIFETIME_NAME,
 };
 
 use super::PIN;
 
-pub(super) fn parse_attribute(args: TokenStream, input: Item) -> Result<TokenStream> {
-    match input {
-        Item::Struct(mut item) => {
-            let mut cx =
-                Context::new(args, &mut item.attrs, item.ident.clone(), item.generics.clone())?;
+pub(super) fn parse_attribute(args: TokenStream, mut item: Item) -> Result<TokenStream> {
+    let cx;
+    let proj_items = match &mut item {
+        Item::Struct(item) => {
+            cx = Context::new(args, &mut item.attrs, &item.ident, &item.generics)?;
 
             let packed_check = ensure_not_packed(&item)?;
-            let proj_items = cx.parse_struct(&mut item)?;
-            let mut item = item.into_token_stream();
-            item.extend(proj_items);
-            item.extend(cx.make_proj_trait());
-            item.extend(cx.make_unpin_impl());
-            item.extend(cx.make_drop_impl());
-            item.extend(packed_check);
-            Ok(item)
+            let mut proj_items = cx.parse_struct(item)?;
+            proj_items.extend(packed_check);
+            proj_items
         }
-        Item::Enum(mut item) => {
-            let mut cx =
-                Context::new(args, &mut item.attrs, item.ident.clone(), item.generics.clone())?;
+        Item::Enum(item) => {
+            cx = Context::new(args, &mut item.attrs, &item.ident, &item.generics)?;
 
             // We don't need to check for '#[repr(packed)]',
             // since it does not apply to enums.
-            let proj_items = cx.parse_enum(&mut item)?;
-            let mut item = item.into_token_stream();
-            item.extend(proj_items);
-            item.extend(cx.make_proj_trait());
-            item.extend(cx.make_unpin_impl());
-            item.extend(cx.make_drop_impl());
-            Ok(item)
+            cx.parse_enum(item)?
         }
-        item => Err(error!(item, "#[pin_project] attribute may only be used on structs or enums")),
-    }
+        _ => {
+            return Err(error!(
+                item,
+                "#[pin_project] attribute may only be used on structs or enums"
+            ));
+        }
+    };
+
+    let mut item = item.into_token_stream();
+    item.extend(proj_items);
+    item.extend(cx.make_unpin_impl());
+    item.extend(cx.make_drop_impl());
+    Ok(item)
 }
 
 #[allow(dead_code)] // https://github.com/rust-lang/rust/issues/56750
@@ -98,17 +96,11 @@ struct Context {
     /// Name of the projected type.
     proj_ident: Ident,
 
-    /// Name of the trait generated to provide a 'project' method.
-    proj_trait: Ident,
-
     /// Generics of the original type.
     generics: Generics,
 
     /// Lifetime on the generated projected type.
     lifetime: Lifetime,
-
-    /// Lifetime on the generated projection trait.
-    trait_lifetime: Lifetime,
 
     /// `UnsafeUnpin` attribute.
     unsafe_unpin: Option<Span>,
@@ -121,8 +113,8 @@ impl Context {
     fn new(
         args: TokenStream,
         attrs: &mut Vec<Attribute>,
-        orig_ident: Ident,
-        generics: Generics,
+        orig_ident: &Ident,
+        generics: &Generics,
     ) -> Result<Self> {
         let Args { pinned_drop, unsafe_unpin } = syn::parse2(args)?;
 
@@ -133,25 +125,16 @@ impl Context {
             );
         }
 
-        let proj_ident = proj_ident(&orig_ident);
-        let proj_trait = proj_trait_ident(&orig_ident);
-
         let mut lifetime_name = String::from(DEFAULT_LIFETIME_NAME);
         proj_lifetime_name(&mut lifetime_name, &generics.params);
         let lifetime = Lifetime::new(&lifetime_name, Span::call_site());
 
-        let mut trait_lifetime_name = String::from(TRAIT_LIFETIME_NAME);
-        proj_lifetime_name(&mut trait_lifetime_name, &generics.params);
-        let trait_lifetime = Lifetime::new(&trait_lifetime_name, Span::call_site());
-
         Ok(Self {
             crate_path,
-            orig_ident,
-            proj_ident,
-            proj_trait,
-            generics,
+            orig_ident: orig_ident.clone(),
+            proj_ident: proj_ident(orig_ident),
+            generics: generics.clone(),
             lifetime,
-            trait_lifetime,
             unsafe_unpin,
             pinned_drop,
         })
@@ -161,13 +144,6 @@ impl Context {
     fn proj_generics(&self) -> Generics {
         let mut generics = self.generics.clone();
         utils::proj_generics(&mut generics, self.lifetime.clone());
-        generics
-    }
-
-    /// Creates the generics for the 'project_into' method.
-    fn project_into_generics(&self) -> Generics {
-        let mut generics = self.generics.clone();
-        utils::proj_generics(&mut generics, self.trait_lifetime.clone());
         generics
     }
 
@@ -280,53 +256,22 @@ impl Context {
         }
     }
 
-    /// Creates a definition of the projection trait.
-    fn make_proj_trait(&self) -> TokenStream {
-        let Self { proj_ident, proj_trait, lifetime, .. } = self;
+    /// Creates an implementation of the projection method.
+    fn make_proj_impl(&self, proj_body: &TokenStream) -> TokenStream {
+        let Context { proj_ident, orig_ident, lifetime, .. } = &self;
+
         let proj_generics = self.proj_generics();
         let proj_ty_generics = proj_generics.split_for_impl().1;
 
-        // Add trait lifetime to trait generics.
-        let mut trait_generics = self.generics.clone();
-        utils::proj_generics(&mut trait_generics, self.trait_lifetime.clone());
-
-        let (trait_generics, trait_ty_generics, orig_where_clause) =
-            trait_generics.split_for_impl();
+        let (impl_generics, ty_generics, where_clause) = self.generics.split_for_impl();
 
         quote! {
-            trait #proj_trait #trait_generics {
-                fn project<#lifetime>(&#lifetime mut self) -> #proj_ident #proj_ty_generics #orig_where_clause;
-                fn project_into(self) -> #proj_ident #trait_ty_generics #orig_where_clause;
-            }
-        }
-    }
-
-    /// Creates an implementation of the projection trait.
-    fn make_proj_impl(
-        &self,
-        project_body: &TokenStream,
-        project_into_body: &TokenStream,
-    ) -> TokenStream {
-        let Context { proj_ident, proj_trait, orig_ident, lifetime, trait_lifetime, .. } = &self;
-        let proj_generics = self.proj_generics();
-        let project_into_generics = self.project_into_generics();
-
-        let proj_ty_generics = proj_generics.split_for_impl().1;
-        let (impl_generics, project_into_ty_generics, _) = project_into_generics.split_for_impl();
-        let (_, ty_generics, where_clause) = self.generics.split_for_impl();
-
-        quote! {
-            impl #impl_generics #proj_trait #project_into_ty_generics
-                for ::core::pin::Pin<&#trait_lifetime mut #orig_ident #ty_generics> #where_clause
-            {
-                fn project<#lifetime>(&#lifetime mut self) -> #proj_ident #proj_ty_generics #where_clause {
+            impl #impl_generics #orig_ident #ty_generics #where_clause {
+                fn project<#lifetime>(
+                    self: ::core::pin::Pin<&#lifetime mut Self>,
+                ) -> #proj_ident #proj_ty_generics {
                     unsafe {
-                        #project_body
-                    }
-                }
-                fn project_into(self) -> #proj_ident #project_into_ty_generics #where_clause {
-                    unsafe {
-                        #project_into_body
+                        #proj_body
                     }
                 }
             }
@@ -434,7 +379,7 @@ fn ensure_not_packed(item: &ItemStruct) -> Result<TokenStream> {
 
 // Visit structs/enums
 impl Context {
-    fn parse_struct(&mut self, item: &mut ItemStruct) -> Result<TokenStream> {
+    fn parse_struct(&self, item: &mut ItemStruct) -> Result<TokenStream> {
         super::validate_struct(&item.ident, &item.fields)?;
 
         let (proj_pat, proj_body, proj_fields) = match &mut item.fields {
@@ -453,21 +398,17 @@ impl Context {
             struct #proj_ident #proj_generics #where_clause #proj_fields
         };
 
-        let project_body = quote! {
-            let #orig_ident #proj_pat = self.as_mut().get_unchecked_mut();
-            #proj_ident #proj_body
-        };
-        let project_into_body = quote! {
+        let proj_body = quote! {
             let #orig_ident #proj_pat = self.get_unchecked_mut();
             #proj_ident #proj_body
         };
 
-        proj_items.extend(self.make_proj_impl(&project_body, &project_into_body));
+        proj_items.extend(self.make_proj_impl(&proj_body));
 
         Ok(proj_items)
     }
 
-    fn parse_enum(&mut self, item: &mut ItemEnum) -> Result<TokenStream> {
+    fn parse_enum(&self, item: &mut ItemEnum) -> Result<TokenStream> {
         super::validate_enum(item.brace_token, &item.variants)?;
 
         let (proj_variants, proj_arms) = self.visit_variants(item)?;
@@ -484,26 +425,18 @@ impl Context {
             }
         };
 
-        let project_body = quote! {
-            match self.as_mut().get_unchecked_mut() {
-                #(#proj_arms,)*
-            }
-        };
-        let project_into_body = quote! {
+        let proj_body = quote! {
             match self.get_unchecked_mut() {
-                #(#proj_arms,)*
+                #(#proj_arms)*
             }
         };
 
-        proj_items.extend(self.make_proj_impl(&project_body, &project_into_body));
+        proj_items.extend(self.make_proj_impl(&proj_body));
 
         Ok(proj_items)
     }
 
-    fn visit_variants(
-        &mut self,
-        item: &mut ItemEnum,
-    ) -> Result<(Vec<TokenStream>, Vec<TokenStream>)> {
+    fn visit_variants(&self, item: &mut ItemEnum) -> Result<(Vec<TokenStream>, Vec<TokenStream>)> {
         let mut proj_variants = Vec::with_capacity(item.variants.len());
         let mut proj_arms = Vec::with_capacity(item.variants.len());
         for Variant { attrs, fields, ident, .. } in &mut item.variants {
@@ -513,7 +446,7 @@ impl Context {
                 Fields::Unit => (TokenStream::new(), TokenStream::new(), TokenStream::new()),
             };
             let cfg = collect_cfg(attrs);
-            let Self { orig_ident, proj_ident, .. } = &self;
+            let Self { orig_ident, proj_ident, .. } = self;
             proj_variants.push(quote! {
                 #(#cfg)*
                 #ident #proj_fields
@@ -530,7 +463,7 @@ impl Context {
     }
 
     fn visit_named(
-        &mut self,
+        &self,
         FieldsNamed { named: fields, .. }: &mut FieldsNamed,
     ) -> Result<(TokenStream, TokenStream, TokenStream)> {
         let mut proj_pat = Vec::with_capacity(fields.len());
@@ -571,7 +504,7 @@ impl Context {
     }
 
     fn visit_unnamed(
-        &mut self,
+        &self,
         FieldsUnnamed { unnamed: fields, .. }: &mut FieldsUnnamed,
         is_struct: bool,
     ) -> Result<(TokenStream, TokenStream, TokenStream)> {

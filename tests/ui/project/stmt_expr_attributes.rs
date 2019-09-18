@@ -19,8 +19,7 @@ fn project_stmt_expr_nightly() {
 
     let mut baz = Baz::Variant1(1, 2);
 
-    let mut baz = Pin::new(&mut baz);
-    let mut baz = baz.project();
+    let mut baz = Pin::new(&mut baz).project();
 
     #[project]
     match &mut baz {

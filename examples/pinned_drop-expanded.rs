@@ -38,19 +38,8 @@ struct __FooProjection<'_pin, 'a, T> {
     field: ::core::pin::Pin<&'_pin mut T>,
 }
 
-impl<'_outer_pin, 'a, T> __FooProjectionTrait<'_outer_pin, 'a, T>
-    for ::core::pin::Pin<&'_outer_pin mut Foo<'a, T>>
-{
-    fn project<'_pin>(&'_pin mut self) -> __FooProjection<'_pin, 'a, T> {
-        unsafe {
-            let Foo { was_dropped, field } = self.as_mut().get_unchecked_mut();
-            __FooProjection {
-                was_dropped: was_dropped,
-                field: ::core::pin::Pin::new_unchecked(field),
-            }
-        }
-    }
-    fn project_into(self) -> __FooProjection<'_outer_pin, 'a, T> {
+impl<'a, T> Foo<'a, T> {
+    fn project<'_pin>(self: ::core::pin::Pin<&'_pin mut Self>) -> __FooProjection<'_pin, 'a, T> {
         unsafe {
             let Foo { was_dropped, field } = self.get_unchecked_mut();
             __FooProjection {
@@ -59,11 +48,6 @@ impl<'_outer_pin, 'a, T> __FooProjectionTrait<'_outer_pin, 'a, T>
             }
         }
     }
-}
-
-trait __FooProjectionTrait<'_outer_pin, 'a, T> {
-    fn project<'_pin>(&'_pin mut self) -> __FooProjection<'_pin, 'a, T>;
-    fn project_into(self) -> __FooProjection<'_outer_pin, 'a, T>;
 }
 
 #[allow(single_use_lifetimes)]
@@ -95,7 +79,7 @@ impl<'a, T> ::core::ops::Drop for Foo<'a, T> {
 impl<T> ::pin_project::__private::PinnedDrop for Foo<'_, T> {
     // Since calling it twice on the same object would be UB,
     // this method is unsafe.
-    unsafe fn drop(mut self: ::core::pin::Pin<&mut Self>) {
+    unsafe fn drop(self: Pin<&mut Self>) {
         **self.project().was_dropped = true;
     }
 }

@@ -20,7 +20,7 @@ fn test_pin_project() {
     let mut foo = Foo { field1: 1, field2: 2 };
 
     let mut foo_orig = Pin::new(&mut foo);
-    let foo = foo_orig.project();
+    let foo = foo_orig.as_mut().project();
 
     let x: Pin<&mut i32> = foo.field1;
     assert_eq!(*x, 1);
@@ -33,8 +33,7 @@ fn test_pin_project() {
 
     let mut foo = Foo { field1: 1, field2: 2 };
 
-    let mut foo = Pin::new(&mut foo);
-    let foo = foo.project();
+    let foo = Pin::new(&mut foo).project();
 
     let __FooProjection { field1, field2 } = foo;
     let _: Pin<&mut i32> = field1;
@@ -47,8 +46,7 @@ fn test_pin_project() {
 
     let mut bar = Bar(1, 2);
 
-    let mut bar = Pin::new(&mut bar);
-    let bar = bar.project();
+    let bar = Pin::new(&mut bar).project();
 
     let x: Pin<&mut i32> = bar.0;
     assert_eq!(*x, 1);
@@ -73,7 +71,7 @@ fn test_pin_project() {
     let mut baz = Baz::Variant1(1, 2);
 
     let mut baz_orig = Pin::new(&mut baz);
-    let baz = baz_orig.project();
+    let baz = baz_orig.as_mut().project();
 
     match baz {
         __BazProjection::Variant1(x, y) => {
@@ -94,8 +92,7 @@ fn test_pin_project() {
 
     let mut baz = Baz::Variant2 { field1: 3, field2: 4 };
 
-    let mut baz = Pin::new(&mut baz);
-    let mut baz = baz.project();
+    let mut baz = Pin::new(&mut baz).project();
 
     match &mut baz {
         __BazProjection::Variant1(x, y) => {
@@ -132,7 +129,7 @@ fn enum_project_set() {
 
     let mut bar = Bar::Variant1(25);
     let mut bar_orig = Pin::new(&mut bar);
-    let bar_proj = bar_orig.project();
+    let bar_proj = bar_orig.as_mut().project();
 
     match bar_proj {
         __BarProjection::Variant1(val) => {
@@ -219,10 +216,9 @@ fn trait_bounds_on_type_generics() {
 #[test]
 fn overlapping_lifetime_names() {
     #[pin_project]
-    pub struct Foo<'_outer_pin, '_pin, T> {
+    pub struct Foo<'_pin, T> {
         #[pin]
-        field1: &'_outer_pin mut T,
-        field2: &'_pin mut T,
+        field: &'_pin mut T,
     }
 }
 
@@ -295,30 +291,30 @@ fn lifetime_project() {
 
     impl<T, U> Struct<T, U> {
         fn get_pin_mut<'a>(self: Pin<&'a mut Self>) -> Pin<&'a mut T> {
-            self.project_into().pinned
+            self.project().pinned
         }
         fn get_pin_mut_elided(self: Pin<&mut Self>) -> Pin<&mut T> {
-            self.project_into().pinned
+            self.project().pinned
         }
     }
 
     impl<'b, T, U> Struct2<'b, T, U> {
         fn get_pin_mut<'a>(self: Pin<&'a mut Self>) -> Pin<&'a mut &'b mut T> {
-            self.project_into().pinned
+            self.project().pinned
         }
         fn get_pin_mut_elided(self: Pin<&mut Self>) -> Pin<&mut &'b mut T> {
-            self.project_into().pinned
+            self.project().pinned
         }
     }
 
     impl<T, U> Enum<T, U> {
         fn get_pin_mut<'a>(self: Pin<&'a mut Self>) -> Pin<&'a mut T> {
-            match self.project_into() {
+            match self.project() {
                 __EnumProjection::Variant { pinned, .. } => pinned,
             }
         }
         fn get_pin_mut_elided(self: Pin<&mut Self>) -> Pin<&mut T> {
-            match self.project_into() {
+            match self.project() {
                 __EnumProjection::Variant { pinned, .. } => pinned,
             }
         }

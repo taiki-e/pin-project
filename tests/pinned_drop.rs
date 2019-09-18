@@ -16,7 +16,7 @@ fn safe_project() {
 
     #[pinned_drop]
     impl PinnedDrop for Foo<'_> {
-        fn drop(mut self: Pin<&mut Self>) {
+        fn drop(self: Pin<&mut Self>) {
             **self.project().was_dropped = true;
         }
     }

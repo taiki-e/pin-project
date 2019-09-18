@@ -34,45 +34,20 @@ use syn::parse::Nothing;
 /// the field.
 /// - For the other fields, makes the unpinned reference to the field.
 ///
-/// The following methods are implemented on the original `#[pin_project]` type:
+/// The following method is implemented on the original `#[pin_project]` type:
 ///
 /// ```
 /// # #![feature(arbitrary_self_types)]
 /// # use std::pin::Pin;
 /// # type ProjectedType = ();
-/// # trait ProjectionTrait {
-/// fn project(self: &mut Pin<&mut Self>) -> ProjectedType;
-/// fn project_into(self: Pin<&mut Self>) -> ProjectedType;
+/// # trait Projection {
+/// fn project(self: Pin<&mut Self>) -> ProjectedType;
 /// # }
 /// ```
 ///
-/// The `project` method takes a mutable reference to a pinned
-/// type, and returns a projection struct. This is the method
-/// you'll usually want to use - since it takes a mutable reference,
-/// it can be called multiple times, and allows you to use
-/// the original Pin type later on (e.g. to call [`Pin::set`]).
-///
-/// The `project_into` type takes a pinned type by value (consuming it),
-/// and returns a projection struct. The difference between this and the `project`
-/// method lies in the lifetime. While the type returned by `project` only lives
-/// as long as the 'outer' mutable reference, the type returned by this method
-/// lives for as long as the original Pin. This can be useful when returning a pin
-/// projection from a method:
-///
-/// ```
-/// # use pin_project::pin_project;
-/// # use std::pin::Pin;
-/// # #[pin_project]
-/// # struct Struct<T> {
-/// #     #[pin]
-/// #     pinned: T,
-/// # }
-/// # impl<T> Struct<T> {
-/// fn get_pin_mut(self: Pin<&mut Self>) -> Pin<&mut T> {
-///     self.project_into().pinned
-/// }
-/// # }
-/// ```
+/// If you want to call the `project` method multiple times or later use the
+/// original Pin type, it needs to use [`.as_mut()`][`Pin::as_mut`] to avoid
+/// consuming the `Pin`.
 ///
 /// ## Safety
 ///
@@ -147,7 +122,7 @@ use syn::parse::Nothing;
 /// }
 ///
 /// impl<T, U> Foo<T, U> {
-///     fn baz(mut self: Pin<&mut Self>) {
+///     fn baz(self: Pin<&mut Self>) {
 ///         let this = self.project();
 ///         let _: Pin<&mut T> = this.future; // Pinned reference to the field
 ///         let _: &mut U = this.field; // Normal reference to the field
@@ -170,7 +145,7 @@ use syn::parse::Nothing;
 /// }
 ///
 /// impl<T, U> Foo<T, U> {
-///     fn baz(mut self: Pin<&mut Self>) {
+///     fn baz(self: Pin<&mut Self>) {
 ///         let this = self.project();
 ///         let _: Pin<&mut T> = this.future; // Pinned reference to the field
 ///         let _: &mut U = this.field; // Normal reference to the field
@@ -259,7 +234,7 @@ use syn::parse::Nothing;
 /// }
 ///
 /// impl<T, U> Foo<T, U> {
-///     fn baz(mut self: Pin<&mut Self>) {
+///     fn baz(self: Pin<&mut Self>) {
 ///         let this = self.project();
 ///         let _: Pin<&mut T> = this.future;
 ///         let _: &mut U = this.field;
@@ -277,7 +252,7 @@ use syn::parse::Nothing;
 /// struct Foo<T, U>(#[pin] T, U);
 ///
 /// impl<T, U> Foo<T, U> {
-///     fn baz(mut self: Pin<&mut Self>) {
+///     fn baz(self: Pin<&mut Self>) {
 ///         let this = self.project();
 ///         let _: Pin<&mut T> = this.0;
 ///         let _: &mut U = this.1;
@@ -316,7 +291,7 @@ use syn::parse::Nothing;
 /// # #[cfg(feature = "project_attr")]
 /// impl<A, B, C> Foo<A, B, C> {
 ///     #[project] // Nightly does not need a dummy attribute to the function.
-///     fn baz(mut self: Pin<&mut Self>) {
+///     fn baz(self: Pin<&mut Self>) {
 ///         #[project]
 ///         match self.project() {
 ///             Foo::Tuple(x, y) => {
@@ -422,7 +397,7 @@ pub fn pinned_drop(args: TokenStream, input: TokenStream) -> TokenStream {
 ///
 /// // impl for the original type
 /// impl<T, U> Foo<T, U> {
-///     fn bar(mut self: Pin<&mut Self>) {
+///     fn bar(self: Pin<&mut Self>) {
 ///         self.project().baz()
 ///     }
 /// }
@@ -459,7 +434,7 @@ pub fn pinned_drop(args: TokenStream, input: TokenStream) -> TokenStream {
 ///
 /// impl<T, U> Foo<T, U> {
 ///     #[project] // Nightly does not need a dummy attribute to the function.
-///     fn baz(mut self: Pin<&mut Self>) {
+///     fn baz(self: Pin<&mut Self>) {
 ///         #[project]
 ///         let Foo { future, field } = self.project();
 ///
@@ -489,7 +464,7 @@ pub fn pinned_drop(args: TokenStream, input: TokenStream) -> TokenStream {
 ///
 /// impl<A, B, C> Foo<A, B, C> {
 ///     #[project] // Nightly does not need a dummy attribute to the function.
-///     fn baz(mut self: Pin<&mut Self>) {
+///     fn baz(self: Pin<&mut Self>) {
 ///         #[project]
 ///         match self.project() {
 ///             Foo::Tuple(x, y) => {
