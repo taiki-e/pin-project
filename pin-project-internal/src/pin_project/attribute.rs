@@ -285,16 +285,13 @@ fn ensure_not_packed(item: &ItemStruct) -> Result<TokenStream> {
             if l.path.is_ident("repr") {
                 for repr in l.nested.iter() {
                     match repr {
-                        NestedMeta::Meta(Meta::Path(p)) if p.is_ident("packed") => {
+                        NestedMeta::Meta(Meta::Path(path))
+                        | NestedMeta::Meta(Meta::List(MetaList { path, .. }))
+                            if path.is_ident("packed") =>
+                        {
                             return Err(error!(
-                                p,
+                                repr,
                                 "#[pin_project] attribute may not be used on #[repr(packed)] types"
-                            ));
-                        }
-                        NestedMeta::Meta(Meta::List(l)) if l.path.is_ident("packed") => {
-                            return Err(error!(
-                                l,
-                                "#[pin_project] attribute may not be used on #[repr(packed(N))] types"
                             ));
                         }
                         _ => {}
