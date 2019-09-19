@@ -1,0 +1,11 @@
+error[E0365]: `__AProjection` is private, and cannot be re-exported
+  --> $DIR/use-public.rs:14:13
+   |
+14 |     pub use crate::A;
+   |             ^^^^^^^^ re-export of private `__AProjection`
+   |
+   = note: consider declaring type or module `__AProjection` with `pub`
+
+error: aborting due to previous error
+
+For more information about this error, try `rustc --explain E0365`.
