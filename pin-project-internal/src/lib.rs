@@ -364,7 +364,7 @@ pub fn pinned_drop(args: TokenStream, input: TokenStream) -> TokenStream {
 // TODO: Move this doc into pin-project crate when https://github.com/rust-lang/rust/pull/62855 merged.
 /// An attribute to provide way to refer to the projected type.
 ///
-/// The following three syntaxes are supported.
+/// The following syntaxes are supported.
 ///
 /// ## `impl` blocks
 ///
@@ -471,6 +471,38 @@ pub fn pinned_drop(args: TokenStream, input: TokenStream) -> TokenStream {
 ///         }
 ///     }
 /// }
+/// ```
+///
+/// ## `use` statements
+///
+/// ### Examples
+///
+/// ```rust
+/// # mod dox {
+/// use pin_project::pin_project;
+///
+/// #[pin_project]
+/// struct Foo<A> {
+///     #[pin]
+///     field: A,
+/// }
+///
+/// mod bar {
+///     use super::Foo;
+///     use pin_project::project;
+///     use std::pin::Pin;
+///
+///     #[project]
+///     use super::Foo;
+///
+///     #[project]
+///     fn baz<A>(foo: Pin<&mut Foo<A>>) {
+///         #[project]
+///         let Foo { field } = foo.project();
+///         let _: Pin<&mut A> = field;
+///     }
+/// }
+/// # }
 /// ```
 #[proc_macro_attribute]
 pub fn project(args: TokenStream, input: TokenStream) -> TokenStream {

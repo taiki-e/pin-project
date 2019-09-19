@@ -23,6 +23,7 @@ fn parse(mut stmt: Stmt) -> Result<TokenStream> {
         Stmt::Local(local) => Context::default().replace_local(local)?,
         Stmt::Item(Item::Fn(ItemFn { block, .. })) => Dummy.visit_block_mut(block),
         Stmt::Item(Item::Impl(item)) => replace_item_impl(item),
+        Stmt::Item(Item::Use(item)) => replace_item_use(item)?,
         _ => {}
     }
 
@@ -156,6 +157,12 @@ fn replace_item_impl(item: &mut ItemImpl) {
     }
 }
 
+fn replace_item_use(item: &mut ItemUse) -> Result<()> {
+    let mut visitor = UseTreeVisitor { res: Ok(()) };
+    visitor.visit_item_use_mut(item);
+    visitor.res
+}
+
 fn replace_ident(ident: &mut Ident) {
     *ident = proj_ident(ident);
 }
@@ -195,5 +202,34 @@ impl VisitMut for Dummy {
 
     fn visit_item_mut(&mut self, _: &mut Item) {
         // Do not recurse into nested items.
+    }
+}
+
+struct UseTreeVisitor {
+    res: Result<()>,
+}
+
+impl VisitMut for UseTreeVisitor {
+    fn visit_use_tree_mut(&mut self, node: &mut UseTree) {
+        if self.res.is_err() {
+            return;
+        }
+
+        match node {
+            // Desugar `use tree::<name>` into `tree::__<name>Projection`.
+            UseTree::Name(name) => replace_ident(&mut name.ident),
+            UseTree::Glob(glob) => {
+                self.res =
+                    Err(error!(glob, "#[project] attribute may not be used on glob imports"));
+            }
+            UseTree::Rename(rename) => {
+                // TODO: Consider allowing the projected type to be renamed by `#[project] use Foo as Bar`.
+                self.res =
+                    Err(error!(rename, "#[project] attribute may not be used on renamed imports"));
+            }
+            node @ UseTree::Path(_) | node @ UseTree::Group(_) => {
+                visit_mut::visit_use_tree_mut(self, node)
+            }
+        }
     }
 }
