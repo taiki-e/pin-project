@@ -7,7 +7,8 @@ use syn::{
 };
 
 use crate::utils::{
-    self, collect_cfg, crate_path, proj_ident, proj_lifetime_name, VecExt, DEFAULT_LIFETIME_NAME,
+    self, collect_cfg, crate_path, determine_visibility, proj_ident, proj_lifetime_name, VecExt,
+    DEFAULT_LIFETIME_NAME,
 };
 
 use super::PIN;
@@ -16,7 +17,7 @@ pub(super) fn parse_attribute(args: TokenStream, mut item: Item) -> Result<Token
     let cx;
     let proj_items = match &mut item {
         Item::Struct(item) => {
-            cx = Context::new(args, &mut item.attrs, &item.ident, &item.generics)?;
+            cx = Context::new(args, &mut item.attrs, &item.ident, &item.vis, &item.generics)?;
 
             let packed_check = ensure_not_packed(&item)?;
             let mut proj_items = cx.parse_struct(item)?;
@@ -24,7 +25,7 @@ pub(super) fn parse_attribute(args: TokenStream, mut item: Item) -> Result<Token
             proj_items
         }
         Item::Enum(item) => {
-            cx = Context::new(args, &mut item.attrs, &item.ident, &item.generics)?;
+            cx = Context::new(args, &mut item.attrs, &item.ident, &item.vis, &item.generics)?;
 
             // We don't need to check for '#[repr(packed)]',
             // since it does not apply to enums.
@@ -96,6 +97,9 @@ struct Context {
     /// Name of the projected type.
     proj_ident: Ident,
 
+    /// Visibility of the original type.
+    vis: Visibility,
+
     /// Generics of the original type.
     generics: Generics,
 
@@ -114,6 +118,7 @@ impl Context {
         args: TokenStream,
         attrs: &mut Vec<Attribute>,
         orig_ident: &Ident,
+        vis: &Visibility,
         generics: &Generics,
     ) -> Result<Self> {
         let Args { pinned_drop, unsafe_unpin } = syn::parse2(args)?;
@@ -133,6 +138,7 @@ impl Context {
             crate_path,
             orig_ident: orig_ident.clone(),
             proj_ident: proj_ident(orig_ident),
+            vis: determine_visibility(vis),
             generics: generics.clone(),
             lifetime,
             unsafe_unpin,
@@ -258,7 +264,7 @@ impl Context {
 
     /// Creates an implementation of the projection method.
     fn make_proj_impl(&self, proj_body: &TokenStream) -> TokenStream {
-        let Context { proj_ident, orig_ident, lifetime, .. } = &self;
+        let Context { proj_ident, orig_ident, vis, lifetime, .. } = self;
 
         let proj_generics = self.proj_generics();
         let proj_ty_generics = proj_generics.split_for_impl().1;
@@ -267,7 +273,7 @@ impl Context {
 
         quote! {
             impl #impl_generics #orig_ident #ty_generics #where_clause {
-                fn project<#lifetime>(
+                #vis fn project<#lifetime>(
                     self: ::core::pin::Pin<&#lifetime mut Self>,
                 ) -> #proj_ident #proj_ty_generics {
                     unsafe {
@@ -385,14 +391,14 @@ impl Context {
             Fields::Unit => unreachable!(),
         };
 
-        let Context { orig_ident, proj_ident, .. } = &self;
+        let Context { orig_ident, proj_ident, vis, .. } = self;
         let proj_generics = self.proj_generics();
         let where_clause = item.generics.split_for_impl().2;
 
         let mut proj_items = quote! {
             #[allow(clippy::mut_mut)] // This lint warns `&mut &mut <ty>`.
             #[allow(dead_code)] // This lint warns unused fields/variants.
-            struct #proj_ident #proj_generics #where_clause #proj_fields
+            #vis struct #proj_ident #proj_generics #where_clause #proj_fields
         };
 
         let proj_body = quote! {
@@ -410,14 +416,14 @@ impl Context {
 
         let (proj_variants, proj_arms) = self.visit_variants(item)?;
 
-        let proj_ident = &self.proj_ident;
+        let Context { proj_ident, vis, .. } = &self;
         let proj_generics = self.proj_generics();
         let where_clause = item.generics.split_for_impl().2;
 
         let mut proj_items = quote! {
             #[allow(clippy::mut_mut)] // This lint warns `&mut &mut <ty>`.
             #[allow(dead_code)] // This lint warns unused fields/variants.
-            enum #proj_ident #proj_generics #where_clause {
+            #vis enum #proj_ident #proj_generics #where_clause {
                 #(#proj_variants,)*
             }
         };
@@ -466,13 +472,13 @@ impl Context {
         let mut proj_pat = Vec::with_capacity(fields.len());
         let mut proj_body = Vec::with_capacity(fields.len());
         let mut proj_fields = Vec::with_capacity(fields.len());
-        for Field { attrs, ident, ty, .. } in fields {
+        for Field { attrs, vis, ident, ty, .. } in fields {
             let cfg = collect_cfg(attrs);
             if self.find_pin_attr(attrs)? {
                 let lifetime = &self.lifetime;
                 proj_fields.push(quote! {
                     #(#cfg)*
-                    #ident: ::core::pin::Pin<&#lifetime mut #ty>
+                    #vis #ident: ::core::pin::Pin<&#lifetime mut #ty>
                 });
                 proj_body.push(quote! {
                     #(#cfg)*
@@ -482,7 +488,7 @@ impl Context {
                 let lifetime = &self.lifetime;
                 proj_fields.push(quote! {
                     #(#cfg)*
-                    #ident: &#lifetime mut #ty
+                    #vis #ident: &#lifetime mut #ty
                 });
                 proj_body.push(quote! {
                     #(#cfg)*
@@ -508,7 +514,7 @@ impl Context {
         let mut proj_pat = Vec::with_capacity(fields.len());
         let mut proj_body = Vec::with_capacity(fields.len());
         let mut proj_fields = Vec::with_capacity(fields.len());
-        for (i, Field { attrs, ty, .. }) in fields.iter_mut().enumerate() {
+        for (i, Field { attrs, vis, ty, .. }) in fields.iter_mut().enumerate() {
             let id = format_ident!("_x{}", i);
             let cfg = collect_cfg(attrs);
             if !cfg.is_empty() {
@@ -521,7 +527,7 @@ impl Context {
             if self.find_pin_attr(attrs)? {
                 let lifetime = &self.lifetime;
                 proj_fields.push(quote! {
-                    ::core::pin::Pin<&#lifetime mut #ty>
+                    #vis ::core::pin::Pin<&#lifetime mut #ty>
                 });
                 proj_body.push(quote! {
                     ::core::pin::Pin::new_unchecked(#id)
@@ -529,7 +535,7 @@ impl Context {
             } else {
                 let lifetime = &self.lifetime;
                 proj_fields.push(quote! {
-                    &#lifetime mut #ty
+                    #vis &#lifetime mut #ty
                 });
                 proj_body.push(quote! {
                     #id

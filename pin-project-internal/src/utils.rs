@@ -1,4 +1,4 @@
-use quote::format_ident;
+use quote::{format_ident, quote_spanned};
 use syn::{
     punctuated::Punctuated,
     token::{self, Comma},
@@ -12,7 +12,7 @@ pub(crate) fn proj_ident(ident: &Ident) -> Ident {
     format_ident!("__{}Projection", ident)
 }
 
-/// Determine the lifetime names. Ensure it doesn't overlap with any existing lifetime names.
+/// Determines the lifetime names. Ensure it doesn't overlap with any existing lifetime names.
 pub(crate) fn proj_lifetime_name(
     lifetime_name: &mut String,
     generics: &Punctuated<GenericParam, Comma>,
@@ -50,6 +50,18 @@ pub(crate) fn proj_generics(generics: &mut Generics, lifetime: Lifetime) {
             bounds: Punctuated::new(),
         }),
     );
+}
+
+/// Determines the visibility of the projected type and projection method.
+pub(crate) fn determine_visibility(vis: &Visibility) -> Visibility {
+    if let Visibility::Public(token) = vis {
+        syn::parse2(quote_spanned! { token.pub_token.span =>
+            pub(crate)
+        })
+        .unwrap()
+    } else {
+        vis.clone()
+    }
 }
 
 pub(crate) fn collect_cfg(attrs: &[Attribute]) -> Vec<Attribute> {

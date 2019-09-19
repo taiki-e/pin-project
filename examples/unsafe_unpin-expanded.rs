@@ -28,13 +28,15 @@ pub struct Foo<T, U> {
 
 #[allow(clippy::mut_mut)]
 #[allow(dead_code)]
-struct __FooProjection<'_pin, T, U> {
+pub(crate) struct __FooProjection<'_pin, T, U> {
     pinned: ::core::pin::Pin<&'_pin mut T>,
     unpinned: &'_pin mut U,
 }
 
 impl<T, U> Foo<T, U> {
-    fn project<'_pin>(self: ::core::pin::Pin<&'_pin mut Self>) -> __FooProjection<'_pin, T, U> {
+    pub(crate) fn project<'_pin>(
+        self: ::core::pin::Pin<&'_pin mut Self>,
+    ) -> __FooProjection<'_pin, T, U> {
         unsafe {
             let Foo { pinned, unpinned } = self.get_unchecked_mut();
             __FooProjection { pinned: ::core::pin::Pin::new_unchecked(pinned), unpinned: unpinned }
