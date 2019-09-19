@@ -45,6 +45,10 @@ use syn::parse::Nothing;
 /// # }
 /// ```
 ///
+/// The visibility of the projected type and projection method is based on the
+/// original type. However, if the visibility of the original type is `pub`,
+/// the visibility of the projected type and the projection method is `pub(crate)`.
+///
 /// If you want to call the `project` method multiple times or later use the
 /// original Pin type, it needs to use [`.as_mut()`][`Pin::as_mut`] to avoid
 /// consuming the `Pin`.
