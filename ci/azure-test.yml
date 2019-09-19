@@ -20,24 +20,12 @@ jobs:
       parameters:
         toolchain: ${{ parameters.toolchain }}
 
-    - ${{ if and(not(eq(parameters.toolchain, 'nightly')), not(eq(parameters.cmd, 'test'))) }}:
-      - script: |
-          cargo ${{ parameters.cmd }} --all
-          cargo ${{ parameters.cmd }} --all --all-features
-        displayName: cargo ${{ parameters.cmd }}
-
-    - ${{ if and(not(eq(parameters.toolchain, 'nightly')), eq(parameters.cmd, 'test')) }}:
-      - script: |
-          cargo ${{ parameters.cmd }} --all --tests
-          cargo ${{ parameters.cmd }} --all --all-features --tests
-        displayName: cargo ${{ parameters.cmd }}
+    - script: |
+        cargo ${{ parameters.cmd }} --all
+        cargo ${{ parameters.cmd }} --all --all-features
+      displayName: cargo ${{ parameters.cmd }}
 
     - ${{ if eq(parameters.toolchain, 'nightly') }}:
-      - script: |
-          cargo ${{ parameters.cmd }} --all
-          cargo ${{ parameters.cmd }} --all --all-features
-        displayName: cargo ${{ parameters.cmd }}
-
       - script: |
           RUSTFLAGS='-Dwarnings -Zallow-features=proc_macro_hygiene,stmt_expr_attributes' cargo ${{ parameters.cmd }} --all --all-features
         displayName: cargo ${{ parameters.cmd }} -Zallow-features

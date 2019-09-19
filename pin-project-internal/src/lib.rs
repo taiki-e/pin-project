@@ -36,7 +36,6 @@ use syn::parse::Nothing;
 /// The following method is implemented on the original `#[pin_project]` type:
 ///
 /// ```
-/// # #![feature(arbitrary_self_types)]
 /// # use std::pin::Pin;
 /// # type ProjectedType = ();
 /// # trait Projection {
