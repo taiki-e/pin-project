@@ -24,6 +24,8 @@ mod project;
 use proc_macro::TokenStream;
 use syn::parse::Nothing;
 
+use utils::{Immutable, Mutable};
+
 // TODO: Move this doc into pin-project crate when https://github.com/rust-lang/rust/pull/62855 merged.
 /// An attribute that creates a projection struct covering all the fields.
 ///
@@ -33,13 +35,15 @@ use syn::parse::Nothing;
 /// the field.
 /// - For the other fields, makes the unpinned reference to the field.
 ///
-/// The following method is implemented on the original `#[pin_project]` type:
+/// The following methods are implemented on the original `#[pin_project]` type:
 ///
 /// ```
 /// # use std::pin::Pin;
-/// # type ProjectedType = ();
-/// # trait Projection {
-/// fn project(self: Pin<&mut Self>) -> ProjectedType;
+/// # type Projection = ();
+/// # type ProjectionRef = ();
+/// # trait Dox {
+/// fn project(self: Pin<&mut Self>) -> Projection;
+/// fn project_ref(self: Pin<&Self>) -> ProjectionRef;
 /// # }
 /// ```
 ///
@@ -304,13 +308,14 @@ use syn::parse::Nothing;
 ///
 /// Enums without variants (zero-variant enums) are not supported.
 ///
-/// See also [`project`] attribute.
+/// See also [`project`] and [`project_ref`] attributes.
 ///
 /// [`Pin::as_mut`]: core::pin::Pin::as_mut
 /// [`Pin::set`]: core::pin::Pin::set
 /// [`drop`]: Drop::drop
 /// [`UnsafeUnpin`]: https://docs.rs/pin-project/0.4.0-alpha.11/pin_project/trait.UnsafeUnpin.html
 /// [`project`]: ./attr.project.html
+/// [`project_ref`]: ./attr.project_ref.html
 /// [`pinned_drop`]: ./attr.pinned_drop.html
 #[proc_macro_attribute]
 pub fn pin_project(args: TokenStream, input: TokenStream) -> TokenStream {
@@ -361,7 +366,8 @@ pub fn pinned_drop(args: TokenStream, input: TokenStream) -> TokenStream {
 }
 
 // TODO: Move this doc into pin-project crate when https://github.com/rust-lang/rust/pull/62855 merged.
-/// An attribute to provide way to refer to the projected type.
+/// An attribute to provide way to refer to the projected type returned by
+/// `project` method.
 ///
 /// The following syntaxes are supported.
 ///
@@ -507,7 +513,23 @@ pub fn pinned_drop(args: TokenStream, input: TokenStream) -> TokenStream {
 pub fn project(args: TokenStream, input: TokenStream) -> TokenStream {
     let _: Nothing = syn::parse_macro_input!(args);
     let input = syn::parse_macro_input!(input);
-    project::attribute(input).into()
+    project::attribute(input, Mutable).into()
+}
+
+/// An attribute to provide way to refer to the projected type returned by
+/// `project_ref` method.
+///
+/// This is the same as [`project`] attribute except it refers to the projected
+/// type returned by `project_ref` method.
+///
+/// See [`project`] attribute for more details.
+///
+/// [`project`]: ./attr.project.html
+#[proc_macro_attribute]
+pub fn project_ref(args: TokenStream, input: TokenStream) -> TokenStream {
+    let _: Nothing = syn::parse_macro_input!(args);
+    let input = syn::parse_macro_input!(input);
+    project::attribute(input, Immutable).into()
 }
 
 #[doc(hidden)]

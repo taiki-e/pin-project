@@ -60,6 +60,9 @@ pub use pin_project_internal::pinned_drop;
 #[doc(hidden)]
 pub use pin_project_internal::project;
 
+#[doc(hidden)]
+pub use pin_project_internal::project_ref;
+
 /// A trait used for custom implementations of [`Unpin`].
 /// This trait is used in conjunction with the `UnsafeUnpin`
 /// argument to [`pin_project`]

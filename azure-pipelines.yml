@@ -31,6 +31,7 @@ jobs:
   parameters:
     toolchain: stable
     name: stable
+    cross: true
 - template: ci/azure-test.yml
   parameters:
     toolchain: beta
@@ -39,7 +40,6 @@ jobs:
   parameters:
     toolchain: nightly
     name: nightly
-    cross: true
 
 - job: compiletest
   pool:
