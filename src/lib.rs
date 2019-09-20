@@ -34,9 +34,9 @@
 //!
 //! There are examples and generated code of each feature in [examples](https://github.com/taiki-e/pin-project/blob/master/examples/README.md) directory.
 //!
-//! [`pin_project`]: https://docs.rs/pin-project-internal/0.4.2/pin_project_internal/attr.pin_project.html
-//! [`pinned_drop`]: https://docs.rs/pin-project-internal/0.4.2/pin_project_internal/attr.pinned_drop.html
-//! [`project`]: https://docs.rs/pin-project-internal/0.4.2/pin_project_internal/attr.project.html
+//! [`pin_project`]: attr.pin_project.html
+//! [`pinned_drop`]: attr.pinned_drop.html
+//! [`project`]: attr.project.html
 
 #![no_std]
 #![recursion_limit = "256"]
@@ -50,13 +50,13 @@
 #![warn(clippy::all, clippy::pedantic)]
 #![allow(clippy::use_self)]
 
-#[doc(hidden)]
+#[doc(inline)]
 pub use pin_project_internal::pin_project;
 
-#[doc(hidden)]
+#[doc(inline)]
 pub use pin_project_internal::pinned_drop;
 
-#[doc(hidden)]
+#[doc(inline)]
 pub use pin_project_internal::project;
 
 #[doc(hidden)]
@@ -115,7 +115,7 @@ pub use pin_project_internal::project_ref;
 /// ```
 ///
 /// [`PhantomPinned`]: core::marker::PhantomPinned
-/// [`pin_project`]: https://docs.rs/pin-project-internal/0.4.2/pin_project_internal/attr.pin_project.html
+/// [`pin_project`]: attr.pin_project.html
 #[allow(unsafe_code)]
 pub unsafe trait UnsafeUnpin {}
 
