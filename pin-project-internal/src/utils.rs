@@ -7,9 +7,21 @@ use syn::{
 
 pub(crate) const DEFAULT_LIFETIME_NAME: &str = "'_pin";
 
+pub(crate) use Mutability::{Immutable, Mutable};
+
+#[derive(Clone, Copy, Eq, PartialEq)]
+pub(crate) enum Mutability {
+    Mutable,
+    Immutable,
+}
+
 /// Creates the ident of projected type from the ident of the original type.
-pub(crate) fn proj_ident(ident: &Ident) -> Ident {
-    format_ident!("__{}Projection", ident)
+pub(crate) fn proj_ident(ident: &Ident, mutability: Mutability) -> Ident {
+    if mutability == Mutable {
+        format_ident!("__{}Projection", ident)
+    } else {
+        format_ident!("__{}ProjectionRef", ident)
+    }
 }
 
 /// Determines the lifetime names. Ensure it doesn't overlap with any existing lifetime names.

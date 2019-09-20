@@ -7,8 +7,8 @@ use syn::{
 };
 
 use crate::utils::{
-    self, collect_cfg, crate_path, determine_visibility, proj_ident, proj_lifetime_name, VecExt,
-    DEFAULT_LIFETIME_NAME,
+    self, collect_cfg, crate_path, determine_visibility, proj_ident, proj_lifetime_name, Immutable,
+    Mutable, VecExt, DEFAULT_LIFETIME_NAME,
 };
 
 use super::PIN;
@@ -94,8 +94,11 @@ struct Context {
     /// Name of the original type.
     orig_ident: Ident,
 
-    /// Name of the projected type.
+    /// Name of the projected type returned by `project` method.
     proj_ident: Ident,
+
+    /// Name of the projected type returned by `project_ref` method.
+    proj_ref_ident: Ident,
 
     /// Visibility of the original type.
     vis: Visibility,
@@ -137,7 +140,8 @@ impl Context {
         Ok(Self {
             crate_path,
             orig_ident: orig_ident.clone(),
-            proj_ident: proj_ident(orig_ident),
+            proj_ident: proj_ident(orig_ident, Mutable),
+            proj_ref_ident: proj_ident(orig_ident, Immutable),
             vis: determine_visibility(vis),
             generics: generics.clone(),
             lifetime,
@@ -263,8 +267,8 @@ impl Context {
     }
 
     /// Creates an implementation of the projection method.
-    fn make_proj_impl(&self, proj_body: &TokenStream) -> TokenStream {
-        let Context { proj_ident, orig_ident, vis, lifetime, .. } = self;
+    fn make_proj_impl(&self, proj_body: &TokenStream, proj_ref_body: &TokenStream) -> TokenStream {
+        let Context { orig_ident, proj_ident, proj_ref_ident, vis, lifetime, .. } = self;
 
         let proj_generics = self.proj_generics();
         let proj_ty_generics = proj_generics.split_for_impl().1;
@@ -278,6 +282,13 @@ impl Context {
                 ) -> #proj_ident #proj_ty_generics {
                     unsafe {
                         #proj_body
+                    }
+                }
+                #vis fn project_ref<#lifetime>(
+                    self: ::core::pin::Pin<&#lifetime Self>,
+                ) -> #proj_ref_ident #proj_ty_generics {
+                    unsafe {
+                        #proj_ref_body
                     }
                 }
             }
@@ -385,13 +396,13 @@ impl Context {
     fn parse_struct(&self, item: &mut ItemStruct) -> Result<TokenStream> {
         super::validate_struct(&item.ident, &item.fields)?;
 
-        let (proj_pat, proj_body, proj_fields) = match &mut item.fields {
+        let (proj_pat, proj_init, proj_fields, proj_ref_fields) = match &mut item.fields {
             Fields::Named(fields) => self.visit_named(fields)?,
             Fields::Unnamed(fields) => self.visit_unnamed(fields, true)?,
             Fields::Unit => unreachable!(),
         };
 
-        let Context { orig_ident, proj_ident, vis, .. } = self;
+        let Context { orig_ident, proj_ident, proj_ref_ident, vis, .. } = self;
         let proj_generics = self.proj_generics();
         let where_clause = item.generics.split_for_impl().2;
 
@@ -399,14 +410,20 @@ impl Context {
             #[allow(clippy::mut_mut)] // This lint warns `&mut &mut <ty>`.
             #[allow(dead_code)] // This lint warns unused fields/variants.
             #vis struct #proj_ident #proj_generics #where_clause #proj_fields
+            #[allow(dead_code)] // This lint warns unused fields/variants.
+            #vis struct #proj_ref_ident #proj_generics #where_clause #proj_ref_fields
         };
 
         let proj_body = quote! {
             let #orig_ident #proj_pat = self.get_unchecked_mut();
-            #proj_ident #proj_body
+            #proj_ident #proj_init
+        };
+        let proj_ref_body = quote! {
+            let #orig_ident #proj_pat = self.get_ref();
+            #proj_ref_ident #proj_init
         };
 
-        proj_items.extend(self.make_proj_impl(&proj_body));
+        proj_items.extend(self.make_proj_impl(&proj_body, &proj_ref_body));
 
         Ok(proj_items)
     }
@@ -414,9 +431,10 @@ impl Context {
     fn parse_enum(&self, item: &mut ItemEnum) -> Result<TokenStream> {
         super::validate_enum(item.brace_token, &item.variants)?;
 
-        let (proj_variants, proj_arms) = self.visit_variants(item)?;
+        let (proj_variants, proj_ref_variants, proj_arms, proj_ref_arms) =
+            self.visit_variants(item)?;
 
-        let Context { proj_ident, vis, .. } = &self;
+        let Context { proj_ident, proj_ref_ident, vis, .. } = &self;
         let proj_generics = self.proj_generics();
         let where_clause = item.generics.split_for_impl().2;
 
@@ -426,6 +444,10 @@ impl Context {
             #vis enum #proj_ident #proj_generics #where_clause {
                 #(#proj_variants,)*
             }
+            #[allow(dead_code)] // This lint warns unused fields/variants.
+            #vis enum #proj_ref_ident #proj_generics #where_clause {
+                #(#proj_ref_variants,)*
+            }
         };
 
         let proj_body = quote! {
@@ -433,26 +455,44 @@ impl Context {
                 #(#proj_arms)*
             }
         };
+        let proj_ref_body = quote! {
+            match self.get_ref() {
+                #(#proj_ref_arms)*
+            }
+        };
 
-        proj_items.extend(self.make_proj_impl(&proj_body));
+        proj_items.extend(self.make_proj_impl(&proj_body, &proj_ref_body));
 
         Ok(proj_items)
     }
 
-    fn visit_variants(&self, item: &mut ItemEnum) -> Result<(Vec<TokenStream>, Vec<TokenStream>)> {
+    #[allow(clippy::type_complexity)]
+    fn visit_variants(
+        &self,
+        item: &mut ItemEnum,
+    ) -> Result<(Vec<TokenStream>, Vec<TokenStream>, Vec<TokenStream>, Vec<TokenStream>)> {
         let mut proj_variants = Vec::with_capacity(item.variants.len());
+        let mut proj_ref_variants = Vec::with_capacity(item.variants.len());
         let mut proj_arms = Vec::with_capacity(item.variants.len());
+        let mut proj_ref_arms = Vec::with_capacity(item.variants.len());
         for Variant { attrs, fields, ident, .. } in &mut item.variants {
-            let (proj_pat, proj_body, proj_fields) = match fields {
+            let (proj_pat, proj_body, proj_fields, proj_ref_fields) = match fields {
                 Fields::Named(fields) => self.visit_named(fields)?,
                 Fields::Unnamed(fields) => self.visit_unnamed(fields, false)?,
-                Fields::Unit => (TokenStream::new(), TokenStream::new(), TokenStream::new()),
+                Fields::Unit => {
+                    (TokenStream::new(), TokenStream::new(), TokenStream::new(), TokenStream::new())
+                }
             };
+
             let cfg = collect_cfg(attrs);
-            let Self { orig_ident, proj_ident, .. } = self;
+            let Self { orig_ident, proj_ident, proj_ref_ident, .. } = self;
             proj_variants.push(quote! {
                 #(#cfg)*
                 #ident #proj_fields
+            });
+            proj_ref_variants.push(quote! {
+                #(#cfg)*
+                #ident #proj_ref_fields
             });
             proj_arms.push(quote! {
                 #(#cfg)*
@@ -460,18 +500,26 @@ impl Context {
                     #proj_ident::#ident #proj_body
                 }
             });
+            proj_ref_arms.push(quote! {
+                #(#cfg)*
+                #orig_ident::#ident #proj_pat => {
+                    #proj_ref_ident::#ident #proj_body
+                }
+            });
         }
 
-        Ok((proj_variants, proj_arms))
+        Ok((proj_variants, proj_ref_variants, proj_arms, proj_ref_arms))
     }
 
+    #[allow(clippy::cognitive_complexity)]
     fn visit_named(
         &self,
         FieldsNamed { named: fields, .. }: &mut FieldsNamed,
-    ) -> Result<(TokenStream, TokenStream, TokenStream)> {
+    ) -> Result<(TokenStream, TokenStream, TokenStream, TokenStream)> {
         let mut proj_pat = Vec::with_capacity(fields.len());
         let mut proj_body = Vec::with_capacity(fields.len());
         let mut proj_fields = Vec::with_capacity(fields.len());
+        let mut proj_ref_fields = Vec::with_capacity(fields.len());
         for Field { attrs, vis, ident, ty, .. } in fields {
             let cfg = collect_cfg(attrs);
             if self.find_pin_attr(attrs)? {
@@ -479,6 +527,10 @@ impl Context {
                 proj_fields.push(quote! {
                     #(#cfg)*
                     #vis #ident: ::core::pin::Pin<&#lifetime mut #ty>
+                });
+                proj_ref_fields.push(quote! {
+                    #(#cfg)*
+                    #vis #ident: ::core::pin::Pin<&#lifetime #ty>
                 });
                 proj_body.push(quote! {
                     #(#cfg)*
@@ -489,6 +541,10 @@ impl Context {
                 proj_fields.push(quote! {
                     #(#cfg)*
                     #vis #ident: &#lifetime mut #ty
+                });
+                proj_ref_fields.push(quote! {
+                    #(#cfg)*
+                    #vis #ident: &#lifetime #ty
                 });
                 proj_body.push(quote! {
                     #(#cfg)*
@@ -503,17 +559,20 @@ impl Context {
         let proj_pat = quote!({ #(#proj_pat),* });
         let proj_body = quote!({ #(#proj_body),* });
         let proj_fields = quote!({ #(#proj_fields),* });
-        Ok((proj_pat, proj_body, proj_fields))
+        let proj_ref_fields = quote!({ #(#proj_ref_fields),* });
+
+        Ok((proj_pat, proj_body, proj_fields, proj_ref_fields))
     }
 
     fn visit_unnamed(
         &self,
         FieldsUnnamed { unnamed: fields, .. }: &mut FieldsUnnamed,
         is_struct: bool,
-    ) -> Result<(TokenStream, TokenStream, TokenStream)> {
+    ) -> Result<(TokenStream, TokenStream, TokenStream, TokenStream)> {
         let mut proj_pat = Vec::with_capacity(fields.len());
         let mut proj_body = Vec::with_capacity(fields.len());
         let mut proj_fields = Vec::with_capacity(fields.len());
+        let mut proj_ref_fields = Vec::with_capacity(fields.len());
         for (i, Field { attrs, vis, ty, .. }) in fields.iter_mut().enumerate() {
             let id = format_ident!("_x{}", i);
             let cfg = collect_cfg(attrs);
@@ -529,6 +588,9 @@ impl Context {
                 proj_fields.push(quote! {
                     #vis ::core::pin::Pin<&#lifetime mut #ty>
                 });
+                proj_ref_fields.push(quote! {
+                    #vis ::core::pin::Pin<&#lifetime #ty>
+                });
                 proj_body.push(quote! {
                     ::core::pin::Pin::new_unchecked(#id)
                 });
@@ -536,6 +598,9 @@ impl Context {
                 let lifetime = &self.lifetime;
                 proj_fields.push(quote! {
                     #vis &#lifetime mut #ty
+                });
+                proj_ref_fields.push(quote! {
+                    #vis &#lifetime #ty
                 });
                 proj_body.push(quote! {
                     #id
@@ -548,8 +613,12 @@ impl Context {
 
         let proj_pat = quote!((#(#proj_pat),*));
         let proj_body = quote!((#(#proj_body),*));
-        let proj_fields =
-            if is_struct { quote!((#(#proj_fields),*);) } else { quote!((#(#proj_fields),*)) };
-        Ok((proj_pat, proj_body, proj_fields))
+        let (proj_fields, proj_ref_fields) = if is_struct {
+            (quote!((#(#proj_fields),*);), quote!((#(#proj_ref_fields),*);))
+        } else {
+            (quote!((#(#proj_fields),*)), quote!((#(#proj_ref_fields),*)))
+        };
+
+        Ok((proj_pat, proj_body, proj_fields, proj_ref_fields))
     }
 }

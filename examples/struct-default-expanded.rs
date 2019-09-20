@@ -30,12 +30,28 @@ struct __StructProjection<'_pin, T, U> {
     pinned: ::core::pin::Pin<&'_pin mut T>,
     unpinned: &'_pin mut U,
 }
+#[allow(dead_code)] // This lint warns unused fields/variants.
+struct __StructProjectionRef<'_pin, T, U> {
+    pinned: ::core::pin::Pin<&'_pin T>,
+    unpinned: &'_pin U,
+}
 
 impl<T, U> Struct<T, U> {
     fn project<'_pin>(self: ::core::pin::Pin<&'_pin mut Self>) -> __StructProjection<'_pin, T, U> {
         unsafe {
             let Struct { pinned, unpinned } = self.get_unchecked_mut();
             __StructProjection {
+                pinned: ::core::pin::Pin::new_unchecked(pinned),
+                unpinned: unpinned,
+            }
+        }
+    }
+    fn project_ref<'_pin>(
+        self: ::core::pin::Pin<&'_pin Self>,
+    ) -> __StructProjectionRef<'_pin, T, U> {
+        unsafe {
+            let Struct { pinned, unpinned } = self.get_ref();
+            __StructProjectionRef {
                 pinned: ::core::pin::Pin::new_unchecked(pinned),
                 unpinned: unpinned,
             }

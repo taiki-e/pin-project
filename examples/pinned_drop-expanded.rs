@@ -38,6 +38,12 @@ pub(crate) struct __FooProjection<'_pin, 'a, T> {
     field: ::core::pin::Pin<&'_pin mut T>,
 }
 
+#[allow(dead_code)]
+pub(crate) struct __FooProjectionRef<'_pin, 'a, T> {
+    was_dropped: &'_pin &'a mut bool,
+    field: ::core::pin::Pin<&'_pin T>,
+}
+
 impl<'a, T> Foo<'a, T> {
     pub(crate) fn project<'_pin>(
         self: ::core::pin::Pin<&'_pin mut Self>,
@@ -45,6 +51,17 @@ impl<'a, T> Foo<'a, T> {
         unsafe {
             let Foo { was_dropped, field } = self.get_unchecked_mut();
             __FooProjection {
+                was_dropped: was_dropped,
+                field: ::core::pin::Pin::new_unchecked(field),
+            }
+        }
+    }
+    pub(crate) fn project_ref<'_pin>(
+        self: ::core::pin::Pin<&'_pin Self>,
+    ) -> __FooProjectionRef<'_pin, 'a, T> {
+        unsafe {
+            let Foo { was_dropped, field } = self.get_ref();
+            __FooProjectionRef {
                 was_dropped: was_dropped,
                 field: ::core::pin::Pin::new_unchecked(field),
             }

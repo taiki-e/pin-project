@@ -6,37 +6,41 @@ use syn::{
     *,
 };
 
-use crate::utils::{proj_generics, proj_ident, proj_lifetime_name, VecExt, DEFAULT_LIFETIME_NAME};
+use crate::utils::{
+    proj_generics, proj_ident, proj_lifetime_name, Mutability, Mutable, VecExt,
+    DEFAULT_LIFETIME_NAME,
+};
 
-/// The attribute name.
-const NAME: &str = "project";
-
-pub(crate) fn attribute(input: Stmt) -> TokenStream {
-    parse(input).unwrap_or_else(|e| e.to_compile_error())
+pub(crate) fn attribute(input: Stmt, mutability: Mutability) -> TokenStream {
+    parse(input, mutability).unwrap_or_else(|e| e.to_compile_error())
 }
 
-fn parse(mut stmt: Stmt) -> Result<TokenStream> {
+fn parse(mut stmt: Stmt, mutability: Mutability) -> Result<TokenStream> {
     match &mut stmt {
         Stmt::Expr(Expr::Match(expr)) | Stmt::Semi(Expr::Match(expr), _) => {
-            Context::default().replace_expr_match(expr)
+            Context::new(mutability).replace_expr_match(expr)
         }
-        Stmt::Local(local) => Context::default().replace_local(local)?,
-        Stmt::Item(Item::Fn(ItemFn { block, .. })) => Dummy.visit_block_mut(block),
-        Stmt::Item(Item::Impl(item)) => replace_item_impl(item),
-        Stmt::Item(Item::Use(item)) => replace_item_use(item)?,
+        Stmt::Local(local) => Context::new(mutability).replace_local(local)?,
+        Stmt::Item(Item::Fn(ItemFn { block, .. })) => Dummy { mutability }.visit_block_mut(block),
+        Stmt::Item(Item::Impl(item)) => replace_item_impl(item, mutability),
+        Stmt::Item(Item::Use(item)) => replace_item_use(item, mutability)?,
         _ => {}
     }
 
     Ok(stmt.into_token_stream())
 }
 
-#[derive(Default)]
 struct Context {
     register: Option<(Ident, usize)>,
     replaced: bool,
+    mutability: Mutability,
 }
 
 impl Context {
+    fn new(mutability: Mutability) -> Self {
+        Self { register: None, replaced: false, mutability }
+    }
+
     fn update(&mut self, ident: &Ident, len: usize) {
         if self.register.is_none() {
             self.register = Some((ident.clone(), len));
@@ -108,7 +112,7 @@ impl Context {
         if self.register.is_none() || self.compare_paths(&path.segments[0].ident, len) {
             self.update(&path.segments[0].ident, len);
             self.replaced = true;
-            replace_ident(&mut path.segments[0].ident);
+            replace_ident(&mut path.segments[0].ident, self.mutability);
         }
     }
 }
@@ -128,13 +132,13 @@ fn is_replaceable(pat: &Pat, allow_pat_path: bool) -> bool {
     }
 }
 
-fn replace_item_impl(item: &mut ItemImpl) {
+fn replace_item_impl(item: &mut ItemImpl, mutability: Mutability) {
     let PathSegment { ident, arguments } = match &mut *item.self_ty {
         Type::Path(TypePath { qself: None, path }) => path.segments.last_mut().unwrap(),
         _ => return,
     };
 
-    replace_ident(ident);
+    replace_ident(ident, mutability);
 
     let mut lifetime_name = String::from(DEFAULT_LIFETIME_NAME);
     proj_lifetime_name(&mut lifetime_name, &item.generics.params);
@@ -157,20 +161,29 @@ fn replace_item_impl(item: &mut ItemImpl) {
     }
 }
 
-fn replace_item_use(item: &mut ItemUse) -> Result<()> {
-    let mut visitor = UseTreeVisitor { res: Ok(()) };
+fn replace_item_use(item: &mut ItemUse, mutability: Mutability) -> Result<()> {
+    let mut visitor = UseTreeVisitor { res: Ok(()), mutability };
     visitor.visit_item_use_mut(item);
     visitor.res
 }
 
-fn replace_ident(ident: &mut Ident) {
-    *ident = proj_ident(ident);
+fn replace_ident(ident: &mut Ident, mutability: Mutability) {
+    *ident = proj_ident(ident, mutability);
 }
 
 // =================================================================================================
 // visitor
 
-struct Dummy;
+struct Dummy {
+    mutability: Mutability,
+}
+
+impl Dummy {
+    /// Returns the attribute name.
+    fn name(&self) -> &str {
+        if self.mutability == Mutable { "project" } else { "project_ref" }
+    }
+}
 
 impl VisitMut for Dummy {
     fn visit_stmt_mut(&mut self, node: &mut Stmt) {
@@ -178,19 +191,19 @@ impl VisitMut for Dummy {
 
         let attr = match node {
             Stmt::Expr(Expr::Match(expr)) | Stmt::Semi(Expr::Match(expr), _) => {
-                expr.attrs.find_remove(NAME)
+                expr.attrs.find_remove(self.name())
             }
-            Stmt::Local(local) => local.attrs.find_remove(NAME),
+            Stmt::Local(local) => local.attrs.find_remove(self.name()),
             _ => return,
         };
 
         if let Some(attr) = attr {
             let res = syn::parse2::<Nothing>(attr.tokens).and_then(|_| match node {
                 Stmt::Expr(Expr::Match(expr)) | Stmt::Semi(Expr::Match(expr), _) => {
-                    Context::default().replace_expr_match(expr);
+                    Context::new(self.mutability).replace_expr_match(expr);
                     Ok(())
                 }
-                Stmt::Local(local) => Context::default().replace_local(local),
+                Stmt::Local(local) => Context::new(self.mutability).replace_local(local),
                 _ => unreachable!(),
             });
 
@@ -207,6 +220,7 @@ impl VisitMut for Dummy {
 
 struct UseTreeVisitor {
     res: Result<()>,
+    mutability: Mutability,
 }
 
 impl VisitMut for UseTreeVisitor {
@@ -217,7 +231,7 @@ impl VisitMut for UseTreeVisitor {
 
         match node {
             // Desugar `use tree::<name>` into `tree::__<name>Projection`.
-            UseTree::Name(name) => replace_ident(&mut name.ident),
+            UseTree::Name(name) => replace_ident(&mut name.ident, self.mutability),
             UseTree::Glob(glob) => {
                 self.res =
                     Err(error!(glob, "#[project] attribute may not be used on glob imports"));
