@@ -22,7 +22,6 @@ jobs:
 
     - script: |
         cargo ${{ parameters.cmd }} --all
-        cargo ${{ parameters.cmd }} --all --all-features
       displayName: cargo ${{ parameters.cmd }}
 
     - ${{ if eq(parameters.toolchain, 'nightly') }}:

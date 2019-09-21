@@ -16,20 +16,10 @@ all-features = true
 [lib]
 proc-macro = true
 
-[features]
-# Enable to allow using the crate with a renamed 'pin-project' dependency
-renamed = ["proc-macro-crate", "serde", "lazy_static"]
-
 [dependencies]
 proc-macro2 = "1.0"
 quote = "1.0"
 syn = { version = "1.0", features = ["full", "visit-mut"] }
-
-proc-macro-crate = { version = "0.1.4", optional = true }
-# Required until a new toml-rs release is made with https://github.com/alexcrichton/toml-rs/pull/311,
-# and proc-macro-crate updates to that new version of toml-rs.
-serde = { version = "1.0.97", optional = true }
-lazy_static = { version = "1.3", optional = true }
 
 [dev-dependencies]
 pin-project = { version = "0.4.0-alpha.11", path = ".." }

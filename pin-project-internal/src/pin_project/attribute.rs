@@ -7,8 +7,8 @@ use syn::{
 };
 
 use crate::utils::{
-    self, collect_cfg, crate_path, determine_visibility, proj_ident, proj_lifetime_name, Immutable,
-    Mutable, VecExt, DEFAULT_LIFETIME_NAME,
+    self, collect_cfg, determine_visibility, proj_ident, proj_lifetime_name, Immutable, Mutable,
+    VecExt, DEFAULT_LIFETIME_NAME,
 };
 
 use super::PIN;
@@ -89,8 +89,6 @@ impl Parse for Args {
 }
 
 struct Context {
-    crate_path: Ident,
-
     /// Name of the original type.
     orig_ident: Ident,
 
@@ -126,10 +124,9 @@ impl Context {
     ) -> Result<Self> {
         let Args { pinned_drop, unsafe_unpin } = syn::parse2(args)?;
 
-        let crate_path = crate_path();
         if unsafe_unpin.is_none() {
             attrs.push(
-                syn::parse_quote!(#[derive(#crate_path::__private::__PinProjectAutoImplUnpin)]),
+                syn::parse_quote!(#[derive(::pin_project::__private::__PinProjectAutoImplUnpin)]),
             );
         }
 
@@ -138,7 +135,6 @@ impl Context {
         let lifetime = Lifetime::new(&lifetime_name, Span::call_site());
 
         Ok(Self {
-            crate_path,
             orig_ident: orig_ident.clone(),
             proj_ident: proj_ident(orig_ident, Mutable),
             proj_ref_ident: proj_ident(orig_ident, Immutable),
@@ -187,12 +183,11 @@ impl Context {
         };
 
         let mut generics = self.generics.clone();
-        let crate_path = &self.crate_path;
         let orig_ident = &self.orig_ident;
 
         generics.make_where_clause().predicates.push(
             syn::parse2(quote_spanned! { unsafe_unpin =>
-                ::#crate_path::__private::Wrapper<Self>: ::#crate_path::UnsafeUnpin
+                ::pin_project::__private::Wrapper<Self>: ::pin_project::UnsafeUnpin
             })
             .unwrap(),
         );
@@ -210,10 +205,8 @@ impl Context {
         let (impl_generics, ty_generics, where_clause) = self.generics.split_for_impl();
 
         if let Some(pinned_drop) = self.pinned_drop {
-            let crate_path = &self.crate_path;
-
             let call = quote_spanned! { pinned_drop =>
-                ::#crate_path::__private::PinnedDrop::drop(pinned_self)
+                ::pin_project::__private::PinnedDrop::drop(pinned_self)
             };
 
             quote! {

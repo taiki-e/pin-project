@@ -2,11 +2,8 @@ use proc_macro2::TokenStream;
 use quote::{quote, quote_spanned, ToTokens};
 use syn::{parse::Nothing, spanned::Spanned, *};
 
-use crate::utils::crate_path;
-
 pub(crate) fn attribute(mut input: ItemImpl) -> TokenStream {
     if let Err(e) = parse(&mut input) {
-        let crate_path = crate_path();
         let self_ty = &input.self_ty;
         let (impl_generics, _, where_clause) = input.generics.split_for_impl();
 
@@ -20,7 +17,7 @@ pub(crate) fn attribute(mut input: ItemImpl) -> TokenStream {
         // We already know that we will get a compile error, so this won't
         // accidentally compile successfully.
         tokens.extend(quote! {
-            impl #impl_generics ::#crate_path::__private::PinnedDrop for #self_ty #where_clause {
+            impl #impl_generics ::pin_project::__private::PinnedDrop for #self_ty #where_clause {
                 unsafe fn drop(self: ::core::pin::Pin<&mut Self>) {}
             }
         });
@@ -96,10 +93,8 @@ fn parse_method(method: &ImplItemMethod) -> Result<()> {
 fn parse(item: &mut ItemImpl) -> Result<()> {
     if let Some((_, path, _)) = &mut item.trait_ {
         if path.is_ident("PinnedDrop") {
-            let crate_path = crate_path();
-
             *path = syn::parse2(quote_spanned! { path.span() =>
-                ::#crate_path::__private::PinnedDrop
+                ::pin_project::__private::PinnedDrop
             })
             .unwrap();
         } else {
