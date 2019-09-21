@@ -17,10 +17,6 @@ all-features = true
 [workspace]
 members = ["pin-project-internal"]
 
-[features]
-# Enable to allow using this crate as a renamed dependency
-renamed = ["pin-project-internal/renamed"]
-
 [dependencies]
 pin-project-internal = { version = "=0.4.0-alpha.11", path = "pin-project-internal", default-features = false }
 

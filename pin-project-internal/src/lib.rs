@@ -538,11 +538,3 @@ pub fn derive_unpin(input: TokenStream) -> TokenStream {
     let input = syn::parse_macro_input!(input);
     pin_project::derive(input).into()
 }
-
-#[cfg(feature = "renamed")]
-lazy_static::lazy_static! {
-    pub(crate) static ref PIN_PROJECT_CRATE: String = {
-        proc_macro_crate::crate_name("pin-project")
-            .expect("pin-project-internal was used without pin-project!")
-    };
-}
