@@ -27,7 +27,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-pin-project = "0.4.0-alpha.11"
+pin-project = "0.4.0-beta.1"
 ```
 
 The current pin-project requires Rust 1.33 or later.

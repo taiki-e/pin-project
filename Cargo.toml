@@ -1,6 +1,6 @@
 [package]
 name = "pin-project"
-version = "0.4.0-alpha.11"
+version = "0.4.0-beta.1"
 authors = ["Taiki Endo <te316e89@gmail.com>"]
 edition = "2018"
 license = "Apache-2.0/MIT"
@@ -20,7 +20,7 @@ all-features = true
 members = ["pin-project-internal"]
 
 [dependencies]
-pin-project-internal = { version = "=0.4.0-alpha.11", path = "pin-project-internal", default-features = false }
+pin-project-internal = { version = "=0.4.0-beta.1", path = "pin-project-internal", default-features = false }
 
 [dev-dependencies]
 compiletest = { version = "0.3.21", package = "compiletest_rs", features = ["stable", "tmp"] }
