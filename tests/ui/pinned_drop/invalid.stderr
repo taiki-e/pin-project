@@ -73,7 +73,7 @@ error: duplicate definitions with name `drop`
 error[E0277]: the trait bound `A: pin_project::__private::PinnedDrop` is not satisfied
  --> $DIR/invalid.rs:6:15
   |
-6 | #[pin_project(PinnedDrop)]
+6 | #[pin_project(PinnedDrop)] //~ ERROR E0277
   |               ^^^^^^^^^^ the trait `pin_project::__private::PinnedDrop` is not implemented for `A`
   |
   = note: required by `pin_project::__private::PinnedDrop::drop`

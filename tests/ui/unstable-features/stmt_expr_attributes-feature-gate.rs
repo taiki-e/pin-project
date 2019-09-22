@@ -1,9 +1,9 @@
-// run-pass
+// compile-fail
 
-#![feature(proc_macro_hygiene, stmt_expr_attributes)]
+// NB: If you change this test, change 'stmt_expr_attributes.rs' at the same time.
 
-use core::pin::Pin;
 use pin_project::{pin_project, project};
+use std::pin::Pin;
 
 fn project_stmt_expr_nightly() {
     #[pin_project]
@@ -21,7 +21,7 @@ fn project_stmt_expr_nightly() {
 
     let mut baz = Pin::new(&mut baz).project();
 
-    #[project]
+    #[project] //~ ERROR E0658
     match &mut baz {
         Baz::Variant1(x, y) => {
             let x: &mut Pin<&mut i32> = x;
@@ -37,7 +37,7 @@ fn project_stmt_expr_nightly() {
         Baz::None => {}
     }
 
-    let () = #[project]
+    let () = #[project] //~ ERROR E0658
     match &mut baz {
         Baz::Variant1(x, y) => {
             let x: &mut Pin<&mut i32> = x;
