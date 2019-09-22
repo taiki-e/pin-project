@@ -1,5 +1,5 @@
 error[E0119]: conflicting implementations of trait `std::marker::Unpin` for type `Foo<_, _>`:
-  --> $DIR/unpin_conflict.rs:8:1
+  --> $DIR/conflict-unpin.rs:8:1
    |
 8  | #[pin_project] //~ ERROR E0119
    | ^^^^^^^^^^^^^^ conflicting implementation for `Foo<_, _>`
@@ -8,7 +8,7 @@ error[E0119]: conflicting implementations of trait `std::marker::Unpin` for type
    | --------------------------------------------- first implementation here
 
 error[E0119]: conflicting implementations of trait `std::marker::Unpin` for type `Bar<_, _>`:
-  --> $DIR/unpin_conflict.rs:20:1
+  --> $DIR/conflict-unpin.rs:20:1
    |
 20 | #[pin_project] //~ ERROR E0119
    | ^^^^^^^^^^^^^^ conflicting implementation for `Bar<_, _>`
@@ -17,7 +17,7 @@ error[E0119]: conflicting implementations of trait `std::marker::Unpin` for type
    | ------------------------------ first implementation here
 
 error[E0119]: conflicting implementations of trait `std::marker::Unpin` for type `Baz<_, _>`:
-  --> $DIR/unpin_conflict.rs:30:1
+  --> $DIR/conflict-unpin.rs:30:1
    |
 30 | #[pin_project] //~ ERROR E0119
    | ^^^^^^^^^^^^^^ conflicting implementation for `Baz<_, _>`

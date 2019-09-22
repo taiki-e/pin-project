@@ -4,8 +4,8 @@
 
 // Refs: https://doc.rust-lang.org/reference/attributes.html
 
-use core::marker::PhantomPinned;
 use pin_project::pin_project;
+use std::marker::PhantomPinned;
 
 #[cfg(target_os = "linux")]
 pub struct Linux;

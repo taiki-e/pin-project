@@ -11,7 +11,7 @@ pub mod b {
     use pin_project::project;
 
     #[project]
-    pub use crate::A;
+    pub use crate::A; //~ ERROR E0365
 }
 
 fn main() {}

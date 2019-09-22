@@ -1,7 +1,7 @@
 // compile-fail
 
 use pin_project::pin_project;
-use std::{marker::PhantomPinned, pin::Pin};
+use std::marker::PhantomPinned;
 
 #[pin_project]
 struct Foo<T> {

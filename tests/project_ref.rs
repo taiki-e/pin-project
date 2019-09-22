@@ -2,8 +2,8 @@
 #![warn(rust_2018_idioms, single_use_lifetimes)]
 #![allow(dead_code)]
 
-use core::pin::Pin;
 use pin_project::{pin_project, project_ref};
+use std::pin::Pin;
 
 #[project_ref] // Nightly does not need a dummy attribute to the function.
 #[test]

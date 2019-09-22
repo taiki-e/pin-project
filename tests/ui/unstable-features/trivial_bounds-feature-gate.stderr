@@ -1,7 +1,7 @@
 error[E0277]: the trait bound `std::marker::PhantomPinned: std::marker::Unpin` is not satisfied in `UnpinStructFoo`
-  --> $DIR/phantom-pinned.rs:10:1
+  --> $DIR/trivial_bounds-feature-gate.rs:10:1
    |
-10 | #[pin_project]
+10 | #[pin_project] //~ ERROR E0277
    | ^^^^^^^^^^^^^^ within `UnpinStructFoo`, the trait `std::marker::Unpin` is not implemented for `std::marker::PhantomPinned`
    |
    = help: the following implementations were found:
