@@ -1,5 +1,26 @@
 # Unreleased
 
+# 0.4.0-beta.1 - 2019-09-21
+
+* [Changed the argument type of project method back to `self: Pin<&mut Self>`.][90]
+
+* [Removed "project_attr" feature and always enable `#[project]` attribute.][94]
+
+* [Removed "renamed" feature.][100]
+
+* [`#[project]` attribute can now be used for `use` statements.][85]
+
+* [Added `project_ref` method and `#[project_ref]` attribute.][93]
+
+* [`#[pin_project]` attribute now determines the visibility of the projection type/method is based on the original type.][96]
+
+[85]: https://github.com/taiki-e/pin-project/pull/85
+[90]: https://github.com/taiki-e/pin-project/pull/90
+[93]: https://github.com/taiki-e/pin-project/pull/93
+[94]: https://github.com/taiki-e/pin-project/pull/94
+[96]: https://github.com/taiki-e/pin-project/pull/96
+[100]: https://github.com/taiki-e/pin-project/pull/100
+
 # 0.4.0-alpha.11 - 2019-09-11
 
 * [Changed #[pinned_drop] to trait implementation.][86]

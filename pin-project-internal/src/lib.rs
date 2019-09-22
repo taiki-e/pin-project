@@ -1,7 +1,7 @@
 //! An internal crate to support pin_project - **do not use directly**
 
 #![recursion_limit = "256"]
-#![doc(html_root_url = "https://docs.rs/pin-project-internal/0.4.0-alpha.11")]
+#![doc(html_root_url = "https://docs.rs/pin-project-internal/0.4.0-beta.1")]
 #![doc(test(
     no_crate_inject,
     attr(deny(warnings, rust_2018_idioms, single_use_lifetimes), allow(dead_code))
@@ -313,7 +313,7 @@ use utils::{Immutable, Mutable};
 /// [`Pin::as_mut`]: core::pin::Pin::as_mut
 /// [`Pin::set`]: core::pin::Pin::set
 /// [`drop`]: Drop::drop
-/// [`UnsafeUnpin`]: https://docs.rs/pin-project/0.4.0-alpha.11/pin_project/trait.UnsafeUnpin.html
+/// [`UnsafeUnpin`]: https://docs.rs/pin-project/0.4.0-beta.1/pin_project/trait.UnsafeUnpin.html
 /// [`project`]: ./attr.project.html
 /// [`project_ref`]: ./attr.project_ref.html
 /// [`pinned_drop`]: ./attr.pinned_drop.html

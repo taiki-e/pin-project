@@ -1,6 +1,6 @@
 [package]
 name = "pin-project-internal"
-version = "0.4.0-alpha.11"
+version = "0.4.0-beta.1"
 authors = ["Taiki Endo <te316e89@gmail.com>"]
 edition = "2018"
 license = "Apache-2.0/MIT"
@@ -8,7 +8,9 @@ repository = "https://github.com/taiki-e/pin-project"
 documentation = "https://docs.rs/pin-project-internal/"
 keywords = ["pin", "macros", "attribute"]
 categories = ["rust-patterns"]
-description = "An internal crate to support pin_project - do not use directly"
+description = """
+An internal crate to support pin_project - do not use directly
+"""
 
 [package.metadata.docs.rs]
 all-features = true
@@ -22,4 +24,4 @@ quote = "1.0"
 syn = { version = "1.0", features = ["full", "visit-mut"] }
 
 [dev-dependencies]
-pin-project = { version = "0.4.0-alpha.11", path = ".." }
+pin-project = { version = "0.4.0-beta.1", path = ".." }
