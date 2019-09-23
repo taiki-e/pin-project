@@ -4,5 +4,5 @@
 target/
 **/*.rs.bk
 Cargo.lock
-cargo-timing*
+cargo-timing*.html
 ___*
