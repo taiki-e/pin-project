@@ -58,7 +58,11 @@ impl<T, U> Struct<T, U> {
 
 [Code like this will be generated](examples/struct-default-expanded.rs)
 
-There are examples and generated code of each feature in [examples](examples/README.md) directory.
+See [API documentation][docs-url] for more details.
+
+Also, there are examples and generated code of each feature in [examples](examples/README.md) directory.
+
+[`pin_project`]: https://docs.rs/pin-project-internal/0.4.0-beta.1/pin_project_internal/attr.pin_project.html
 
 ## License
 
