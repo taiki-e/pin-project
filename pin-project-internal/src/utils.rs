@@ -7,6 +7,8 @@ use syn::{
 
 pub(crate) const DEFAULT_LIFETIME_NAME: &str = "'_pin";
 
+pub(crate) type Variants = Punctuated<Variant, token::Comma>;
+
 pub(crate) use Mutability::{Immutable, Mutable};
 
 #[derive(Clone, Copy, Eq, PartialEq)]

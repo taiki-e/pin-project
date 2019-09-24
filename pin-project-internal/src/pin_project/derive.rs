@@ -2,26 +2,26 @@ use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use syn::{parse::Nothing, *};
 
-use crate::utils::VecExt;
+use crate::utils::{Variants, VecExt};
 
 use super::PIN;
 
-pub(super) fn parse_derive(input: DeriveInput) -> Result<TokenStream> {
-    let DeriveInput { vis, ident, generics, mut data, .. } = input;
-    let mut cx = DeriveContext::new(ident, vis, generics);
-    match &mut data {
-        Data::Struct(data) => {
-            super::validate_struct(&cx.ident, &data.fields)?;
-            cx.visit_fields(&mut data.fields)
+pub(super) fn parse_derive(item: Item) -> Result<TokenStream> {
+    match item {
+        Item::Struct(ItemStruct { vis, ident, generics, fields, .. }) => {
+            let mut cx = DeriveContext::new(ident, vis, generics);
+            super::validate_struct(&cx.ident, &fields)?;
+            cx.visit_fields(&fields);
+            Ok(cx.make_unpin_impl())
         }
-        Data::Enum(data) => {
-            super::validate_enum(data.brace_token, &data.variants)?;
-            cx.visit_variants(data)
+        Item::Enum(ItemEnum { vis, ident, generics, brace_token, variants, .. }) => {
+            let mut cx = DeriveContext::new(ident, vis, generics);
+            super::validate_enum(brace_token, &variants)?;
+            cx.visit_variants(&variants);
+            Ok(cx.make_unpin_impl())
         }
-        Data::Union(_) => unreachable!(),
+        _ => unreachable!(),
     }
-
-    Ok(cx.make_unpin_impl())
 }
 
 struct DeriveContext {
@@ -43,16 +43,16 @@ impl DeriveContext {
         Self { ident, vis, generics, pinned_fields: Vec::new() }
     }
 
-    fn visit_variants(&mut self, data: &mut DataEnum) {
-        for Variant { fields, .. } in &mut data.variants {
+    fn visit_variants(&mut self, variants: &Variants) {
+        for Variant { fields, .. } in variants {
             self.visit_fields(fields)
         }
     }
 
-    fn visit_fields(&mut self, fields: &mut Fields) {
+    fn visit_fields(&mut self, fields: &Fields) {
         let fields = match fields {
-            Fields::Unnamed(fields) => &mut fields.unnamed,
-            Fields::Named(fields) => &mut fields.named,
+            Fields::Unnamed(fields) => &fields.unnamed,
+            Fields::Named(fields) => &fields.named,
             Fields::Unit => return,
         };
 
