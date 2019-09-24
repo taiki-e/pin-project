@@ -8,7 +8,7 @@ use syn::{
 
 use crate::utils::{
     self, collect_cfg, determine_visibility, proj_ident, proj_lifetime_name, Immutable, Mutable,
-    VecExt, DEFAULT_LIFETIME_NAME,
+    Variants, VecExt, DEFAULT_LIFETIME_NAME,
 };
 
 use super::PIN;
@@ -17,19 +17,21 @@ pub(super) fn parse_attribute(args: TokenStream, mut item: Item) -> Result<Token
     let cx;
     let proj_items = match &mut item {
         Item::Struct(item) => {
-            cx = Context::new(args, &mut item.attrs, &item.ident, &item.vis, &item.generics)?;
+            super::validate_struct(&item.ident, &item.fields)?;
+            cx = Context::new(args, &mut item.attrs, &item.vis, &item.ident, &item.generics)?;
 
             let packed_check = ensure_not_packed(&item)?;
-            let mut proj_items = cx.parse_struct(item)?;
+            let mut proj_items = cx.parse_struct(&mut item.fields)?;
             proj_items.extend(packed_check);
             proj_items
         }
-        Item::Enum(item) => {
-            cx = Context::new(args, &mut item.attrs, &item.ident, &item.vis, &item.generics)?;
+        Item::Enum(ItemEnum { attrs, vis, ident, generics, brace_token, variants, .. }) => {
+            super::validate_enum(*brace_token, variants)?;
+            cx = Context::new(args, attrs, vis, ident, generics)?;
 
             // We don't need to check for '#[repr(packed)]',
             // since it does not apply to enums.
-            cx.parse_enum(item)?
+            cx.parse_enum(variants)?
         }
         _ => {
             return Err(error!(
@@ -89,6 +91,9 @@ impl Parse for Args {
 }
 
 struct Context {
+    /// Visibility of the original type.
+    vis: Visibility,
+
     /// Name of the original type.
     orig_ident: Ident,
 
@@ -97,9 +102,6 @@ struct Context {
 
     /// Name of the projected type returned by `project_ref` method.
     proj_ref_ident: Ident,
-
-    /// Visibility of the original type.
-    vis: Visibility,
 
     /// Generics of the original type.
     generics: Generics,
@@ -118,8 +120,8 @@ impl Context {
     fn new(
         args: TokenStream,
         attrs: &mut Vec<Attribute>,
-        orig_ident: &Ident,
         vis: &Visibility,
+        orig_ident: &Ident,
         generics: &Generics,
     ) -> Result<Self> {
         let Args { pinned_drop, unsafe_unpin } = syn::parse2(args)?;
@@ -135,10 +137,10 @@ impl Context {
         let lifetime = Lifetime::new(&lifetime_name, Span::call_site());
 
         Ok(Self {
+            vis: determine_visibility(vis),
             orig_ident: orig_ident.clone(),
             proj_ident: proj_ident(orig_ident, Mutable),
             proj_ref_ident: proj_ident(orig_ident, Immutable),
-            vis: determine_visibility(vis),
             generics: generics.clone(),
             lifetime,
             unsafe_unpin,
@@ -386,10 +388,8 @@ fn ensure_not_packed(item: &ItemStruct) -> Result<TokenStream> {
 
 // Visit structs/enums
 impl Context {
-    fn parse_struct(&self, item: &mut ItemStruct) -> Result<TokenStream> {
-        super::validate_struct(&item.ident, &item.fields)?;
-
-        let (proj_pat, proj_init, proj_fields, proj_ref_fields) = match &mut item.fields {
+    fn parse_struct(&self, fields: &mut Fields) -> Result<TokenStream> {
+        let (proj_pat, proj_init, proj_fields, proj_ref_fields) = match fields {
             Fields::Named(fields) => self.visit_named(fields)?,
             Fields::Unnamed(fields) => self.visit_unnamed(fields, true)?,
             Fields::Unit => unreachable!(),
@@ -397,7 +397,7 @@ impl Context {
 
         let Context { orig_ident, proj_ident, proj_ref_ident, vis, .. } = self;
         let proj_generics = self.proj_generics();
-        let where_clause = item.generics.split_for_impl().2;
+        let where_clause = self.generics.split_for_impl().2;
 
         let mut proj_items = quote! {
             #[allow(clippy::mut_mut)] // This lint warns `&mut &mut <ty>`.
@@ -421,15 +421,13 @@ impl Context {
         Ok(proj_items)
     }
 
-    fn parse_enum(&self, item: &mut ItemEnum) -> Result<TokenStream> {
-        super::validate_enum(item.brace_token, &item.variants)?;
-
+    fn parse_enum(&self, variants: &mut Variants) -> Result<TokenStream> {
         let (proj_variants, proj_ref_variants, proj_arms, proj_ref_arms) =
-            self.visit_variants(item)?;
+            self.visit_variants(variants)?;
 
         let Context { proj_ident, proj_ref_ident, vis, .. } = &self;
         let proj_generics = self.proj_generics();
-        let where_clause = item.generics.split_for_impl().2;
+        let where_clause = self.generics.split_for_impl().2;
 
         let mut proj_items = quote! {
             #[allow(clippy::mut_mut)] // This lint warns `&mut &mut <ty>`.
@@ -462,13 +460,13 @@ impl Context {
     #[allow(clippy::type_complexity)]
     fn visit_variants(
         &self,
-        item: &mut ItemEnum,
+        variants: &mut Variants,
     ) -> Result<(Vec<TokenStream>, Vec<TokenStream>, Vec<TokenStream>, Vec<TokenStream>)> {
-        let mut proj_variants = Vec::with_capacity(item.variants.len());
-        let mut proj_ref_variants = Vec::with_capacity(item.variants.len());
-        let mut proj_arms = Vec::with_capacity(item.variants.len());
-        let mut proj_ref_arms = Vec::with_capacity(item.variants.len());
-        for Variant { attrs, fields, ident, .. } in &mut item.variants {
+        let mut proj_variants = Vec::with_capacity(variants.len());
+        let mut proj_ref_variants = Vec::with_capacity(variants.len());
+        let mut proj_arms = Vec::with_capacity(variants.len());
+        let mut proj_ref_arms = Vec::with_capacity(variants.len());
+        for Variant { attrs, ident, fields, .. } in variants {
             let (proj_pat, proj_body, proj_fields, proj_ref_fields) = match fields {
                 Fields::Named(fields) => self.visit_named(fields)?,
                 Fields::Unnamed(fields) => self.visit_unnamed(fields, false)?,

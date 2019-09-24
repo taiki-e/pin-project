@@ -1,5 +1,7 @@
 use proc_macro2::TokenStream;
-use syn::{punctuated::Punctuated, *};
+use syn::*;
+
+use crate::utils::Variants;
 
 mod attribute;
 mod derive;
@@ -7,13 +9,11 @@ mod derive;
 /// The annotation for pinned type.
 const PIN: &str = "pin";
 
-type Variants = Punctuated<Variant, token::Comma>;
-
 pub(crate) fn attribute(args: TokenStream, input: Item) -> TokenStream {
     attribute::parse_attribute(args, input).unwrap_or_else(|e| e.to_compile_error())
 }
 
-pub(crate) fn derive(input: DeriveInput) -> TokenStream {
+pub(crate) fn derive(input: Item) -> TokenStream {
     derive::parse_derive(input).unwrap_or_else(|e| e.to_compile_error())
 }
 
