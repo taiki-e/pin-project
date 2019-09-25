@@ -29,7 +29,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-pin-project = "0.4.0-beta.1"
+pin-project = "0.4"
 ```
 
 The current pin-project requires Rust 1.33 or later.
@@ -64,7 +64,7 @@ See [API documentation][docs-url] for more details.
 
 Also, there are examples and generated code of each feature in [examples](examples/README.md) directory.
 
-[`pin_project`]: https://docs.rs/pin-project-internal/0.4.0-beta.1/pin_project_internal/attr.pin_project.html
+[`pin_project`]: https://docs.rs/pin-project-internal/0.4.0/pin_project_internal/attr.pin_project.html
 
 ## License
 
