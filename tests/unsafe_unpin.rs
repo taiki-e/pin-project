@@ -3,21 +3,51 @@
 #![allow(dead_code)]
 
 use pin_project::{pin_project, UnsafeUnpin};
-use std::marker::PhantomPinned;
+use std::{marker::PhantomPinned, pin::Pin};
 
 fn is_unpin<T: Unpin>() {}
 
+#[pin_project(UnsafeUnpin)]
+pub struct Blah<T, U> {
+    field1: U,
+    #[pin]
+    field2: T,
+}
+
+#[allow(unsafe_code)]
+unsafe impl<T: Unpin, U> UnsafeUnpin for Blah<T, U> {}
+
+#[pin_project(UnsafeUnpin)]
+pub struct NotImplementUnsafUnpin {
+    #[pin]
+    field1: PhantomPinned,
+}
+
+#[pin_project(UnsafeUnpin)]
+pub struct OverlappingLifetimeNames<'_pin, T, U> {
+    #[pin]
+    field1: T,
+    field2: U,
+    field3: &'_pin (),
+}
+
+#[allow(unsafe_code)]
+unsafe impl<T: Unpin, U> UnsafeUnpin for OverlappingLifetimeNames<'_, T, U> {}
+
 #[test]
 fn unsafe_unpin() {
-    #[pin_project(UnsafeUnpin)]
-    pub struct Blah<T, U> {
-        field1: U,
-        #[pin]
-        field2: Option<T>,
-    }
-
-    #[allow(unsafe_code)]
-    unsafe impl<T: Unpin, U> UnsafeUnpin for Blah<T, U> {}
-
     is_unpin::<Blah<(), PhantomPinned>>();
+    is_unpin::<OverlappingLifetimeNames<'_, (), ()>>();
+}
+
+#[test]
+fn test() {
+    let mut x = OverlappingLifetimeNames { field1: 0, field2: 1, field3: &() };
+    let x = Pin::new(&mut x);
+    let y = x.as_ref().project_ref();
+    let _: Pin<&u8> = y.field1;
+    let _: &u8 = y.field2;
+    let y = x.project();
+    let _: Pin<&mut u8> = y.field1;
+    let _: &mut u8 = y.field2;
 }

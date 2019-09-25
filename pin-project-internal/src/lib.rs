@@ -136,6 +136,10 @@ use utils::{Immutable, Mutable};
 /// }
 /// ```
 ///
+/// Note that borrowing the field where `#[pin]` attribute is used multiple
+/// times requires using [`.as_mut()`][`Pin::as_mut`] to avoid
+/// consuming the `Pin`.
+///
 /// If you want to implement [`Unpin`] manually, you must use the `UnsafeUnpin`
 /// argument to `#[pin_project]`.
 ///
@@ -167,11 +171,7 @@ use utils::{Immutable, Mutable};
 /// are being used. If you implement [`UnsafeUnpin`], you must ensure that it is
 /// only implemented when all pin-projected fields implement [`Unpin`].
 ///
-/// Note that borrowing the field where `#[pin]` attribute is used multiple
-/// times requires using [`.as_mut()`][`Pin::as_mut`] to avoid
-/// consuming the `Pin`.
-///
-/// See also [`UnsafeUnpin`] trait.
+/// See [`UnsafeUnpin`] trait for more details.
 ///
 /// ### `#[pinned_drop]`
 ///

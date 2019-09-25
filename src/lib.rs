@@ -124,7 +124,7 @@ pub unsafe trait UnsafeUnpin {}
 #[doc(hidden)]
 pub mod __private {
     use super::UnsafeUnpin;
-    use core::pin::Pin;
+    use core::{marker::PhantomData, pin::Pin};
 
     #[doc(hidden)]
     pub use pin_project_internal::__PinProjectAutoImplUnpin;
@@ -195,8 +195,8 @@ pub mod __private {
     // to making the type never implement Unpin), or provide an impl of `UnsafeUnpin`.
     // It is impossible for them to provide an impl of `Unpin`
     #[doc(hidden)]
-    pub struct Wrapper<T>(T);
+    pub struct Wrapper<'a, T>(T, PhantomData<&'a ()>);
 
     #[allow(unsafe_code)]
-    unsafe impl<T> UnsafeUnpin for Wrapper<T> where T: UnsafeUnpin {}
+    unsafe impl<T> UnsafeUnpin for Wrapper<'_, T> where T: UnsafeUnpin {}
 }

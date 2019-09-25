@@ -1,18 +1,75 @@
 error[E0277]: the trait bound `std::marker::PhantomPinned: std::marker::Unpin` is not satisfied
-  --> $DIR/proper_unpin.rs:18:5
+  --> $DIR/proper_unpin.rs:37:5
    |
-15 | fn is_unpin<T: Unpin>() {}
+6  | fn is_unpin<T: Unpin>() {}
    |    --------    ----- required by this bound in `is_unpin`
 ...
-18 |     is_unpin::<Foo<PhantomPinned, PhantomPinned>>(); //~ ERROR E0277
-   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `std::marker::Unpin` is not implemented for `std::marker::PhantomPinned`
+37 |     is_unpin::<Blah<PhantomPinned, ()>>(); //~ ERROR E0277
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `std::marker::Unpin` is not implemented for `std::marker::PhantomPinned`
    |
    = help: the following implementations were found:
              <std::marker::PhantomPinned as std::marker::Unpin>
-   = note: required because of the requirements on the impl of `pin_project::UnsafeUnpin` for `Foo<std::marker::PhantomPinned, std::marker::PhantomPinned>`
-   = note: required because of the requirements on the impl of `pin_project::UnsafeUnpin` for `pin_project::__private::Wrapper<Foo<std::marker::PhantomPinned, std::marker::PhantomPinned>>`
-   = note: required because of the requirements on the impl of `std::marker::Unpin` for `Foo<std::marker::PhantomPinned, std::marker::PhantomPinned>`
+   = note: required because of the requirements on the impl of `pin_project::UnsafeUnpin` for `Blah<std::marker::PhantomPinned, ()>`
+   = note: required because of the requirements on the impl of `pin_project::UnsafeUnpin` for `pin_project::__private::Wrapper<'_, Blah<std::marker::PhantomPinned, ()>>`
+   = note: required because of the requirements on the impl of `std::marker::Unpin` for `Blah<std::marker::PhantomPinned, ()>`
 
-error: aborting due to previous error
+error[E0277]: the trait bound `std::marker::PhantomPinned: std::marker::Unpin` is not satisfied
+  --> $DIR/proper_unpin.rs:38:5
+   |
+6  | fn is_unpin<T: Unpin>() {}
+   |    --------    ----- required by this bound in `is_unpin`
+...
+38 |     is_unpin::<Blah<PhantomPinned, PhantomPinned>>(); //~ ERROR E0277
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `std::marker::Unpin` is not implemented for `std::marker::PhantomPinned`
+   |
+   = help: the following implementations were found:
+             <std::marker::PhantomPinned as std::marker::Unpin>
+   = note: required because of the requirements on the impl of `pin_project::UnsafeUnpin` for `Blah<std::marker::PhantomPinned, std::marker::PhantomPinned>`
+   = note: required because of the requirements on the impl of `pin_project::UnsafeUnpin` for `pin_project::__private::Wrapper<'_, Blah<std::marker::PhantomPinned, std::marker::PhantomPinned>>`
+   = note: required because of the requirements on the impl of `std::marker::Unpin` for `Blah<std::marker::PhantomPinned, std::marker::PhantomPinned>`
+
+error[E0277]: the trait bound `NotImplementUnsafUnpin: pin_project::UnsafeUnpin` is not satisfied
+  --> $DIR/proper_unpin.rs:39:16
+   |
+6  | fn is_unpin<T: Unpin>() {}
+   |    --------    ----- required by this bound in `is_unpin`
+...
+39 |     is_unpin::<NotImplementUnsafUnpin>(); //~ ERROR E0277
+   |                ^^^^^^^^^^^^^^^^^^^^^^ the trait `pin_project::UnsafeUnpin` is not implemented for `NotImplementUnsafUnpin`
+   |
+   = note: required because of the requirements on the impl of `pin_project::UnsafeUnpin` for `pin_project::__private::Wrapper<'_, NotImplementUnsafUnpin>`
+   = note: required because of the requirements on the impl of `std::marker::Unpin` for `NotImplementUnsafUnpin`
+
+error[E0277]: the trait bound `std::marker::PhantomPinned: std::marker::Unpin` is not satisfied
+  --> $DIR/proper_unpin.rs:40:5
+   |
+6  | fn is_unpin<T: Unpin>() {}
+   |    --------    ----- required by this bound in `is_unpin`
+...
+40 |     is_unpin::<OverlappingLifetimeNames<'_, PhantomPinned, ()>>(); //~ ERROR E0277
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `std::marker::Unpin` is not implemented for `std::marker::PhantomPinned`
+   |
+   = help: the following implementations were found:
+             <std::marker::PhantomPinned as std::marker::Unpin>
+   = note: required because of the requirements on the impl of `pin_project::UnsafeUnpin` for `OverlappingLifetimeNames<'_, std::marker::PhantomPinned, ()>`
+   = note: required because of the requirements on the impl of `pin_project::UnsafeUnpin` for `pin_project::__private::Wrapper<'_, OverlappingLifetimeNames<'_, std::marker::PhantomPinned, ()>>`
+   = note: required because of the requirements on the impl of `std::marker::Unpin` for `OverlappingLifetimeNames<'_, std::marker::PhantomPinned, ()>`
+
+error[E0277]: the trait bound `std::marker::PhantomPinned: std::marker::Unpin` is not satisfied
+  --> $DIR/proper_unpin.rs:41:5
+   |
+6  | fn is_unpin<T: Unpin>() {}
+   |    --------    ----- required by this bound in `is_unpin`
+...
+41 |     is_unpin::<OverlappingLifetimeNames<'_, (), PhantomPinned>>(); //~ ERROR E0277
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `std::marker::Unpin` is not implemented for `std::marker::PhantomPinned`
+   |
+   = help: the following implementations were found:
+             <std::marker::PhantomPinned as std::marker::Unpin>
+   = note: required because of the requirements on the impl of `pin_project::UnsafeUnpin` for `OverlappingLifetimeNames<'_, (), std::marker::PhantomPinned>`
+   = note: required because of the requirements on the impl of `pin_project::UnsafeUnpin` for `pin_project::__private::Wrapper<'_, OverlappingLifetimeNames<'_, (), std::marker::PhantomPinned>>`
+   = note: required because of the requirements on the impl of `std::marker::Unpin` for `OverlappingLifetimeNames<'_, (), std::marker::PhantomPinned>`
+
+error: aborting due to 5 previous errors
 
 For more information about this error, try `rustc --explain E0277`.

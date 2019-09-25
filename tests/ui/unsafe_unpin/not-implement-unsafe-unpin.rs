@@ -1,7 +1,5 @@
 // compile-fail
 
-// FIXME?
-
 use pin_project::pin_project;
 
 #[pin_project(UnsafeUnpin)]
