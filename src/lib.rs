@@ -34,13 +34,13 @@
 //!
 //! There are examples and generated code of each feature in [examples](https://github.com/taiki-e/pin-project/blob/master/examples/README.md) directory.
 //!
-//! [`pin_project`]: https://docs.rs/pin-project-internal/0.4.0-beta.1/pin_project_internal/attr.pin_project.html
-//! [`pinned_drop`]: https://docs.rs/pin-project-internal/0.4.0-beta.1/pin_project_internal/attr.pinned_drop.html
-//! [`project`]: https://docs.rs/pin-project-internal/0.4.0-beta.1/pin_project_internal/attr.project.html
+//! [`pin_project`]: https://docs.rs/pin-project-internal/0.4.0/pin_project_internal/attr.pin_project.html
+//! [`pinned_drop`]: https://docs.rs/pin-project-internal/0.4.0/pin_project_internal/attr.pinned_drop.html
+//! [`project`]: https://docs.rs/pin-project-internal/0.4.0/pin_project_internal/attr.project.html
 
 #![no_std]
 #![recursion_limit = "256"]
-#![doc(html_root_url = "https://docs.rs/pin-project/0.4.0-beta.1")]
+#![doc(html_root_url = "https://docs.rs/pin-project/0.4.0")]
 #![doc(test(
     no_crate_inject,
     attr(deny(warnings, rust_2018_idioms, single_use_lifetimes), allow(dead_code))
@@ -78,7 +78,7 @@ pub use pin_project_internal::project_ref;
 ///
 /// However, things change if you want to provide a custom [`Unpin`] impl
 /// for your `#[pin_project]` type. As stated in [the Rust
-/// documentation](https://doc.rust-lang.org/beta/std/pin/index.html#projections-and-structural-pinning),
+/// documentation](https://doc.rust-lang.org/nightly/std/pin/index.html#projections-and-structural-pinning),
 /// you must be sure to only implement [`Unpin`] when all of your `#[pin]` fields (i.e. struturally
 /// pinend fields) are also [`Unpin`].
 ///
@@ -116,7 +116,7 @@ pub use pin_project_internal::project_ref;
 /// ```
 ///
 /// [`PhantomPinned`]: core::marker::PhantomPinned
-/// [`pin_project`]: https://docs.rs/pin-project-internal/0.4.0-beta.1/pin_project_internal/attr.pin_project.html
+/// [`pin_project`]: https://docs.rs/pin-project-internal/0.4.0/pin_project_internal/attr.pin_project.html
 #[allow(unsafe_code)]
 pub unsafe trait UnsafeUnpin {}
 
