@@ -7,7 +7,11 @@ use std::marker::PhantomPinned;
 
 struct Inner(PhantomPinned);
 
-#[pin_project] //~ ERROR E0277
+// As a workaround, you need to use `UnsafeUnpin`.
+#[pin_project(UnsafeUnpin)] // Ok
 struct Foo(#[pin] Inner);
+
+#[pin_project] //~ ERROR E0277
+struct Bar(#[pin] Inner);
 
 fn main() {}

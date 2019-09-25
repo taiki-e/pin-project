@@ -3,19 +3,42 @@
 use pin_project::{pin_project, UnsafeUnpin};
 use std::marker::PhantomPinned;
 
-#[pin_project(UnsafeUnpin)]
-struct Foo<T, U> {
-    #[pin]
-    inner: T,
-    other: U,
-}
-
-unsafe impl<T: Unpin, U> UnsafeUnpin for Foo<T, U> {}
-
 fn is_unpin<T: Unpin>() {}
 
-fn foo_is_unpin() {
-    is_unpin::<Foo<PhantomPinned, PhantomPinned>>(); //~ ERROR E0277
+#[pin_project(UnsafeUnpin)]
+pub struct Blah<T, U> {
+    field1: U,
+    #[pin]
+    field2: T,
+}
+
+#[allow(unsafe_code)]
+unsafe impl<T: Unpin, U> UnsafeUnpin for Blah<T, U> {}
+
+#[pin_project(UnsafeUnpin)]
+pub struct NotImplementUnsafUnpin {
+    #[pin]
+    field1: PhantomPinned,
+}
+
+#[pin_project(UnsafeUnpin)]
+pub struct OverlappingLifetimeNames<'_pin, T, U> {
+    #[pin]
+    field1: U,
+    #[pin]
+    field2: Option<T>,
+    field3: &'_pin (),
+}
+
+#[allow(unsafe_code)]
+unsafe impl<T: Unpin, U: Unpin> UnsafeUnpin for OverlappingLifetimeNames<'_, T, U> {}
+
+fn unsafe_unpin() {
+    is_unpin::<Blah<PhantomPinned, ()>>(); //~ ERROR E0277
+    is_unpin::<Blah<PhantomPinned, PhantomPinned>>(); //~ ERROR E0277
+    is_unpin::<NotImplementUnsafUnpin>(); //~ ERROR E0277
+    is_unpin::<OverlappingLifetimeNames<'_, PhantomPinned, ()>>(); //~ ERROR E0277
+    is_unpin::<OverlappingLifetimeNames<'_, (), PhantomPinned>>(); //~ ERROR E0277
 }
 
 fn main() {}

@@ -21,6 +21,8 @@ A crate for safe and ergonomic pin-projection.
 
 [Documentation][docs-url]
 
+[Examples](examples/README.md)
+
 ## Usage
 
 Add this to your `Cargo.toml`:

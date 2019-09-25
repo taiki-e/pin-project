@@ -184,19 +184,21 @@ impl Context {
             return TokenStream::new();
         };
 
-        let mut generics = self.generics.clone();
-        let orig_ident = &self.orig_ident;
+        let mut proj_generics = self.proj_generics();
+        let Self { orig_ident, lifetime, .. } = self;
 
-        generics.make_where_clause().predicates.push(
+        proj_generics.make_where_clause().predicates.push(
             syn::parse2(quote_spanned! { unsafe_unpin =>
-                ::pin_project::__private::Wrapper<Self>: ::pin_project::UnsafeUnpin
+                ::pin_project::__private::Wrapper<#lifetime, Self>: ::pin_project::UnsafeUnpin
             })
             .unwrap(),
         );
 
-        let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
+        let (impl_generics, _, where_clause) = proj_generics.split_for_impl();
+        let ty_generics = self.generics.split_for_impl().1;
 
         quote! {
+            #[allow(single_use_lifetimes)]
             impl #impl_generics ::core::marker::Unpin for #orig_ident #ty_generics #where_clause {}
         }
     }

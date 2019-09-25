@@ -62,8 +62,9 @@ impl<T, U> Foo<T, U> {
 
 unsafe impl<T: Unpin, U> UnsafeUnpin for Foo<T, U> {}
 
-impl<T, U> ::core::marker::Unpin for Foo<T, U> where
-    ::pin_project::__private::Wrapper<Self>: ::pin_project::UnsafeUnpin
+#[allow(single_use_lifetimes)]
+impl<'_pin, T, U> ::core::marker::Unpin for Foo<T, U> where
+    ::pin_project::__private::Wrapper<'_pin, Self>: ::pin_project::UnsafeUnpin
 {
 }
 
