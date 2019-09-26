@@ -1,5 +1,11 @@
 # Unreleased
 
+# 0.4.1 - 2019-09-26
+
+* [Fixed an issue that caused an error when using `#[pin_project]` on a type that has `#[pin]` + `!Unpin` field with no generics or lifetime.][111]
+
+[111]: https://github.com/taiki-e/pin-project/pull/111
+
 # 0.4.0 - 2019-09-25
 
 * [**Pin projection has become a safe operation.**][18] In the absence of other unsafe code that you write, it is impossible to cause undefined behavior.
