@@ -1,17 +1,47 @@
-error[E0277]: the trait bound `T: std::marker::Unpin` is not satisfied in `UnpinStructFoo<T, U>`
-  --> $DIR/proper_unpin.rs:20:5
+error[E0277]: the trait bound `std::marker::PhantomPinned: std::marker::Unpin` is not satisfied in `UnpinStructFoo<'_, std::marker::PhantomPinned, ()>`
+  --> $DIR/proper_unpin.rs:33:5
    |
-17 | fn is_unpin<T: Unpin>() {}
+30 | fn is_unpin<T: Unpin>() {}
    |    --------    ----- required by this bound in `is_unpin`
 ...
-20 |     is_unpin::<Foo<T, U>>(); //~ ERROR E0277
-   |     ^^^^^^^^^^^^^^^^^^^^^ within `UnpinStructFoo<T, U>`, the trait `std::marker::Unpin` is not implemented for `T`
+33 |     is_unpin::<Foo<PhantomPinned, ()>>(); //~ ERROR E0277
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ within `UnpinStructFoo<'_, std::marker::PhantomPinned, ()>`, the trait `std::marker::Unpin` is not implemented for `std::marker::PhantomPinned`
    |
-   = help: consider adding a `where T: std::marker::Unpin` bound
-   = note: required because it appears within the type `Inner<T>`
-   = note: required because it appears within the type `UnpinStructFoo<T, U>`
-   = note: required because of the requirements on the impl of `std::marker::Unpin` for `Foo<T, U>`
+   = help: the following implementations were found:
+             <std::marker::PhantomPinned as std::marker::Unpin>
+   = note: required because it appears within the type `Inner<std::marker::PhantomPinned>`
+   = note: required because it appears within the type `UnpinStructFoo<'_, std::marker::PhantomPinned, ()>`
+   = note: required because of the requirements on the impl of `std::marker::Unpin` for `Foo<std::marker::PhantomPinned, ()>`
 
-error: aborting due to previous error
+error[E0277]: the trait bound `std::marker::PhantomPinned: std::marker::Unpin` is not satisfied in `UnpinStructFoo<'_, std::marker::PhantomPinned, std::marker::PhantomPinned>`
+  --> $DIR/proper_unpin.rs:35:5
+   |
+30 | fn is_unpin<T: Unpin>() {}
+   |    --------    ----- required by this bound in `is_unpin`
+...
+35 |     is_unpin::<Foo<PhantomPinned, PhantomPinned>>(); //~ ERROR E0277
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ within `UnpinStructFoo<'_, std::marker::PhantomPinned, std::marker::PhantomPinned>`, the trait `std::marker::Unpin` is not implemented for `std::marker::PhantomPinned`
+   |
+   = help: the following implementations were found:
+             <std::marker::PhantomPinned as std::marker::Unpin>
+   = note: required because it appears within the type `Inner<std::marker::PhantomPinned>`
+   = note: required because it appears within the type `UnpinStructFoo<'_, std::marker::PhantomPinned, std::marker::PhantomPinned>`
+   = note: required because of the requirements on the impl of `std::marker::Unpin` for `Foo<std::marker::PhantomPinned, std::marker::PhantomPinned>`
+
+error[E0277]: the trait bound `std::marker::PhantomPinned: std::marker::Unpin` is not satisfied in `UnpinStructTrivialBounds<'_>`
+  --> $DIR/proper_unpin.rs:37:5
+   |
+30 | fn is_unpin<T: Unpin>() {}
+   |    --------    ----- required by this bound in `is_unpin`
+...
+37 |     is_unpin::<TrivialBounds>(); //~ ERROR E0277
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^ within `UnpinStructTrivialBounds<'_>`, the trait `std::marker::Unpin` is not implemented for `std::marker::PhantomPinned`
+   |
+   = help: the following implementations were found:
+             <std::marker::PhantomPinned as std::marker::Unpin>
+   = note: required because it appears within the type `UnpinStructTrivialBounds<'_>`
+   = note: required because of the requirements on the impl of `std::marker::Unpin` for `TrivialBounds`
+
+error: aborting due to 3 previous errors
 
 For more information about this error, try `rustc --explain E0277`.

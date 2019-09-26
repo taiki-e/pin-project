@@ -3,7 +3,7 @@
 #![warn(rust_2018_idioms, single_use_lifetimes)]
 #![allow(dead_code)]
 
-use core::pin::Pin;
+use core::{marker::PhantomPinned, pin::Pin};
 use pin_project::{pin_project, pinned_drop, UnsafeUnpin};
 
 #[test]
@@ -347,4 +347,13 @@ fn visibility() {
     let _: &u8 = y.b;
     let y = x.project();
     let _: &mut u8 = y.b;
+}
+
+#[test]
+fn trivial_bounds() {
+    #[pin_project]
+    pub struct NoGenerics {
+        #[pin]
+        field: PhantomPinned,
+    }
 }

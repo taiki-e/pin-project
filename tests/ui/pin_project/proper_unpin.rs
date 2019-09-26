@@ -1,7 +1,7 @@
 // compile-fail
 
 use pin_project::pin_project;
-use std::pin::Pin;
+use std::marker::PhantomPinned;
 
 struct Inner<T> {
     val: T,
@@ -14,10 +14,29 @@ struct Foo<T, U> {
     other: U,
 }
 
+#[pin_project]
+pub struct TrivialBounds {
+    #[pin]
+    field1: PhantomPinned,
+}
+
+#[pin_project]
+struct Bar<'a, T, U> {
+    #[pin]
+    inner: &'a mut Inner<T>,
+    other: U,
+}
+
 fn is_unpin<T: Unpin>() {}
 
-fn bar<T, U>() {
-    is_unpin::<Foo<T, U>>(); //~ ERROR E0277
+fn assert_unpin() {
+    is_unpin::<Foo<PhantomPinned, ()>>(); //~ ERROR E0277
+    is_unpin::<Foo<(), PhantomPinned>>(); // Ok
+    is_unpin::<Foo<PhantomPinned, PhantomPinned>>(); //~ ERROR E0277
+
+    is_unpin::<TrivialBounds>(); //~ ERROR E0277
+
+    is_unpin::<Bar<'_, PhantomPinned, PhantomPinned>>(); //~ Ok
 }
 
 fn main() {}

@@ -18,12 +18,6 @@ pub struct Blah<T, U> {
 unsafe impl<T: Unpin, U> UnsafeUnpin for Blah<T, U> {}
 
 #[pin_project(UnsafeUnpin)]
-pub struct NotImplementUnsafUnpin {
-    #[pin]
-    field1: PhantomPinned,
-}
-
-#[pin_project(UnsafeUnpin)]
 pub struct OverlappingLifetimeNames<'_pin, T, U> {
     #[pin]
     field1: T,
@@ -38,6 +32,15 @@ unsafe impl<T: Unpin, U> UnsafeUnpin for OverlappingLifetimeNames<'_, T, U> {}
 fn unsafe_unpin() {
     is_unpin::<Blah<(), PhantomPinned>>();
     is_unpin::<OverlappingLifetimeNames<'_, (), ()>>();
+}
+
+#[test]
+fn trivial_bounds() {
+    #[pin_project(UnsafeUnpin)]
+    pub struct NotImplementUnsafUnpin {
+        #[pin]
+        field: PhantomPinned,
+    }
 }
 
 #[test]

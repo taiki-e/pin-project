@@ -28,6 +28,7 @@ use std::pin::Pin;
 
 pub struct Foo<'a, T> {
     was_dropped: &'a mut bool,
+    // #[pin]
     field: T,
 }
 
@@ -109,19 +110,17 @@ impl<T> ::pin_project::__private::PinnedDrop for Foo<'_, T> {
 // for details.
 #[allow(non_snake_case)]
 fn __unpin_scope_Foo() {
-    struct AlwaysUnpinFoo<T: ?Sized> {
-        val: ::core::marker::PhantomData<T>,
-    }
-    impl<T: ?Sized> ::core::marker::Unpin for AlwaysUnpinFoo<T> {}
     #[allow(dead_code)]
     #[doc(hidden)]
-    pub struct __UnpinStructFoo<'a, T> {
-        __pin_project_use_generics: AlwaysUnpinFoo<(T)>,
+    pub struct __UnpinStructFoo<'_pin, 'a, T> {
+        __pin_project_use_generics: ::pin_project::__private::AlwaysUnpin<'_pin, (T)>,
         __field0: T,
         __lifetime0: &'a (),
     }
-    impl<'a, T> ::core::marker::Unpin for Foo<'a, T> where __UnpinStructFoo<'a, T>: ::core::marker::Unpin
-    {}
+    impl<'_pin, 'a, T> ::core::marker::Unpin for Foo<'a, T> where
+        __UnpinStructFoo<'_pin, 'a, T>: ::core::marker::Unpin
+    {
+    }
 }
 
 // Ensure that it's impossible to use pin projections on a #[repr(packed)] struct.

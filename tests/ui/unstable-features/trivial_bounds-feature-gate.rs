@@ -1,4 +1,4 @@
-// compile-fail
+// run-pass
 
 // NB: If you change this test, change 'trivial_bounds.rs' at the same time.
 
@@ -7,11 +7,10 @@ use std::marker::PhantomPinned;
 
 struct Inner(PhantomPinned);
 
-// As a workaround, you need to use `UnsafeUnpin`.
-#[pin_project(UnsafeUnpin)] // Ok
+#[pin_project]
 struct Foo(#[pin] Inner);
 
-#[pin_project] //~ ERROR E0277
+#[pin_project(UnsafeUnpin)]
 struct Bar(#[pin] Inner);
 
 fn main() {}

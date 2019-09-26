@@ -1,8 +1,8 @@
-use proc_macro2::TokenStream;
+use proc_macro2::{Span, TokenStream};
 use quote::{format_ident, quote};
 use syn::{parse::Nothing, *};
 
-use crate::utils::{Variants, VecExt};
+use crate::utils::{self, proj_lifetime_name, Variants, VecExt, DEFAULT_LIFETIME_NAME};
 
 use super::PIN;
 
@@ -34,13 +34,27 @@ struct DeriveContext {
     /// Generics of the original type.
     generics: Generics,
 
+    /// Lifetime on the generated projected type.
+    lifetime: Lifetime,
+
     /// Types of the pinned fields.
     pinned_fields: Vec<Type>,
 }
 
 impl DeriveContext {
     fn new(ident: Ident, vis: Visibility, generics: Generics) -> Self {
-        Self { ident, vis, generics, pinned_fields: Vec::new() }
+        let mut lifetime_name = String::from(DEFAULT_LIFETIME_NAME);
+        proj_lifetime_name(&mut lifetime_name, &generics.params);
+        let lifetime = Lifetime::new(&lifetime_name, Span::call_site());
+
+        Self { ident, vis, generics, lifetime, pinned_fields: Vec::new() }
+    }
+
+    /// Creates the generics of projected type.
+    fn proj_generics(&self) -> Generics {
+        let mut generics = self.generics.clone();
+        utils::proj_generics(&mut generics, self.lifetime.clone());
+        generics
     }
 
     fn visit_variants(&mut self, variants: &Variants) {
@@ -68,8 +82,6 @@ impl DeriveContext {
     fn make_unpin_impl(&mut self) -> TokenStream {
         let where_clause = self.generics.make_where_clause().clone();
         let orig_ident = &self.ident;
-        let (impl_generics, ty_generics, _) = self.generics.split_for_impl();
-        let type_params: Vec<_> = self.generics.type_params().map(|t| t.ident.clone()).collect();
 
         let make_span = || {
             #[cfg(proc_macro_def_site)]
@@ -87,7 +99,6 @@ impl DeriveContext {
         } else {
             format_ident!("__UnpinStruct{}", orig_ident)
         };
-        let always_unpin_ident = format_ident!("AlwaysUnpin{}", orig_ident, span = make_span());
 
         // Generate a field in our new struct for every
         // pinned field in the original type.
@@ -138,25 +149,21 @@ impl DeriveContext {
 
         let scope_ident = format_ident!("__unpin_scope_{}", orig_ident);
 
-        let vis = &self.vis;
-        let full_generics = &self.generics;
+        let Self { vis, lifetime, .. } = &self;
+        let type_params: Vec<_> = self.generics.type_params().map(|t| t.ident.clone()).collect();
+        let proj_generics = self.proj_generics();
+        let (impl_generics, proj_ty_generics, _) = proj_generics.split_for_impl();
+        let ty_generics = self.generics.split_for_impl().1;
         let mut full_where_clause = where_clause.clone();
 
         let unpin_clause: WherePredicate = syn::parse_quote! {
-            #struct_ident #ty_generics: ::core::marker::Unpin
+            #struct_ident #proj_ty_generics: ::core::marker::Unpin
         };
-
         full_where_clause.predicates.push(unpin_clause);
 
         let attrs = if cfg!(proc_macro_def_site) { quote!() } else { quote!(#[doc(hidden)]) };
 
         let inner_data = quote! {
-            struct #always_unpin_ident <T: ?Sized> {
-                val: ::core::marker::PhantomData<T>
-            }
-
-            impl<T: ?Sized> ::core::marker::Unpin for #always_unpin_ident <T> {}
-
             // This needs to have the same visibility as the original type,
             // due to the limitations of the 'public in private' error.
             //
@@ -171,8 +178,8 @@ impl DeriveContext {
             // See also https://github.com/taiki-e/pin-project/pull/53.
             #[allow(dead_code)]
             #attrs
-            #vis struct #struct_ident #full_generics #where_clause {
-                __pin_project_use_generics: #always_unpin_ident <(#(#type_params),*)>,
+            #vis struct #struct_ident #proj_generics #where_clause {
+                __pin_project_use_generics: ::pin_project::__private::AlwaysUnpin<#lifetime, (#(#type_params),*)>,
 
                 #(#fields,)*
                 #(#lifetime_fields,)*
