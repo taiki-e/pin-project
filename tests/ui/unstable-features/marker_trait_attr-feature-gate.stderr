@@ -1,0 +1,12 @@
+error[E0119]: conflicting implementations of trait `std::marker::Unpin` for type `Foo<_>`:
+  --> $DIR/marker_trait_attr-feature-gate.rs:8:1
+   |
+8  | #[pin_project] //~ ERROR E0119
+   | ^^^^^^^^^^^^^^ conflicting implementation for `Foo<_>`
+...
+15 | impl<T> Unpin for Foo<T> {}
+   | ------------------------ first implementation here
+
+error: aborting due to previous error
+
+For more information about this error, try `rustc --explain E0119`.
