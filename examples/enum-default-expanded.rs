@@ -19,7 +19,7 @@
 use pin_project::pin_project;
 
 enum Enum<T, U> {
-    Pinned(T),
+    Pinned(/* #[pin] */ T),
     Unpinned(U),
 }
 
@@ -63,17 +63,16 @@ impl<T, U> Enum<T, U> {
 // for details.
 #[allow(non_snake_case)]
 fn __unpin_scope_Enum() {
-    struct AlwaysUnpinEnum<T: ?Sized> {
-        val: ::core::marker::PhantomData<T>,
-    }
-    impl<T: ?Sized> ::core::marker::Unpin for AlwaysUnpinEnum<T> {}
     #[allow(dead_code)]
     #[doc(hidden)]
-    struct __UnpinStructEnum<T, U> {
-        __pin_project_use_generics: AlwaysUnpinEnum<(T, U)>,
+    struct __UnpinStructEnum<'_pin, T, U> {
+        __pin_project_use_generics: ::pin_project::__private::AlwaysUnpin<'_pin, (T, U)>,
         __field0: T,
     }
-    impl<T, U> ::core::marker::Unpin for Enum<T, U> where __UnpinStructEnum<T, U>: ::core::marker::Unpin {}
+    impl<'_pin, T, U> ::core::marker::Unpin for Enum<T, U> where
+        __UnpinStructEnum<'_pin, T, U>: ::core::marker::Unpin
+    {
+    }
 }
 
 // Ensure that enum does not implement `Drop`.

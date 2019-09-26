@@ -35,8 +35,11 @@ unsafe impl<T: Unpin, U: Unpin> UnsafeUnpin for OverlappingLifetimeNames<'_, T, 
 
 fn unsafe_unpin() {
     is_unpin::<Blah<PhantomPinned, ()>>(); //~ ERROR E0277
+    is_unpin::<Blah<(), PhantomPinned>>(); // Ok
     is_unpin::<Blah<PhantomPinned, PhantomPinned>>(); //~ ERROR E0277
+
     is_unpin::<NotImplementUnsafUnpin>(); //~ ERROR E0277
+
     is_unpin::<OverlappingLifetimeNames<'_, PhantomPinned, ()>>(); //~ ERROR E0277
     is_unpin::<OverlappingLifetimeNames<'_, (), PhantomPinned>>(); //~ ERROR E0277
 }

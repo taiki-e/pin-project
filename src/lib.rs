@@ -199,4 +199,12 @@ pub mod __private {
 
     #[allow(unsafe_code)]
     unsafe impl<T> UnsafeUnpin for Wrapper<'_, T> where T: UnsafeUnpin {}
+
+    // This is an internal helper struct used by `pin-project-internal`.
+    //
+    // See https://github.com/taiki-e/pin-project/pull/53 for more details.
+    #[doc(hidden)]
+    pub struct AlwaysUnpin<'a, T: ?Sized>(PhantomData<T>, PhantomData<&'a ()>);
+
+    impl<T: ?Sized> Unpin for AlwaysUnpin<'_, T> {}
 }

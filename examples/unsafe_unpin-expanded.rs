@@ -22,6 +22,7 @@
 use pin_project::{pin_project, UnsafeUnpin};
 
 pub struct Foo<T, U> {
+    // #[pin]
     pinned: T,
     unpinned: U,
 }

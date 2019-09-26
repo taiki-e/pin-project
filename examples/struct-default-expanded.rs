@@ -20,6 +20,7 @@
 use pin_project::pin_project;
 
 struct Struct<T, U> {
+    // #[pin]
     pinned: T,
     unpinned: U,
 }
@@ -86,18 +87,14 @@ impl<T, U> Struct<T, U> {
 // See also https://github.com/taiki-e/pin-project/pull/53.
 #[allow(non_snake_case)]
 fn __unpin_scope_Struct() {
-    struct AlwaysUnpinStruct<T: ?Sized> {
-        val: ::core::marker::PhantomData<T>,
-    }
-    impl<T: ?Sized> ::core::marker::Unpin for AlwaysUnpinStruct<T> {}
     #[allow(dead_code)]
     #[doc(hidden)]
-    struct __UnpinStructStruct<T, U> {
-        __pin_project_use_generics: AlwaysUnpinStruct<(T, U)>,
+    struct __UnpinStructStruct<'_pin, T, U> {
+        __pin_project_use_generics: ::pin_project::__private::AlwaysUnpin<'_pin, (T, U)>,
         __field0: T,
     }
-    impl<T, U> ::core::marker::Unpin for Struct<T, U> where
-        __UnpinStructStruct<T, U>: ::core::marker::Unpin
+    impl<'_pin, T, U> ::core::marker::Unpin for Struct<T, U> where
+        __UnpinStructStruct<'_pin, T, U>: ::core::marker::Unpin
     {
     }
 }

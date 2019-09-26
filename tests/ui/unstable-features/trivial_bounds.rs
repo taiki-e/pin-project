@@ -14,4 +14,7 @@ struct Inner(PhantomPinned);
 #[pin_project]
 struct Foo(#[pin] Inner);
 
+#[pin_project(UnsafeUnpin)]
+struct Bar(#[pin] Inner);
+
 fn main() {}
