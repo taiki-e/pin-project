@@ -23,4 +23,4 @@ members = ["pin-project-internal"]
 pin-project-internal = { version = "=0.4.0", path = "pin-project-internal", default-features = false }
 
 [dev-dependencies]
-compiletest = { version = "0.3.21", package = "compiletest_rs", features = ["stable", "tmp"] }
+compiletest = { version = "=0.3.22", package = "compiletest_rs", features = ["stable", "tmp"] }
