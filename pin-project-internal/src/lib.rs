@@ -7,7 +7,7 @@
     attr(deny(warnings, rust_2018_idioms, single_use_lifetimes), allow(dead_code))
 ))]
 #![warn(unsafe_code)]
-#![warn(rust_2018_idioms, unreachable_pub, single_use_lifetimes)]
+#![warn(rust_2018_idioms, single_use_lifetimes, unreachable_pub)]
 #![warn(clippy::all, clippy::pedantic)]
 #![allow(clippy::use_self)]
 #![cfg_attr(proc_macro_def_site, feature(proc_macro_def_site))]

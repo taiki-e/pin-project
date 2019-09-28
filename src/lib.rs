@@ -45,9 +45,8 @@
     no_crate_inject,
     attr(deny(warnings, rust_2018_idioms, single_use_lifetimes), allow(dead_code))
 ))]
-#![warn(missing_docs)]
 #![warn(unsafe_code)]
-#![warn(rust_2018_idioms, unreachable_pub, single_use_lifetimes)]
+#![warn(missing_docs, rust_2018_idioms, single_use_lifetimes, unreachable_pub)]
 #![warn(clippy::all, clippy::pedantic)]
 #![allow(clippy::use_self)]
 
