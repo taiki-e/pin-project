@@ -357,3 +357,23 @@ fn trivial_bounds() {
         field: PhantomPinned,
     }
 }
+
+#[test]
+fn dst() {
+    #[pin_project]
+    pub struct A<T: ?Sized> {
+        x: T,
+    }
+
+    #[pin_project]
+    pub struct B<T: ?Sized> {
+        #[pin]
+        x: T,
+    }
+
+    #[pin_project]
+    pub struct C<T: ?Sized>(T);
+
+    #[pin_project]
+    pub struct D<T: ?Sized>(#[pin] T);
+}

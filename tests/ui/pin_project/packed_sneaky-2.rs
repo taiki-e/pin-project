@@ -6,7 +6,7 @@ extern crate sneaky_macro;
 
 use pin_project::pin_project;
 
-hidden_repr_macro! { //~ ERROR borrow of packed field is unsafe and requires unsafe function or block
+hidden_repr_macro! { //~ ERROR may not be used on #[repr(packed)] types
     #[pin_project]
     struct B {
         #[pin]

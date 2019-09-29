@@ -322,7 +322,7 @@ fn ensure_not_packed(item: &ItemStruct) -> Result<TokenStream> {
     // struct, we generate code like this:
     //
     // #[deny(safe_packed_borrows)]
-    // fn enforce_not_packed_for_MyStruct(val: MyStruct) {
+    // fn enforce_not_packed_for_MyStruct(val: &MyStruct) {
     //  let _field1 = &val.field1;
     //  let _field2 = &val.field2;
     //  ...
@@ -381,7 +381,7 @@ fn ensure_not_packed(item: &ItemStruct) -> Result<TokenStream> {
         #[allow(single_use_lifetimes)]
         #[allow(non_snake_case)]
         #[deny(safe_packed_borrows)]
-        fn #method_name #impl_generics (val: #struct_name #ty_generics) #where_clause {
+        fn #method_name #impl_generics (val: &#struct_name #ty_generics) #where_clause {
             #(#field_refs)*
         }
     };

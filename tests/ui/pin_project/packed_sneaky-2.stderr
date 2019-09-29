@@ -1,7 +1,7 @@
 error: #[pin_project] attribute may not be used on #[repr(packed)] types
   --> $DIR/packed_sneaky-2.rs:9:1
    |
-9  | / hidden_repr_macro! { //~ ERROR borrow of packed field is unsafe and requires unsafe function or block
+9  | / hidden_repr_macro! { //~ ERROR may not be used on #[repr(packed)] types
 10 | |     #[pin_project]
 11 | |     struct B {
 12 | |         #[pin]
