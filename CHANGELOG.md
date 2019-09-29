@@ -1,5 +1,11 @@
 # Unreleased
 
+# 0.4.2 - 2019-09-29
+
+* [Fixed support for DSTs(Dynamically Sized Types).][113]
+
+[113]: https://github.com/taiki-e/pin-project/pull/113
+
 # 0.4.1 - 2019-09-26
 
 * [Fixed an issue that caused an error when using `#[pin_project]` on a type that has `#[pin]` + `!Unpin` field with no generics or lifetime.][111]
