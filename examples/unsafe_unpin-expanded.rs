@@ -85,7 +85,7 @@ impl<T, U> FooMustNotImplDrop for Foo<T, U> {}
 #[allow(single_use_lifetimes)]
 #[allow(non_snake_case)]
 #[deny(safe_packed_borrows)]
-fn __pin_project_assert_not_repr_packed_Foo<T, U>(val: Foo<T, U>) {
+fn __pin_project_assert_not_repr_packed_Foo<T, U>(val: &Foo<T, U>) {
     {
         &val.pinned;
     }
