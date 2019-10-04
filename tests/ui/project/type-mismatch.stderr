@@ -1,11 +1,11 @@
 error[E0308]: mismatched types
- --> $DIR/type-mismatch.rs:40:9
-  |
-40|         None => {} //~ ERROR mismatched types
-  |         ^^^^ expected enum `span::__FooProjection`, found enum `std::option::Option`
-  |
-  = note: expected type `span::__FooProjection<'_, {integer}, {integer}, _, _>`
-             found type `std::option::Option<_>`
+  --> $DIR/type-mismatch.rs:40:9
+   |
+40 |         None => {} //~ ERROR mismatched types
+   |         ^^^^ expected enum `span::__FooProjection`, found enum `std::option::Option`
+   |
+   = note: expected type `span::__FooProjection<'_, {integer}, {integer}, _, _>`
+              found type `std::option::Option<_>`
 
 error[E0308]: mismatched types
   |

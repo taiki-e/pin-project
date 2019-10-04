@@ -1,14 +1,14 @@
 error[E0277]: the trait bound `Foo<(), ()>: pin_project::UnsafeUnpin` is not satisfied
- --> $DIR/not-implement-unsafe-unpin.rs:15:16
-  |
-12| fn is_unpin<T: Unpin>() {}
-  |    --------    ----- required by this bound in `is_unpin`
+  --> $DIR/not-implement-unsafe-unpin.rs:15:16
+   |
+12 | fn is_unpin<T: Unpin>() {}
+   |    --------    ----- required by this bound in `is_unpin`
 ...
-15|     is_unpin::<Foo<(), ()>>(); //~ ERROR E0277
-  |                ^^^^^^^^^^^ the trait `pin_project::UnsafeUnpin` is not implemented for `Foo<(), ()>`
-  |
-  = note: required because of the requirements on the impl of `pin_project::UnsafeUnpin` for `pin_project::__private::Wrapper<'_, Foo<(), ()>>`
-  = note: required because of the requirements on the impl of `std::marker::Unpin` for `Foo<(), ()>`
+15 |     is_unpin::<Foo<(), ()>>(); //~ ERROR E0277
+   |                ^^^^^^^^^^^ the trait `pin_project::UnsafeUnpin` is not implemented for `Foo<(), ()>`
+   |
+   = note: required because of the requirements on the impl of `pin_project::UnsafeUnpin` for `pin_project::__private::Wrapper<'_, Foo<(), ()>>`
+   = note: required because of the requirements on the impl of `std::marker::Unpin` for `Foo<(), ()>`
 
 error: aborting due to previous error
 
