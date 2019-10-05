@@ -11,7 +11,3 @@ error[E0277]: the trait bound `std::marker::PhantomPinned: std::marker::Unpin` i
              <std::marker::PhantomPinned as std::marker::Unpin>
    = note: required because it appears within the type `UnpinStructBar<'_, std::marker::PhantomPinned>`
    = note: required because of the requirements on the impl of `std::marker::Unpin` for `Bar<std::marker::PhantomPinned>`
-
-error: aborting due to previous error
-
-For more information about this error, try `rustc --explain E0277`.

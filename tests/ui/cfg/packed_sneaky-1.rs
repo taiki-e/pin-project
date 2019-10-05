@@ -1,8 +1,7 @@
 // compile-fail
-// aux-build:sneaky_macro.rs
 
 #[macro_use]
-extern crate sneaky_macro;
+extern crate auxiliary_macros;
 
 use pin_project::pin_project;
 

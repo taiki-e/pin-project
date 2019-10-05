@@ -15,7 +15,3 @@ error[E0119]: conflicting implementations of trait `std::ops::Drop` for type `Ba
 ...
 29 | impl<T, U> Drop for Bar<T, U> {
    | ----------------------------- first implementation here
-
-error: aborting due to 2 previous errors
-
-For more information about this error, try `rustc --explain E0119`.

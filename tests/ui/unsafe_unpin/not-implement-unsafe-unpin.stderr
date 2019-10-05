@@ -9,7 +9,3 @@ error[E0277]: the trait bound `Foo<(), ()>: pin_project::UnsafeUnpin` is not sat
    |
    = note: required because of the requirements on the impl of `pin_project::UnsafeUnpin` for `pin_project::__private::Wrapper<'_, Foo<(), ()>>`
    = note: required because of the requirements on the impl of `std::marker::Unpin` for `Foo<(), ()>`
-
-error: aborting due to previous error
-
-For more information about this error, try `rustc --explain E0277`.

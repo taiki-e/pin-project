@@ -9,6 +9,3 @@ error: #[project] attribute may not be used on glob imports
    |
 16 |     use crate::*; //~ ERROR #[project] attribute may not be used on glob imports
    |                ^
-
-error: aborting due to 2 previous errors
-

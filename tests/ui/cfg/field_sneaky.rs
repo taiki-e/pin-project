@@ -1,11 +1,10 @@
 // compile-fail
-// aux-build:sneaky_macro.rs
 
 #![feature(optin_builtin_traits)]
 #![feature(trivial_bounds)]
 
 #[macro_use]
-extern crate sneaky_macro;
+extern crate auxiliary_macros;
 
 use pin_project::pin_project;
 

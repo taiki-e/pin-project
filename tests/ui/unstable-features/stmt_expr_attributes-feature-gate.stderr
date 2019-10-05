@@ -33,7 +33,3 @@ error[E0658]: custom attributes cannot be applied to expressions
    |
    = note: for more information, see https://github.com/rust-lang/rust/issues/54727
    = help: add `#![feature(proc_macro_hygiene)]` to the crate attributes to enable
-
-error: aborting due to 4 previous errors
-
-For more information about this error, try `rustc --explain E0658`.

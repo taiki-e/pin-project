@@ -17,10 +17,11 @@ A crate for safe and ergonomic pin-projection.
 all-features = true
 
 [workspace]
-members = ["pin-project-internal"]
+members = ["pin-project-internal", "tests/ui/auxiliary"]
 
 [dependencies]
 pin-project-internal = { version = "=0.4.2", path = "pin-project-internal", default-features = false }
 
 [dev-dependencies]
-compiletest = { version = "=0.3.22", package = "compiletest_rs", features = ["stable", "tmp"] }
+auxiliary-macros = { version = "0.1", path = "tests/ui/auxiliary" }
+trybuild = "1.0"

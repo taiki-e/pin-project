@@ -13,8 +13,3 @@ error[E0321]: cross-crate traits with a default impl, like `std::marker::Unpin`,
    |
 11 | impl Unpin for UnpinStructFoo {} //~ ERROR E0412,E0321
    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ can't implement cross-crate trait with a default impl for non-struct/enum type
-
-error: aborting due to 2 previous errors
-
-Some errors have detailed explanations: E0321, E0412.
-For more information about an error, try `rustc --explain E0321`.
