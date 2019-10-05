@@ -1,19 +1,16 @@
 # pin-project
 
-[![Build Status][azure-badge]][azure-url]
-[![Crates.io][crates-version-badge]][crates-url]
-[![Docs.rs][docs-badge]][docs-url]
-[![License][crates-license-badge]][crates-url]
-[![Minimum supported Rust version][rustc-badge]][rustc-url]
+[![crates-badge]][crates-url]
+[![docs-badge]][docs-url]
+[![license-badge]][license]
+[![rustc-badge]][rustc-url]
 
-[azure-badge]: https://dev.azure.com/taiki-e/taiki-e/_apis/build/status/taiki-e.pin-project?branchName=master
-[azure-url]: https://dev.azure.com/taiki-e/taiki-e/_build/latest?definitionId=13&branchName=master
-[crates-version-badge]: https://img.shields.io/crates/v/pin-project.svg
-[crates-license-badge]: https://img.shields.io/crates/l/pin-project.svg
 [crates-badge]: https://img.shields.io/crates/v/pin-project.svg
 [crates-url]: https://crates.io/crates/pin-project/
 [docs-badge]: https://docs.rs/pin-project/badge.svg
 [docs-url]: https://docs.rs/pin-project/
+[license-badge]: https://img.shields.io/crates/l/pin-project.svg
+[license]: #license
 [rustc-badge]: https://img.shields.io/badge/rustc-1.33+-lightgray.svg
 [rustc-url]: https://blog.rust-lang.org/2019/02/28/Rust-1.33.0.html
 
