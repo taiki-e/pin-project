@@ -1,0 +1,153 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+      - staging
+      - trying
+  schedule:
+    - cron: 00 01 * * * # Daily
+
+jobs:
+  test:
+    name: test
+    runs-on: ${{ matrix.os }}
+    env:
+      RUSTFLAGS: -Dwarnings
+    strategy:
+      fail-fast: false
+      matrix:
+        build:
+          # This is the minimum Rust version supported by pin-project.
+          # When updating this, the reminder to update the minimum supported
+          # Rust version in README.md.
+          #
+          # Tests are not run as tests may require newer versions of Rust.
+          - 1.33.0
+          - stable
+          - beta
+          - nightly
+          # pin-project itself has no platform-dependent implementation.
+          # macOS is only used to check that pin-project can interoperate
+          # correctly with `#[cfg()]`.
+          - macos
+          # - windows
+        include:
+          - build: 1.33.0
+            os: ubuntu-latest
+            rust: 1.33.0
+          - build: stable
+            os: ubuntu-latest
+            rust: stable
+          - build: beta
+            os: ubuntu-latest
+            rust: beta
+          - build: nightly
+            os: ubuntu-latest
+            rust: nightly
+          - build: macos
+            os: macOS-latest
+            rust: nightly
+          # - build: windows
+          #   os: windows-latest
+          #   rust: nightly
+    steps:
+      - uses: actions/checkout@master
+      - name: Install Rust (rustup)
+        if: matrix.os != 'macos-latest'
+        run: |
+          set -e
+          rustup update ${{ matrix.rust }} --no-self-update && rustup default ${{ matrix.rust }}
+      - name: Install Rust (macos)
+        if: matrix.os == 'macos-latest'
+        run: |
+          set -e
+          curl https://sh.rustup.rs | sh -s -- -y --default-toolchain ${{ matrix.rust }}
+          echo "##[add-path]$HOME/.cargo/bin"
+      - name: cargo check
+        if: matrix.rust == '1.33.0'
+        run: |
+          cargo check --all
+      - name: cargo test
+        if: matrix.rust != '1.33.0'
+        run: |
+          cargo test --all
+      - name: compiletest
+        if: matrix.rust == 'nightly'
+        run: |
+          cargo test -p pin-project --all-features --test compiletest
+        env:
+          RUSTFLAGS: -Dwarnings --cfg compiletest --cfg pin_project_show_unpin_struct
+      - name: cargo test --cfg pin_project_show_unpin_struct
+        if: matrix.rust == 'nightly'
+        run: |
+          cargo test --all --all-features
+        env:
+          RUSTFLAGS: -Dwarnings --cfg pin_project_show_unpin_struct
+      - name: cargo check -Zallow-features
+        if: matrix.rust == 'nightly'
+        run: |
+          cargo check --all --all-features
+        env:
+          RUSTFLAGS: -Dwarnings --cfg pin_project_show_unpin_struct -Zallow-features=proc_macro_hygiene,stmt_expr_attributes
+      # Refs: https://github.com/rust-lang/cargo/issues/5657
+      - name: cargo check -Zminimal-versions
+        if: matrix.rust == 'nightly'
+        run: |
+          cargo update -Zminimal-versions
+          cargo check --all --all-features
+
+  style:
+    name: style
+    runs-on: ubuntu-latest
+    env:
+      RUSTFLAGS: -Dwarnings
+    strategy:
+      fail-fast: false
+      matrix:
+        component:
+          - clippy
+          - rustfmt
+          - rustdoc
+    steps:
+      - uses: actions/checkout@master
+      - name: Install Rust
+        run: |
+          set -e
+          rustup update nightly && rustup default nightly
+      - name: Install ${{ matrix.component }}
+        if: matrix.component != 'rustdoc'
+        run: |
+          set +e
+          if rustup component add ${{ matrix.component }}; then
+            set -e
+          else
+            set -e
+            # If the component is unavailable on the latest nightly,
+            # use the latest toolchain with the component available.
+            # Refs: https://github.com/rust-lang/rustup-components-history#the-web-part
+            component=${{ matrix.component }}
+            target=`curl https://rust-lang.github.io/rustup-components-history/x86_64-unknown-linux-gnu/$component`
+            echo "'$component' is unavailable on the toolchain 'nightly', use the toolchain 'nightly-$target' instead"
+            rustup toolchain install nightly-$target
+            rustup default nightly-$target
+            rustup component add $component
+          fi
+      - name: cargo clippy
+        if: matrix.component == 'clippy'
+        run: |
+          cargo clippy -V
+          cargo clippy --all --all-features
+      - name: cargo fmt -- --check
+        if: matrix.component == 'rustfmt'
+        run: |
+          rustfmt -V
+          cargo fmt --all -- --check
+      - name: cargo doc
+        if: matrix.component == 'rustdoc'
+        run: |
+          cargo doc --no-deps --all --all-features
+        env:
+          RUSTDOCFLAGS: -Dwarnings
