@@ -41,7 +41,3 @@ error[E0277]: the trait bound `std::marker::PhantomPinned: std::marker::Unpin` i
              <std::marker::PhantomPinned as std::marker::Unpin>
    = note: required because it appears within the type `UnpinStructTrivialBounds<'_>`
    = note: required because of the requirements on the impl of `std::marker::Unpin` for `TrivialBounds`
-
-error: aborting due to 3 previous errors
-
-For more information about this error, try `rustc --explain E0277`.

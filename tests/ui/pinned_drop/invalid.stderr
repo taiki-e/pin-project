@@ -1,83 +1,79 @@
 error: unexpected token
-  --> $DIR/invalid.rs:12:15
+  --> $DIR/invalid.rs:11:15
    |
-12 | #[pinned_drop(foo)] //~ ERROR unexpected token
+11 | #[pinned_drop(foo)] //~ ERROR unexpected token
    |               ^^^
 
 error: #[pinned_drop] may only be used on implementation for the `PinnedDrop` trait
-  --> $DIR/invalid.rs:24:6
+  --> $DIR/invalid.rs:23:6
    |
-24 | impl Drop for B {
+23 | impl Drop for B {
    |      ^^^^
 
 error: #[pinned_drop] may only be used on implementation for the `PinnedDrop` trait
-  --> $DIR/invalid.rs:36:6
+  --> $DIR/invalid.rs:35:6
    |
-36 | impl C {
+35 | impl C {
    |      ^
 
 error: method `drop` must take an argument `self: Pin<&mut Self>`
-  --> $DIR/invalid.rs:49:13
+  --> $DIR/invalid.rs:48:13
    |
-49 |     fn drop(&mut self) {} //~ ERROR method `drop` must take an argument `self: Pin<&mut Self>`
+48 |     fn drop(&mut self) {} //~ ERROR method `drop` must take an argument `self: Pin<&mut Self>`
    |             ^^^^^^^^^
 
 error: method `drop_baz` is not a member of trait `PinnedDrop
-  --> $DIR/invalid.rs:60:8
+  --> $DIR/invalid.rs:59:8
    |
-60 |     fn drop_baz(&mut self) {} //~ ERROR method `drop_baz` is not a member of trait `PinnedDrop
+59 |     fn drop_baz(&mut self) {} //~ ERROR method `drop_baz` is not a member of trait `PinnedDrop
    |        ^^^^^^^^
 
 error: implementing the trait `PinnedDrop` is not unsafe
-  --> $DIR/invalid.rs:70:1
+  --> $DIR/invalid.rs:69:1
    |
-70 | unsafe impl PinnedDrop for F {
+69 | unsafe impl PinnedDrop for F {
    | ^^^^^^
 
 error: implementing the method `drop` is not unsafe
-  --> $DIR/invalid.rs:83:5
+  --> $DIR/invalid.rs:82:5
    |
-83 |     unsafe fn drop(self: Pin<&mut Self>) {} //~ ERROR implementing the method `drop` is not unsafe
+82 |     unsafe fn drop(self: Pin<&mut Self>) {} //~ ERROR implementing the method `drop` is not unsafe
    |     ^^^^^^
 
 error: const `A` is not a member of trait `PinnedDrop`
-  --> $DIR/invalid.rs:94:5
+  --> $DIR/invalid.rs:93:5
    |
-94 |     const A: u8 = 0; //~ ERROR const `A` is not a member of trait `PinnedDrop`
+93 |     const A: u8 = 0; //~ ERROR const `A` is not a member of trait `PinnedDrop`
    |     ^^^^^^^^^^^^^^^^
 
 error: const `A` is not a member of trait `PinnedDrop`
-   --> $DIR/invalid.rs:107:5
+   --> $DIR/invalid.rs:106:5
     |
-107 |     const A: u8 = 0; //~ ERROR const `A` is not a member of trait `PinnedDrop`
+106 |     const A: u8 = 0; //~ ERROR const `A` is not a member of trait `PinnedDrop`
     |     ^^^^^^^^^^^^^^^^
 
 error: type `A` is not a member of trait `PinnedDrop`
-   --> $DIR/invalid.rs:118:5
+   --> $DIR/invalid.rs:117:5
     |
-118 |     type A = u8; //~ ERROR type `A` is not a member of trait `PinnedDrop`
+117 |     type A = u8; //~ ERROR type `A` is not a member of trait `PinnedDrop`
     |     ^^^^^^^^^^^^
 
 error: type `A` is not a member of trait `PinnedDrop`
-   --> $DIR/invalid.rs:131:5
+   --> $DIR/invalid.rs:130:5
     |
-131 |     type A = u8; //~ ERROR type `A` is not a member of trait `PinnedDrop`
+130 |     type A = u8; //~ ERROR type `A` is not a member of trait `PinnedDrop`
     |     ^^^^^^^^^^^^
 
 error: duplicate definitions with name `drop`
-   --> $DIR/invalid.rs:143:5
+   --> $DIR/invalid.rs:142:5
     |
-143 |     fn drop(self: Pin<&mut Self>) {} //~ ERROR duplicate definitions with name `drop`
+142 |     fn drop(self: Pin<&mut Self>) {} //~ ERROR duplicate definitions with name `drop`
     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error[E0277]: the trait bound `A: pin_project::__private::PinnedDrop` is not satisfied
- --> $DIR/invalid.rs:6:15
+ --> $DIR/invalid.rs:5:15
   |
-6 | #[pin_project(PinnedDrop)] //~ ERROR E0277
+5 | #[pin_project(PinnedDrop)] //~ ERROR E0277
   |               ^^^^^^^^^^ the trait `pin_project::__private::PinnedDrop` is not implemented for `A`
   |
   = note: required by `pin_project::__private::PinnedDrop::drop`
-
-error: aborting due to 13 previous errors
-
-For more information about this error, try `rustc --explain E0277`.

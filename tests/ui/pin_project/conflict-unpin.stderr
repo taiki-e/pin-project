@@ -1,30 +1,26 @@
 error[E0119]: conflicting implementations of trait `std::marker::Unpin` for type `Foo<_, _>`:
-  --> $DIR/conflict-unpin.rs:8:1
+  --> $DIR/conflict-unpin.rs:7:1
    |
-8  | #[pin_project] //~ ERROR E0119
+7  | #[pin_project] //~ ERROR E0119
    | ^^^^^^^^^^^^^^ conflicting implementation for `Foo<_, _>`
 ...
-16 | impl<T, U> Unpin for Foo<T, U> where T: Unpin {} // Conditional Unpin impl
+15 | impl<T, U> Unpin for Foo<T, U> where T: Unpin {} // Conditional Unpin impl
    | --------------------------------------------- first implementation here
 
 error[E0119]: conflicting implementations of trait `std::marker::Unpin` for type `Bar<_, _>`:
-  --> $DIR/conflict-unpin.rs:20:1
+  --> $DIR/conflict-unpin.rs:19:1
    |
-20 | #[pin_project] //~ ERROR E0119
+19 | #[pin_project] //~ ERROR E0119
    | ^^^^^^^^^^^^^^ conflicting implementation for `Bar<_, _>`
 ...
-28 | impl<T, U> Unpin for Bar<T, U> {} // Non-conditional Unpin impl
+27 | impl<T, U> Unpin for Bar<T, U> {} // Non-conditional Unpin impl
    | ------------------------------ first implementation here
 
 error[E0119]: conflicting implementations of trait `std::marker::Unpin` for type `Baz<_, _>`:
-  --> $DIR/conflict-unpin.rs:30:1
+  --> $DIR/conflict-unpin.rs:29:1
    |
-30 | #[pin_project] //~ ERROR E0119
+29 | #[pin_project] //~ ERROR E0119
    | ^^^^^^^^^^^^^^ conflicting implementation for `Baz<_, _>`
 ...
-38 | impl<T: Unpin, U: Unpin> Unpin for Baz<T, U> {} // Conditional Unpin impl
+37 | impl<T: Unpin, U: Unpin> Unpin for Baz<T, U> {} // Conditional Unpin impl
    | -------------------------------------------- first implementation here
-
-error: aborting due to 3 previous errors
-
-For more information about this error, try `rustc --explain E0119`.

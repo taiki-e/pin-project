@@ -69,7 +69,3 @@ error[E0277]: the trait bound `std::marker::PhantomPinned: std::marker::Unpin` i
    = note: required because of the requirements on the impl of `pin_project::UnsafeUnpin` for `OverlappingLifetimeNames<'_, (), std::marker::PhantomPinned>`
    = note: required because of the requirements on the impl of `pin_project::UnsafeUnpin` for `pin_project::__private::Wrapper<'_, OverlappingLifetimeNames<'_, (), std::marker::PhantomPinned>>`
    = note: required because of the requirements on the impl of `std::marker::Unpin` for `OverlappingLifetimeNames<'_, (), std::marker::PhantomPinned>`
-
-error: aborting due to 5 previous errors
-
-For more information about this error, try `rustc --explain E0277`.

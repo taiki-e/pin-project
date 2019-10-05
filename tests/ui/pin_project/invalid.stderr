@@ -51,6 +51,3 @@ error: duplicate `PinnedDrop` argument
    |
 51 | #[pin_project(PinnedDrop, UnsafeUnpin, PinnedDrop, PinnedDrop)] //~ ERROR duplicate `PinnedDrop` argument
    |                                        ^^^^^^^^^^
-
-error: aborting due to 9 previous errors
-

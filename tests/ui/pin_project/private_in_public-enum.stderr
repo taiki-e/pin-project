@@ -15,7 +15,3 @@ error[E0446]: private type `foo::PrivateEnum` in public interface
 ...
 20 |     enum PrivateEnum {
    |     - `foo::PrivateEnum` declared as private
-
-error: aborting due to 2 previous errors
-
-For more information about this error, try `rustc --explain E0446`.

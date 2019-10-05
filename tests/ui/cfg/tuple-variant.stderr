@@ -3,6 +3,3 @@ error: `cfg` attributes on the field of tuple variants are not supported
    |
 13 |         #[cfg(not(any()))] //~ ERROR `cfg` attributes on the field of tuple variants are not supported
    |         ^^^^^^^^^^^^^^^^^^
-
-error: aborting due to previous error
-

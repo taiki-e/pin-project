@@ -8,4 +8,5 @@
 # . ./compiletest.sh
 # ```
 
-rm -rf target/debug/deps/libpin_project* && RUSTFLAGS='--cfg compiletest --cfg pin_project_show_unpin_struct' cargo +nightly test -p pin-project --all-features --test compiletest
+TRYBUILD=overwrite RUSTFLAGS='--cfg compiletest --cfg pin_project_show_unpin_struct' cargo +nightly test -p pin-project --all-features --test compiletest
+# RUSTFLAGS='--cfg compiletest --cfg pin_project_show_unpin_struct' cargo +nightly test -p pin-project --all-features --test compiletest

@@ -6,7 +6,3 @@ error[E0119]: conflicting implementations of trait `std::marker::Unpin` for type
 ...
 21 | impl<T> Unpin for Foo<T> {}
    | ------------------------ first implementation here
-
-error: aborting due to previous error
-
-For more information about this error, try `rustc --explain E0119`.

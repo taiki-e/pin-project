@@ -1,7 +1,6 @@
 // compile-fail
 
 use pin_project::pin_project;
-use std::pin::Pin;
 
 // The same implementation.
 

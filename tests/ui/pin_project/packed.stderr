@@ -15,6 +15,3 @@ error: #[pin_project] attribute may not be used on #[repr(packed)] types
    |
 21 | #[repr(packed(2))] //~ ERROR may not be used on #[repr(packed)] types
    |        ^^^^^^^^^
-
-error: aborting due to 3 previous errors
-
