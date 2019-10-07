@@ -198,13 +198,13 @@ use utils::{Immutable, Mutable};
 ///
 /// ```rust
 /// use pin_project::{pin_project, pinned_drop};
-/// use std::fmt::Debug;
-/// use std::pin::Pin;
+/// use std::{fmt::Debug, pin::Pin};
 ///
 /// #[pin_project(PinnedDrop)]
 /// pub struct Foo<T: Debug, U: Debug> {
-///     #[pin] pinned_field: T,
-///     unpin_field: U
+///     #[pin]
+///     pinned_field: T,
+///     unpin_field: U,
 /// }
 ///
 /// #[pinned_drop]
@@ -278,7 +278,7 @@ use utils::{Immutable, Mutable};
 /// a dummy `#[project]` attribute for the function.
 ///
 /// ```rust
-/// use pin_project::{project, pin_project};
+/// use pin_project::{pin_project, project};
 /// use std::pin::Pin;
 ///
 /// #[pin_project]
@@ -340,7 +340,8 @@ pub fn pin_project(args: TokenStream, input: TokenStream) -> TokenStream {
 ///
 /// #[pin_project(PinnedDrop)]
 /// struct Foo {
-///     #[pin] field: u8
+///     #[pin]
+///     field: u8,
 /// }
 ///
 /// #[pinned_drop]
@@ -450,7 +451,7 @@ pub fn pinned_drop(args: TokenStream, input: TokenStream) -> TokenStream {
 /// ### Examples
 ///
 /// ```rust
-/// use pin_project::{project, pin_project};
+/// use pin_project::{pin_project, project};
 /// use std::pin::Pin;
 ///
 /// #[pin_project]
