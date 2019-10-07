@@ -108,7 +108,7 @@ pub use pin_project_internal::project_ref;
 /// struct Foo<K, V> {
 ///     #[pin]
 ///     field_1: K,
-///     field_2: V
+///     field_2: V,
 /// }
 ///
 /// unsafe impl<K, V> UnsafeUnpin for Foo<K, V> where K: Unpin + Clone {}
