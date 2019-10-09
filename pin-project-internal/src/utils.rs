@@ -27,7 +27,7 @@ pub(crate) fn proj_ident(ident: &Ident, mutability: Mutability) -> Ident {
 }
 
 /// Determines the lifetime names. Ensure it doesn't overlap with any existing lifetime names.
-pub(crate) fn proj_lifetime_name(
+pub(crate) fn determine_lifetime_name(
     lifetime_name: &mut String,
     generics: &Punctuated<GenericParam, Comma>,
 ) {
@@ -46,8 +46,8 @@ pub(crate) fn proj_lifetime_name(
     }
 }
 
-/// Creates the generics of projected type from the generics of the original type.
-pub(crate) fn proj_generics(generics: &mut Generics, lifetime: Lifetime) {
+/// Inserts a `lifetime` at position `0` of `generics.params`.
+pub(crate) fn insert_lifetime(generics: &mut Generics, lifetime: Lifetime) {
     if generics.lt_token.is_none() {
         generics.lt_token = Some(token::Lt::default())
     }

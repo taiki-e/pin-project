@@ -7,7 +7,7 @@ use syn::{
 };
 
 use crate::utils::{
-    proj_generics, proj_ident, proj_lifetime_name, Mutability, Mutable, VecExt,
+    determine_lifetime_name, insert_lifetime, proj_ident, Mutability, Mutable, VecExt,
     DEFAULT_LIFETIME_NAME,
 };
 
@@ -141,14 +141,14 @@ fn replace_item_impl(item: &mut ItemImpl, mutability: Mutability) {
     replace_ident(ident, mutability);
 
     let mut lifetime_name = String::from(DEFAULT_LIFETIME_NAME);
-    proj_lifetime_name(&mut lifetime_name, &item.generics.params);
+    determine_lifetime_name(&mut lifetime_name, &item.generics.params);
     item.items
         .iter_mut()
         .filter_map(|i| if let ImplItem::Method(i) = i { Some(i) } else { None })
-        .for_each(|item| proj_lifetime_name(&mut lifetime_name, &item.sig.generics.params));
+        .for_each(|item| determine_lifetime_name(&mut lifetime_name, &item.sig.generics.params));
     let lifetime = Lifetime::new(&lifetime_name, Span::call_site());
 
-    proj_generics(&mut item.generics, syn::parse_quote!(#lifetime));
+    insert_lifetime(&mut item.generics, lifetime.clone());
 
     match arguments {
         PathArguments::None => {
