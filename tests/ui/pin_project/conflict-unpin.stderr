@@ -1,26 +1,26 @@
 error[E0119]: conflicting implementations of trait `std::marker::Unpin` for type `Foo<_, _>`:
-  --> $DIR/conflict-unpin.rs:7:1
+  --> $DIR/conflict-unpin.rs:5:1
    |
-7  | #[pin_project] //~ ERROR E0119
+5  | #[pin_project] //~ ERROR E0119
    | ^^^^^^^^^^^^^^ conflicting implementation for `Foo<_, _>`
 ...
-15 | impl<T, U> Unpin for Foo<T, U> where T: Unpin {} // Conditional Unpin impl
+13 | impl<T, U> Unpin for Foo<T, U> where T: Unpin {} // Conditional Unpin impl
    | --------------------------------------------- first implementation here
 
 error[E0119]: conflicting implementations of trait `std::marker::Unpin` for type `Bar<_, _>`:
-  --> $DIR/conflict-unpin.rs:19:1
+  --> $DIR/conflict-unpin.rs:17:1
    |
-19 | #[pin_project] //~ ERROR E0119
+17 | #[pin_project] //~ ERROR E0119
    | ^^^^^^^^^^^^^^ conflicting implementation for `Bar<_, _>`
 ...
-27 | impl<T, U> Unpin for Bar<T, U> {} // Non-conditional Unpin impl
+25 | impl<T, U> Unpin for Bar<T, U> {} // Non-conditional Unpin impl
    | ------------------------------ first implementation here
 
 error[E0119]: conflicting implementations of trait `std::marker::Unpin` for type `Baz<_, _>`:
-  --> $DIR/conflict-unpin.rs:29:1
+  --> $DIR/conflict-unpin.rs:27:1
    |
-29 | #[pin_project] //~ ERROR E0119
+27 | #[pin_project] //~ ERROR E0119
    | ^^^^^^^^^^^^^^ conflicting implementation for `Baz<_, _>`
 ...
-37 | impl<T: Unpin, U: Unpin> Unpin for Baz<T, U> {} // Conditional Unpin impl
+35 | impl<T: Unpin, U: Unpin> Unpin for Baz<T, U> {} // Conditional Unpin impl
    | -------------------------------------------- first implementation here

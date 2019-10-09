@@ -1,5 +1,3 @@
-// compile-fail
-
 // NB: If you change this test, change 'trivial_bounds.rs' at the same time.
 
 use std::marker::{PhantomData, PhantomPinned};

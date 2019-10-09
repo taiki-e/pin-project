@@ -1,5 +1,3 @@
-// compile-fail
-
 // NB: If you change this test, change 'marker_trait_attr-feature-gate.rs' at the same time.
 
 // marker_trait_attr

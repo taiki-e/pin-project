@@ -1,5 +1,3 @@
-// compile-fail
-
 #[macro_use]
 extern crate auxiliary_macros;
 

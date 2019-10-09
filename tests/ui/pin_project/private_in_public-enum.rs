@@ -1,5 +1,3 @@
-// compile-fail
-
 // Even if allows private_in_public, these are errors.
 
 #![allow(private_in_public)]

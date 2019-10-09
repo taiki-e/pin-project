@@ -1,8 +1,8 @@
 error[E0119]: conflicting implementations of trait `std::marker::Unpin` for type `Foo<_>`:
-  --> $DIR/overlapping_marker_traits-feature-gate.rs:8:1
+  --> $DIR/overlapping_marker_traits-feature-gate.rs:6:1
    |
-8  | #[pin_project] //~ ERROR E0119
+6  | #[pin_project] //~ ERROR E0119
    | ^^^^^^^^^^^^^^ conflicting implementation for `Foo<_>`
 ...
-15 | impl<T> Unpin for Foo<T> {}
+13 | impl<T> Unpin for Foo<T> {}
    | ------------------------ first implementation here

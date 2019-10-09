@@ -1,5 +1,3 @@
-// run-pass
-
 // NB: If you change this test, change 'trivial_bounds-feature-gate.rs' at the same time.
 
 // trivial_bounds

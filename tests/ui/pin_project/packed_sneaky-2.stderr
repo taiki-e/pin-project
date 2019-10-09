@@ -1,13 +1,13 @@
 error: #[pin_project] attribute may not be used on #[repr(packed)] types
-  --> $DIR/packed_sneaky-2.rs:8:1
+  --> $DIR/packed_sneaky-2.rs:6:1
    |
-8  | / hidden_repr_macro! { //~ ERROR may not be used on #[repr(packed)] types
-9  | |     #[pin_project]
-10 | |     struct B {
-11 | |         #[pin]
-12 | |         field: u32,
-13 | |     }
-14 | | }
+6  | / hidden_repr_macro! { //~ ERROR may not be used on #[repr(packed)] types
+7  | |     #[pin_project]
+8  | |     struct B {
+9  | |         #[pin]
+10 | |         field: u32,
+11 | |     }
+12 | | }
    | | ^ in this macro invocation
    | |_|
    |
