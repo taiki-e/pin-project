@@ -194,16 +194,16 @@ pub mod __private {
     // to making the type never implement Unpin), or provide an impl of `UnsafeUnpin`.
     // It is impossible for them to provide an impl of `Unpin`
     #[doc(hidden)]
-    pub struct Wrapper<'a, T>(T, PhantomData<&'a ()>);
+    pub struct Wrapper<'a, T: ?Sized>(PhantomData<&'a ()>, T);
 
     #[allow(unsafe_code)]
-    unsafe impl<T> UnsafeUnpin for Wrapper<'_, T> where T: UnsafeUnpin {}
+    unsafe impl<T: ?Sized> UnsafeUnpin for Wrapper<'_, T> where T: UnsafeUnpin {}
 
     // This is an internal helper struct used by `pin-project-internal`.
     //
     // See https://github.com/taiki-e/pin-project/pull/53 for more details.
     #[doc(hidden)]
-    pub struct AlwaysUnpin<'a, T: ?Sized>(PhantomData<T>, PhantomData<&'a ()>);
+    pub struct AlwaysUnpin<'a, T: ?Sized>(PhantomData<&'a ()>, PhantomData<T>);
 
     impl<T: ?Sized> Unpin for AlwaysUnpin<'_, T> {}
 }
