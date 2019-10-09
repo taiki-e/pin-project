@@ -2,7 +2,9 @@ use proc_macro2::{Span, TokenStream};
 use quote::{format_ident, quote};
 use syn::{parse::Nothing, *};
 
-use crate::utils::{self, proj_lifetime_name, Variants, VecExt, DEFAULT_LIFETIME_NAME};
+use crate::utils::{
+    determine_lifetime_name, insert_lifetime, Variants, VecExt, DEFAULT_LIFETIME_NAME,
+};
 
 use super::PIN;
 
@@ -44,7 +46,7 @@ struct DeriveContext {
 impl DeriveContext {
     fn new(ident: Ident, vis: Visibility, generics: Generics) -> Self {
         let mut lifetime_name = String::from(DEFAULT_LIFETIME_NAME);
-        proj_lifetime_name(&mut lifetime_name, &generics.params);
+        determine_lifetime_name(&mut lifetime_name, &generics.params);
         let lifetime = Lifetime::new(&lifetime_name, Span::call_site());
 
         Self { ident, vis, generics, lifetime, pinned_fields: Vec::new() }
@@ -53,7 +55,7 @@ impl DeriveContext {
     /// Creates the generics of projected type.
     fn proj_generics(&self) -> Generics {
         let mut generics = self.generics.clone();
-        utils::proj_generics(&mut generics, self.lifetime.clone());
+        insert_lifetime(&mut generics, self.lifetime.clone());
         generics
     }
 
@@ -94,11 +96,7 @@ impl DeriveContext {
             }
         };
 
-        let struct_ident = if cfg!(proc_macro_def_site) {
-            format_ident!("UnpinStruct{}", orig_ident, span = make_span())
-        } else {
-            format_ident!("__UnpinStruct{}", orig_ident)
-        };
+        let struct_ident = format_ident!("UnpinStruct{}", orig_ident, span = make_span());
 
         // Generate a field in our new struct for every
         // pinned field in the original type.

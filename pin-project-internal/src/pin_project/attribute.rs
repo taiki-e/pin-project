@@ -7,8 +7,8 @@ use syn::{
 };
 
 use crate::utils::{
-    self, collect_cfg, determine_visibility, proj_ident, proj_lifetime_name, Immutable, Mutable,
-    Variants, VecExt, DEFAULT_LIFETIME_NAME,
+    collect_cfg, determine_lifetime_name, determine_visibility, insert_lifetime, proj_ident,
+    Immutable, Mutable, Variants, VecExt, DEFAULT_LIFETIME_NAME,
 };
 
 use super::PIN;
@@ -133,7 +133,7 @@ impl Context {
         }
 
         let mut lifetime_name = String::from(DEFAULT_LIFETIME_NAME);
-        proj_lifetime_name(&mut lifetime_name, &generics.params);
+        determine_lifetime_name(&mut lifetime_name, &generics.params);
         let lifetime = Lifetime::new(&lifetime_name, Span::call_site());
 
         Ok(Self {
@@ -151,7 +151,7 @@ impl Context {
     /// Creates the generics of projected type.
     fn proj_generics(&self) -> Generics {
         let mut generics = self.generics.clone();
-        utils::proj_generics(&mut generics, self.lifetime.clone());
+        insert_lifetime(&mut generics, self.lifetime.clone());
         generics
     }
 
