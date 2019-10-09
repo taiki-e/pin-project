@@ -59,7 +59,7 @@ pub use pin_project_internal::pinned_drop;
 #[doc(inline)]
 pub use pin_project_internal::project;
 
-#[doc(hidden)]
+#[doc(inline)]
 pub use pin_project_internal::project_ref;
 
 /// A trait used for custom implementations of [`Unpin`].
