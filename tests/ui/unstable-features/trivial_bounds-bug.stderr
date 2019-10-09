@@ -1,0 +1,9 @@
+error[E0277]: the trait bound `std::marker::PhantomPinned: std::marker::Unpin` is not satisfied
+  --> $DIR/trivial_bounds-bug.rs:13:5
+   |
+13 |     impl Unpin for Foo where PhantomPinned: Unpin {} //~ ERROR E0277
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `std::marker::Unpin` is not implemented for `std::marker::PhantomPinned`
+   |
+   = help: the following implementations were found:
+             <std::marker::PhantomPinned as std::marker::Unpin>
+   = note: required by `std::marker::Unpin`

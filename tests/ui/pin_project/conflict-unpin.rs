@@ -1,5 +1,3 @@
-// compile-fail
-
 use pin_project::pin_project;
 
 // The same implementation.

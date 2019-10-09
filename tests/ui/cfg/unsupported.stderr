@@ -1,9 +1,9 @@
 error: #[pin_project] attribute may not be used on structs with zero fields
 
 error[E0392]: parameter `'_pin` is never used
- --> $DIR/unsupported.rs:5:1
+ --> $DIR/unsupported.rs:3:1
   |
-5 | #[pin_project]
+3 | #[pin_project]
   | ^^^^^^^^^^^^^^ unused parameter
   |
   = help: consider removing `'_pin`, referring to it in a field, or using a marker such as `std::marker::PhantomData`

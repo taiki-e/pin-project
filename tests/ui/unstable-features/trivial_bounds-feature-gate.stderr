@@ -1,0 +1,47 @@
+error[E0277]: the trait bound `std::marker::PhantomPinned: std::marker::Unpin` is not satisfied
+ --> $DIR/trivial_bounds-feature-gate.rs:8:5
+  |
+8 |     impl Unpin for Foo where PhantomPinned: Unpin {} //~ ERROR E0277
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `std::marker::Unpin` is not implemented for `std::marker::PhantomPinned`
+  |
+  = help: the following implementations were found:
+            <std::marker::PhantomPinned as std::marker::Unpin>
+  = help: see issue #48214
+  = help: add `#![feature(trivial_bounds)]` to the crate attributes to enable
+
+error[E0277]: the trait bound `std::marker::PhantomPinned: std::marker::Unpin` is not satisfied
+  --> $DIR/trivial_bounds-feature-gate.rs:16:5
+   |
+16 |     impl Unpin for Bar where Wrapper<PhantomPinned>: Unpin {} //~ ERROR E0277
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `std::marker::Unpin` is not implemented for `std::marker::PhantomPinned`
+   |
+   = help: the following implementations were found:
+             <std::marker::PhantomPinned as std::marker::Unpin>
+   = note: required because of the requirements on the impl of `std::marker::Unpin` for `phantom_pinned::Wrapper<std::marker::PhantomPinned>`
+   = help: see issue #48214
+   = help: add `#![feature(trivial_bounds)]` to the crate attributes to enable
+
+error[E0277]: the trait bound `std::marker::PhantomPinned: std::marker::Unpin` is not satisfied in `inner::Inner`
+  --> $DIR/trivial_bounds-feature-gate.rs:33:5
+   |
+33 |     impl Unpin for Foo where Inner: Unpin {} //~ ERROR E0277
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ within `inner::Inner`, the trait `std::marker::Unpin` is not implemented for `std::marker::PhantomPinned`
+   |
+   = help: the following implementations were found:
+             <std::marker::PhantomPinned as std::marker::Unpin>
+   = note: required because it appears within the type `inner::Inner`
+   = help: see issue #48214
+   = help: add `#![feature(trivial_bounds)]` to the crate attributes to enable
+
+error[E0277]: the trait bound `std::marker::PhantomPinned: std::marker::Unpin` is not satisfied in `inner::Inner`
+  --> $DIR/trivial_bounds-feature-gate.rs:41:5
+   |
+41 |     impl Unpin for Bar where Wrapper<Inner>: Unpin {} //~ ERROR E0277
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ within `inner::Inner`, the trait `std::marker::Unpin` is not implemented for `std::marker::PhantomPinned`
+   |
+   = help: the following implementations were found:
+             <std::marker::PhantomPinned as std::marker::Unpin>
+   = note: required because it appears within the type `inner::Inner`
+   = note: required because of the requirements on the impl of `std::marker::Unpin` for `inner::Wrapper<inner::Inner>`
+   = help: see issue #48214
+   = help: add `#![feature(trivial_bounds)]` to the crate attributes to enable

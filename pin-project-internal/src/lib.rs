@@ -9,7 +9,7 @@
 #![warn(unsafe_code)]
 #![warn(rust_2018_idioms, single_use_lifetimes, unreachable_pub)]
 #![warn(clippy::all, clippy::pedantic)]
-#![allow(clippy::use_self)]
+#![allow(clippy::use_self, clippy::needless_doctest_main)]
 #![cfg_attr(proc_macro_def_site, feature(proc_macro_def_site))]
 
 extern crate proc_macro;
@@ -216,7 +216,7 @@ use utils::{Immutable, Mutable};
 /// }
 ///
 /// fn main() {
-///     Foo { pinned_field: true, unpin_field: 40 };
+///     let _x = Foo { pinned_field: true, unpin_field: 40 };
 /// }
 /// ```
 ///
@@ -352,7 +352,7 @@ pub fn pin_project(args: TokenStream, input: TokenStream) -> TokenStream {
 /// }
 ///
 /// fn main() {
-///     Foo { field: 50 };
+///     let _x = Foo { field: 50 };
 /// }
 /// ```
 ///

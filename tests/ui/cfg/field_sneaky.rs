@@ -1,5 +1,3 @@
-// compile-fail
-
 #![feature(optin_builtin_traits)]
 #![feature(trivial_bounds)]
 

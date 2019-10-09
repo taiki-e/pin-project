@@ -1,11 +1,11 @@
 error: Both initializer expression and pattern are replaceable, you need to split the initializer expression into separate let bindings to avoid ambiguity
-  --> $DIR/ambiguous-let.rs:18:9
+  --> $DIR/ambiguous-let.rs:16:9
    |
-18 |     let Struct(x) = match Pin::new(&mut foo).project() {
+16 |     let Struct(x) = match Pin::new(&mut foo).project() {
    |         ^^^^^^^^^
 
 error[E0425]: cannot find value `x` in this scope
-  --> $DIR/ambiguous-let.rs:23:13
+  --> $DIR/ambiguous-let.rs:21:13
    |
-23 |     assert!(x);
+21 |     assert!(x);
    |             ^ not found in this scope

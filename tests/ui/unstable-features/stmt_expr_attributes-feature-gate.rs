@@ -1,5 +1,3 @@
-// compile-fail
-
 // NB: If you change this test, change 'stmt_expr_attributes.rs' at the same time.
 
 use pin_project::{pin_project, project};

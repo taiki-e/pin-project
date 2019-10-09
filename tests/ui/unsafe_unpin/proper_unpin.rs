@@ -1,5 +1,3 @@
-// compile-fail
-
 use pin_project::{pin_project, UnsafeUnpin};
 use std::marker::PhantomPinned;
 
@@ -16,7 +14,7 @@ pub struct Blah<T, U> {
 unsafe impl<T: Unpin, U> UnsafeUnpin for Blah<T, U> {}
 
 #[pin_project(UnsafeUnpin)]
-pub struct NotImplementUnsafUnpin {
+pub struct TrivialBounds {
     #[pin]
     field1: PhantomPinned,
 }
@@ -38,7 +36,7 @@ fn unsafe_unpin() {
     is_unpin::<Blah<(), PhantomPinned>>(); // Ok
     is_unpin::<Blah<PhantomPinned, PhantomPinned>>(); //~ ERROR E0277
 
-    is_unpin::<NotImplementUnsafUnpin>(); //~ ERROR E0277
+    is_unpin::<TrivialBounds>(); //~ ERROR E0277
 
     is_unpin::<OverlappingLifetimeNames<'_, PhantomPinned, ()>>(); //~ ERROR E0277
     is_unpin::<OverlappingLifetimeNames<'_, (), PhantomPinned>>(); //~ ERROR E0277

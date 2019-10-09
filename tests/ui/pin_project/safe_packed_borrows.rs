@@ -1,5 +1,3 @@
-// compile-fail
-
 #![deny(safe_packed_borrows)]
 
 // Refs: https://github.com/rust-lang/rust/issues/46043

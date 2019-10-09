@@ -1,5 +1,5 @@
 error: `cfg` attributes on the field of tuple variants are not supported
-  --> $DIR/tuple-variant.rs:13:9
+  --> $DIR/tuple-variant.rs:11:9
    |
-13 |         #[cfg(not(any()))] //~ ERROR `cfg` attributes on the field of tuple variants are not supported
+11 |         #[cfg(not(any()))] //~ ERROR `cfg` attributes on the field of tuple variants are not supported
    |         ^^^^^^^^^^^^^^^^^^

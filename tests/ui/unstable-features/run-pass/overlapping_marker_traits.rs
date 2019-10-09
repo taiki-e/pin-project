@@ -1,5 +1,3 @@
-// run-pass
-
 // NB: If you change this test, change 'overlapping_marker_traits-feature-gate.rs' at the same time.
 
 // overlapping_marker_traits

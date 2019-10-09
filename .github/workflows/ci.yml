@@ -17,7 +17,6 @@ jobs:
     env:
       RUSTFLAGS: -Dwarnings
     strategy:
-      fail-fast: false
       matrix:
         build:
           # This is the minimum Rust version supported by pin-project.
@@ -117,7 +116,7 @@ jobs:
         run: |
           set -e
           rustup update nightly && rustup default nightly
-      - name: Install ${{ matrix.component }}
+      - name: Install component
         if: matrix.component != 'rustdoc'
         run: |
           set +e
@@ -138,12 +137,10 @@ jobs:
       - name: cargo clippy
         if: matrix.component == 'clippy'
         run: |
-          cargo clippy -V
           cargo clippy --all --all-features
       - name: cargo fmt -- --check
         if: matrix.component == 'rustfmt'
         run: |
-          rustfmt -V
           cargo fmt --all -- --check
       - name: cargo doc
         if: matrix.component == 'rustdoc'

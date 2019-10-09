@@ -1,10 +1,10 @@
 error[E0277]: the trait bound `std::marker::PhantomPinned: std::marker::Unpin` is not satisfied in `UnpinStructFoo<'_, std::marker::PhantomPinned, ()>`
-  --> $DIR/proper_unpin.rs:33:5
+  --> $DIR/proper_unpin.rs:31:5
    |
-30 | fn is_unpin<T: Unpin>() {}
+28 | fn is_unpin<T: Unpin>() {}
    |    --------    ----- required by this bound in `is_unpin`
 ...
-33 |     is_unpin::<Foo<PhantomPinned, ()>>(); //~ ERROR E0277
+31 |     is_unpin::<Foo<PhantomPinned, ()>>(); //~ ERROR E0277
    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ within `UnpinStructFoo<'_, std::marker::PhantomPinned, ()>`, the trait `std::marker::Unpin` is not implemented for `std::marker::PhantomPinned`
    |
    = help: the following implementations were found:
@@ -14,12 +14,12 @@ error[E0277]: the trait bound `std::marker::PhantomPinned: std::marker::Unpin` i
    = note: required because of the requirements on the impl of `std::marker::Unpin` for `Foo<std::marker::PhantomPinned, ()>`
 
 error[E0277]: the trait bound `std::marker::PhantomPinned: std::marker::Unpin` is not satisfied in `UnpinStructFoo<'_, std::marker::PhantomPinned, std::marker::PhantomPinned>`
-  --> $DIR/proper_unpin.rs:35:5
+  --> $DIR/proper_unpin.rs:33:5
    |
-30 | fn is_unpin<T: Unpin>() {}
+28 | fn is_unpin<T: Unpin>() {}
    |    --------    ----- required by this bound in `is_unpin`
 ...
-35 |     is_unpin::<Foo<PhantomPinned, PhantomPinned>>(); //~ ERROR E0277
+33 |     is_unpin::<Foo<PhantomPinned, PhantomPinned>>(); //~ ERROR E0277
    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ within `UnpinStructFoo<'_, std::marker::PhantomPinned, std::marker::PhantomPinned>`, the trait `std::marker::Unpin` is not implemented for `std::marker::PhantomPinned`
    |
    = help: the following implementations were found:
@@ -29,12 +29,12 @@ error[E0277]: the trait bound `std::marker::PhantomPinned: std::marker::Unpin` i
    = note: required because of the requirements on the impl of `std::marker::Unpin` for `Foo<std::marker::PhantomPinned, std::marker::PhantomPinned>`
 
 error[E0277]: the trait bound `std::marker::PhantomPinned: std::marker::Unpin` is not satisfied in `UnpinStructTrivialBounds<'_>`
-  --> $DIR/proper_unpin.rs:37:5
+  --> $DIR/proper_unpin.rs:35:5
    |
-30 | fn is_unpin<T: Unpin>() {}
+28 | fn is_unpin<T: Unpin>() {}
    |    --------    ----- required by this bound in `is_unpin`
 ...
-37 |     is_unpin::<TrivialBounds>(); //~ ERROR E0277
+35 |     is_unpin::<TrivialBounds>(); //~ ERROR E0277
    |     ^^^^^^^^^^^^^^^^^^^^^^^^^ within `UnpinStructTrivialBounds<'_>`, the trait `std::marker::Unpin` is not implemented for `std::marker::PhantomPinned`
    |
    = help: the following implementations were found:

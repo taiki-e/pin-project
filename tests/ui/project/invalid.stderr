@@ -1,5 +1,5 @@
 error: unexpected token
-  --> $DIR/invalid.rs:14:14
+  --> $DIR/invalid.rs:12:14
    |
-14 |     #[project(foo)] //~ ERROR unexpected token
+12 |     #[project(foo)] //~ ERROR unexpected token
    |              ^

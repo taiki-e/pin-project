@@ -1,5 +1,3 @@
-// run-pass
-
 // NB: If you change this test, change 'stmt_expr_attributes-feature-gate.rs' at the same time.
 
 // proc_macro_hygiene
