@@ -38,7 +38,6 @@ use syn::parse::Nothing;
 
 use utils::{Immutable, Mutable};
 
-// TODO: Move this doc into pin-project crate when https://github.com/rust-lang/rust/pull/62855 merged.
 /// An attribute that creates a projection struct covering all the fields.
 ///
 /// This attribute creates a projection struct according to the following rules:
@@ -335,7 +334,6 @@ pub fn pin_project(args: TokenStream, input: TokenStream) -> TokenStream {
     pin_project::attribute(args.into(), input).into()
 }
 
-// TODO: Move this doc into pin-project crate when https://github.com/rust-lang/rust/pull/62855 merged.
 /// An attribute for annotating an impl block that implements [`Drop`].
 ///
 /// This attribute is only needed when you wish to provide a [`Drop`]
@@ -378,7 +376,6 @@ pub fn pinned_drop(args: TokenStream, input: TokenStream) -> TokenStream {
     pinned_drop::attribute(input).into()
 }
 
-// TODO: Move this doc into pin-project crate when https://github.com/rust-lang/rust/pull/62855 merged.
 /// An attribute to provide way to refer to the projected type returned by
 /// `project` method.
 ///

@@ -1,11 +1,5 @@
 //! A crate for safe and ergonomic pin-projection.
 //!
-//! This crate provides the following attribute macros:
-//!
-//! * [`pin_project`] - An attribute that creates a projection struct covering all the fields.
-//! * [`pinned_drop`] - An attribute for annotating a function that implements `Drop`.
-//! * [`project`] - An attribute to support pattern matching.
-//!
 //! ## Examples
 //!
 //! [`pin_project`] attribute creates a projection struct covering all the fields.
@@ -32,11 +26,11 @@
 //!
 //! [Code like this will be generated](https://github.com/taiki-e/pin-project/blob/master/examples/struct-default-expanded.rs)
 //!
-//! There are examples and generated code of each feature in [examples](https://github.com/taiki-e/pin-project/blob/master/examples/README.md) directory.
+//! See [`pin_project`] attribute for more details.
+//!
+//! Also, there are examples and generated code of each feature in [examples](https://github.com/taiki-e/pin-project/blob/master/examples/README.md) directory.
 //!
 //! [`pin_project`]: attr.pin_project.html
-//! [`pinned_drop`]: attr.pinned_drop.html
-//! [`project`]: attr.project.html
 
 #![no_std]
 #![recursion_limit = "256"]
