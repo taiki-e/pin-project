@@ -86,11 +86,11 @@ impl DeriveContext {
         let orig_ident = &self.ident;
 
         let make_span = || {
-            #[cfg(proc_macro_def_site)]
+            #[cfg(pin_project_show_unpin_struct)]
             {
                 proc_macro::Span::def_site().into()
             }
-            #[cfg(not(proc_macro_def_site))]
+            #[cfg(not(pin_project_show_unpin_struct))]
             {
                 proc_macro2::Span::call_site()
             }
@@ -159,7 +159,8 @@ impl DeriveContext {
         };
         full_where_clause.predicates.push(unpin_clause);
 
-        let attrs = if cfg!(proc_macro_def_site) { quote!() } else { quote!(#[doc(hidden)]) };
+        let attrs =
+            if cfg!(pin_project_show_unpin_struct) { quote!() } else { quote!(#[doc(hidden)]) };
 
         let inner_data = quote! {
             // This needs to have the same visibility as the original type,
@@ -186,7 +187,7 @@ impl DeriveContext {
             impl #impl_generics ::core::marker::Unpin for #orig_ident #ty_generics #full_where_clause {}
         };
 
-        if cfg!(proc_macro_def_site) {
+        if cfg!(pin_project_show_unpin_struct) {
             // On nightly, we use def-site hygiene to make it impossible
             // for user code to refer to any of the types we define.
             // This allows us to omit wrapping the generated types
