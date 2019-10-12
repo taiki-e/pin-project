@@ -1,7 +1,8 @@
-#![cfg(compiletest)]
 #![cfg(pin_project_show_unpin_struct)]
+#![warn(unsafe_code)]
 #![warn(rust_2018_idioms, single_use_lifetimes)]
 
+#[ignore]
 #[test]
 fn ui() {
     let t = trybuild::TestCases::new();
