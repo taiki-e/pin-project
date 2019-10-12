@@ -73,16 +73,10 @@ jobs:
         if: matrix.rust != '1.33.0'
         run: |
           cargo test --all
-      - name: compiletest
-        if: matrix.rust == 'nightly'
-        run: |
-          cargo test -p pin-project --all-features --test compiletest
-        env:
-          RUSTFLAGS: -Dwarnings --cfg compiletest --cfg pin_project_show_unpin_struct
       - name: cargo test --cfg pin_project_show_unpin_struct
         if: matrix.rust == 'nightly'
         run: |
-          cargo test --all --all-features
+          cargo test --all --all-features -- -Zunstable-options --include-ignored
         env:
           RUSTFLAGS: -Dwarnings --cfg pin_project_show_unpin_struct
       # Refs: https://github.com/rust-lang/cargo/issues/5657
