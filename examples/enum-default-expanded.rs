@@ -40,18 +40,18 @@ impl<T, U> Enum<T, U> {
     fn project<'_pin>(self: ::core::pin::Pin<&'_pin mut Self>) -> __EnumProjection<'_pin, T, U> {
         unsafe {
             match self.get_unchecked_mut() {
-                Enum::Pinned(_x0) => __EnumProjection::Pinned(::core::pin::Pin::new_unchecked(_x0)),
-                Enum::Unpinned(_x0) => __EnumProjection::Unpinned(_x0),
+                Enum::Pinned(_0) => __EnumProjection::Pinned(::core::pin::Pin::new_unchecked(_0)),
+                Enum::Unpinned(_0) => __EnumProjection::Unpinned(_0),
             }
         }
     }
     fn project_ref<'_pin>(self: ::core::pin::Pin<&'_pin Self>) -> __EnumProjectionRef<'_pin, T, U> {
         unsafe {
             match self.get_ref() {
-                Enum::Pinned(_x0) => {
-                    __EnumProjectionRef::Pinned(::core::pin::Pin::new_unchecked(_x0))
+                Enum::Pinned(_0) => {
+                    __EnumProjectionRef::Pinned(::core::pin::Pin::new_unchecked(_0))
                 }
-                Enum::Unpinned(_x0) => __EnumProjectionRef::Unpinned(_x0),
+                Enum::Unpinned(_0) => __EnumProjectionRef::Unpinned(_0),
             }
         }
     }
