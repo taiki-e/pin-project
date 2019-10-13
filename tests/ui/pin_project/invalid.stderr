@@ -51,3 +51,15 @@ error: duplicate `PinnedDrop` argument
    |
 49 | #[pin_project(PinnedDrop, UnsafeUnpin, PinnedDrop, PinnedDrop)] //~ ERROR duplicate `PinnedDrop` argument
    |                                        ^^^^^^^^^^
+
+error: #[pin] attribute may only be used on fields of structs or variants
+  --> $DIR/invalid.rs:57:5
+   |
+57 |     #[pin] //~ ERROR may only be used on fields of structs or variants
+   |     ^^^^^^
+
+error: #[pin] attribute may only be used on fields of structs or variants
+  --> $DIR/invalid.rs:62:1
+   |
+62 | #[pin] //~ ERROR may only be used on fields of structs or variants
+   | ^^^^^^

@@ -45,7 +45,7 @@ impl<T, U> Foo<T, U> {
     ) -> __FooProjection<'_pin, T, U> {
         unsafe {
             let Foo { pinned, unpinned } = self.get_unchecked_mut();
-            __FooProjection { pinned: ::core::pin::Pin::new_unchecked(pinned), unpinned: unpinned }
+            __FooProjection { pinned: ::core::pin::Pin::new_unchecked(pinned), unpinned }
         }
     }
     pub(crate) fn project_ref<'_pin>(
@@ -53,10 +53,7 @@ impl<T, U> Foo<T, U> {
     ) -> __FooProjectionRef<'_pin, T, U> {
         unsafe {
             let Foo { pinned, unpinned } = self.get_ref();
-            __FooProjectionRef {
-                pinned: ::core::pin::Pin::new_unchecked(pinned),
-                unpinned: unpinned,
-            }
+            __FooProjectionRef { pinned: ::core::pin::Pin::new_unchecked(pinned), unpinned }
         }
     }
 }
