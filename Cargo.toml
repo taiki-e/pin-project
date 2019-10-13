@@ -17,7 +17,11 @@ A crate for safe and ergonomic pin-projection.
 all-features = true
 
 [workspace]
-members = ["pin-project-internal", "tests/ui/auxiliary"]
+members = [
+    "pin-project-internal",
+    "tests/ui/auxiliary",
+    "tests/doc",
+]
 
 [dependencies]
 pin-project-internal = { version = "=0.4.2", path = "pin-project-internal", default-features = false }
