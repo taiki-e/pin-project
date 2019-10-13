@@ -4,7 +4,7 @@ use pin_project::{pin_project, project};
 use std::pin::Pin;
 
 #[project]
-fn span() {
+fn type_mismatch() {
     // enum
 
     #[pin_project]
@@ -39,9 +39,10 @@ fn span() {
     }
 }
 
-// `#[project]` loses span.
+//~ ERROR mismatched types
+// span is lost.
 // Refs: https://github.com/rust-lang/rust/issues/43081
-fn loses_span() {
+fn type_mismatch_span_issue() {
     // enum
 
     #[pin_project]
@@ -59,7 +60,7 @@ fn loses_span() {
 
     let mut foo = Pin::new(&mut foo).project();
 
-    #[project] //~ ERROR mismatched types
+    #[project]
     match &mut foo {
         Foo::Variant1(x, y) => {
             let x: &mut Pin<&mut i32> = x;
