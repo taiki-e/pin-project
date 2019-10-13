@@ -1,18 +1,16 @@
 use proc_macro2::{Span, TokenStream};
 use quote::ToTokens;
 use syn::{
-    parse::Nothing,
     visit_mut::{self, VisitMut},
     *,
 };
 
-use crate::utils::{
-    determine_lifetime_name, insert_lifetime, proj_ident, Mutability, Mutable, VecExt,
-    DEFAULT_LIFETIME_NAME,
-};
+use crate::utils::*;
 
-pub(crate) fn attribute(input: Stmt, mutability: Mutability) -> TokenStream {
-    parse(input, mutability).unwrap_or_else(|e| e.to_compile_error())
+pub(crate) fn attribute(args: &TokenStream, input: Stmt, mutability: Mutability) -> TokenStream {
+    parse_as_empty(args)
+        .and_then(|()| parse(input, mutability))
+        .unwrap_or_else(|e| e.to_compile_error())
 }
 
 fn parse(mut stmt: Stmt, mutability: Mutability) -> Result<TokenStream> {
@@ -198,7 +196,7 @@ impl VisitMut for Dummy {
         };
 
         if let Some(attr) = attr {
-            let res = syn::parse2::<Nothing>(attr.tokens).and_then(|_| match node {
+            let res = parse_as_empty(&attr.tokens).and_then(|()| match node {
                 Stmt::Expr(Expr::Match(expr)) | Stmt::Semi(Expr::Match(expr), _) => {
                     Context::new(self.mutability).replace_expr_match(expr);
                     Ok(())

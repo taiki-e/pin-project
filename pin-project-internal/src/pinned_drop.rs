@@ -1,9 +1,11 @@
 use proc_macro2::TokenStream;
 use quote::{quote, quote_spanned, ToTokens};
-use syn::{parse::Nothing, spanned::Spanned, *};
+use syn::{spanned::Spanned, *};
 
-pub(crate) fn attribute(mut input: ItemImpl) -> TokenStream {
-    if let Err(e) = parse(&mut input) {
+use crate::utils::parse_as_empty;
+
+pub(crate) fn attribute(args: &TokenStream, mut input: ItemImpl) -> TokenStream {
+    if let Err(e) = parse_as_empty(args).and_then(|()| parse(&mut input)) {
         let self_ty = &input.self_ty;
         let (impl_generics, _, where_clause) = input.generics.split_for_impl();
 
@@ -137,9 +139,7 @@ fn parse(item: &mut ItemImpl) -> Result<()> {
                     return Err(error!(method, "duplicate definitions with name `drop`"));
                 }
             }
-            _ => {
-                let _: Nothing = syn::parse2(item.to_token_stream())?;
-            }
+            _ => parse_as_empty(&item.to_token_stream())?,
         }
     }
 
