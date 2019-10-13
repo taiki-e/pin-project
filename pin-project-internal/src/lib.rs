@@ -50,11 +50,11 @@ use utils::{Immutable, Mutable};
 ///
 /// ```
 /// # use std::pin::Pin;
-/// # type Projection = ();
-/// # type ProjectionRef = ();
+/// # type Projection<'a> = &'a ();
+/// # type ProjectionRef<'a> = &'a ();
 /// # trait Dox {
-/// fn project(self: Pin<&mut Self>) -> Projection;
-/// fn project_ref(self: Pin<&Self>) -> ProjectionRef;
+/// fn project(self: Pin<&mut Self>) -> Projection<'_>;
+/// fn project_ref(self: Pin<&Self>) -> ProjectionRef<'_>;
 /// # }
 /// ```
 ///
