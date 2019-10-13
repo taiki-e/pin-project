@@ -8,7 +8,7 @@ on:
       - staging
       - trying
   schedule:
-    - cron: 00 01 * * * # Daily
+    - cron: '00 01 * * *' # Daily
 
 jobs:
   test:
