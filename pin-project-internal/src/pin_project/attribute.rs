@@ -126,6 +126,13 @@ impl Context {
     ) -> Result<Self> {
         let Args { pinned_drop, unsafe_unpin } = syn::parse2(args)?;
 
+        if let Some(attr) = attrs.find(PIN) {
+            return Err(error!(
+                attr,
+                "#[pin] attribute may only be used on fields of structs or variants"
+            ));
+        }
+
         if unsafe_unpin.is_none() {
             attrs.push(
                 syn::parse_quote!(#[derive(::pin_project::__private::__PinProjectAutoImplUnpin)]),

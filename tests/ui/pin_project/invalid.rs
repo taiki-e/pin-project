@@ -52,4 +52,16 @@ struct I<T> {
     pinned: T,
 }
 
+#[pin_project]
+enum J<T> {
+    #[pin] //~ ERROR may only be used on fields of structs or variants
+    A(T),
+}
+
+#[pin_project]
+#[pin] //~ ERROR may only be used on fields of structs or variants
+enum K<T> {
+    A(T),
+}
+
 fn main() {}

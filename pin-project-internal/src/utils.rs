@@ -84,12 +84,16 @@ pub(crate) fn collect_cfg(attrs: &[Attribute]) -> Vec<Attribute> {
 
 pub(crate) trait VecExt {
     fn position(&self, ident: &str) -> Option<usize>;
+    fn find(&self, ident: &str) -> Option<&Attribute>;
     fn find_remove(&mut self, ident: &str) -> Option<Attribute>;
 }
 
 impl VecExt for Vec<Attribute> {
     fn position(&self, ident: &str) -> Option<usize> {
         self.iter().position(|attr| attr.path.is_ident(ident))
+    }
+    fn find(&self, ident: &str) -> Option<&Attribute> {
+        self.position(ident).and_then(|i| self.get(i))
     }
     fn find_remove(&mut self, ident: &str) -> Option<Attribute> {
         self.position(ident).map(|i| self.remove(i))

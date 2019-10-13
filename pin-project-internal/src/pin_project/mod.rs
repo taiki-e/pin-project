@@ -1,7 +1,7 @@
 use proc_macro2::TokenStream;
 use syn::*;
 
-use crate::utils::Variants;
+use crate::utils::{Variants, VecExt};
 
 mod attribute;
 mod derive;
@@ -48,6 +48,8 @@ fn validate_enum(brace_token: token::Brace, variants: &Variants) -> Result<()> {
     let has_field = variants.iter().try_fold(false, |has_field, v| {
         if let Some((_, e)) = &v.discriminant {
             Err(error!(e, "#[pin_project] attribute may not be used on enums with discriminants"))
+        } else if let Some(attr) = v.attrs.find(PIN) {
+            Err(error!(attr, "#[pin] attribute may only be used on fields of structs or variants"))
         } else if let Fields::Unit = v.fields {
             Ok(has_field)
         } else {
