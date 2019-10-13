@@ -539,8 +539,8 @@ pub fn project_ref(args: TokenStream, input: TokenStream) -> TokenStream {
 }
 
 #[doc(hidden)]
-#[proc_macro_derive(__PinProjectAutoImplUnpin, attributes(pin))]
-pub fn derive_unpin(input: TokenStream) -> TokenStream {
+#[proc_macro_derive(__PinProjectInternalDerive, attributes(pin))]
+pub fn __pin_project_internal_derive(input: TokenStream) -> TokenStream {
     let input = syn::parse_macro_input!(input);
     pin_project::derive(input).into()
 }

@@ -88,10 +88,6 @@ pub(crate) fn determine_visibility(vis: &Visibility) -> Visibility {
     }
 }
 
-pub(crate) fn collect_cfg(attrs: &[Attribute]) -> Vec<Attribute> {
-    attrs.iter().filter(|attr| attr.path.is_ident("cfg")).cloned().collect()
-}
-
 /// Check if `tokens` is an empty `TokenStream`.
 /// This is almost equivalent to `syn::parse2::<Nothing>()`,
 /// but produces a better error message and does not require ownership of `tokens`.
@@ -100,7 +96,6 @@ pub(crate) fn parse_as_empty(tokens: &TokenStream) -> Result<()> {
 }
 
 pub(crate) trait SliceExt {
-    fn position(&self, ident: &str) -> Option<usize>;
     fn find(&self, ident: &str) -> Option<&Attribute>;
 }
 
@@ -109,9 +104,6 @@ pub(crate) trait VecExt {
 }
 
 impl SliceExt for [Attribute] {
-    fn position(&self, ident: &str) -> Option<usize> {
-        self.iter().position(|attr| attr.path.is_ident(ident))
-    }
     fn find(&self, ident: &str) -> Option<&Attribute> {
         self.iter().position(|attr| attr.path.is_ident(ident)).and_then(|i| self.get(i))
     }

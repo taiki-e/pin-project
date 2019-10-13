@@ -120,7 +120,7 @@ pub mod __private {
     use core::{marker::PhantomData, pin::Pin};
 
     #[doc(hidden)]
-    pub use pin_project_internal::__PinProjectAutoImplUnpin;
+    pub use pin_project_internal::__PinProjectInternalDerive;
 
     // It is safe to implement PinnedDrop::drop, but it is not safe to call it.
     // This is because destructors can be called multiple times (double dropping

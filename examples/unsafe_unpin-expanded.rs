@@ -83,12 +83,8 @@ impl<T, U> FooMustNotImplDrop for Foo<T, U> {}
 #[allow(non_snake_case)]
 #[deny(safe_packed_borrows)]
 fn __pin_project_assert_not_repr_packed_Foo<T, U>(val: &Foo<T, U>) {
-    {
-        &val.pinned;
-    }
-    {
-        &val.unpinned;
-    }
+    &val.pinned;
+    &val.unpinned;
 }
 
 fn main() {}

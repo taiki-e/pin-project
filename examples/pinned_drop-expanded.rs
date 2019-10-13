@@ -125,12 +125,8 @@ fn __unpin_scope_Foo() {
 #[allow(non_snake_case)]
 #[deny(safe_packed_borrows)]
 fn __pin_project_assert_not_repr_packed_Foo<'a, T>(val: &Foo<'a, T>) {
-    {
-        &val.was_dropped;
-    }
-    {
-        &val.field;
-    }
+    &val.was_dropped;
+    &val.field;
 }
 
 fn main() {}

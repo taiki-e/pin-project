@@ -1,5 +1,0 @@
-error: `cfg` attributes on the field of tuple structs are not supported
-  --> $DIR/tuple-struct.rs:10:5
-   |
-10 |     #[cfg(not(any()))] //~ ERROR `cfg` attributes on the field of tuple structs are not supported
-   |     ^^^^^^^^^^^^^^^^^^

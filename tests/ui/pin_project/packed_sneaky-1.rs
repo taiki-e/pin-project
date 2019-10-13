@@ -4,14 +4,14 @@ extern crate auxiliary_macros;
 use pin_project::{pin_project, pinned_drop, UnsafeUnpin};
 use std::pin::Pin;
 
-#[pin_project] //~ ERROR borrow of packed field is unsafe and requires unsafe function or block
+#[pin_project] //~ ERROR may not be used on #[repr(packed)] types
 #[hidden_repr(packed)]
 struct A {
     #[pin]
     field: u32,
 }
 
-#[pin_project(UnsafeUnpin)] //~ ERROR borrow of packed field is unsafe and requires unsafe function or block
+#[pin_project(UnsafeUnpin)] //~ ERROR may not be used on #[repr(packed)] types
 #[hidden_repr(packed)]
 struct C {
     #[pin]
@@ -20,7 +20,7 @@ struct C {
 
 unsafe impl UnsafeUnpin for C {}
 
-#[pin_project(PinnedDrop)] //~ ERROR borrow of packed field is unsafe and requires unsafe function or block
+#[pin_project(PinnedDrop)] //~ ERROR may not be used on #[repr(packed)] types
 #[hidden_repr(packed)]
 struct D {
     #[pin]
