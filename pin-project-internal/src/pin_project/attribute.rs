@@ -571,7 +571,7 @@ impl Context {
         let mut proj_fields = Vec::with_capacity(fields.len());
         let mut proj_ref_fields = Vec::with_capacity(fields.len());
         for (i, Field { attrs, vis, ty, .. }) in fields.iter_mut().enumerate() {
-            let id = format_ident!("_x{}", i);
+            let id = format_ident!("_{}", i);
             let cfg = collect_cfg(attrs);
             if !cfg.is_empty() {
                 return Err(error!(
