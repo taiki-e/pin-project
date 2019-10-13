@@ -51,10 +51,7 @@ impl<'a, T> Foo<'a, T> {
     ) -> __FooProjection<'_pin, 'a, T> {
         unsafe {
             let Foo { was_dropped, field } = self.get_unchecked_mut();
-            __FooProjection {
-                was_dropped: was_dropped,
-                field: ::core::pin::Pin::new_unchecked(field),
-            }
+            __FooProjection { was_dropped, field: ::core::pin::Pin::new_unchecked(field) }
         }
     }
     pub(crate) fn project_ref<'_pin>(
@@ -62,10 +59,7 @@ impl<'a, T> Foo<'a, T> {
     ) -> __FooProjectionRef<'_pin, 'a, T> {
         unsafe {
             let Foo { was_dropped, field } = self.get_ref();
-            __FooProjectionRef {
-                was_dropped: was_dropped,
-                field: ::core::pin::Pin::new_unchecked(field),
-            }
+            __FooProjectionRef { was_dropped, field: ::core::pin::Pin::new_unchecked(field) }
         }
     }
 }

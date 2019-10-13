@@ -541,11 +541,12 @@ impl Context {
                 });
                 proj_body.push(quote! {
                     #(#cfg)*
-                    #ident: #ident
+                    #ident
                 });
             }
             proj_pat.push(quote! {
-                #(#cfg)* #ident
+                #(#cfg)*
+                #ident
             });
         }
 
