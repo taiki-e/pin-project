@@ -18,7 +18,7 @@ enum Enum2 {
 }
 
 #[pin_project]
-enum Enum1 {
+enum Enum3 {
     A, //~ ERROR may not be used on enums that have no field
     B,
 }

@@ -1,6 +1,6 @@
 use pin_project::{pin_project, pinned_drop};
 
-#[pin_project(PinnedDrop)] //~ ERROR E0277
+#[pin_project(PinnedDrop)]
 pub struct A {
     #[pin]
     field: u8,
@@ -139,5 +139,14 @@ impl PinnedDrop for L {
     fn drop(self: Pin<&mut Self>) {}
     fn drop(self: Pin<&mut Self>) {} //~ ERROR duplicate definitions with name `drop`
 }
+
+#[pin_project(PinnedDrop)] //~ ERROR E0277
+pub struct M {
+    #[pin]
+    field: u8,
+}
+
+#[pinned_drop]
+fn drop(_this: Pin<&mut M>) {} //~ ERROR expected `impl`
 
 fn main() {}

@@ -1,26 +1,26 @@
-error: unexpected token
+error: unexpected token: ()
  --> $DIR/invalid.rs:5:10
   |
 5 |     #[pin()] //~ ERROR unexpected token
-  |          ^
+  |          ^^
 
-error: unexpected token
+error: unexpected token: (foo)
   --> $DIR/invalid.rs:10:18
    |
 10 | struct B<T>(#[pin(foo)] T); //~ ERROR unexpected token
-   |                  ^
+   |                  ^^^^^
 
-error: unexpected token
+error: unexpected token: (foo)
   --> $DIR/invalid.rs:14:12
    |
 14 |     A(#[pin(foo)] T), //~ ERROR unexpected token
-   |            ^
+   |            ^^^^^
 
-error: unexpected token
+error: unexpected token: (foo)
   --> $DIR/invalid.rs:20:14
    |
 20 |         #[pin(foo)] //~ ERROR unexpected token
-   |              ^
+   |              ^^^^^
 
 error: expected identifier
   --> $DIR/invalid.rs:25:27
@@ -28,38 +28,14 @@ error: expected identifier
 25 | #[pin_project(UnsafeUnpin,,)] //~ ERROR expected identifier
    |                           ^
 
-error: duplicate `UnsafeUnpin` argument
-  --> $DIR/invalid.rs:31:28
-   |
-31 | #[pin_project(UnsafeUnpin, UnsafeUnpin)] //~ ERROR duplicate `UnsafeUnpin` argument
-   |                            ^^^^^^^^^^^
-
-error: duplicate `PinnedDrop` argument
-  --> $DIR/invalid.rs:37:27
-   |
-37 | #[pin_project(PinnedDrop, PinnedDrop)] //~ ERROR duplicate `PinnedDrop` argument
-   |                           ^^^^^^^^^^
-
-error: duplicate `UnsafeUnpin` argument
-  --> $DIR/invalid.rs:43:40
-   |
-43 | #[pin_project(PinnedDrop, UnsafeUnpin, UnsafeUnpin)] //~ ERROR duplicate `UnsafeUnpin` argument
-   |                                        ^^^^^^^^^^^
-
-error: duplicate `PinnedDrop` argument
-  --> $DIR/invalid.rs:49:40
-   |
-49 | #[pin_project(PinnedDrop, UnsafeUnpin, PinnedDrop, PinnedDrop)] //~ ERROR duplicate `PinnedDrop` argument
-   |                                        ^^^^^^^^^^
-
 error: #[pin] attribute may only be used on fields of structs or variants
-  --> $DIR/invalid.rs:57:5
+  --> $DIR/invalid.rs:33:5
    |
-57 |     #[pin] //~ ERROR may only be used on fields of structs or variants
+33 |     #[pin] //~ ERROR may only be used on fields of structs or variants
    |     ^^^^^^
 
 error: #[pin] attribute may only be used on fields of structs or variants
-  --> $DIR/invalid.rs:62:1
+  --> $DIR/invalid.rs:38:1
    |
-62 | #[pin] //~ ERROR may only be used on fields of structs or variants
+38 | #[pin] //~ ERROR may only be used on fields of structs or variants
    | ^^^^^^

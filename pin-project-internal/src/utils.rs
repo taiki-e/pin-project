@@ -1,3 +1,4 @@
+use proc_macro2::TokenStream;
 use quote::{format_ident, quote_spanned};
 use syn::{
     punctuated::Punctuated,
@@ -10,6 +11,15 @@ pub(crate) const DEFAULT_LIFETIME_NAME: &str = "'_pin";
 pub(crate) type Variants = Punctuated<Variant, token::Comma>;
 
 pub(crate) use Mutability::{Immutable, Mutable};
+
+macro_rules! error {
+    ($span:expr, $msg:expr) => {
+        syn::Error::new_spanned(&$span, $msg)
+    };
+    ($span:expr, $($tt:tt)*) => {
+        error!($span, format!($($tt)*))
+    };
+}
 
 #[derive(Clone, Copy, Eq, PartialEq)]
 pub(crate) enum Mutability {
@@ -82,29 +92,33 @@ pub(crate) fn collect_cfg(attrs: &[Attribute]) -> Vec<Attribute> {
     attrs.iter().filter(|attr| attr.path.is_ident("cfg")).cloned().collect()
 }
 
-pub(crate) trait VecExt {
+/// Check if `tokens` is an empty `TokenStream`.
+/// This is almost equivalent to `syn::parse2::<Nothing>()`,
+/// but produces a better error message and does not require ownership of `tokens`.
+pub(crate) fn parse_as_empty(tokens: &TokenStream) -> Result<()> {
+    if tokens.is_empty() { Ok(()) } else { Err(error!(tokens, "unexpected token: {}", tokens)) }
+}
+
+pub(crate) trait SliceExt {
     fn position(&self, ident: &str) -> Option<usize>;
     fn find(&self, ident: &str) -> Option<&Attribute>;
+}
+
+pub(crate) trait VecExt {
     fn find_remove(&mut self, ident: &str) -> Option<Attribute>;
 }
 
-impl VecExt for Vec<Attribute> {
+impl SliceExt for [Attribute] {
     fn position(&self, ident: &str) -> Option<usize> {
         self.iter().position(|attr| attr.path.is_ident(ident))
     }
     fn find(&self, ident: &str) -> Option<&Attribute> {
-        self.position(ident).and_then(|i| self.get(i))
-    }
-    fn find_remove(&mut self, ident: &str) -> Option<Attribute> {
-        self.position(ident).map(|i| self.remove(i))
+        self.iter().position(|attr| attr.path.is_ident(ident)).and_then(|i| self.get(i))
     }
 }
 
-macro_rules! error {
-    ($span:expr, $msg:expr) => {
-        syn::Error::new_spanned(&$span, $msg)
-    };
-    ($span:expr, $($tt:tt)*) => {
-        error!($span, format!($($tt)*))
-    };
+impl VecExt for Vec<Attribute> {
+    fn find_remove(&mut self, ident: &str) -> Option<Attribute> {
+        self.iter().position(|attr| attr.path.is_ident(ident)).map(|i| self.remove(i))
+    }
 }

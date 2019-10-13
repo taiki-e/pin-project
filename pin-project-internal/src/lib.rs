@@ -34,7 +34,6 @@ mod pinned_drop;
 mod project;
 
 use proc_macro::TokenStream;
-use syn::parse::Nothing;
 
 use utils::{Immutable, Mutable};
 
@@ -371,9 +370,8 @@ pub fn pin_project(args: TokenStream, input: TokenStream) -> TokenStream {
 /// [pinned-drop]: ./attr.pin_project.html#pinned_drop
 #[proc_macro_attribute]
 pub fn pinned_drop(args: TokenStream, input: TokenStream) -> TokenStream {
-    let _: Nothing = syn::parse_macro_input!(args);
     let input = syn::parse_macro_input!(input);
-    pinned_drop::attribute(input).into()
+    pinned_drop::attribute(&args.into(), input).into()
 }
 
 /// An attribute to provide way to refer to the projected type returned by
@@ -521,9 +519,8 @@ pub fn pinned_drop(args: TokenStream, input: TokenStream) -> TokenStream {
 /// ```
 #[proc_macro_attribute]
 pub fn project(args: TokenStream, input: TokenStream) -> TokenStream {
-    let _: Nothing = syn::parse_macro_input!(args);
     let input = syn::parse_macro_input!(input);
-    project::attribute(input, Mutable).into()
+    project::attribute(&args.into(), input, Mutable).into()
 }
 
 /// An attribute to provide way to refer to the projected type returned by
@@ -537,9 +534,8 @@ pub fn project(args: TokenStream, input: TokenStream) -> TokenStream {
 /// [`project`]: ./attr.project.html
 #[proc_macro_attribute]
 pub fn project_ref(args: TokenStream, input: TokenStream) -> TokenStream {
-    let _: Nothing = syn::parse_macro_input!(args);
     let input = syn::parse_macro_input!(input);
-    project::attribute(input, Immutable).into()
+    project::attribute(&args.into(), input, Immutable).into()
 }
 
 #[doc(hidden)]

@@ -1,15 +1,12 @@
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote, quote_spanned, ToTokens};
 use syn::{
-    parse::{Nothing, Parse, ParseStream},
+    parse::{Parse, ParseStream},
     token::Comma,
     *,
 };
 
-use crate::utils::{
-    collect_cfg, determine_lifetime_name, determine_visibility, insert_lifetime, proj_ident,
-    Immutable, Mutable, Variants, VecExt, DEFAULT_LIFETIME_NAME,
-};
+use crate::utils::*;
 
 use super::PIN;
 
@@ -164,12 +161,11 @@ impl Context {
 
     fn find_pin_attr(&self, attrs: &mut Vec<Attribute>) -> Result<bool> {
         if let Some(pos) = attrs.position(PIN) {
-            let tokens = if self.unsafe_unpin.is_some() {
-                attrs.remove(pos).tokens
+            if self.unsafe_unpin.is_some() {
+                parse_as_empty(&attrs.remove(pos).tokens)?;
             } else {
-                attrs[pos].tokens.clone()
-            };
-            let _: Nothing = syn::parse2(tokens)?;
+                parse_as_empty(&attrs[pos].tokens)?;
+            }
             Ok(true)
         } else {
             Ok(false)

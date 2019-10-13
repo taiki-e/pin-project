@@ -28,39 +28,15 @@ struct E<T> {
     pinned: T,
 }
 
-#[pin_project(UnsafeUnpin, UnsafeUnpin)] //~ ERROR duplicate `UnsafeUnpin` argument
-struct F<T> {
-    #[pin]
-    pinned: T,
-}
-
-#[pin_project(PinnedDrop, PinnedDrop)] //~ ERROR duplicate `PinnedDrop` argument
-struct G<T> {
-    #[pin]
-    pinned: T,
-}
-
-#[pin_project(PinnedDrop, UnsafeUnpin, UnsafeUnpin)] //~ ERROR duplicate `UnsafeUnpin` argument
-struct H<T> {
-    #[pin]
-    pinned: T,
-}
-
-#[pin_project(PinnedDrop, UnsafeUnpin, PinnedDrop, PinnedDrop)] //~ ERROR duplicate `PinnedDrop` argument
-struct I<T> {
-    #[pin]
-    pinned: T,
-}
-
 #[pin_project]
-enum J<T> {
+enum F<T> {
     #[pin] //~ ERROR may only be used on fields of structs or variants
     A(T),
 }
 
 #[pin_project]
 #[pin] //~ ERROR may only be used on fields of structs or variants
-enum K<T> {
+enum G<T> {
     A(T),
 }
 

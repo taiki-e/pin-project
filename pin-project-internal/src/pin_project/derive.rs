@@ -1,10 +1,8 @@
 use proc_macro2::{Span, TokenStream};
 use quote::{format_ident, quote};
-use syn::{parse::Nothing, *};
+use syn::*;
 
-use crate::utils::{
-    determine_lifetime_name, insert_lifetime, Variants, VecExt, DEFAULT_LIFETIME_NAME,
-};
+use crate::utils::*;
 
 use super::PIN;
 
@@ -73,8 +71,8 @@ impl DeriveContext {
         };
 
         for Field { attrs, ty, .. } in fields {
-            if let Some(attr) = attrs.position(PIN).and_then(|i| attrs.get(i)) {
-                let _: Nothing = syn::parse2(attr.tokens.clone()).unwrap();
+            if let Some(attr) = attrs.find(PIN) {
+                parse_as_empty(&attr.tokens).unwrap();
                 self.pinned_fields.push(ty.clone());
             }
         }

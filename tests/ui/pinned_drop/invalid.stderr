@@ -1,4 +1,4 @@
-error: unexpected token
+error: unexpected token: foo
  --> $DIR/invalid.rs:9:15
   |
 9 | #[pinned_drop(foo)] //~ ERROR unexpected token
@@ -70,10 +70,16 @@ error: duplicate definitions with name `drop`
 140 |     fn drop(self: Pin<&mut Self>) {} //~ ERROR duplicate definitions with name `drop`
     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-error[E0277]: the trait bound `A: pin_project::__private::PinnedDrop` is not satisfied
- --> $DIR/invalid.rs:3:15
-  |
-3 | #[pin_project(PinnedDrop)] //~ ERROR E0277
-  |               ^^^^^^^^^^ the trait `pin_project::__private::PinnedDrop` is not implemented for `A`
-  |
-  = note: required by `pin_project::__private::PinnedDrop::drop`
+error: expected `impl`
+   --> $DIR/invalid.rs:150:1
+    |
+150 | fn drop(_this: Pin<&mut M>) {} //~ ERROR expected `impl`
+    | ^^
+
+error[E0277]: the trait bound `M: pin_project::__private::PinnedDrop` is not satisfied
+   --> $DIR/invalid.rs:143:15
+    |
+143 | #[pin_project(PinnedDrop)] //~ ERROR E0277
+    |               ^^^^^^^^^^ the trait `pin_project::__private::PinnedDrop` is not implemented for `M`
+    |
+    = note: required by `pin_project::__private::PinnedDrop::drop`

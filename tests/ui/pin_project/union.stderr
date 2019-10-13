@@ -1,0 +1,8 @@
+error: #[pin_project] attribute may only be used on structs or enums
+ --> $DIR/union.rs:4:1
+  |
+4 | / union Union {
+5 | |     //~^ ERROR may only be used on structs or enums
+6 | |     x: u8,
+7 | | }
+  | |_^

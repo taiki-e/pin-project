@@ -1,7 +1,7 @@
 use proc_macro2::TokenStream;
 use syn::*;
 
-use crate::utils::{Variants, VecExt};
+use crate::utils::{SliceExt, Variants};
 
 mod attribute;
 mod derive;
