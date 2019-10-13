@@ -22,9 +22,9 @@ pub fn add_pinned_field(_: TokenStream, input: TokenStream) -> TokenStream {
         vec.extend(g.stream());
 
         // #[pin]
-        // __field: __HiddenPinnedField
         vec.push(op('#'));
         vec.push(TokenTree::Group(Group::new(Delimiter::Bracket, word("pin").into())));
+        // __field: __HiddenPinnedField
         vec.push(word("__field"));
         vec.push(op(':'));
         vec.push(word("__HiddenPinnedField"));
@@ -48,8 +48,8 @@ pub fn add_pinned_field(_: TokenStream, input: TokenStream) -> TokenStream {
         vec.push(word("for"));
         vec.push(word("__HiddenPinnedField"));
         vec.push(TokenTree::Group(Group::new(Delimiter::Brace, TokenStream::new())));
-        tokens.extend(vec);
 
+        tokens.extend(vec);
         tokens.into_iter().collect()
     } else {
         unreachable!()

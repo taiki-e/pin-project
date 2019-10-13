@@ -7,13 +7,15 @@
 use pin_project::pin_project;
 use std::marker::PhantomPinned;
 
+fn is_unpin<T: Unpin>() {}
+
 #[cfg(target_os = "linux")]
 pub struct Linux;
 #[cfg(not(target_os = "linux"))]
 pub struct Other;
 
-// Using `PhantomPinned: Unpin` without #![feature(trivial_bounds)] will result in an error.
 // Use this type to check that `cfg(any())` is working properly.
+// If `cfg(any())` is not working properly, `is_unpin` will fail.
 pub struct Any(PhantomPinned);
 
 #[test]
@@ -30,6 +32,8 @@ fn struct_() {
         #[pin]
         any: Any,
     }
+
+    is_unpin::<SameName>();
 
     #[cfg(target_os = "linux")]
     let _x = SameName { inner: Linux };
@@ -48,6 +52,8 @@ fn struct_() {
         #[pin]
         a: Any,
     }
+
+    is_unpin::<DifferentName>();
 
     #[cfg(target_os = "linux")]
     let _x = DifferentName { l: Linux };
@@ -71,6 +77,8 @@ fn enum_() {
         #[cfg(any())]
         Any(#[pin] Any),
     }
+
+    is_unpin::<Variant>();
 
     #[cfg(target_os = "linux")]
     let _x = Variant::Inner(Linux);
@@ -107,6 +115,8 @@ fn enum_() {
             any: Any,
         },
     }
+
+    is_unpin::<Field>();
 
     #[cfg(target_os = "linux")]
     let _x = Field::SameName { inner: Linux };
