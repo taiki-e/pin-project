@@ -19,7 +19,7 @@ fn parse(mut stmt: Stmt, mutability: Mutability) -> Result<TokenStream> {
             Context::new(mutability).replace_expr_match(expr)
         }
         Stmt::Local(local) => Context::new(mutability).replace_local(local)?,
-        Stmt::Item(Item::Fn(ItemFn { block, .. })) => Dummy { mutability }.visit_block_mut(block),
+        Stmt::Item(Item::Fn(item)) => replace_item_fn(item, mutability)?,
         Stmt::Item(Item::Impl(item)) => replace_item_impl(item, mutability),
         Stmt::Item(Item::Use(item)) => replace_item_use(item, mutability)?,
         _ => {}
@@ -159,6 +159,12 @@ fn replace_item_impl(item: &mut ItemImpl, mutability: Mutability) {
     }
 }
 
+fn replace_item_fn(item: &mut ItemFn, mutability: Mutability) -> Result<()> {
+    let mut visitor = FnVisitor { res: Ok(()), mutability };
+    visitor.visit_block_mut(&mut item.block);
+    visitor.res
+}
+
 fn replace_item_use(item: &mut ItemUse, mutability: Mutability) -> Result<()> {
     let mut visitor = UseTreeVisitor { res: Ok(()), mutability };
     visitor.visit_item_use_mut(item);
@@ -172,42 +178,49 @@ fn replace_ident(ident: &mut Ident, mutability: Mutability) {
 // =================================================================================================
 // visitor
 
-struct Dummy {
+struct FnVisitor {
+    res: Result<()>,
     mutability: Mutability,
 }
 
-impl Dummy {
+impl FnVisitor {
     /// Returns the attribute name.
     fn name(&self) -> &str {
         if self.mutability == Mutable { "project" } else { "project_ref" }
     }
-}
 
-impl VisitMut for Dummy {
-    fn visit_stmt_mut(&mut self, node: &mut Stmt) {
-        visit_mut::visit_stmt_mut(self, node);
-
+    fn visit_stmt(&mut self, node: &mut Stmt) -> Result<()> {
         let attr = match node {
             Stmt::Expr(Expr::Match(expr)) | Stmt::Semi(Expr::Match(expr), _) => {
-                expr.attrs.find_remove(self.name())
+                expr.attrs.find_remove(self.name())?
             }
-            Stmt::Local(local) => local.attrs.find_remove(self.name()),
-            _ => return,
+            Stmt::Local(local) => local.attrs.find_remove(self.name())?,
+            _ => return Ok(()),
         };
-
         if let Some(attr) = attr {
-            let res = parse_as_empty(&attr.tokens).and_then(|()| match node {
+            parse_as_empty(&attr.tokens)?;
+            match node {
                 Stmt::Expr(Expr::Match(expr)) | Stmt::Semi(Expr::Match(expr), _) => {
-                    Context::new(self.mutability).replace_expr_match(expr);
-                    Ok(())
+                    Context::new(self.mutability).replace_expr_match(expr)
                 }
-                Stmt::Local(local) => Context::new(self.mutability).replace_local(local),
+                Stmt::Local(local) => Context::new(self.mutability).replace_local(local)?,
                 _ => unreachable!(),
-            });
-
-            if let Err(e) = res {
-                *node = Stmt::Expr(syn::parse2(e.to_compile_error()).unwrap())
             }
+        }
+        Ok(())
+    }
+}
+
+impl VisitMut for FnVisitor {
+    fn visit_stmt_mut(&mut self, node: &mut Stmt) {
+        if self.res.is_err() {
+            return;
+        }
+
+        visit_mut::visit_stmt_mut(self, node);
+
+        if let Err(e) = self.visit_stmt(node) {
+            self.res = Err(e)
         }
     }
 

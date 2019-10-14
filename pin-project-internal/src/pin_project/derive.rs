@@ -365,8 +365,7 @@ impl<'a> Context<'a> {
         let mut proj_fields = Vec::with_capacity(fields.len());
         let mut proj_ref_fields = Vec::with_capacity(fields.len());
         for Field { attrs, vis, ident, ty, .. } in fields {
-            if let Some(attr) = attrs.find(PIN) {
-                parse_as_empty(&attr.tokens)?;
+            if attrs.find_exact(PIN)?.is_some() {
                 self.pinned_fields.push(ty.clone());
 
                 let lifetime = &self.proj.lifetime;
@@ -413,8 +412,7 @@ impl<'a> Context<'a> {
         let mut proj_ref_fields = Vec::with_capacity(fields.len());
         for (i, Field { attrs, vis, ty, .. }) in fields.iter_mut().enumerate() {
             let id = format_ident!("_{}", i);
-            if let Some(attr) = attrs.find(PIN) {
-                parse_as_empty(&attr.tokens)?;
+            if attrs.find_exact(PIN)?.is_some() {
                 self.pinned_fields.push(ty.clone());
 
                 let lifetime = &self.proj.lifetime;
