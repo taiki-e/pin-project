@@ -18,11 +18,11 @@ pub struct Blah<T, U> {
 unsafe impl<T: Unpin, U> UnsafeUnpin for Blah<T, U> {}
 
 #[pin_project(UnsafeUnpin)]
-pub struct OverlappingLifetimeNames<'_pin, T, U> {
+pub struct OverlappingLifetimeNames<'pin, T, U> {
     #[pin]
     field1: T,
     field2: U,
-    field3: &'_pin (),
+    field3: &'pin (),
 }
 
 #[allow(unsafe_code)]

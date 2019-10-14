@@ -6,6 +6,6 @@ struct Foo {
     inner: u8,
 }
 
-impl Unpin for UnpinStructFoo {} //~ ERROR E0412,E0321
+impl Unpin for __Foo {} //~ ERROR E0412,E0321
 
 fn main() {}

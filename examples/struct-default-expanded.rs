@@ -27,26 +27,24 @@ struct Struct<T, U> {
 
 #[allow(clippy::mut_mut)] // This lint warns `&mut &mut <ty>`.
 #[allow(dead_code)] // This lint warns unused fields/variants.
-struct __StructProjection<'_pin, T, U> {
-    pinned: ::core::pin::Pin<&'_pin mut T>,
-    unpinned: &'_pin mut U,
+struct __StructProjection<'pin, T, U> {
+    pinned: ::core::pin::Pin<&'pin mut T>,
+    unpinned: &'pin mut U,
 }
 #[allow(dead_code)] // This lint warns unused fields/variants.
-struct __StructProjectionRef<'_pin, T, U> {
-    pinned: ::core::pin::Pin<&'_pin T>,
-    unpinned: &'_pin U,
+struct __StructProjectionRef<'pin, T, U> {
+    pinned: ::core::pin::Pin<&'pin T>,
+    unpinned: &'pin U,
 }
 
 impl<T, U> Struct<T, U> {
-    fn project<'_pin>(self: ::core::pin::Pin<&'_pin mut Self>) -> __StructProjection<'_pin, T, U> {
+    fn project<'pin>(self: ::core::pin::Pin<&'pin mut Self>) -> __StructProjection<'pin, T, U> {
         unsafe {
             let Struct { pinned, unpinned } = self.get_unchecked_mut();
             __StructProjection { pinned: ::core::pin::Pin::new_unchecked(pinned), unpinned }
         }
     }
-    fn project_ref<'_pin>(
-        self: ::core::pin::Pin<&'_pin Self>,
-    ) -> __StructProjectionRef<'_pin, T, U> {
+    fn project_ref<'pin>(self: ::core::pin::Pin<&'pin Self>) -> __StructProjectionRef<'pin, T, U> {
         unsafe {
             let Struct { pinned, unpinned } = self.get_ref();
             __StructProjectionRef { pinned: ::core::pin::Pin::new_unchecked(pinned), unpinned }
@@ -81,14 +79,12 @@ impl<T, U> Struct<T, U> {
 // See also https://github.com/taiki-e/pin-project/pull/53.
 #[allow(non_snake_case)]
 fn __unpin_scope_Struct() {
-    #[allow(dead_code)]
-    #[doc(hidden)]
-    struct __UnpinStructStruct<'_pin, T, U> {
-        __pin_project_use_generics: ::pin_project::__private::AlwaysUnpin<'_pin, (T, U)>,
+    struct __Struct<'pin, T, U> {
+        __pin_project_use_generics: ::pin_project::__private::AlwaysUnpin<'pin, (T, U)>,
         __field0: T,
     }
-    impl<'_pin, T, U> ::core::marker::Unpin for Struct<T, U> where
-        __UnpinStructStruct<'_pin, T, U>: ::core::marker::Unpin
+    impl<'pin, T, U> ::core::marker::Unpin for Struct<T, U> where
+        __Struct<'pin, T, U>: ::core::marker::Unpin
     {
     }
 }
@@ -104,7 +100,7 @@ fn __unpin_scope_Struct() {
 // This will result in a compilation error, which is exactly what we want.
 trait StructMustNotImplDrop {}
 #[allow(clippy::drop_bounds)]
-impl<T: Drop> StructMustNotImplDrop for T {}
+impl<T: ::core::ops::Drop> StructMustNotImplDrop for T {}
 #[allow(single_use_lifetimes)]
 impl<T, U> StructMustNotImplDrop for Struct<T, U> {}
 

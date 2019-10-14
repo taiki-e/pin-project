@@ -126,15 +126,15 @@ fn project_impl() {
     impl<T, U> HasLifetimes<'_, T, U> {}
 
     #[pin_project]
-    struct HasOverlappingLifetimes<'_pin, T, U> {
+    struct HasOverlappingLifetimes<'pin, T, U> {
         #[pin]
-        field1: &'_pin mut T,
+        field1: &'pin mut T,
         field2: U,
     }
 
     #[allow(single_use_lifetimes)]
     #[project]
-    impl<'_pin, T, U> HasOverlappingLifetimes<'_pin, T, U> {}
+    impl<'pin, T, U> HasOverlappingLifetimes<'pin, T, U> {}
 
     #[pin_project]
     struct HasOverlappingLifetimes2<T, U> {
@@ -146,7 +146,7 @@ fn project_impl() {
     #[allow(single_use_lifetimes)]
     #[project]
     impl<T, U> HasOverlappingLifetimes2<T, U> {
-        fn foo<'_pin>(&'_pin self) {}
+        fn foo<'pin>(&'pin self) {}
     }
 }
 

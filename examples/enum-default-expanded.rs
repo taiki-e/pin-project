@@ -25,19 +25,19 @@ enum Enum<T, U> {
 
 #[allow(clippy::mut_mut)] // This lint warns `&mut &mut <ty>`.
 #[allow(dead_code)] // This lint warns unused fields/variants.
-enum __EnumProjection<'_pin, T, U> {
-    Pinned(::core::pin::Pin<&'_pin mut T>),
-    Unpinned(&'_pin mut U),
+enum __EnumProjection<'pin, T, U> {
+    Pinned(::core::pin::Pin<&'pin mut T>),
+    Unpinned(&'pin mut U),
 }
 
 #[allow(dead_code)] // This lint warns unused fields/variants.
-enum __EnumProjectionRef<'_pin, T, U> {
-    Pinned(::core::pin::Pin<&'_pin T>),
-    Unpinned(&'_pin U),
+enum __EnumProjectionRef<'pin, T, U> {
+    Pinned(::core::pin::Pin<&'pin T>),
+    Unpinned(&'pin U),
 }
 
 impl<T, U> Enum<T, U> {
-    fn project<'_pin>(self: ::core::pin::Pin<&'_pin mut Self>) -> __EnumProjection<'_pin, T, U> {
+    fn project<'pin>(self: ::core::pin::Pin<&'pin mut Self>) -> __EnumProjection<'pin, T, U> {
         unsafe {
             match self.get_unchecked_mut() {
                 Enum::Pinned(_0) => __EnumProjection::Pinned(::core::pin::Pin::new_unchecked(_0)),
@@ -45,7 +45,7 @@ impl<T, U> Enum<T, U> {
             }
         }
     }
-    fn project_ref<'_pin>(self: ::core::pin::Pin<&'_pin Self>) -> __EnumProjectionRef<'_pin, T, U> {
+    fn project_ref<'pin>(self: ::core::pin::Pin<&'pin Self>) -> __EnumProjectionRef<'pin, T, U> {
         unsafe {
             match self.get_ref() {
                 Enum::Pinned(_0) => {
@@ -63,16 +63,12 @@ impl<T, U> Enum<T, U> {
 // for details.
 #[allow(non_snake_case)]
 fn __unpin_scope_Enum() {
-    #[allow(dead_code)]
-    #[doc(hidden)]
-    struct __UnpinStructEnum<'_pin, T, U> {
-        __pin_project_use_generics: ::pin_project::__private::AlwaysUnpin<'_pin, (T, U)>,
+    struct __Enum<'pin, T, U> {
+        __pin_project_use_generics: ::pin_project::__private::AlwaysUnpin<'pin, (T, U)>,
         __field0: T,
     }
-    impl<'_pin, T, U> ::core::marker::Unpin for Enum<T, U> where
-        __UnpinStructEnum<'_pin, T, U>: ::core::marker::Unpin
-    {
-    }
+    impl<'pin, T, U> ::core::marker::Unpin for Enum<T, U> where __Enum<'pin, T, U>: ::core::marker::Unpin
+    {}
 }
 
 // Ensure that enum does not implement `Drop`.
@@ -80,7 +76,7 @@ fn __unpin_scope_Enum() {
 // See ./struct-default-expanded.rs for details.
 trait EnumMustNotImplDrop {}
 #[allow(clippy::drop_bounds)]
-impl<T: Drop> EnumMustNotImplDrop for T {}
+impl<T: ::core::ops::Drop> EnumMustNotImplDrop for T {}
 #[allow(single_use_lifetimes)]
 impl<T, U> EnumMustNotImplDrop for Enum<T, U> {}
 

@@ -492,7 +492,7 @@ impl<'a> Context<'a> {
                 }
             };
 
-            let struct_ident = format_ident!("UnpinStruct{}", orig_ident, span = make_span());
+            let struct_ident = format_ident!("__{}", orig_ident, span = make_span());
 
             // Generate a field in our new struct for every
             // pinned field in the original type.
@@ -555,9 +555,6 @@ impl<'a> Context<'a> {
                 #struct_ident #proj_ty_generics: ::core::marker::Unpin
             });
 
-            let attrs =
-                if cfg!(pin_project_show_unpin_struct) { quote!() } else { quote!(#[doc(hidden)]) };
-
             let private = Ident::new(CURRENT_PRIVATE_MODULE, Span::call_site());
             let inner_data = quote! {
                 // This needs to have the same visibility as the original type,
@@ -572,8 +569,6 @@ impl<'a> Context<'a> {
                 // this 'public' type. These steps are described below.
                 //
                 // See also https://github.com/taiki-e/pin-project/pull/53.
-                #[allow(dead_code)]
-                #attrs
                 #vis struct #struct_ident #proj_generics #where_clause {
                     __pin_project_use_generics: ::pin_project::#private::AlwaysUnpin<#lifetime, (#(#type_params),*)>,
 
