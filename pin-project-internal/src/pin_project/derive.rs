@@ -291,22 +291,22 @@ impl<'a> Context<'a> {
             #[allow(clippy::mut_mut)] // This lint warns `&mut &mut <ty>`.
             #[allow(dead_code)] // This lint warns unused fields/variants.
             #vis enum #proj_ident #proj_generics #where_clause {
-                #(#proj_variants,)*
+                #proj_variants
             }
             #[allow(dead_code)] // This lint warns unused fields/variants.
             #vis enum #proj_ref_ident #proj_generics #where_clause {
-                #(#proj_ref_variants,)*
+                #proj_ref_variants
             }
         };
 
         let proj_body = quote! {
             match self.get_unchecked_mut() {
-                #(#proj_arms)*
+                #proj_arms
             }
         };
         let proj_ref_body = quote! {
             match self.get_ref() {
-                #(#proj_ref_arms)*
+                #proj_ref_arms
             }
         };
 
@@ -315,15 +315,14 @@ impl<'a> Context<'a> {
         Ok(proj_items)
     }
 
-    #[allow(clippy::type_complexity)]
     fn visit_variants(
         &mut self,
         variants: &mut Variants,
-    ) -> Result<(Vec<TokenStream>, Vec<TokenStream>, Vec<TokenStream>, Vec<TokenStream>)> {
-        let mut proj_variants = Vec::with_capacity(variants.len());
-        let mut proj_ref_variants = Vec::with_capacity(variants.len());
-        let mut proj_arms = Vec::with_capacity(variants.len());
-        let mut proj_ref_arms = Vec::with_capacity(variants.len());
+    ) -> Result<(TokenStream, TokenStream, TokenStream, TokenStream)> {
+        let mut proj_variants = TokenStream::new();
+        let mut proj_ref_variants = TokenStream::new();
+        let mut proj_arms = TokenStream::new();
+        let mut proj_ref_arms = TokenStream::new();
         for Variant { ident, fields, .. } in variants {
             let (proj_pat, proj_body, proj_fields, proj_ref_fields) = match fields {
                 Fields::Named(fields) => self.visit_named(fields)?,
@@ -336,18 +335,18 @@ impl<'a> Context<'a> {
             let orig_ident = self.orig.ident;
             let proj_ident = &self.proj.mut_ident;
             let proj_ref_ident = &self.proj.ref_ident;
-            proj_variants.push(quote! {
-                #ident #proj_fields
+            proj_variants.extend(quote! {
+                #ident #proj_fields,
             });
-            proj_ref_variants.push(quote! {
-                #ident #proj_ref_fields
+            proj_ref_variants.extend(quote! {
+                #ident #proj_ref_fields,
             });
-            proj_arms.push(quote! {
+            proj_arms.extend(quote! {
                 #orig_ident::#ident #proj_pat => {
                     #proj_ident::#ident #proj_body
                 }
             });
-            proj_ref_arms.push(quote! {
+            proj_ref_arms.extend(quote! {
                 #orig_ident::#ident #proj_pat => {
                     #proj_ref_ident::#ident #proj_body
                 }
