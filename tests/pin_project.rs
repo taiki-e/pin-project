@@ -216,9 +216,9 @@ fn trait_bounds_on_type_generics() {
 #[test]
 fn overlapping_lifetime_names() {
     #[pin_project]
-    pub struct Foo<'_pin, T> {
+    pub struct Foo<'pin, T> {
         #[pin]
-        field: &'_pin mut T,
+        field: &'pin mut T,
     }
 }
 

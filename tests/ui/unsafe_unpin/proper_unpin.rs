@@ -20,12 +20,12 @@ pub struct TrivialBounds {
 }
 
 #[pin_project(UnsafeUnpin)]
-pub struct OverlappingLifetimeNames<'_pin, T, U> {
+pub struct OverlappingLifetimeNames<'pin, T, U> {
     #[pin]
     field1: U,
     #[pin]
     field2: Option<T>,
-    field3: &'_pin (),
+    field3: &'pin (),
 }
 
 #[allow(unsafe_code)]

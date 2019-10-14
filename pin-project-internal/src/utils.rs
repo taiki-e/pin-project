@@ -7,7 +7,7 @@ use syn::{
     *,
 };
 
-pub(crate) const DEFAULT_LIFETIME_NAME: &str = "'_pin";
+pub(crate) const DEFAULT_LIFETIME_NAME: &str = "'pin";
 pub(crate) const CURRENT_PRIVATE_MODULE: &str = "__private";
 
 pub(crate) type Variants = Punctuated<Variant, token::Comma>;

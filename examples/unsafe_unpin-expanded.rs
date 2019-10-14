@@ -29,28 +29,28 @@ pub struct Foo<T, U> {
 
 #[allow(clippy::mut_mut)]
 #[allow(dead_code)]
-pub(crate) struct __FooProjection<'_pin, T, U> {
-    pinned: ::core::pin::Pin<&'_pin mut T>,
-    unpinned: &'_pin mut U,
+pub(crate) struct __FooProjection<'pin, T, U> {
+    pinned: ::core::pin::Pin<&'pin mut T>,
+    unpinned: &'pin mut U,
 }
 #[allow(dead_code)]
-pub(crate) struct __FooProjectionRef<'_pin, T, U> {
-    pinned: ::core::pin::Pin<&'_pin T>,
-    unpinned: &'_pin U,
+pub(crate) struct __FooProjectionRef<'pin, T, U> {
+    pinned: ::core::pin::Pin<&'pin T>,
+    unpinned: &'pin U,
 }
 
 impl<T, U> Foo<T, U> {
-    pub(crate) fn project<'_pin>(
-        self: ::core::pin::Pin<&'_pin mut Self>,
-    ) -> __FooProjection<'_pin, T, U> {
+    pub(crate) fn project<'pin>(
+        self: ::core::pin::Pin<&'pin mut Self>,
+    ) -> __FooProjection<'pin, T, U> {
         unsafe {
             let Foo { pinned, unpinned } = self.get_unchecked_mut();
             __FooProjection { pinned: ::core::pin::Pin::new_unchecked(pinned), unpinned }
         }
     }
-    pub(crate) fn project_ref<'_pin>(
-        self: ::core::pin::Pin<&'_pin Self>,
-    ) -> __FooProjectionRef<'_pin, T, U> {
+    pub(crate) fn project_ref<'pin>(
+        self: ::core::pin::Pin<&'pin Self>,
+    ) -> __FooProjectionRef<'pin, T, U> {
         unsafe {
             let Foo { pinned, unpinned } = self.get_ref();
             __FooProjectionRef { pinned: ::core::pin::Pin::new_unchecked(pinned), unpinned }
@@ -61,8 +61,8 @@ impl<T, U> Foo<T, U> {
 unsafe impl<T: Unpin, U> UnsafeUnpin for Foo<T, U> {}
 
 #[allow(single_use_lifetimes)]
-impl<'_pin, T, U> ::core::marker::Unpin for Foo<T, U> where
-    ::pin_project::__private::Wrapper<'_pin, Self>: ::pin_project::UnsafeUnpin
+impl<'pin, T, U> ::core::marker::Unpin for Foo<T, U> where
+    ::pin_project::__private::Wrapper<'pin, Self>: ::pin_project::UnsafeUnpin
 {
 }
 

@@ -34,29 +34,29 @@ pub struct Foo<'a, T> {
 
 #[allow(clippy::mut_mut)]
 #[allow(dead_code)]
-pub(crate) struct __FooProjection<'_pin, 'a, T> {
-    was_dropped: &'_pin mut &'a mut bool,
-    field: ::core::pin::Pin<&'_pin mut T>,
+pub(crate) struct __FooProjection<'pin, 'a, T> {
+    was_dropped: &'pin mut &'a mut bool,
+    field: ::core::pin::Pin<&'pin mut T>,
 }
 
 #[allow(dead_code)]
-pub(crate) struct __FooProjectionRef<'_pin, 'a, T> {
-    was_dropped: &'_pin &'a mut bool,
-    field: ::core::pin::Pin<&'_pin T>,
+pub(crate) struct __FooProjectionRef<'pin, 'a, T> {
+    was_dropped: &'pin &'a mut bool,
+    field: ::core::pin::Pin<&'pin T>,
 }
 
 impl<'a, T> Foo<'a, T> {
-    pub(crate) fn project<'_pin>(
-        self: ::core::pin::Pin<&'_pin mut Self>,
-    ) -> __FooProjection<'_pin, 'a, T> {
+    pub(crate) fn project<'pin>(
+        self: ::core::pin::Pin<&'pin mut Self>,
+    ) -> __FooProjection<'pin, 'a, T> {
         unsafe {
             let Foo { was_dropped, field } = self.get_unchecked_mut();
             __FooProjection { was_dropped, field: ::core::pin::Pin::new_unchecked(field) }
         }
     }
-    pub(crate) fn project_ref<'_pin>(
-        self: ::core::pin::Pin<&'_pin Self>,
-    ) -> __FooProjectionRef<'_pin, 'a, T> {
+    pub(crate) fn project_ref<'pin>(
+        self: ::core::pin::Pin<&'pin Self>,
+    ) -> __FooProjectionRef<'pin, 'a, T> {
         unsafe {
             let Foo { was_dropped, field } = self.get_ref();
             __FooProjectionRef { was_dropped, field: ::core::pin::Pin::new_unchecked(field) }
@@ -104,15 +104,13 @@ impl<T> ::pin_project::__private::PinnedDrop for Foo<'_, T> {
 // for details.
 #[allow(non_snake_case)]
 fn __unpin_scope_Foo() {
-    #[allow(dead_code)]
-    #[doc(hidden)]
-    pub struct __UnpinStructFoo<'_pin, 'a, T> {
-        __pin_project_use_generics: ::pin_project::__private::AlwaysUnpin<'_pin, (T)>,
+    pub struct __Foo<'pin, 'a, T> {
+        __pin_project_use_generics: ::pin_project::__private::AlwaysUnpin<'pin, (T)>,
         __field0: T,
         __lifetime0: &'a (),
     }
-    impl<'_pin, 'a, T> ::core::marker::Unpin for Foo<'a, T> where
-        __UnpinStructFoo<'_pin, 'a, T>: ::core::marker::Unpin
+    impl<'pin, 'a, T> ::core::marker::Unpin for Foo<'a, T> where
+        __Foo<'pin, 'a, T>: ::core::marker::Unpin
     {
     }
 }
