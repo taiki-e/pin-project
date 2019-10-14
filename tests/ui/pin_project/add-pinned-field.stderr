@@ -1,0 +1,27 @@
+error[E0277]: the trait bound `std::marker::PhantomPinned: std::marker::Unpin` is not satisfied in `__Foo<'_>`
+  --> $DIR/add-pinned-field.rs:21:5
+   |
+4  | fn is_unpin<T: Unpin>() {}
+   |    --------    ----- required by this bound in `is_unpin`
+...
+21 |     is_unpin::<Foo>(); //~ ERROR E0277
+   |     ^^^^^^^^^^^^^^^ within `__Foo<'_>`, the trait `std::marker::Unpin` is not implemented for `std::marker::PhantomPinned`
+   |
+   = help: the following implementations were found:
+             <std::marker::PhantomPinned as std::marker::Unpin>
+   = note: required because it appears within the type `__Foo<'_>`
+   = note: required because of the requirements on the impl of `std::marker::Unpin` for `Foo`
+
+error[E0277]: the trait bound `std::marker::PhantomPinned: std::marker::Unpin` is not satisfied in `__Bar<'_>`
+  --> $DIR/add-pinned-field.rs:22:5
+   |
+4  | fn is_unpin<T: Unpin>() {}
+   |    --------    ----- required by this bound in `is_unpin`
+...
+22 |     is_unpin::<Bar>(); //~ ERROR E0277
+   |     ^^^^^^^^^^^^^^^ within `__Bar<'_>`, the trait `std::marker::Unpin` is not implemented for `std::marker::PhantomPinned`
+   |
+   = help: the following implementations were found:
+             <std::marker::PhantomPinned as std::marker::Unpin>
+   = note: required because it appears within the type `__Bar<'_>`
+   = note: required because of the requirements on the impl of `std::marker::Unpin` for `Bar`

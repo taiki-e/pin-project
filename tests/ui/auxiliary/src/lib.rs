@@ -1,77 +1,52 @@
+#![warn(unsafe_code)]
+#![warn(rust_2018_idioms, single_use_lifetimes, unreachable_pub)]
+#![warn(clippy::all, clippy::pedantic)]
+#![allow(clippy::use_self)]
+
 extern crate proc_macro;
 
-use proc_macro::{Delimiter, Group, Ident, Punct, Spacing, Span, TokenStream, TokenTree};
+use proc_macro::TokenStream;
+use quote::{format_ident, ToTokens};
+use syn::*;
 
-fn op(c: char) -> TokenTree {
-    Punct::new(c, Spacing::Alone).into()
+#[proc_macro_attribute]
+pub fn hidden_repr(args: TokenStream, input: TokenStream) -> TokenStream {
+    format!("#[repr({})] {}", args, input).parse().unwrap()
 }
 
-fn ident(sym: &str) -> Ident {
-    Ident::new(sym, Span::call_site())
+#[proc_macro]
+pub fn hidden_repr_macro(input: TokenStream) -> TokenStream {
+    format!("#[repr(packed)] {}", input).parse().unwrap()
 }
 
-fn word(sym: &str) -> TokenTree {
-    ident(sym).into()
+#[proc_macro_attribute]
+pub fn hidden_repr_cfg_any(args: TokenStream, input: TokenStream) -> TokenStream {
+    format!("#[cfg_attr(any(), repr({}))] {}", args, input).parse().unwrap()
+}
+
+#[proc_macro_attribute]
+pub fn hidden_repr_cfg_not_any(args: TokenStream, input: TokenStream) -> TokenStream {
+    format!("#[cfg_attr(not(any()), repr({}))] {}", args, input).parse().unwrap()
 }
 
 #[proc_macro_attribute]
 pub fn add_pinned_field(_: TokenStream, input: TokenStream) -> TokenStream {
-    let mut tokens: Vec<_> = input.into_iter().collect();
-    if let Some(TokenTree::Group(g)) = tokens.pop() {
-        let mut vec = vec![];
-        vec.extend(g.stream());
-
-        // #[pin]
-        vec.push(op('#'));
-        vec.push(TokenTree::Group(Group::new(Delimiter::Bracket, word("pin").into())));
-        // __field: __HiddenPinnedField
-        vec.push(word("__field"));
-        vec.push(op(':'));
-        vec.push(word("__HiddenPinnedField"));
-
-        tokens.extend(TokenStream::from(TokenTree::Group(Group::new(
-            Delimiter::Brace,
-            vec.into_iter().collect(),
-        ))));
-        let mut vec = vec![];
-
-        // pub struct __HiddenPinnedField;
-        vec.push(word("pub"));
-        vec.push(word("struct"));
-        vec.push(word("__HiddenPinnedField"));
-        vec.push(op(';'));
-
-        // impl !Unpin for __HiddenPinnedField {}
-        vec.push(word("impl"));
-        vec.push(op('!'));
-        vec.push(word("Unpin"));
-        vec.push(word("for"));
-        vec.push(word("__HiddenPinnedField"));
-        vec.push(TokenTree::Group(Group::new(Delimiter::Brace, TokenStream::new())));
-
-        tokens.extend(vec);
-        tokens.into_iter().collect()
-    } else {
-        unreachable!()
-    }
+    let mut item = syn::parse_macro_input!(input as ItemStruct);
+    let fields = if let Fields::Named(fields) = &mut item.fields { fields } else { panic!() };
+    fields.named.push(Field {
+        attrs: vec![syn::parse_quote!(#[pin])],
+        vis: Visibility::Inherited,
+        ident: Some(format_ident!("__field")),
+        colon_token: Some(<Token![:]>::default()),
+        ty: syn::parse_quote!(::std::marker::PhantomPinned),
+    });
+    item.into_token_stream().into()
 }
 
 #[proc_macro_attribute]
-pub fn hidden_repr(attr: TokenStream, item: TokenStream) -> TokenStream {
-    format!("#[repr({})] {}", attr, item).parse().unwrap()
-}
-
-#[proc_macro]
-pub fn hidden_repr_macro(item: TokenStream) -> TokenStream {
-    format!("#[repr(packed)] {}", item).parse().unwrap()
-}
-
-#[proc_macro_attribute]
-pub fn hidden_repr_cfg_any(attr: TokenStream, item: TokenStream) -> TokenStream {
-    format!("#[cfg_attr(any(), repr({}))] {}", attr, item).parse().unwrap()
-}
-
-#[proc_macro_attribute]
-pub fn hidden_repr_cfg_not_any(attr: TokenStream, item: TokenStream) -> TokenStream {
-    format!("#[cfg_attr(not(any()), repr({}))] {}", attr, item).parse().unwrap()
+pub fn remove_pin_attrs(_: TokenStream, input: TokenStream) -> TokenStream {
+    let mut item = syn::parse_macro_input!(input as ItemStruct);
+    let fields = if let Fields::Named(fields) = &mut item.fields { fields } else { panic!() };
+    fields.named.iter_mut().for_each(|field| field.attrs.clear());
+    item.into_token_stream().into()
 }

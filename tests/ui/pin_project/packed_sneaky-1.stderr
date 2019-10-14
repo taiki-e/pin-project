@@ -1,17 +1,17 @@
 error: #[pin_project] attribute may not be used on #[repr(packed)] types
- --> $DIR/packed_sneaky-1.rs:8:1
+ --> $DIR/packed_sneaky-1.rs:6:1
   |
-8 | #[hidden_repr(packed)]
+6 | #[hidden_repr(packed)]
   | ^^^^^^^^^^^^^^^^^^^^^^
 
 error: #[pin_project] attribute may not be used on #[repr(packed)] types
-  --> $DIR/packed_sneaky-1.rs:15:1
+  --> $DIR/packed_sneaky-1.rs:13:1
    |
-15 | #[hidden_repr(packed)]
+13 | #[hidden_repr(packed)]
    | ^^^^^^^^^^^^^^^^^^^^^^
 
 error: #[pin_project] attribute may not be used on #[repr(packed)] types
-  --> $DIR/packed_sneaky-1.rs:24:1
+  --> $DIR/packed_sneaky-1.rs:22:1
    |
-24 | #[hidden_repr(packed)]
+22 | #[hidden_repr(packed)]
    | ^^^^^^^^^^^^^^^^^^^^^^

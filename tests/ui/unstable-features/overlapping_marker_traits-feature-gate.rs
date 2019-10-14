@@ -14,8 +14,6 @@ impl<T> Unpin for Foo<T> {}
 
 fn is_unpin<T: Unpin>() {}
 
-fn foo_is_unpin() {
+fn main() {
     is_unpin::<Foo<PhantomPinned>>()
 }
-
-fn main() {}

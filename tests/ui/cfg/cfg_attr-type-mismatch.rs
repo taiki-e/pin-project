@@ -13,16 +13,12 @@ struct Bar<T> {
     inner: T,
 }
 
-fn foo() {
+fn main() {
     let mut x = Foo { inner: 0_u8 };
     let x = Pin::new(&mut x).project();
     let _: Pin<&mut u8> = x.inner; //~ ERROR E0308
-}
 
-fn bar() {
     let mut x = Bar { inner: 0_u8 };
     let x = Pin::new(&mut x).project();
     let _: &mut u8 = x.inner; //~ ERROR E0308
 }
-
-fn main() {}

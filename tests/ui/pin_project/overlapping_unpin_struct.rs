@@ -13,8 +13,6 @@ impl Unpin for __Foo {}
 
 fn is_unpin<T: Unpin>() {}
 
-fn foo() {
+fn main() {
     is_unpin::<Foo<PhantomPinned>>(); //~ ERROR E0277
 }
-
-fn main() {}

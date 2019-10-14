@@ -9,8 +9,6 @@ struct Foo<T, U> {
 
 fn is_unpin<T: Unpin>() {}
 
-fn foo_is_unpin() {
+fn main() {
     is_unpin::<Foo<(), ()>>(); //~ ERROR E0277
 }
-
-fn main() {}
