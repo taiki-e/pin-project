@@ -46,4 +46,11 @@ enum H<T> {
     A(T),
 }
 
+#[pin_project]
+struct I<T> {
+    #[pin]
+    #[pin] //~ ERROR duplicate #[pin] attribute
+    pinned: T,
+}
+
 fn main() {}

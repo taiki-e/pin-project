@@ -45,3 +45,9 @@ error: #[pin] attribute may only be used on fields of structs or variants
    |
 44 | #[pin] //~ ERROR may only be used on fields of structs or variants
    | ^^^^^^
+
+error: duplicate #[pin] attribute
+  --> $DIR/invalid.rs:52:5
+   |
+52 |     #[pin] //~ ERROR duplicate #[pin] attribute
+   |     ^^^^^^

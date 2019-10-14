@@ -1,17 +1,17 @@
-use auxiliary_macros::remove_pin_attrs;
+use auxiliary_macros::remove_attr;
 use pin_project::pin_project;
 use std::{marker::PhantomPinned, pin::Pin};
 
 fn is_unpin<T: Unpin>() {}
 
 #[pin_project]
-#[remove_pin_attrs]
+#[remove_attr(field)]
 struct Foo {
     #[pin]
     field: PhantomPinned,
 }
 
-#[remove_pin_attrs]
+#[remove_attr(field)]
 #[pin_project]
 struct Bar {
     #[pin]

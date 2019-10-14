@@ -32,7 +32,7 @@ pub fn hidden_repr_cfg_not_any(args: TokenStream, input: TokenStream) -> TokenSt
 #[proc_macro_attribute]
 pub fn add_pinned_field(_: TokenStream, input: TokenStream) -> TokenStream {
     let mut item = syn::parse_macro_input!(input as ItemStruct);
-    let fields = if let Fields::Named(fields) = &mut item.fields { fields } else { panic!() };
+    let fields = if let Fields::Named(fields) = &mut item.fields { fields } else { unreachable!() };
     fields.named.push(Field {
         attrs: vec![syn::parse_quote!(#[pin])],
         vis: Visibility::Inherited,
@@ -44,9 +44,26 @@ pub fn add_pinned_field(_: TokenStream, input: TokenStream) -> TokenStream {
 }
 
 #[proc_macro_attribute]
-pub fn remove_pin_attrs(_: TokenStream, input: TokenStream) -> TokenStream {
+pub fn remove_attr(args: TokenStream, input: TokenStream) -> TokenStream {
     let mut item = syn::parse_macro_input!(input as ItemStruct);
-    let fields = if let Fields::Named(fields) = &mut item.fields { fields } else { panic!() };
-    fields.named.iter_mut().for_each(|field| field.attrs.clear());
+    match &*args.to_string() {
+        "field" => {
+            if let Fields::Named(fields) = &mut item.fields { fields } else { unreachable!() }
+                .named
+                .iter_mut()
+                .for_each(|field| field.attrs.clear())
+        }
+        "struct" => item.attrs.clear(),
+        _ => unreachable!(),
+    }
+
+    item.into_token_stream().into()
+}
+
+#[proc_macro_attribute]
+pub fn add_attr(args: TokenStream, input: TokenStream) -> TokenStream {
+    let mut item = syn::parse_macro_input!(input as ItemStruct);
+    assert_eq!(&*args.to_string(), "struct");
+    item.attrs.push(syn::parse_quote!(#[pin]));
     item.into_token_stream().into()
 }
