@@ -5,9 +5,9 @@ struct Foo<T> {
     inner: T,
 }
 
-fn baz() {
+fn foo() {
     let mut x = Foo { inner: 0_u8 };
-    let _x = Pin::new(&mut x).project();
+    let _x = Pin::new(&mut x).project(); //~ ERROR E0599
 }
 
 fn main() {}

@@ -1,12 +1,14 @@
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote_spanned};
 use syn::{
+    parse::{ParseBuffer, ParseStream},
     punctuated::Punctuated,
     token::{self, Comma},
     *,
 };
 
 pub(crate) const DEFAULT_LIFETIME_NAME: &str = "'_pin";
+pub(crate) const CURRENT_PRIVATE_MODULE: &str = "__private";
 
 pub(crate) type Variants = Punctuated<Variant, token::Comma>;
 
@@ -112,5 +114,25 @@ impl SliceExt for [Attribute] {
 impl VecExt for Vec<Attribute> {
     fn find_remove(&mut self, ident: &str) -> Option<Attribute> {
         self.iter().position(|attr| attr.path.is_ident(ident)).map(|i| self.remove(i))
+    }
+}
+
+pub(crate) trait ParseBufferExt<'a> {
+    fn parenthesized(self) -> Result<ParseBuffer<'a>>;
+}
+
+impl<'a> ParseBufferExt<'a> for ParseStream<'a> {
+    fn parenthesized(self) -> Result<ParseBuffer<'a>> {
+        let content;
+        let _: token::Paren = syn::parenthesized!(content in self);
+        Ok(content)
+    }
+}
+
+impl<'a> ParseBufferExt<'a> for ParseBuffer<'a> {
+    fn parenthesized(self) -> Result<ParseBuffer<'a>> {
+        let content;
+        let _: token::Paren = syn::parenthesized!(content in self);
+        Ok(content)
     }
 }

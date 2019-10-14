@@ -1,8 +1,8 @@
-use proc_macro2::TokenStream;
+use proc_macro2::{Span, TokenStream};
 use quote::{quote, quote_spanned, ToTokens};
 use syn::{spanned::Spanned, *};
 
-use crate::utils::parse_as_empty;
+use crate::utils::{parse_as_empty, CURRENT_PRIVATE_MODULE};
 
 pub(crate) fn attribute(args: &TokenStream, mut input: ItemImpl) -> TokenStream {
     if let Err(e) = parse_as_empty(args).and_then(|()| parse(&mut input)) {
@@ -10,6 +10,7 @@ pub(crate) fn attribute(args: &TokenStream, mut input: ItemImpl) -> TokenStream 
         let (impl_generics, _, where_clause) = input.generics.split_for_impl();
 
         let mut tokens = e.to_compile_error();
+        let private = Ident::new(CURRENT_PRIVATE_MODULE, Span::call_site());
         // Generate a dummy `PinnedDrop` implementation.
         // In many cases, `#[pinned_drop] impl` is declared after `#[pin_project]`.
         // Therefore, if `pinned_drop` compile fails, you will also get an error
@@ -19,7 +20,7 @@ pub(crate) fn attribute(args: &TokenStream, mut input: ItemImpl) -> TokenStream 
         // We already know that we will get a compile error, so this won't
         // accidentally compile successfully.
         tokens.extend(quote! {
-            impl #impl_generics ::pin_project::__private::PinnedDrop for #self_ty #where_clause {
+            impl #impl_generics ::pin_project::#private::PinnedDrop for #self_ty #where_clause {
                 unsafe fn drop(self: ::core::pin::Pin<&mut Self>) {}
             }
         });
@@ -95,8 +96,9 @@ fn parse_method(method: &ImplItemMethod) -> Result<()> {
 fn parse(item: &mut ItemImpl) -> Result<()> {
     if let Some((_, path, _)) = &mut item.trait_ {
         if path.is_ident("PinnedDrop") {
+            let private = Ident::new(CURRENT_PRIVATE_MODULE, Span::call_site());
             *path = syn::parse2(quote_spanned! { path.span() =>
-                ::pin_project::__private::PinnedDrop
+                ::pin_project::#private::PinnedDrop
             })
             .unwrap();
         } else {

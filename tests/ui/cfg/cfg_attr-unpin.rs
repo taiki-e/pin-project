@@ -14,7 +14,7 @@ struct Bar<T> {
 
 fn is_unpin<T: Unpin>() {}
 
-fn baz() {
+fn foo() {
     is_unpin::<Foo<PhantomPinned>>(); // ERROR E0277
     is_unpin::<Bar<()>>(); // Ok
     is_unpin::<Bar<PhantomPinned>>(); //~ ERROR E0277
