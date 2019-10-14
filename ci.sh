@@ -9,16 +9,16 @@
 # ```
 
 echo "Running 'cargo fmt -- --check'"
-RUSTFLAGS=-Dwarnings cargo +nightly fmt --all -- --check
+cargo +nightly fmt --all -- --check
 
 echo "Running 'cargo clippy'"
-RUSTFLAGS=-Dwarnings cargo +nightly clippy --all --all-features
+cargo +nightly clippy --all --all-features
 
 echo "Running 'cargo test'"
-RUSTFLAGS=-Dwarnings cargo +nightly test --all --all-features
+cargo +nightly test --all --all-features
 
 echo "Running 'cargo doc'"
-RUSTDOCFLAGS=-Dwarnings cargo +nightly doc --no-deps --all --all-features
+cargo +nightly doc --no-deps --all --all-features
 
 echo "Running 'compiletest'"
 . ./compiletest.sh

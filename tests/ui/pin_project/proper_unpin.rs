@@ -27,7 +27,7 @@ struct Bar<'a, T, U> {
 
 fn is_unpin<T: Unpin>() {}
 
-fn assert_unpin() {
+fn main() {
     is_unpin::<Foo<PhantomPinned, ()>>(); //~ ERROR E0277
     is_unpin::<Foo<(), PhantomPinned>>(); // Ok
     is_unpin::<Foo<PhantomPinned, PhantomPinned>>(); //~ ERROR E0277
@@ -36,5 +36,3 @@ fn assert_unpin() {
 
     is_unpin::<Bar<'_, PhantomPinned, PhantomPinned>>(); //~ Ok
 }
-
-fn main() {}

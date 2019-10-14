@@ -1,6 +1,4 @@
-#[macro_use]
-extern crate auxiliary_macros;
-
+use auxiliary_macros::hidden_repr_cfg_any;
 use pin_project::pin_project;
 
 // `#[hidden_repr_cfg_any(packed)]` generates `#[cfg_attr(any(), repr(packed))]`.

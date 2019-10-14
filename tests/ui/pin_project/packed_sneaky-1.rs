@@ -1,6 +1,4 @@
-#[macro_use]
-extern crate auxiliary_macros;
-
+use auxiliary_macros::hidden_repr;
 use pin_project::{pin_project, pinned_drop, UnsafeUnpin};
 use std::pin::Pin;
 

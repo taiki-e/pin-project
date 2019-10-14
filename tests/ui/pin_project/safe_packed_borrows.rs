@@ -12,12 +12,10 @@ struct B {
     field: u32,
 }
 
-fn foo() {
+fn main() {
     let a = A { field: 1 };
     &a.field; //~ ERROR borrow of packed field is unsafe and requires unsafe function or block
 
     let b = B { field: 1 };
     &b.field; //~ ERROR borrow of packed field is unsafe and requires unsafe function or block
 }
-
-fn main() {}

@@ -31,7 +31,7 @@ pub struct OverlappingLifetimeNames<'pin, T, U> {
 #[allow(unsafe_code)]
 unsafe impl<T: Unpin, U: Unpin> UnsafeUnpin for OverlappingLifetimeNames<'_, T, U> {}
 
-fn unsafe_unpin() {
+fn main() {
     is_unpin::<Blah<PhantomPinned, ()>>(); //~ ERROR E0277
     is_unpin::<Blah<(), PhantomPinned>>(); // Ok
     is_unpin::<Blah<PhantomPinned, PhantomPinned>>(); //~ ERROR E0277
@@ -41,5 +41,3 @@ fn unsafe_unpin() {
     is_unpin::<OverlappingLifetimeNames<'_, PhantomPinned, ()>>(); //~ ERROR E0277
     is_unpin::<OverlappingLifetimeNames<'_, (), PhantomPinned>>(); //~ ERROR E0277
 }
-
-fn main() {}

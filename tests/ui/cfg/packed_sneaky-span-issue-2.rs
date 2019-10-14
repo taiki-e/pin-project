@@ -1,6 +1,4 @@
-#[macro_use]
-extern crate auxiliary_macros;
-
+use auxiliary_macros::hidden_repr;
 use pin_project::pin_project;
 
 //~ ERROR may not be used on #[repr(packed)] types
