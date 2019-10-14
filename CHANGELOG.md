@@ -1,5 +1,16 @@
 # Unreleased
 
+# 0.4.3 - 2019-10-15
+
+* [`#[pin_project]` can now interoperate with `#[cfg_attr()]`.][135]
+
+* [`#[pin_project]` can now interoperate with `#[cfg()]` on tuple structs and tuple variants.][135]
+
+* [Fixed support for DSTs(Dynamically Sized Types) on `#[pin_project(UnsafeUnpin)]`][120]
+
+[120]: https://github.com/taiki-e/pin-project/pull/120
+[135]: https://github.com/taiki-e/pin-project/pull/135
+
 # 0.4.2 - 2019-09-29
 
 * [Fixed support for DSTs(Dynamically Sized Types).][113]
