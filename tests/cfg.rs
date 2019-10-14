@@ -5,7 +5,7 @@
 // Refs: https://doc.rust-lang.org/nightly/reference/attributes.html
 
 use pin_project::pin_project;
-use std::marker::PhantomPinned;
+use std::{marker::PhantomPinned, pin::Pin};
 
 fn is_unpin<T: Unpin>() {}
 
@@ -19,7 +19,9 @@ pub struct Other;
 pub struct Any(PhantomPinned);
 
 #[test]
-fn struct_() {
+fn cfg() {
+    // structs
+
     #[pin_project]
     pub struct SameName {
         #[cfg(target_os = "linux")]
@@ -59,10 +61,29 @@ fn struct_() {
     let _x = DifferentName { l: Linux };
     #[cfg(not(target_os = "linux"))]
     let _x = DifferentName { o: Other };
-}
 
-#[test]
-fn enum_() {
+    #[pin_project]
+    pub struct TupleStruct(
+        #[cfg(target_os = "linux")]
+        #[pin]
+        Linux,
+        #[cfg(not(target_os = "linux"))]
+        #[pin]
+        Other,
+        #[cfg(any())]
+        #[pin]
+        Any,
+    );
+
+    is_unpin::<TupleStruct>();
+
+    #[cfg(target_os = "linux")]
+    let _x = TupleStruct(Linux);
+    #[cfg(not(target_os = "linux"))]
+    let _x = TupleStruct(Other);
+
+    // enums
+
     #[pin_project]
     pub enum Variant {
         #[cfg(target_os = "linux")]
@@ -114,6 +135,17 @@ fn enum_() {
             #[pin]
             any: Any,
         },
+        TupleVariant(
+            #[cfg(target_os = "linux")]
+            #[pin]
+            Linux,
+            #[cfg(not(target_os = "linux"))]
+            #[pin]
+            Other,
+            #[cfg(any())]
+            #[pin]
+            Any,
+        ),
     }
 
     is_unpin::<Field>();
@@ -127,4 +159,74 @@ fn enum_() {
     let _x = Field::DifferentName { l: Linux };
     #[cfg(not(target_os = "linux"))]
     let _x = Field::DifferentName { w: Other };
+
+    #[cfg(target_os = "linux")]
+    let _x = Field::TupleVariant(Linux);
+    #[cfg(not(target_os = "linux"))]
+    let _x = Field::TupleVariant(Other);
+}
+
+#[test]
+fn cfg_attr() {
+    #[pin_project]
+    pub struct SameCfg {
+        #[cfg(target_os = "linux")]
+        #[cfg_attr(target_os = "linux", pin)]
+        inner: Linux,
+        #[cfg(not(target_os = "linux"))]
+        #[cfg_attr(not(target_os = "linux"), pin)]
+        inner: Other,
+        #[cfg(any())]
+        #[cfg_attr(any(), pin)]
+        any: Any,
+    }
+
+    is_unpin::<SameCfg>();
+
+    #[cfg(target_os = "linux")]
+    let mut x = SameCfg { inner: Linux };
+    #[cfg(not(target_os = "linux"))]
+    let mut x = SameCfg { inner: Other };
+
+    let x = Pin::new(&mut x).project();
+    #[cfg(target_os = "linux")]
+    let _: Pin<&mut Linux> = x.inner;
+    #[cfg(not(target_os = "linux"))]
+    let _: Pin<&mut Other> = x.inner;
+
+    #[pin_project]
+    pub struct DifferentCfg {
+        #[cfg(target_os = "linux")]
+        #[cfg_attr(target_os = "linux", pin)]
+        inner: Linux,
+        #[cfg(not(target_os = "linux"))]
+        #[cfg_attr(target_os = "linux", pin)]
+        inner: Other,
+        #[cfg(any())]
+        #[cfg_attr(any(), pin)]
+        any: Any,
+    }
+
+    is_unpin::<DifferentCfg>();
+
+    #[cfg(target_os = "linux")]
+    let mut x = DifferentCfg { inner: Linux };
+    #[cfg(not(target_os = "linux"))]
+    let mut x = DifferentCfg { inner: Other };
+
+    let x = Pin::new(&mut x).project();
+    #[cfg(target_os = "linux")]
+    let _: Pin<&mut Linux> = x.inner;
+    #[cfg(not(target_os = "linux"))]
+    let _: &mut Other = x.inner;
+
+    #[cfg_attr(not(any()), pin_project)]
+    struct Foo<T> {
+        #[cfg_attr(not(any()), pin)]
+        inner: T,
+    }
+
+    let mut x = Foo { inner: 0_u8 };
+    let x = Pin::new(&mut x).project();
+    let _: Pin<&mut u8> = x.inner;
 }

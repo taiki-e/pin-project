@@ -329,8 +329,7 @@ use utils::{Immutable, Mutable};
 /// [`pinned_drop`]: ./attr.pinned_drop.html
 #[proc_macro_attribute]
 pub fn pin_project(args: TokenStream, input: TokenStream) -> TokenStream {
-    let input = syn::parse_macro_input!(input);
-    pin_project::attribute(args.into(), input).into()
+    pin_project::attribute(&args.into(), input.into()).into()
 }
 
 /// An attribute for annotating an impl block that implements [`Drop`].
@@ -538,9 +537,9 @@ pub fn project_ref(args: TokenStream, input: TokenStream) -> TokenStream {
     project::attribute(&args.into(), input, Immutable).into()
 }
 
+/// An internal helper macro.
 #[doc(hidden)]
-#[proc_macro_derive(__PinProjectAutoImplUnpin, attributes(pin))]
-pub fn derive_unpin(input: TokenStream) -> TokenStream {
-    let input = syn::parse_macro_input!(input);
-    pin_project::derive(input).into()
+#[proc_macro_derive(__PinProjectInternalDerive, attributes(pin))]
+pub fn __pin_project_internal_derive(input: TokenStream) -> TokenStream {
+    pin_project::derive(input.into()).into()
 }

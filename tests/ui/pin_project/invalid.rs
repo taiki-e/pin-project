@@ -28,15 +28,21 @@ struct E<T> {
     pinned: T,
 }
 
+#[pin_project(Foo)] //~ ERROR unexpected argument
+struct F<T> {
+    #[pin]
+    pinned: T,
+}
+
 #[pin_project]
-enum F<T> {
+enum G<T> {
     #[pin] //~ ERROR may only be used on fields of structs or variants
     A(T),
 }
 
 #[pin_project]
 #[pin] //~ ERROR may only be used on fields of structs or variants
-enum G<T> {
+enum H<T> {
     A(T),
 }
 

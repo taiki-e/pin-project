@@ -1,44 +1,17 @@
-error: borrow of packed field is unsafe and requires unsafe function or block (error E0133)
- --> $DIR/packed_sneaky-1.rs:7:1
+error: #[pin_project] attribute may not be used on #[repr(packed)] types
+ --> $DIR/packed_sneaky-1.rs:8:1
   |
-7 | #[pin_project] //~ ERROR borrow of packed field is unsafe and requires unsafe function or block
-  | ^^^^^^^^^^^^^^
-  |
-note: lint level defined here
- --> $DIR/packed_sneaky-1.rs:7:1
-  |
-7 | #[pin_project] //~ ERROR borrow of packed field is unsafe and requires unsafe function or block
-  | ^^^^^^^^^^^^^^
-  = warning: this was previously accepted by the compiler but is being phased out; it will become a hard error in a future release!
-  = note: for more information, see issue #46043 <https://github.com/rust-lang/rust/issues/46043>
-  = note: fields of packed structs might be misaligned: dereferencing a misaligned pointer or even just creating a misaligned reference is undefined behavior
+8 | #[hidden_repr(packed)]
+  | ^^^^^^^^^^^^^^^^^^^^^^
 
-error: borrow of packed field is unsafe and requires unsafe function or block (error E0133)
-  --> $DIR/packed_sneaky-1.rs:14:1
+error: #[pin_project] attribute may not be used on #[repr(packed)] types
+  --> $DIR/packed_sneaky-1.rs:15:1
    |
-14 | #[pin_project(UnsafeUnpin)] //~ ERROR borrow of packed field is unsafe and requires unsafe function or block
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-   |
-note: lint level defined here
-  --> $DIR/packed_sneaky-1.rs:14:1
-   |
-14 | #[pin_project(UnsafeUnpin)] //~ ERROR borrow of packed field is unsafe and requires unsafe function or block
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-   = warning: this was previously accepted by the compiler but is being phased out; it will become a hard error in a future release!
-   = note: for more information, see issue #46043 <https://github.com/rust-lang/rust/issues/46043>
-   = note: fields of packed structs might be misaligned: dereferencing a misaligned pointer or even just creating a misaligned reference is undefined behavior
+15 | #[hidden_repr(packed)]
+   | ^^^^^^^^^^^^^^^^^^^^^^
 
-error: borrow of packed field is unsafe and requires unsafe function or block (error E0133)
-  --> $DIR/packed_sneaky-1.rs:23:1
+error: #[pin_project] attribute may not be used on #[repr(packed)] types
+  --> $DIR/packed_sneaky-1.rs:24:1
    |
-23 | #[pin_project(PinnedDrop)] //~ ERROR borrow of packed field is unsafe and requires unsafe function or block
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^
-   |
-note: lint level defined here
-  --> $DIR/packed_sneaky-1.rs:23:1
-   |
-23 | #[pin_project(PinnedDrop)] //~ ERROR borrow of packed field is unsafe and requires unsafe function or block
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^
-   = warning: this was previously accepted by the compiler but is being phased out; it will become a hard error in a future release!
-   = note: for more information, see issue #46043 <https://github.com/rust-lang/rust/issues/46043>
-   = note: fields of packed structs might be misaligned: dereferencing a misaligned pointer or even just creating a misaligned reference is undefined behavior
+24 | #[hidden_repr(packed)]
+   | ^^^^^^^^^^^^^^^^^^^^^^

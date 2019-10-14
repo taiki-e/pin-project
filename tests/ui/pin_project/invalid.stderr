@@ -28,14 +28,20 @@ error: expected identifier
 25 | #[pin_project(UnsafeUnpin,,)] //~ ERROR expected identifier
    |                           ^
 
-error: #[pin] attribute may only be used on fields of structs or variants
-  --> $DIR/invalid.rs:33:5
+error: unexpected argument: Foo
+  --> $DIR/invalid.rs:31:15
    |
-33 |     #[pin] //~ ERROR may only be used on fields of structs or variants
+31 | #[pin_project(Foo)] //~ ERROR unexpected argument
+   |               ^^^
+
+error: #[pin] attribute may only be used on fields of structs or variants
+  --> $DIR/invalid.rs:39:5
+   |
+39 |     #[pin] //~ ERROR may only be used on fields of structs or variants
    |     ^^^^^^
 
 error: #[pin] attribute may only be used on fields of structs or variants
-  --> $DIR/invalid.rs:38:1
+  --> $DIR/invalid.rs:44:1
    |
-38 | #[pin] //~ ERROR may only be used on fields of structs or variants
+44 | #[pin] //~ ERROR may only be used on fields of structs or variants
    | ^^^^^^

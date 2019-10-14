@@ -125,12 +125,8 @@ impl<T, U> StructMustNotImplDrop for Struct<T, U> {}
 #[allow(non_snake_case)]
 #[deny(safe_packed_borrows)]
 fn __pin_project_assert_not_repr_packed_Struct<T, U>(val: &Struct<T, U>) {
-    {
-        &val.pinned;
-    }
-    {
-        &val.unpinned;
-    }
+    &val.pinned;
+    &val.unpinned;
 }
 
 fn main() {}
