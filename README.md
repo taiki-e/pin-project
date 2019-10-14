@@ -61,7 +61,7 @@ See [API documentation][docs-url] for more details.
 
 Also, there are examples and generated code of each feature in [examples](examples/README.md) directory.
 
-[`pin_project`]: https://docs.rs/pin-project-internal/0.4.2/pin_project_internal/attr.pin_project.html
+[`pin_project`]: https://docs.rs/pin-project-internal/0.4.3/pin_project_internal/attr.pin_project.html
 
 ## License
 
