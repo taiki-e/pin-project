@@ -25,6 +25,8 @@ jobs:
           #
           # Tests are not run as tests may require newer versions of Rust.
           - 1.33.0
+          # This is the minimum Rust version we run tests on.
+          - 1.36.0
           - stable
           - beta
           - nightly
@@ -37,6 +39,9 @@ jobs:
           - build: 1.33.0
             os: ubuntu-latest
             rust: 1.33.0
+          - build: 1.36.0
+            os: ubuntu-latest
+            rust: 1.36.0
           - build: stable
             os: ubuntu-latest
             rust: stable
