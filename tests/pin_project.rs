@@ -8,16 +8,14 @@ use pin_project::{pin_project, pinned_drop, UnsafeUnpin};
 
 #[test]
 fn test_pin_project() {
-    // struct
-
     #[pin_project]
-    struct Foo<T, U> {
+    struct Struct<T, U> {
         #[pin]
         field1: T,
         field2: U,
     }
 
-    let mut foo = Foo { field1: 1, field2: 2 };
+    let mut foo = Struct { field1: 1, field2: 2 };
 
     let mut foo_orig = Pin::new(&mut foo);
     let foo = foo_orig.as_mut().project();
@@ -31,20 +29,18 @@ fn test_pin_project() {
     assert_eq!(foo_orig.as_ref().field1, 1);
     assert_eq!(foo_orig.as_ref().field2, 2);
 
-    let mut foo = Foo { field1: 1, field2: 2 };
+    let mut foo = Struct { field1: 1, field2: 2 };
 
     let foo = Pin::new(&mut foo).project();
 
-    let __FooProjection { field1, field2 } = foo;
+    let __StructProjection { field1, field2 } = foo;
     let _: Pin<&mut i32> = field1;
     let _: &mut i32 = field2;
 
-    // tuple struct
-
     #[pin_project]
-    struct Bar<T, U>(#[pin] T, U);
+    struct TupleStruct<T, U>(#[pin] T, U);
 
-    let mut bar = Bar(1, 2);
+    let mut bar = TupleStruct(1, 2);
 
     let bar = Pin::new(&mut bar).project();
 
@@ -54,11 +50,9 @@ fn test_pin_project() {
     let y: &mut i32 = bar.1;
     assert_eq!(*y, 2);
 
-    // enum
-
     #[pin_project]
     #[derive(Eq, PartialEq, Debug)]
-    enum Baz<A, B, C, D> {
+    enum Enum<A, B, C, D> {
         Variant1(#[pin] A, B),
         Variant2 {
             #[pin]
@@ -68,48 +62,48 @@ fn test_pin_project() {
         None,
     }
 
-    let mut baz = Baz::Variant1(1, 2);
+    let mut baz = Enum::Variant1(1, 2);
 
     let mut baz_orig = Pin::new(&mut baz);
     let baz = baz_orig.as_mut().project();
 
     match baz {
-        __BazProjection::Variant1(x, y) => {
+        __EnumProjection::Variant1(x, y) => {
             let x: Pin<&mut i32> = x;
             assert_eq!(*x, 1);
 
             let y: &mut i32 = y;
             assert_eq!(*y, 2);
         }
-        __BazProjection::Variant2 { field1, field2 } => {
+        __EnumProjection::Variant2 { field1, field2 } => {
             let _x: Pin<&mut i32> = field1;
             let _y: &mut i32 = field2;
         }
-        __BazProjection::None => {}
+        __EnumProjection::None => {}
     }
 
-    assert_eq!(Pin::into_ref(baz_orig).get_ref(), &Baz::Variant1(1, 2));
+    assert_eq!(Pin::into_ref(baz_orig).get_ref(), &Enum::Variant1(1, 2));
 
-    let mut baz = Baz::Variant2 { field1: 3, field2: 4 };
+    let mut baz = Enum::Variant2 { field1: 3, field2: 4 };
 
     let mut baz = Pin::new(&mut baz).project();
 
     match &mut baz {
-        __BazProjection::Variant1(x, y) => {
+        __EnumProjection::Variant1(x, y) => {
             let _x: &mut Pin<&mut i32> = x;
             let _y: &mut &mut i32 = y;
         }
-        __BazProjection::Variant2 { field1, field2 } => {
+        __EnumProjection::Variant2 { field1, field2 } => {
             let x: &mut Pin<&mut i32> = field1;
             assert_eq!(**x, 3);
 
             let y: &mut &mut i32 = field2;
             assert_eq!(**y, 4);
         }
-        __BazProjection::None => {}
+        __EnumProjection::None => {}
     }
 
-    if let __BazProjection::Variant2 { field1, field2 } = baz {
+    if let __EnumProjection::Variant2 { field1, field2 } = baz {
         let x: Pin<&mut i32> = field1;
         assert_eq!(*x, 3);
 
@@ -144,10 +138,8 @@ fn enum_project_set() {
 
 #[test]
 fn where_clause_and_associated_type_fields() {
-    // struct
-
     #[pin_project]
-    struct Foo<I>
+    struct Struct<I>
     where
         I: Iterator,
     {
@@ -156,10 +148,8 @@ fn where_clause_and_associated_type_fields() {
         field2: I::Item,
     }
 
-    // enum
-
     #[pin_project]
-    enum Baz<I>
+    enum Enum<I>
     where
         I: Iterator,
     {
@@ -173,42 +163,46 @@ fn move_out() {
     struct NotCopy;
 
     #[pin_project]
-    struct Foo {
+    struct Struct {
         val: NotCopy,
     }
 
-    let foo = Foo { val: NotCopy };
+    let foo = Struct { val: NotCopy };
     let _val: NotCopy = foo.val;
 
     #[pin_project]
-    enum Bar {
+    enum Enum {
         Variant(NotCopy),
     }
 
-    let bar = Bar::Variant(NotCopy);
+    let bar = Enum::Variant(NotCopy);
     let _val: NotCopy = match bar {
-        Bar::Variant(val) => val,
+        Enum::Variant(val) => val,
     };
 }
 
 #[test]
 fn trait_bounds_on_type_generics() {
-    // struct
-
     #[pin_project]
-    pub struct Foo<'a, T: ?Sized> {
+    pub struct Struct<'a, T: ?Sized> {
         field: &'a mut T,
     }
 
-    // tuple struct
+    #[pin_project]
+    pub struct Struct2<'a, T: ::core::future::Future> {
+        field: &'a mut T,
+    }
 
     #[pin_project]
-    pub struct Bar<'a, T: ?Sized>(&'a mut T);
-
-    // enum
+    pub struct Struct3<'a, T: core::future::Future> {
+        field: &'a mut T,
+    }
 
     #[pin_project]
-    enum Baz<'a, T: ?Sized> {
+    pub struct TupleStruct<'a, T: ?Sized>(&'a mut T);
+
+    #[pin_project]
+    enum Enum<'a, T: ?Sized> {
         Variant(&'a mut T),
     }
 }
