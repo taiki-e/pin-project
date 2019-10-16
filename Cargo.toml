@@ -7,14 +7,11 @@ license = "Apache-2.0/MIT"
 repository = "https://github.com/taiki-e/pin-project"
 documentation = "https://docs.rs/pin-project/"
 keywords = ["pin", "macros", "attribute"]
-categories = ["rust-patterns"]
+categories = ["no-std", "rust-patterns"]
 readme = "README.md"
 description = """
 A crate for safe and ergonomic pin-projection.
 """
-
-[package.metadata.docs.rs]
-all-features = true
 
 [workspace]
 members = [
