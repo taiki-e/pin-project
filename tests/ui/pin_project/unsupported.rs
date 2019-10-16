@@ -23,4 +23,10 @@ enum Enum3 {
     B,
 }
 
+#[pin_project]
+union Union {
+    //~^ ERROR may only be used on structs or enums
+    x: u8,
+}
+
 fn main() {}
