@@ -1,5 +1,11 @@
 # Unreleased
 
+# 0.4.4 - 2019-10-17
+
+* [Fixed an issue where `PinnedDrop` implementations can call unsafe code without an unsafe block.][149]
+
+[149]: https://github.com/taiki-e/pin-project/pull/149
+
 # 0.4.3 - 2019-10-15
 
 * [`#[pin_project]` can now interoperate with `#[cfg_attr()]`.][135]

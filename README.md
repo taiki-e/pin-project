@@ -6,9 +6,9 @@
 [![rustc-badge]][rustc-url]
 
 [crates-badge]: https://img.shields.io/crates/v/pin-project.svg
-[crates-url]: https://crates.io/crates/pin-project/
+[crates-url]: https://crates.io/crates/pin-project
 [docs-badge]: https://docs.rs/pin-project/badge.svg
-[docs-url]: https://docs.rs/pin-project/
+[docs-url]: https://docs.rs/pin-project
 [license-badge]: https://img.shields.io/crates/l/pin-project.svg
 [license]: #license
 [rustc-badge]: https://img.shields.io/badge/rustc-1.33+-lightgray.svg
@@ -61,7 +61,7 @@ See [API documentation][docs-url] for more details.
 
 Also, there are examples and generated code of each feature in [examples](examples/README.md) directory.
 
-[`pin_project`]: https://docs.rs/pin-project-internal/0.4.3/pin_project_internal/attr.pin_project.html
+[`pin_project`]: https://docs.rs/pin-project/0.4.4/pin_project/attr.pin_project.html
 
 ## License
 
