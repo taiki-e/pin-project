@@ -94,7 +94,10 @@ impl<T> ::pin_project::__private::PinnedDrop for Foo<'_, T> {
     // Since calling it twice on the same object would be UB,
     // this method is unsafe.
     unsafe fn drop(self: Pin<&mut Self>) {
-        **self.project().was_dropped = true;
+        fn __drop_inner<T>(__self: Pin<&mut Foo<'_, T>>) {
+            **__self.project().was_dropped = true;
+        }
+        __drop_inner(self);
     }
 }
 
