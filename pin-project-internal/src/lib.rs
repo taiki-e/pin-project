@@ -323,7 +323,7 @@ use utils::{Immutable, Mutable};
 /// [`Pin::as_mut`]: core::pin::Pin::as_mut
 /// [`Pin::set`]: core::pin::Pin::set
 /// [`drop`]: Drop::drop
-/// [`UnsafeUnpin`]: https://docs.rs/pin-project/0.4.4/pin_project/trait.UnsafeUnpin.html
+/// [`UnsafeUnpin`]: https://docs.rs/pin-project/0.4/pin_project/trait.UnsafeUnpin.html
 /// [`project`]: ./attr.project.html
 /// [`project_ref`]: ./attr.project_ref.html
 /// [`pinned_drop`]: ./attr.pinned_drop.html
