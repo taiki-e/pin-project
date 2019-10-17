@@ -42,7 +42,7 @@
 #![warn(unsafe_code)]
 #![warn(missing_docs, rust_2018_idioms, single_use_lifetimes, unreachable_pub)]
 #![warn(clippy::all, clippy::pedantic)]
-#![allow(clippy::use_self, clippy::needless_doctest_main)]
+#![allow(clippy::use_self, clippy::needless_doctest_main, clippy::must_use_candidate)]
 
 #[doc(inline)]
 pub use pin_project_internal::pin_project;

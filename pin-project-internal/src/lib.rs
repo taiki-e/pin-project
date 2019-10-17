@@ -9,7 +9,7 @@
 #![warn(unsafe_code)]
 #![warn(rust_2018_idioms, single_use_lifetimes, unreachable_pub)]
 #![warn(clippy::all, clippy::pedantic)]
-#![allow(clippy::use_self, clippy::needless_doctest_main)]
+#![allow(clippy::use_self, clippy::needless_doctest_main, clippy::must_use_candidate)]
 // While this crate supports stable Rust, it currently requires
 // nightly Rust in order for rustdoc to correctly document auto-generated
 // `Unpin` impls. This does not affect the runtime functionality of this crate,
