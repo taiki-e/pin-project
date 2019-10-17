@@ -1,6 +1,13 @@
-use proc_macro2::{Span, TokenStream};
+use std::mem;
+
+use proc_macro2::{Group, Span, TokenStream, TokenTree};
 use quote::{quote, quote_spanned, ToTokens};
-use syn::{spanned::Spanned, *};
+use syn::{
+    punctuated::Punctuated,
+    spanned::Spanned,
+    visit_mut::{self, VisitMut},
+    *,
+};
 
 use crate::utils::{parse_as_empty, CURRENT_PRIVATE_MODULE};
 
@@ -145,9 +152,172 @@ fn parse(item: &mut ItemImpl) -> Result<()> {
         }
     }
 
-    if let ImplItem::Method(method) = &mut item.items[0] {
-        method.sig.unsafety = Some(token::Unsafe::default());
-    }
+    expand_item(item);
 
     Ok(())
+}
+
+// from:
+//
+// fn drop(self: Pin<&mut Self>) {
+//     // something
+// }
+//
+// into:
+//
+// unsafe fn drop(self: Pin<&mut Self>) {
+//     fn __drop_inner<T>(__self: Pin<&mut Foo<'_, T>>) {
+//         // something
+//     }
+//     __drop_inner(self);
+// }
+//
+fn expand_item(item: &mut ItemImpl) {
+    let method =
+        if let ImplItem::Method(method) = &mut item.items[0] { method } else { unreachable!() };
+    let mut drop_inner = method.clone();
+
+    // `fn drop(mut self: Pin<&mut Self>)` -> `fn __drop_inner<T>(mut __self: Pin<&mut Receiver>)`
+    drop_inner.sig.ident = Ident::new("__drop_inner", drop_inner.sig.ident.span());
+    drop_inner.sig.generics = item.generics.clone();
+    if let FnArg::Typed(arg) = &mut drop_inner.sig.inputs[0] {
+        if let Pat::Ident(ident) = &mut *arg.pat {
+            prepend_underscore_to_self(&mut ident.ident);
+        }
+    }
+    let mut visitor = ReplaceReceiver::new(&item.self_ty);
+    visitor.visit_signature_mut(&mut drop_inner.sig);
+    visitor.visit_block_mut(&mut drop_inner.block);
+
+    // `fn drop(mut self: Pin<&mut Self>)` -> `unsafe fn drop(self: Pin<&mut Self>)`
+    method.sig.unsafety = Some(token::Unsafe::default());
+    if let FnArg::Typed(arg) = &mut method.sig.inputs[0] {
+        if let Pat::Ident(ident) = &mut *arg.pat {
+            ident.mutability = None;
+        }
+    }
+
+    method.block = syn::parse_quote! {{
+        #drop_inner
+        __drop_inner(self);
+    }};
+}
+
+// Replace `self` and `Self` with `__self` and `Receiver`.
+// Based on https://github.com/dtolnay/async-trait/blob/1.0.15/src/receiver.rs
+
+struct ReplaceReceiver<'a> {
+    self_ty: &'a Type,
+}
+
+#[allow(clippy::similar_names)] // allow `qself`
+impl<'a> ReplaceReceiver<'a> {
+    fn new(self_ty: &'a Type) -> Self {
+        Self { self_ty }
+    }
+
+    fn self_to_qself(&mut self, qself: &mut Option<QSelf>, path: &mut Path) {
+        if path.leading_colon.is_some() {
+            return;
+        }
+
+        let first = &path.segments[0];
+        if first.ident != "Self" || !first.arguments.is_empty() {
+            return;
+        }
+
+        match path.segments.pairs().next().unwrap().punct() {
+            Some(colon) => path.leading_colon = Some(**colon),
+            None => return,
+        }
+
+        *qself = Some(QSelf {
+            lt_token: token::Lt::default(),
+            ty: Box::new(self.self_ty.clone()),
+            position: 0,
+            as_token: None,
+            gt_token: token::Gt::default(),
+        });
+
+        let segments = mem::replace(&mut path.segments, Punctuated::new());
+        path.segments = segments.into_pairs().skip(1).collect();
+    }
+}
+
+impl VisitMut for ReplaceReceiver<'_> {
+    // `Self` -> `Receiver`
+    fn visit_type_mut(&mut self, ty: &mut Type) {
+        if let Type::Path(node) = ty {
+            if node.qself.is_none() && node.path.is_ident("Self") {
+                *ty = self.self_ty.clone();
+            } else {
+                self.visit_type_path_mut(node);
+            }
+        } else {
+            visit_mut::visit_type_mut(self, ty);
+        }
+    }
+
+    // `Self::Assoc` -> `<Receiver>::Assoc`
+    fn visit_type_path_mut(&mut self, ty: &mut TypePath) {
+        if ty.qself.is_none() {
+            self.self_to_qself(&mut ty.qself, &mut ty.path);
+        }
+        visit_mut::visit_type_path_mut(self, ty);
+    }
+
+    // `Self::method` -> `<Receiver>::method`
+    fn visit_expr_path_mut(&mut self, expr: &mut ExprPath) {
+        if expr.qself.is_none() {
+            prepend_underscore_to_self(&mut expr.path.segments[0].ident);
+            self.self_to_qself(&mut expr.qself, &mut expr.path);
+        }
+        visit_mut::visit_expr_path_mut(self, expr);
+    }
+
+    fn visit_macro_mut(&mut self, node: &mut Macro) {
+        // We can't tell in general whether `self` inside a macro invocation
+        // refers to the self in the argument list or a different self
+        // introduced within the macro. Heuristic: if the macro input contains
+        // `fn`, then `self` is more likely to refer to something other than the
+        // outer function's self argument.
+        if !contains_fn(node.tokens.clone()) {
+            node.tokens = fold_token_stream(node.tokens.clone());
+        }
+    }
+
+    fn visit_item_mut(&mut self, _: &mut Item) {
+        // Do not recurse into nested items.
+    }
+}
+
+fn contains_fn(tokens: TokenStream) -> bool {
+    tokens.into_iter().any(|tt| match tt {
+        TokenTree::Ident(ident) => ident == "fn",
+        TokenTree::Group(group) => contains_fn(group.stream()),
+        _ => false,
+    })
+}
+
+fn fold_token_stream(tokens: TokenStream) -> TokenStream {
+    tokens
+        .into_iter()
+        .map(|tt| match tt {
+            TokenTree::Ident(mut ident) => {
+                prepend_underscore_to_self(&mut ident);
+                TokenTree::Ident(ident)
+            }
+            TokenTree::Group(group) => {
+                let content = fold_token_stream(group.stream());
+                TokenTree::Group(Group::new(group.delimiter(), content))
+            }
+            other => other,
+        })
+        .collect()
+}
+
+fn prepend_underscore_to_self(ident: &mut Ident) {
+    if ident == "self" {
+        *ident = Ident::new("__self", ident.span());
+    }
 }

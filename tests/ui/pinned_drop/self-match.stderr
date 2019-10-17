@@ -1,0 +1,95 @@
+error[E0401]: can't use generic parameters from outer function
+  --> $DIR/self-match.rs:13:13
+   |
+10 | impl PinnedDrop for Struct {
+   | ---- `Self` type implicitly declared here, by this `impl`
+...
+13 |             Self { x: _ } => {} //~ ERROR can't use generic parameters from outer function [E0401]
+   |             ^^^^
+   |             |
+   |             use of generic parameter from outer function
+   |             use a type here instead
+
+error[E0401]: can't use generic parameters from outer function
+  --> $DIR/self-match.rs:15:16
+   |
+10 | impl PinnedDrop for Struct {
+   | ---- `Self` type implicitly declared here, by this `impl`
+...
+15 |         if let Self { x: _ } = *self {} //~ ERROR can't use generic parameters from outer function [E0401]
+   |                ^^^^
+   |                |
+   |                use of generic parameter from outer function
+   |                use a type here instead
+
+error[E0401]: can't use generic parameters from outer function
+  --> $DIR/self-match.rs:16:23
+   |
+10 | impl PinnedDrop for Struct {
+   | ---- `Self` type implicitly declared here, by this `impl`
+...
+16 |         let _: Self = Self { x: 0 }; //~ ERROR can't use generic parameters from outer function [E0401]
+   |                       ^^^^
+   |                       |
+   |                       use of generic parameter from outer function
+   |                       use a type here instead
+
+error[E0401]: can't use generic parameters from outer function
+  --> $DIR/self-match.rs:44:13
+   |
+41 | impl PinnedDrop for Enum {
+   | ---- `Self` type implicitly declared here, by this `impl`
+...
+44 |             Self::StructVariant { x: _ } => {} //~ ERROR can't use generic parameters from outer function [E0401]
+   |             ^^^^^^^^^^^^^^^^^^^
+   |             |
+   |             use of generic parameter from outer function
+   |             use a type here instead
+
+error[E0401]: can't use generic parameters from outer function
+  --> $DIR/self-match.rs:45:13
+   |
+41 | impl PinnedDrop for Enum {
+   | ---- `Self` type implicitly declared here, by this `impl`
+...
+45 |             Self::TupleVariant(_) => {} //~ ERROR can't use generic parameters from outer function [E0401]
+   |             ^^^^^^^^^^^^^^^^^^
+   |             |
+   |             use of generic parameter from outer function
+   |             use a type here instead
+
+error[E0401]: can't use generic parameters from outer function
+  --> $DIR/self-match.rs:47:16
+   |
+41 | impl PinnedDrop for Enum {
+   | ---- `Self` type implicitly declared here, by this `impl`
+...
+47 |         if let Self::StructVariant { x: _ } = *self {} //~ ERROR can't use generic parameters from outer function [E0401]
+   |                ^^^^^^^^^^^^^^^^^^^
+   |                |
+   |                use of generic parameter from outer function
+   |                use a type here instead
+
+error[E0401]: can't use generic parameters from outer function
+  --> $DIR/self-match.rs:48:16
+   |
+41 | impl PinnedDrop for Enum {
+   | ---- `Self` type implicitly declared here, by this `impl`
+...
+48 |         if let Self::TupleVariant(_) = *self {} //~ ERROR can't use generic parameters from outer function [E0401]
+   |                ^^^^^^^^^^^^^^^^^^
+   |                |
+   |                use of generic parameter from outer function
+   |                use a type here instead
+
+error[E0401]: can't use generic parameters from outer function
+  --> $DIR/self-match.rs:49:23
+   |
+41 | impl PinnedDrop for Enum {
+   | ---- `Self` type implicitly declared here, by this `impl`
+...
+49 |         let _: Self = Self::StructVariant { x: 0 }; //~ ERROR can't use generic parameters from outer function [E0401]
+   |                       ^^^^^^^^^^^^^^^^^^^
+   |                       |
+   |                       use of generic parameter from outer function
+   |                       use a type here instead
