@@ -6,9 +6,9 @@
 [![rustc-badge]][rustc-url]
 
 [crates-badge]: https://img.shields.io/crates/v/pin-project.svg
-[crates-url]: https://crates.io/crates/pin-project/
+[crates-url]: https://crates.io/crates/pin-project
 [docs-badge]: https://docs.rs/pin-project/badge.svg
-[docs-url]: https://docs.rs/pin-project/
+[docs-url]: https://docs.rs/pin-project
 [license-badge]: https://img.shields.io/crates/l/pin-project.svg
 [license]: #license
 [rustc-badge]: https://img.shields.io/badge/rustc-1.33+-lightgray.svg
