@@ -210,7 +210,6 @@ struct ReplaceReceiver<'a> {
     self_ty: &'a Type,
 }
 
-#[allow(clippy::similar_names)] // allow `qself`
 impl<'a> ReplaceReceiver<'a> {
     fn new(self_ty: &'a Type) -> Self {
         Self { self_ty }
