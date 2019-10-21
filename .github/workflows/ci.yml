@@ -22,10 +22,7 @@ jobs:
           # This is the minimum supported Rust version of this crate.
           # When updating this, the reminder to update the minimum supported
           # Rust version in README.md.
-          #
-          # Tests are not run as tests may require newer versions of Rust.
           - 1.33.0
-          # This is the minimum Rust version we run tests on.
           - 1.36.0
           - stable
           - beta
@@ -70,12 +67,7 @@ jobs:
         run: |
           curl https://sh.rustup.rs | sh -s -- -y --default-toolchain ${{ matrix.rust }} --profile minimal
           echo "##[add-path]$HOME/.cargo/bin"
-      - name: cargo check
-        if: matrix.rust == '1.33.0'
-        run: |
-          cargo check --all
       - name: cargo test
-        if: matrix.rust != '1.33.0'
         run: |
           cargo test --all
       - name: cargo test --cfg pin_project_show_unpin_struct

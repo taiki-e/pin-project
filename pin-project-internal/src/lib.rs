@@ -48,12 +48,15 @@ use utils::{Immutable, Mutable};
 /// The following methods are implemented on the original `#[pin_project]` type:
 ///
 /// ```
+/// # #[rustversion::since(1.36)]
+/// # fn dox() {
 /// # use std::pin::Pin;
 /// # type Projection<'a> = &'a ();
 /// # type ProjectionRef<'a> = &'a ();
 /// # trait Dox {
 /// fn project(self: Pin<&mut Self>) -> Projection<'_>;
 /// fn project_ref(self: Pin<&Self>) -> ProjectionRef<'_>;
+/// # }
 /// # }
 /// ```
 ///
