@@ -230,3 +230,14 @@ fn cfg_attr() {
     let x = Pin::new(&mut x).project();
     let _: Pin<&mut u8> = x.inner;
 }
+
+#[test]
+fn cfg_attr_any_packed() {
+    // Since `cfg(any())` can never be true, it is okay for this to pass.
+    #[pin_project]
+    #[cfg_attr(any(), repr(packed))]
+    struct Struct {
+        #[pin]
+        field: u32,
+    }
+}
