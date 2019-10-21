@@ -189,12 +189,12 @@ fn trait_bounds_on_type_generics() {
     }
 
     #[pin_project]
-    pub struct Struct2<'a, T: ::core::future::Future> {
+    pub struct Struct2<'a, T: ::core::fmt::Debug> {
         field: &'a mut T,
     }
 
     #[pin_project]
-    pub struct Struct3<'a, T: core::future::Future> {
+    pub struct Struct3<'a, T: core::fmt::Debug> {
         field: &'a mut T,
     }
 
@@ -274,13 +274,7 @@ fn lifetime_project() {
         fn get_pin_ref<'a>(self: Pin<&'a Self>) -> Pin<&'a T> {
             self.project_ref().pinned
         }
-        fn get_pin_ref_elided(self: Pin<&Self>) -> Pin<&T> {
-            self.project_ref().pinned
-        }
         fn get_pin_mut<'a>(self: Pin<&'a mut Self>) -> Pin<&'a mut T> {
-            self.project().pinned
-        }
-        fn get_pin_mut_elided(self: Pin<&mut Self>) -> Pin<&mut T> {
             self.project().pinned
         }
     }
@@ -289,13 +283,7 @@ fn lifetime_project() {
         fn get_pin_ref<'a>(self: Pin<&'a Self>) -> Pin<&'a &'b mut T> {
             self.project_ref().pinned
         }
-        fn get_pin_ref_elided(self: Pin<&Self>) -> Pin<&&'b mut T> {
-            self.project_ref().pinned
-        }
         fn get_pin_mut<'a>(self: Pin<&'a mut Self>) -> Pin<&'a mut &'b mut T> {
-            self.project().pinned
-        }
-        fn get_pin_mut_elided(self: Pin<&mut Self>) -> Pin<&mut &'b mut T> {
             self.project().pinned
         }
     }
@@ -306,17 +294,65 @@ fn lifetime_project() {
                 __EnumProjectionRef::Variant { pinned, .. } => pinned,
             }
         }
-        fn get_pin_ref_elided(self: Pin<&Self>) -> Pin<&T> {
-            match self.project_ref() {
-                __EnumProjectionRef::Variant { pinned, .. } => pinned,
-            }
-        }
         fn get_pin_mut<'a>(self: Pin<&'a mut Self>) -> Pin<&'a mut T> {
             match self.project() {
                 __EnumProjection::Variant { pinned, .. } => pinned,
             }
         }
-        fn get_pin_mut_elided(self: Pin<&mut Self>) -> Pin<&mut T> {
+    }
+}
+
+#[rustversion::since(1.36)]
+#[test]
+fn lifetime_project_elided() {
+    #[pin_project]
+    struct Struct<T, U> {
+        #[pin]
+        pinned: T,
+        unpinned: U,
+    }
+
+    #[pin_project]
+    struct Struct2<'a, T, U> {
+        #[pin]
+        pinned: &'a mut T,
+        unpinned: U,
+    }
+
+    #[pin_project]
+    enum Enum<T, U> {
+        Variant {
+            #[pin]
+            pinned: T,
+            unpinned: U,
+        },
+    }
+
+    impl<T, U> Struct<T, U> {
+        fn get_pin_ref(self: Pin<&Self>) -> Pin<&T> {
+            self.project_ref().pinned
+        }
+        fn get_pin_mut(self: Pin<&mut Self>) -> Pin<&mut T> {
+            self.project().pinned
+        }
+    }
+
+    impl<'b, T, U> Struct2<'b, T, U> {
+        fn get_pin_ref(self: Pin<&Self>) -> Pin<&&'b mut T> {
+            self.project_ref().pinned
+        }
+        fn get_pin_mut(self: Pin<&mut Self>) -> Pin<&mut &'b mut T> {
+            self.project().pinned
+        }
+    }
+
+    impl<T, U> Enum<T, U> {
+        fn get_pin_ref(self: Pin<&Self>) -> Pin<&T> {
+            match self.project_ref() {
+                __EnumProjectionRef::Variant { pinned, .. } => pinned,
+            }
+        }
+        fn get_pin_mut(self: Pin<&mut Self>) -> Pin<&mut T> {
             match self.project() {
                 __EnumProjection::Variant { pinned, .. } => pinned,
             }
