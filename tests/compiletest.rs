@@ -12,5 +12,5 @@ fn ui() {
     t.compile_fail("tests/ui/project/*.rs");
     t.compile_fail("tests/ui/unsafe_unpin/*.rs");
     t.compile_fail("tests/ui/unstable-features/*.rs");
-    t.pass("tests/ui/*/run-pass/*.rs");
+    t.pass("tests/ui/unstable-features/run-pass/*.rs");
 }

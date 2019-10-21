@@ -371,3 +371,32 @@ fn dst() {
     #[pin_project]
     pub struct D<T: ?Sized>(#[pin] T);
 }
+
+#[test]
+fn dyn_type() {
+    #[pin_project]
+    struct Struct1 {
+        a: i32,
+        f: dyn core::fmt::Debug,
+    }
+
+    #[pin_project]
+    struct Struct2 {
+        a: i32,
+        #[pin]
+        f: dyn core::fmt::Debug,
+    }
+
+    #[pin_project]
+    struct Struct3 {
+        a: i32,
+        f: dyn core::fmt::Debug + Send,
+    }
+
+    #[pin_project]
+    struct Struct4 {
+        a: i32,
+        #[pin]
+        f: dyn core::fmt::Debug + Send,
+    }
+}

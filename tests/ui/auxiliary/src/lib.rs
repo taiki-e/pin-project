@@ -19,11 +19,6 @@ pub fn hidden_repr_macro(input: TokenStream) -> TokenStream {
 }
 
 #[proc_macro_attribute]
-pub fn hidden_repr_cfg_any(args: TokenStream, input: TokenStream) -> TokenStream {
-    format!("#[cfg_attr(any(), repr({}))] {}", args, input).parse().unwrap()
-}
-
-#[proc_macro_attribute]
 pub fn hidden_repr_cfg_not_any(args: TokenStream, input: TokenStream) -> TokenStream {
     format!("#[cfg_attr(not(any()), repr({}))] {}", args, input).parse().unwrap()
 }
