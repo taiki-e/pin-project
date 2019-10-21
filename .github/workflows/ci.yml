@@ -8,7 +8,7 @@ on:
       - staging
       - trying
   schedule:
-    - cron: '00 01 * * *' # Daily
+    - cron: 00 01 * * 00 # Weekly
 
 jobs:
   test:
@@ -19,7 +19,7 @@ jobs:
     strategy:
       matrix:
         build:
-          # This is the minimum Rust version supported by pin-project.
+          # This is the minimum supported Rust version of this crate.
           # When updating this, the reminder to update the minimum supported
           # Rust version in README.md.
           #
@@ -62,13 +62,13 @@ jobs:
       - name: Install Rust (rustup)
         if: matrix.os != 'macos-latest'
         run: |
-          set -e
+          rustup self update # TODO: when default rustup is bumped to 1.20+, remove this.
+          rustup set profile minimal
           rustup update ${{ matrix.rust }} --no-self-update && rustup default ${{ matrix.rust }}
       - name: Install Rust (macos)
         if: matrix.os == 'macos-latest'
         run: |
-          set -e
-          curl https://sh.rustup.rs | sh -s -- -y --default-toolchain ${{ matrix.rust }}
+          curl https://sh.rustup.rs | sh -s -- -y --default-toolchain ${{ matrix.rust }} --profile minimal
           echo "##[add-path]$HOME/.cargo/bin"
       - name: cargo check
         if: matrix.rust == '1.33.0'
@@ -107,16 +107,13 @@ jobs:
       - uses: actions/checkout@master
       - name: Install Rust
         run: |
-          set -e
+          rustup self update # TODO: when default rustup is bumped to 1.20+, remove this.
+          rustup set profile minimal
           rustup update nightly && rustup default nightly
       - name: Install component
         if: matrix.component != 'rustdoc'
         run: |
-          set +e
-          if rustup component add ${{ matrix.component }}; then
-            set -e
-          else
-            set -e
+          if ! rustup component add ${{ matrix.component }}; then
             # If the component is unavailable on the latest nightly,
             # use the latest toolchain with the component available.
             # Refs: https://github.com/rust-lang/rustup-components-history#the-web-part
