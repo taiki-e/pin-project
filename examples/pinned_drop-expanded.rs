@@ -35,14 +35,14 @@ pub struct Foo<'a, T> {
 #[allow(clippy::mut_mut)] // This lint warns `&mut &mut <ty>`.
 #[allow(dead_code)] // This lint warns unused fields/variants.
 pub(crate) struct __FooProjection<'pin, 'a, T> {
-    was_dropped: &'pin mut &'a mut bool,
-    field: ::core::pin::Pin<&'pin mut T>,
+    was_dropped: &'pin mut (&'a mut bool),
+    field: ::core::pin::Pin<&'pin mut (T)>,
 }
 
 #[allow(dead_code)] // This lint warns unused fields/variants.
 pub(crate) struct __FooProjectionRef<'pin, 'a, T> {
-    was_dropped: &'pin &'a mut bool,
-    field: ::core::pin::Pin<&'pin T>,
+    was_dropped: &'pin (&'a mut bool),
+    field: ::core::pin::Pin<&'pin (T)>,
 }
 
 impl<'a, T> Foo<'a, T> {

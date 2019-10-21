@@ -30,13 +30,13 @@ pub struct Foo<T, U> {
 #[allow(clippy::mut_mut)] // This lint warns `&mut &mut <ty>`.
 #[allow(dead_code)] // This lint warns unused fields/variants.
 pub(crate) struct __FooProjection<'pin, T, U> {
-    pinned: ::core::pin::Pin<&'pin mut T>,
-    unpinned: &'pin mut U,
+    pinned: ::core::pin::Pin<&'pin mut (T)>,
+    unpinned: &'pin mut (U),
 }
 #[allow(dead_code)] // This lint warns unused fields/variants.
 pub(crate) struct __FooProjectionRef<'pin, T, U> {
-    pinned: ::core::pin::Pin<&'pin T>,
-    unpinned: &'pin U,
+    pinned: ::core::pin::Pin<&'pin (T)>,
+    unpinned: &'pin (U),
 }
 
 impl<T, U> Foo<T, U> {
