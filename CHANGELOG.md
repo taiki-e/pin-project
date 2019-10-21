@@ -1,5 +1,11 @@
 # Unreleased
 
+# 0.4.5 - 2019-10-21
+
+* [Fixed compile error with `dyn` types.][158]
+
+[158]: https://github.com/taiki-e/pin-project/pull/158
+
 # 0.4.4 - 2019-10-17
 
 * [Fixed an issue where `PinnedDrop` implementations can call unsafe code without an unsafe block.][149]
