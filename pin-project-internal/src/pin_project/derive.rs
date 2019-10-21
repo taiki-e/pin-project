@@ -370,10 +370,10 @@ impl<'a> Context<'a> {
 
                 let lifetime = &self.proj.lifetime;
                 proj_fields.push(quote! {
-                    #vis #ident: ::core::pin::Pin<&#lifetime mut #ty>
+                    #vis #ident: ::core::pin::Pin<&#lifetime mut (#ty)>
                 });
                 proj_ref_fields.push(quote! {
-                    #vis #ident: ::core::pin::Pin<&#lifetime #ty>
+                    #vis #ident: ::core::pin::Pin<&#lifetime (#ty)>
                 });
                 proj_body.push(quote! {
                     #ident: ::core::pin::Pin::new_unchecked(#ident)
@@ -381,10 +381,10 @@ impl<'a> Context<'a> {
             } else {
                 let lifetime = &self.proj.lifetime;
                 proj_fields.push(quote! {
-                    #vis #ident: &#lifetime mut #ty
+                    #vis #ident: &#lifetime mut (#ty)
                 });
                 proj_ref_fields.push(quote! {
-                    #vis #ident: &#lifetime #ty
+                    #vis #ident: &#lifetime (#ty)
                 });
                 proj_body.push(quote! {
                     #ident
@@ -417,10 +417,10 @@ impl<'a> Context<'a> {
 
                 let lifetime = &self.proj.lifetime;
                 proj_fields.push(quote! {
-                    #vis ::core::pin::Pin<&#lifetime mut #ty>
+                    #vis ::core::pin::Pin<&#lifetime mut (#ty)>
                 });
                 proj_ref_fields.push(quote! {
-                    #vis ::core::pin::Pin<&#lifetime #ty>
+                    #vis ::core::pin::Pin<&#lifetime (#ty)>
                 });
                 proj_body.push(quote! {
                     ::core::pin::Pin::new_unchecked(#id)
@@ -428,10 +428,10 @@ impl<'a> Context<'a> {
             } else {
                 let lifetime = &self.proj.lifetime;
                 proj_fields.push(quote! {
-                    #vis &#lifetime mut #ty
+                    #vis &#lifetime mut (#ty)
                 });
                 proj_ref_fields.push(quote! {
-                    #vis &#lifetime #ty
+                    #vis &#lifetime (#ty)
                 });
                 proj_body.push(quote! {
                     #id
