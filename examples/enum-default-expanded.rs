@@ -26,14 +26,14 @@ enum Enum<T, U> {
 #[allow(clippy::mut_mut)] // This lint warns `&mut &mut <ty>`.
 #[allow(dead_code)] // This lint warns unused fields/variants.
 enum __EnumProjection<'pin, T, U> {
-    Pinned(::core::pin::Pin<&'pin mut T>),
-    Unpinned(&'pin mut U),
+    Pinned(::core::pin::Pin<&'pin mut (T)>),
+    Unpinned(&'pin mut (U)),
 }
 
 #[allow(dead_code)] // This lint warns unused fields/variants.
 enum __EnumProjectionRef<'pin, T, U> {
-    Pinned(::core::pin::Pin<&'pin T>),
-    Unpinned(&'pin U),
+    Pinned(::core::pin::Pin<&'pin (T)>),
+    Unpinned(&'pin (U)),
 }
 
 impl<T, U> Enum<T, U> {
