@@ -139,13 +139,23 @@ fn enum_project_set() {
 #[test]
 fn where_clause_and_associated_type_fields() {
     #[pin_project]
-    struct Struct<I>
+    struct Struct1<I>
     where
         I: Iterator,
     {
         #[pin]
         field1: I,
         field2: I::Item,
+    }
+
+    #[pin_project]
+    struct Struct2<I, J>
+    where
+        I: Iterator<Item = J>,
+    {
+        #[pin]
+        field1: I,
+        field2: J,
     }
 
     #[pin_project]
@@ -156,6 +166,19 @@ fn where_clause_and_associated_type_fields() {
         Variant1(#[pin] I),
         Variant2(I::Item),
     }
+}
+
+#[test]
+fn derive_copy() {
+    #[pin_project]
+    #[derive(Clone, Copy)]
+    struct Struct<T> {
+        val: T,
+    }
+
+    fn is_copy<T: Copy>() {}
+
+    is_copy::<Struct<u8>>();
 }
 
 #[test]
@@ -184,7 +207,7 @@ fn move_out() {
 #[test]
 fn trait_bounds_on_type_generics() {
     #[pin_project]
-    pub struct Struct<'a, T: ?Sized> {
+    pub struct Struct1<'a, T: ?Sized> {
         field: &'a mut T,
     }
 
@@ -195,6 +218,16 @@ fn trait_bounds_on_type_generics() {
 
     #[pin_project]
     pub struct Struct3<'a, T: core::fmt::Debug> {
+        field: &'a mut T,
+    }
+
+    #[pin_project]
+    pub struct Struct4<'a, T: core::fmt::Debug + core::fmt::Display> {
+        field: &'a mut T,
+    }
+
+    #[pin_project]
+    pub struct Struct5<'a, T: core::fmt::Debug + ?Sized> {
         field: &'a mut T,
     }
 
@@ -248,7 +281,7 @@ fn private_type_in_public_type() {
 #[test]
 fn lifetime_project() {
     #[pin_project]
-    struct Struct<T, U> {
+    struct Struct1<T, U> {
         #[pin]
         pinned: T,
         unpinned: U,
@@ -270,7 +303,7 @@ fn lifetime_project() {
         },
     }
 
-    impl<T, U> Struct<T, U> {
+    impl<T, U> Struct1<T, U> {
         fn get_pin_ref<'a>(self: Pin<&'a Self>) -> Pin<&'a T> {
             self.project_ref().pinned
         }
@@ -306,7 +339,7 @@ fn lifetime_project() {
 #[test]
 fn lifetime_project_elided() {
     #[pin_project]
-    struct Struct<T, U> {
+    struct Struct1<T, U> {
         #[pin]
         pinned: T,
         unpinned: U,
@@ -328,7 +361,7 @@ fn lifetime_project_elided() {
         },
     }
 
-    impl<T, U> Struct<T, U> {
+    impl<T, U> Struct1<T, U> {
         fn get_pin_ref(self: Pin<&Self>) -> Pin<&T> {
             self.project_ref().pinned
         }
