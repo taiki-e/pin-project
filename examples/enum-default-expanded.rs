@@ -1,7 +1,7 @@
 // Original code (./enum-default.rs):
 //
 // ```rust
-// #![allow(dead_code, unused_imports)]
+// #![allow(dead_code)]
 //
 // use pin_project::pin_project;
 //
@@ -14,7 +14,7 @@
 // fn main() {}
 // ```
 
-#![allow(dead_code, unused_imports)]
+#![allow(dead_code, unused_imports, unused_parens)]
 
 use pin_project::pin_project;
 

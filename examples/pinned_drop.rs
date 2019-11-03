@@ -1,6 +1,6 @@
 // See ./pinned_drop-expanded.rs for generated code.
 
-#![allow(dead_code, unused_imports)]
+#![allow(dead_code)]
 
 use pin_project::{pin_project, pinned_drop};
 use std::pin::Pin;

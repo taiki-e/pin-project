@@ -8,14 +8,18 @@ on:
       - staging
       - trying
   schedule:
-    - cron: 00 01 * * 00 # Weekly
+    - cron: '00 01 * * *'
+
+env:
+  RUSTFLAGS: -Dwarnings
 
 jobs:
   test:
     name: test
     runs-on: ${{ matrix.os }}
     env:
-      RUSTFLAGS: -Dwarnings
+      AGENT_OS: ${{ matrix.os }}
+      RUST_TOOLCHAIN: ${{ matrix.rust }}
     strategy:
       matrix:
         build:
@@ -49,45 +53,40 @@ jobs:
             os: ubuntu-latest
             rust: nightly
           - build: macos
-            os: macOS-latest
+            os: macos-latest
             rust: nightly
           # - build: windows
           #   os: windows-latest
           #   rust: nightly
     steps:
       - uses: actions/checkout@master
-      - name: Install Rust (rustup)
-        if: matrix.os != 'macos-latest'
+      - name: Install Rust
+        shell: bash
         run: |
-          rustup self update # TODO: when default rustup is bumped to 1.20+, remove this.
-          rustup set profile minimal
-          rustup update ${{ matrix.rust }} --no-self-update && rustup default ${{ matrix.rust }}
-      - name: Install Rust (macos)
-        if: matrix.os == 'macos-latest'
+          . ./ci/install-rust.sh
+      - name: Install cargo-hack
+        if: matrix.rust == 'nightly'
         run: |
-          curl https://sh.rustup.rs | sh -s -- -y --default-toolchain ${{ matrix.rust }} --profile minimal
-          echo "##[add-path]$HOME/.cargo/bin"
+          cargo install cargo-hack
       - name: cargo test
         run: |
           cargo test --all
       - name: cargo test --cfg pin_project_show_unpin_struct
         if: matrix.rust == 'nightly'
-        run: |
-          cargo test --all --all-features -- -Zunstable-options --include-ignored
         env:
           RUSTFLAGS: -Dwarnings --cfg pin_project_show_unpin_struct
+        run: |
+          cargo test --all --all-features -- -Zunstable-options --include-ignored
       # Refs: https://github.com/rust-lang/cargo/issues/5657
       - name: cargo check -Zminimal-versions
         if: matrix.rust == 'nightly'
         run: |
           cargo update -Zminimal-versions
-          cargo check --all --all-features
+          cargo hack check --all --all-features --no-dev-deps --ignore-private
 
   style:
     name: style
     runs-on: ubuntu-latest
-    env:
-      RUSTFLAGS: -Dwarnings
     strategy:
       fail-fast: false
       matrix:
@@ -98,24 +97,14 @@ jobs:
     steps:
       - uses: actions/checkout@master
       - name: Install Rust
+        shell: bash
         run: |
-          rustup self update # TODO: when default rustup is bumped to 1.20+, remove this.
-          rustup set profile minimal
-          rustup update nightly && rustup default nightly
+          . ./ci/install-rust.sh
       - name: Install component
         if: matrix.component != 'rustdoc'
+        shell: bash
         run: |
-          if ! rustup component add ${{ matrix.component }}; then
-            # If the component is unavailable on the latest nightly,
-            # use the latest toolchain with the component available.
-            # Refs: https://github.com/rust-lang/rustup-components-history#the-web-part
-            component=${{ matrix.component }}
-            target=`curl https://rust-lang.github.io/rustup-components-history/x86_64-unknown-linux-gnu/$component`
-            echo "'$component' is unavailable on the toolchain 'nightly', use the toolchain 'nightly-$target' instead"
-            rustup toolchain install nightly-$target
-            rustup default nightly-$target
-            rustup component add $component
-          fi
+          . ./ci/install-component.sh ${{ matrix.component }}
       - name: cargo clippy
         if: matrix.component == 'clippy'
         run: |
@@ -126,7 +115,7 @@ jobs:
           cargo fmt --all -- --check
       - name: cargo doc
         if: matrix.component == 'rustdoc'
-        run: |
-          cargo doc --no-deps --all --all-features
         env:
           RUSTDOCFLAGS: -Dwarnings
+        run: |
+          cargo doc --no-deps --all --all-features

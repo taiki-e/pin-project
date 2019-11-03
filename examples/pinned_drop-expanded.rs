@@ -1,7 +1,7 @@
 // Original code (./pinned_drop.rs):
 //
 // ```rust
-// #![allow(dead_code, unused_imports)]
+// #![allow(dead_code)]
 //
 // use pin_project::{pin_project, pinned_drop};
 // use std::pin::Pin;
@@ -21,7 +21,7 @@
 // fn main() {}
 // ```
 
-#![allow(dead_code, unused_imports)]
+#![allow(dead_code, unused_imports, unused_parens)]
 
 use pin_project::{pin_project, pinned_drop};
 use std::pin::Pin;
