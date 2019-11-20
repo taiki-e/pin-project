@@ -861,8 +861,4 @@ impl VisitMut for ReplaceSelf<'_> {
         }
         visit_mut::visit_type_path_mut(self, ty);
     }
-
-    fn visit_item_mut(&mut self, _: &mut Item) {
-        // Do not recurse into nested items.
-    }
 }
