@@ -8,25 +8,25 @@ error[E0277]: the trait bound `__Struct<'pin, T>: Trait` is not satisfied
  --> $DIR/self-in-where-clause.rs:5:1
   |
 5 | #[pin_project]
-  | ^^^^^^^^^^^^^-
-  | |            |
-  | |            required by `__Struct`
+  | ^^^^^^^^^^^^^^
+  | |
   | the trait `Trait` is not implemented for `__Struct<'pin, T>`
+  | required by `__Struct`
 
 error[E0277]: the trait bound `__StructProjection<'pin, T>: Trait` is not satisfied
- --> $DIR/self-in-where-clause.rs:5:14
+ --> $DIR/self-in-where-clause.rs:5:1
   |
 5 | #[pin_project]
-  |              ^
-  |              |
-  |              the trait `Trait` is not implemented for `__StructProjection<'pin, T>`
-  |              required by `__StructProjection`
+  | ^^^^^^^^^^^^^^
+  | |
+  | the trait `Trait` is not implemented for `__StructProjection<'pin, T>`
+  | required by `__StructProjection`
 
 error[E0277]: the trait bound `__StructProjectionRef<'pin, T>: Trait` is not satisfied
- --> $DIR/self-in-where-clause.rs:5:14
+ --> $DIR/self-in-where-clause.rs:5:1
   |
 5 | #[pin_project]
-  |              ^
-  |              |
-  |              the trait `Trait` is not implemented for `__StructProjectionRef<'pin, T>`
-  |              required by `__StructProjectionRef`
+  | ^^^^^^^^^^^^^^
+  | |
+  | the trait `Trait` is not implemented for `__StructProjectionRef<'pin, T>`
+  | required by `__StructProjectionRef`
