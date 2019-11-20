@@ -1,7 +1,11 @@
+use std::mem;
+
 use proc_macro2::{Span, TokenStream};
 use quote::{format_ident, quote, quote_spanned};
 use syn::{
     parse::{Parse, ParseBuffer, ParseStream},
+    punctuated::Punctuated,
+    visit_mut::{self, VisitMut},
     *,
 };
 
@@ -10,32 +14,30 @@ use crate::utils::*;
 use super::PIN;
 
 pub(super) fn parse_derive(input: TokenStream) -> Result<TokenStream> {
-    let mut item = syn::parse2(input)?;
-
-    match &mut item {
+    match syn::parse2(input)? {
         Item::Struct(ItemStruct { attrs, vis, ident, generics, fields, .. }) => {
-            validate_struct(ident, fields)?;
+            validate_struct(&ident, &fields)?;
             let mut cx = Context::new(attrs, vis, ident, generics)?;
 
-            let packed_check = cx.ensure_not_packed(fields)?;
-            let mut proj_items = cx.parse_struct(fields)?;
+            let packed_check = cx.ensure_not_packed(&fields)?;
+            let mut proj_items = cx.parse_struct(&fields)?;
             proj_items.extend(packed_check);
             proj_items.extend(cx.make_unpin_impl());
             proj_items.extend(cx.make_drop_impl());
             Ok(proj_items)
         }
         Item::Enum(ItemEnum { attrs, vis, ident, generics, brace_token, variants, .. }) => {
-            validate_enum(*brace_token, variants)?;
+            validate_enum(brace_token, &variants)?;
             let mut cx = Context::new(attrs, vis, ident, generics)?;
 
             // We don't need to check for '#[repr(packed)]',
             // since it does not apply to enums.
-            let mut proj_items = cx.parse_enum(variants)?;
+            let mut proj_items = cx.parse_enum(&variants)?;
             proj_items.extend(cx.make_unpin_impl());
             proj_items.extend(cx.make_drop_impl());
             Ok(proj_items)
         }
-        _ => Err(error!(item, "#[pin_project] attribute may only be used on structs or enums")),
+        item => Err(error!(item, "#[pin_project] attribute may only be used on structs or enums")),
     }
 }
 
@@ -175,15 +177,15 @@ impl Parse for Args {
     }
 }
 
-struct OriginalType<'a> {
+struct OriginalType {
     /// Attributes of the original type.
-    attrs: &'a [Attribute],
+    attrs: Vec<Attribute>,
     /// Visibility of the original type.
-    vis: &'a Visibility,
+    vis: Visibility,
     /// Name of the original type.
-    ident: &'a Ident,
+    ident: Ident,
     /// Generics of the original type.
-    generics: &'a mut Generics,
+    generics: Generics,
 }
 
 struct ProjectedType {
@@ -199,8 +201,8 @@ struct ProjectedType {
     generics: Generics,
 }
 
-struct Context<'a> {
-    orig: OriginalType<'a>,
+struct Context {
+    orig: OriginalType,
     proj: ProjectedType,
     /// Types of the pinned fields.
     pinned_fields: Vec<Type>,
@@ -210,14 +212,21 @@ struct Context<'a> {
     unsafe_unpin: Option<Span>,
 }
 
-impl<'a> Context<'a> {
+impl Context {
     fn new(
-        attrs: &'a [Attribute],
-        vis: &'a Visibility,
-        ident: &'a Ident,
-        generics: &'a mut Generics,
+        attrs: Vec<Attribute>,
+        vis: Visibility,
+        ident: Ident,
+        mut generics: Generics,
     ) -> Result<Self> {
-        let Args { pinned_drop, unsafe_unpin } = Args::get(attrs)?;
+        let Args { pinned_drop, unsafe_unpin } = Args::get(&attrs)?;
+
+        {
+            let ty_generics = generics.split_for_impl().1;
+            let self_ty = syn::parse_quote!(#ident #ty_generics);
+            let mut visitor = ReplaceSelf::new(&self_ty);
+            visitor.visit_where_clause_mut(generics.make_where_clause());
+        }
 
         let mut lifetime_name = String::from(DEFAULT_LIFETIME_NAME);
         determine_lifetime_name(&mut lifetime_name, &generics.params);
@@ -228,9 +237,9 @@ impl<'a> Context<'a> {
 
         Ok(Self {
             proj: ProjectedType {
-                vis: determine_visibility(vis),
-                mut_ident: proj_ident(ident, Mutable),
-                ref_ident: proj_ident(ident, Immutable),
+                vis: determine_visibility(&vis),
+                mut_ident: proj_ident(&ident, Mutable),
+                ref_ident: proj_ident(&ident, Immutable),
                 lifetime,
                 generics: proj_generics,
             },
@@ -241,14 +250,14 @@ impl<'a> Context<'a> {
         })
     }
 
-    fn parse_struct(&mut self, fields: &mut Fields) -> Result<TokenStream> {
+    fn parse_struct(&mut self, fields: &Fields) -> Result<TokenStream> {
         let (proj_pat, proj_init, proj_fields, proj_ref_fields) = match fields {
             Fields::Named(fields) => self.visit_named(fields)?,
             Fields::Unnamed(fields) => self.visit_unnamed(fields, true)?,
             Fields::Unit => unreachable!(),
         };
 
-        let orig_ident = self.orig.ident;
+        let orig_ident = &self.orig.ident;
         let proj_ident = &self.proj.mut_ident;
         let proj_ref_ident = &self.proj.ref_ident;
         let vis = &self.proj.vis;
@@ -277,7 +286,7 @@ impl<'a> Context<'a> {
         Ok(proj_items)
     }
 
-    fn parse_enum(&mut self, variants: &mut Variants) -> Result<TokenStream> {
+    fn parse_enum(&mut self, variants: &Variants) -> Result<TokenStream> {
         let (proj_variants, proj_ref_variants, proj_arms, proj_ref_arms) =
             self.visit_variants(variants)?;
 
@@ -317,7 +326,7 @@ impl<'a> Context<'a> {
 
     fn visit_variants(
         &mut self,
-        variants: &mut Variants,
+        variants: &Variants,
     ) -> Result<(TokenStream, TokenStream, TokenStream, TokenStream)> {
         let mut proj_variants = TokenStream::new();
         let mut proj_ref_variants = TokenStream::new();
@@ -332,7 +341,7 @@ impl<'a> Context<'a> {
                 }
             };
 
-            let orig_ident = self.orig.ident;
+            let orig_ident = &self.orig.ident;
             let proj_ident = &self.proj.mut_ident;
             let proj_ref_ident = &self.proj.ref_ident;
             proj_variants.extend(quote! {
@@ -358,7 +367,7 @@ impl<'a> Context<'a> {
 
     fn visit_named(
         &mut self,
-        FieldsNamed { named: fields, .. }: &mut FieldsNamed,
+        FieldsNamed { named: fields, .. }: &FieldsNamed,
     ) -> Result<(TokenStream, TokenStream, TokenStream, TokenStream)> {
         let mut proj_pat = Vec::with_capacity(fields.len());
         let mut proj_body = Vec::with_capacity(fields.len());
@@ -403,14 +412,14 @@ impl<'a> Context<'a> {
 
     fn visit_unnamed(
         &mut self,
-        FieldsUnnamed { unnamed: fields, .. }: &mut FieldsUnnamed,
+        FieldsUnnamed { unnamed: fields, .. }: &FieldsUnnamed,
         is_struct: bool,
     ) -> Result<(TokenStream, TokenStream, TokenStream, TokenStream)> {
         let mut proj_pat = Vec::with_capacity(fields.len());
         let mut proj_body = Vec::with_capacity(fields.len());
         let mut proj_fields = Vec::with_capacity(fields.len());
         let mut proj_ref_fields = Vec::with_capacity(fields.len());
-        for (i, Field { attrs, vis, ty, .. }) in fields.iter_mut().enumerate() {
+        for (i, Field { attrs, vis, ty, .. }) in fields.iter().enumerate() {
             let id = format_ident!("_{}", i);
             if attrs.find_exact(PIN)?.is_some() {
                 self.pinned_fields.push(ty.clone());
@@ -455,7 +464,7 @@ impl<'a> Context<'a> {
     fn make_unpin_impl(&mut self) -> TokenStream {
         if let Some(unsafe_unpin) = self.unsafe_unpin {
             let mut proj_generics = self.proj.generics.clone();
-            let orig_ident = self.orig.ident;
+            let orig_ident = &self.orig.ident;
             let lifetime = &self.proj.lifetime;
 
             let private = Ident::new(CURRENT_PRIVATE_MODULE, Span::call_site());
@@ -475,8 +484,8 @@ impl<'a> Context<'a> {
                 impl #impl_generics ::core::marker::Unpin for #orig_ident #ty_generics #where_clause {}
             }
         } else {
-            let mut full_where_clause = self.orig.generics.make_where_clause().clone();
-            let orig_ident = self.orig.ident;
+            let mut full_where_clause = self.orig.generics.where_clause.as_ref().cloned().unwrap();
+            let orig_ident = &self.orig.ident;
 
             let make_span = || {
                 #[cfg(pin_project_show_unpin_struct)]
@@ -541,7 +550,7 @@ impl<'a> Context<'a> {
 
             let scope_ident = format_ident!("__unpin_scope_{}", orig_ident);
 
-            let vis = self.orig.vis;
+            let vis = &self.orig.vis;
             let lifetime = &self.proj.lifetime;
             let type_params: Vec<_> = self.orig.generics.type_params().map(|t| &t.ident).collect();
             let proj_generics = &self.proj.generics;
@@ -602,7 +611,7 @@ impl<'a> Context<'a> {
 
     /// Creates `Drop` implementation for original type.
     fn make_drop_impl(&self) -> TokenStream {
-        let ident = self.orig.ident;
+        let ident = &self.orig.ident;
         let (impl_generics, ty_generics, where_clause) = self.orig.generics.split_for_impl();
 
         if let Some(pinned_drop) = self.pinned_drop {
@@ -668,7 +677,7 @@ impl<'a> Context<'a> {
     fn make_proj_impl(&self, proj_body: &TokenStream, proj_ref_body: &TokenStream) -> TokenStream {
         let vis = &self.proj.vis;
         let lifetime = &self.proj.lifetime;
-        let orig_ident = self.orig.ident;
+        let orig_ident = &self.orig.ident;
         let proj_ident = &self.proj.mut_ident;
         let proj_ref_ident = &self.proj.ref_ident;
 
@@ -778,7 +787,7 @@ impl<'a> Context<'a> {
 
         let (impl_generics, ty_generics, where_clause) = self.orig.generics.split_for_impl();
 
-        let struct_name = self.orig.ident;
+        let struct_name = &self.orig.ident;
         let method_name = format_ident!("__pin_project_assert_not_repr_packed_{}", self.orig.ident);
         Ok(quote! {
             #[allow(single_use_lifetimes)]
@@ -788,5 +797,72 @@ impl<'a> Context<'a> {
                 #(#field_refs)*
             }
         })
+    }
+}
+
+// Replace `Self` with `self_ty`.
+// Based on https://github.com/dtolnay/async-trait/blob/1.0.15/src/receiver.rs
+
+struct ReplaceSelf<'a> {
+    self_ty: &'a Type,
+}
+
+impl<'a> ReplaceSelf<'a> {
+    fn new(self_ty: &'a Type) -> Self {
+        Self { self_ty }
+    }
+
+    fn self_to_qself(&mut self, qself: &mut Option<QSelf>, path: &mut Path) {
+        if path.leading_colon.is_some() {
+            return;
+        }
+
+        let first = &path.segments[0];
+        if first.ident != "Self" || !first.arguments.is_empty() {
+            return;
+        }
+
+        match path.segments.pairs().next().unwrap().punct() {
+            Some(colon) => path.leading_colon = Some(**colon),
+            None => return,
+        }
+
+        *qself = Some(QSelf {
+            lt_token: token::Lt::default(),
+            ty: Box::new(self.self_ty.clone()),
+            position: 0,
+            as_token: None,
+            gt_token: token::Gt::default(),
+        });
+
+        let segments = mem::replace(&mut path.segments, Punctuated::new());
+        path.segments = segments.into_pairs().skip(1).collect();
+    }
+}
+
+impl VisitMut for ReplaceSelf<'_> {
+    // `Self` -> `Receiver`
+    fn visit_type_mut(&mut self, ty: &mut Type) {
+        if let Type::Path(node) = ty {
+            if node.qself.is_none() && node.path.is_ident("Self") {
+                *ty = self.self_ty.clone();
+            } else {
+                self.visit_type_path_mut(node);
+            }
+        } else {
+            visit_mut::visit_type_mut(self, ty);
+        }
+    }
+
+    // `Self::Assoc` -> `<Receiver>::Assoc`
+    fn visit_type_path_mut(&mut self, ty: &mut TypePath) {
+        if ty.qself.is_none() {
+            self.self_to_qself(&mut ty.qself, &mut ty.path);
+        }
+        visit_mut::visit_type_path_mut(self, ty);
+    }
+
+    fn visit_item_mut(&mut self, _: &mut Item) {
+        // Do not recurse into nested items.
     }
 }
