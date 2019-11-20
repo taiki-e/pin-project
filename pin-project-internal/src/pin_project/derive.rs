@@ -1,7 +1,11 @@
+use std::mem;
+
 use proc_macro2::{Span, TokenStream};
 use quote::{format_ident, quote, quote_spanned};
 use syn::{
     parse::{Parse, ParseBuffer, ParseStream},
+    punctuated::Punctuated,
+    visit_mut::{self, VisitMut},
     *,
 };
 
@@ -183,7 +187,7 @@ struct OriginalType<'a> {
     /// Name of the original type.
     ident: &'a Ident,
     /// Generics of the original type.
-    generics: &'a mut Generics,
+    generics: &'a Generics,
 }
 
 struct ProjectedType {
@@ -218,6 +222,13 @@ impl<'a> Context<'a> {
         generics: &'a mut Generics,
     ) -> Result<Self> {
         let Args { pinned_drop, unsafe_unpin } = Args::get(attrs)?;
+
+        {
+            let ty_generics = generics.split_for_impl().1;
+            let self_ty = syn::parse_quote!(#ident #ty_generics);
+            let mut visitor = ReplaceSelf::new(&self_ty);
+            visitor.visit_where_clause_mut(generics.make_where_clause());
+        }
 
         let mut lifetime_name = String::from(DEFAULT_LIFETIME_NAME);
         determine_lifetime_name(&mut lifetime_name, &generics.params);
@@ -475,7 +486,7 @@ impl<'a> Context<'a> {
                 impl #impl_generics ::core::marker::Unpin for #orig_ident #ty_generics #where_clause {}
             }
         } else {
-            let mut full_where_clause = self.orig.generics.make_where_clause().clone();
+            let mut full_where_clause = self.orig.generics.where_clause.as_ref().cloned().unwrap();
             let orig_ident = self.orig.ident;
 
             let make_span = || {
@@ -788,5 +799,72 @@ impl<'a> Context<'a> {
                 #(#field_refs)*
             }
         })
+    }
+}
+
+// Replace `Self` with `self_ty`.
+// Based on https://github.com/dtolnay/async-trait/blob/1.0.15/src/receiver.rs
+
+struct ReplaceSelf<'a> {
+    self_ty: &'a Type,
+}
+
+impl<'a> ReplaceSelf<'a> {
+    fn new(self_ty: &'a Type) -> Self {
+        Self { self_ty }
+    }
+
+    fn self_to_qself(&mut self, qself: &mut Option<QSelf>, path: &mut Path) {
+        if path.leading_colon.is_some() {
+            return;
+        }
+
+        let first = &path.segments[0];
+        if first.ident != "Self" || !first.arguments.is_empty() {
+            return;
+        }
+
+        match path.segments.pairs().next().unwrap().punct() {
+            Some(colon) => path.leading_colon = Some(**colon),
+            None => return,
+        }
+
+        *qself = Some(QSelf {
+            lt_token: token::Lt::default(),
+            ty: Box::new(self.self_ty.clone()),
+            position: 0,
+            as_token: None,
+            gt_token: token::Gt::default(),
+        });
+
+        let segments = mem::replace(&mut path.segments, Punctuated::new());
+        path.segments = segments.into_pairs().skip(1).collect();
+    }
+}
+
+impl VisitMut for ReplaceSelf<'_> {
+    // `Self` -> `Receiver`
+    fn visit_type_mut(&mut self, ty: &mut Type) {
+        if let Type::Path(node) = ty {
+            if node.qself.is_none() && node.path.is_ident("Self") {
+                *ty = self.self_ty.clone();
+            } else {
+                self.visit_type_path_mut(node);
+            }
+        } else {
+            visit_mut::visit_type_mut(self, ty);
+        }
+    }
+
+    // `Self::Assoc` -> `<Receiver>::Assoc`
+    fn visit_type_path_mut(&mut self, ty: &mut TypePath) {
+        if ty.qself.is_none() {
+            self.self_to_qself(&mut ty.qself, &mut ty.path);
+        }
+        visit_mut::visit_type_path_mut(self, ty);
+    }
+
+    fn visit_item_mut(&mut self, _: &mut Item) {
+        // Do not recurse into nested items.
     }
 }

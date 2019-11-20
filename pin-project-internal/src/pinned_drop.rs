@@ -203,7 +203,7 @@ fn expand_item(item: &mut ItemImpl) {
     }};
 }
 
-// Replace `self` and `Self` with `__self` and `Receiver`.
+// Replace `self` and `Self` with `__self` and `self_ty`.
 // Based on https://github.com/dtolnay/async-trait/blob/1.0.15/src/receiver.rs
 
 struct ReplaceReceiver<'a> {

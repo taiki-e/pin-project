@@ -469,3 +469,35 @@ fn dyn_type() {
         f: dyn core::fmt::Debug + Send,
     }
 }
+
+#[test]
+fn self_in_where_clause() {
+    pub trait Trait {}
+
+    #[pin_project]
+    pub struct Struct1<T>
+    where
+        Self: Trait,
+    {
+        x: T,
+    }
+
+    impl<T> Trait for Struct1<T> {}
+
+    pub trait Trait2 {
+        type Foo;
+    }
+
+    #[pin_project]
+    pub struct Struct2<T>
+    where
+        Self: Trait2<Foo = Struct1<T>>,
+        <Self as Trait2>::Foo: Trait,
+    {
+        x: T,
+    }
+
+    impl<T> Trait2 for Struct2<T> {
+        type Foo = Struct1<T>;
+    }
+}
