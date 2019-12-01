@@ -66,11 +66,11 @@ impl<T, U> Struct<T, U> {
 // this will become a lint, rather then a hard error.
 //
 // As a workaround for this, we generate a new struct, containing all of the pinned
-// fields from our #[pin_project] type. This struct is delcared within
+// fields from our #[pin_project] type. This struct is declared within
 // a function, which makes it impossible to be named by user code.
-// This guarnatees that it will use the default auto-trait impl for Unpin -
+// This guarantees that it will use the default auto-trait impl for Unpin -
 // that is, it will implement Unpin iff all of its fields implement Unpin.
-// This type can be safely declared as 'public', satisfiying the privacy
+// This type can be safely declared as 'public', satisfying the privacy
 // checker without actually allowing user code to access it.
 //
 // This allows users to apply the #[pin_project] attribute to types
@@ -96,7 +96,7 @@ fn __unpin_scope_Struct() {
 // the first blanked impl will not apply to it. This code
 // will compile, as there is only one impl of MustNotImplDrop for the user type
 // 2. The user type does impl Drop. This will make the blanket impl applicable,
-// which will then comflict with the explicit MustNotImplDrop impl below.
+// which will then conflict with the explicit MustNotImplDrop impl below.
 // This will result in a compilation error, which is exactly what we want.
 trait StructMustNotImplDrop {}
 #[allow(clippy::drop_bounds)]
@@ -106,7 +106,7 @@ impl<T, U> StructMustNotImplDrop for Struct<T, U> {}
 
 // Ensure that it's impossible to use pin projections on a #[repr(packed)] struct.
 //
-// Taking a reference to a packed field is unsafe, amd appplying
+// Taking a reference to a packed field is unsafe, and applying
 // #[deny(safe_packed_borrows)] makes sure that doing this without
 // an 'unsafe' block (which we deliberately do not generate)
 // is a hard error.

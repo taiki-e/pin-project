@@ -533,7 +533,7 @@ impl Context {
             // _field: AlwaysUnpin<(A, B, C)>
             // ```
             //
-            // This ensures that any unused type paramters
+            // This ensures that any unused type parameters
             // don't end up with Unpin bounds.
             let lifetime_fields: Vec<_> = self
                 .orig
@@ -646,7 +646,7 @@ impl Context {
             // Based on https://github.com/upsuper/assert-impl/blob/f503255b292ab0ba8d085b657f4065403cfa46eb/src/lib.rs#L80-L87
             //
             // We create a new identifier for each struct, so that the traits
-            // for different types do not conflcit with each other.
+            // for different types do not conflict with each other.
             //
             // Another approach would be to provide an empty Drop impl,
             // which would conflict with a user-provided Drop impl.
@@ -662,7 +662,7 @@ impl Context {
                 // the first blanked impl will not apply to it. This code
                 // will compile, as there is only one impl of MustNotImplDrop for the user type
                 // 2. The user type does impl Drop. This will make the blanket impl applicable,
-                // which will then comflict with the explicit MustNotImplDrop impl below.
+                // which will then conflict with the explicit MustNotImplDrop impl below.
                 // This will result in a compilation error, which is exactly what we want.
                 trait #trait_ident {}
                 #[allow(clippy::drop_bounds)]
@@ -743,7 +743,7 @@ impl Context {
         //  let _fieldn = &val.fieldn;
         // }
         //
-        // Taking a reference to a packed field is unsafe, amd appplying
+        // Taking a reference to a packed field is unsafe, and applying
         // #[deny(safe_packed_borrows)] makes sure that doing this without
         // an 'unsafe' block (which we deliberately do not generate)
         // is a hard error.
