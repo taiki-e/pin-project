@@ -67,16 +67,16 @@ pub use pin_project_internal::project_ref;
 /// It turns out that using pin projections, which requires unsafe code,
 /// imposes additional requirements on an [`Unpin`] impl. Normally, all of this
 /// unsafety is contained within this crate, ensuring that it's impossible for
-/// you to violate any of the guarnatees required by pin projection.
+/// you to violate any of the guarantees required by pin projection.
 ///
 /// However, things change if you want to provide a custom [`Unpin`] impl
 /// for your `#[pin_project]` type. As stated in [the Rust
 /// documentation](https://doc.rust-lang.org/nightly/std/pin/index.html#projections-and-structural-pinning),
-/// you must be sure to only implement [`Unpin`] when all of your `#[pin]` fields (i.e. struturally
-/// pinend fields) are also [`Unpin`].
+/// you must be sure to only implement [`Unpin`] when all of your `#[pin]` fields (i.e. structurally
+/// pinned fields) are also [`Unpin`].
 ///
 /// To help highlight this unsafety, the `UnsafeUnpin` trait is provided.
-/// Implementing this trait is logically equivalent to implemnting [`Unpin`] -
+/// Implementing this trait is logically equivalent to implementing [`Unpin`] -
 /// this crate will generate an [`Unpin`] impl for your type that 'forwards' to
 /// your `UnsafeUnpin` impl. However, this trait is `unsafe` - since your type
 /// uses structural pinning (otherwise, you wouldn't be using this crate!),
@@ -85,14 +85,14 @@ pub use pin_project_internal::project_ref;
 ///
 /// Note that if you specify `#[pin_project(UnsafeUnpin)]`, but do *not*
 /// provide an impl of `UnsafeUnpin`, your type will never implement [`Unpin`].
-/// This is effectly the same thing as adding a [`PhantomPinned`] to your type
+/// This is effectively the same thing as adding a [`PhantomPinned`] to your type
 ///
 /// Since this trait is `unsafe`, impls of it will be detected by the `unsafe_code` lint,
 /// and by tools like `cargo geiger`.
 ///
 /// ## Examples
 ///
-/// An `UnsafeUnpin` impl which, in addition to requiring that structually pinned
+/// An `UnsafeUnpin` impl which, in addition to requiring that structurally pinned
 /// fields be [`Unpin`], imposes an additional requirement:
 ///
 /// ```rust
@@ -183,7 +183,7 @@ pub mod __private {
     // This will cause rust to reject any other Unpin impls for MyStruct<T>, since it will
     // assume that our generated impl could potentially apply in any situation.
     //
-    // This acheives the desired effect - when the user writes `#[pin_project(UnsafeUnpin)]`,
+    // This achieves the desired effect - when the user writes `#[pin_project(UnsafeUnpin)]`,
     // the user must either provide no impl of `UnsafeUnpin` (which is equivalent
     // to making the type never implement Unpin), or provide an impl of `UnsafeUnpin`.
     // It is impossible for them to provide an impl of `Unpin`

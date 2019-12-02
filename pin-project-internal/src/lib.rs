@@ -111,8 +111,8 @@ use utils::{Immutable, Mutable};
 ///    the memory that contains the content is not overwritten or deallocated without calling the content's destructors.
 ///
 ///    Safe code doesn't need to worry about this - the only wait to violate this requirement
-///    is to manually deallocate memory (which is `unsafe`), or to overwite a field with something else.
-///    Becauese your custom destructor takes `Pin<&mut MyStruct`, it's impossible to obtain
+///    is to manually deallocate memory (which is `unsafe`), or to overwrite a field with something else.
+///    Because your custom destructor takes `Pin<&mut MyStruct`, it's impossible to obtain
 ///    a mutable reference to a pin-projected field in safe code.
 ///
 /// 4. You must not offer any other operations that could lead to data being moved out of the structural fields when your type is pinned.
@@ -189,7 +189,7 @@ use utils::{Immutable, Mutable};
 /// ### `#[pinned_drop]`
 ///
 /// In order to correctly implement pin projections, a type's `Drop` impl must
-/// not move out of any stucturally pinned fields. Unfortunately, [`Drop::drop`]
+/// not move out of any structurally pinned fields. Unfortunately, [`Drop::drop`]
 /// takes `&mut Self`, not `Pin<&mut Self>`.
 ///
 /// To ensure that this requirement is upheld, the `#[pin_project]` attribute will
