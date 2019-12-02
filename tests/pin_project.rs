@@ -168,6 +168,19 @@ fn where_clause_and_associated_type_fields() {
     }
 }
 
+#[allow(explicit_outlives_requirements)] // https://github.com/rust-lang/rust/issues/60993
+#[test]
+fn unsized_in_where_clause() {
+    #[pin_project]
+    struct Struct<I>
+    where
+        I: ?Sized,
+    {
+        #[pin]
+        field: I,
+    }
+}
+
 #[test]
 fn derive_copy() {
     #[pin_project]
