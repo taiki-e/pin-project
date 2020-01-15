@@ -9,6 +9,8 @@
 #![warn(unsafe_code)]
 #![warn(rust_2018_idioms, single_use_lifetimes, unreachable_pub)]
 #![warn(clippy::all)]
+// mem::take requires Rust 1.40
+#![allow(clippy::mem_replace_with_default)]
 #![allow(clippy::needless_doctest_main)]
 // While this crate supports stable Rust, it currently requires
 // nightly Rust in order for rustdoc to correctly document auto-generated
@@ -24,6 +26,8 @@
 // * https://github.com/rust-lang/rust/issues/63281
 #![cfg_attr(pin_project_show_unpin_struct, feature(proc_macro_def_site))]
 
+// older compilers require explicit `extern crate`.
+#[allow(unused_extern_crates)]
 extern crate proc_macro;
 
 #[macro_use]
