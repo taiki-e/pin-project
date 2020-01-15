@@ -82,7 +82,7 @@ use utils::{Immutable, Mutable};
 ///
 /// 1. The struct must only be Unpin if all the structural fields are Unpin.
 ///
-///	   To enforce this, this attribute will automatically generate an `Unpin` implementation
+///    To enforce this, this attribute will automatically generate an `Unpin` implementation
 ///    for you, which will require that all structurally pinned fields be `Unpin`
 ///    If you wish to provide an manual `Unpin` impl, you can do so via the
 ///    `UnsafeUnpin` argument.
