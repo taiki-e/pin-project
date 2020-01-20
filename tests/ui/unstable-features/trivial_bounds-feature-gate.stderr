@@ -1,8 +1,8 @@
 error[E0277]: the trait bound `std::marker::PhantomPinned: std::marker::Unpin` is not satisfied
  --> $DIR/trivial_bounds-feature-gate.rs:8:5
   |
-8 |     impl Unpin for Foo where PhantomPinned: Unpin {} //~ ERROR E0277
-  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `std::marker::Unpin` is not implemented for `std::marker::PhantomPinned`
+8 |     impl Unpin for A where PhantomPinned: Unpin {} //~ ERROR E0277
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `std::marker::Unpin` is not implemented for `std::marker::PhantomPinned`
   |
   = help: the following implementations were found:
             <std::marker::PhantomPinned as std::marker::Unpin>
@@ -12,8 +12,8 @@ error[E0277]: the trait bound `std::marker::PhantomPinned: std::marker::Unpin` i
 error[E0277]: the trait bound `std::marker::PhantomPinned: std::marker::Unpin` is not satisfied
   --> $DIR/trivial_bounds-feature-gate.rs:16:5
    |
-16 |     impl Unpin for Bar where Wrapper<PhantomPinned>: Unpin {} //~ ERROR E0277
-   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `std::marker::Unpin` is not implemented for `std::marker::PhantomPinned`
+16 |     impl Unpin for B where Wrapper<PhantomPinned>: Unpin {} //~ ERROR E0277
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `std::marker::Unpin` is not implemented for `std::marker::PhantomPinned`
    |
    = help: the following implementations were found:
              <std::marker::PhantomPinned as std::marker::Unpin>
@@ -24,8 +24,8 @@ error[E0277]: the trait bound `std::marker::PhantomPinned: std::marker::Unpin` i
 error[E0277]: the trait bound `std::marker::PhantomPinned: std::marker::Unpin` is not satisfied in `inner::Inner`
   --> $DIR/trivial_bounds-feature-gate.rs:33:5
    |
-33 |     impl Unpin for Foo where Inner: Unpin {} //~ ERROR E0277
-   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ within `inner::Inner`, the trait `std::marker::Unpin` is not implemented for `std::marker::PhantomPinned`
+33 |     impl Unpin for A where Inner: Unpin {} //~ ERROR E0277
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ within `inner::Inner`, the trait `std::marker::Unpin` is not implemented for `std::marker::PhantomPinned`
    |
    = help: the following implementations were found:
              <std::marker::PhantomPinned as std::marker::Unpin>
@@ -36,8 +36,8 @@ error[E0277]: the trait bound `std::marker::PhantomPinned: std::marker::Unpin` i
 error[E0277]: the trait bound `std::marker::PhantomPinned: std::marker::Unpin` is not satisfied in `inner::Inner`
   --> $DIR/trivial_bounds-feature-gate.rs:41:5
    |
-41 |     impl Unpin for Bar where Wrapper<Inner>: Unpin {} //~ ERROR E0277
-   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ within `inner::Inner`, the trait `std::marker::Unpin` is not implemented for `std::marker::PhantomPinned`
+41 |     impl Unpin for B where Wrapper<Inner>: Unpin {} //~ ERROR E0277
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ within `inner::Inner`, the trait `std::marker::Unpin` is not implemented for `std::marker::PhantomPinned`
    |
    = help: the following implementations were found:
              <std::marker::PhantomPinned as std::marker::Unpin>

@@ -100,6 +100,9 @@ pub(crate) fn parse_as_empty(tokens: &TokenStream) -> Result<()> {
     if tokens.is_empty() { Ok(()) } else { Err(error!(tokens, "unexpected token: {}", tokens)) }
 }
 
+// =================================================================================================
+// extension traits
+
 pub(crate) trait SliceExt {
     fn position_exact(&self, ident: &str) -> Result<Option<usize>>;
     fn find(&self, ident: &str) -> Option<&Attribute>;
@@ -125,9 +128,11 @@ impl SliceExt for [Attribute] {
             })
             .map(|(_, pos)| pos)
     }
+
     fn find(&self, ident: &str) -> Option<&Attribute> {
         self.iter().position(|attr| attr.path.is_ident(ident)).and_then(|i| self.get(i))
     }
+
     fn find_exact(&self, ident: &str) -> Result<Option<&Attribute>> {
         self.position_exact(ident).map(|pos| pos.and_then(|i| self.get(i)))
     }
@@ -158,6 +163,9 @@ impl<'a> ParseBufferExt<'a> for ParseBuffer<'a> {
         Ok(content)
     }
 }
+
+// =================================================================================================
+// visitors
 
 // Replace `self`/`Self` with `__self`/`self_ty`.
 // Based on https://github.com/dtolnay/async-trait/blob/0.1.22/src/receiver.rs
@@ -209,7 +217,7 @@ impl<'a> ReplaceReceiver<'a> {
             for segment in &mut path.segments {
                 if let PathArguments::AngleBracketed(bracketed) = &mut segment.arguments {
                     if bracketed.colon2_token.is_none() && !bracketed.args.is_empty() {
-                        bracketed.colon2_token = Some(Default::default());
+                        bracketed.colon2_token = Some(token::Colon2::default());
                     }
                 }
             }

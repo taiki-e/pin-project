@@ -475,6 +475,8 @@ fn dst() {
         x: T,
     }
 
+    let _: &mut A<dyn core::fmt::Debug> = &mut A { x: 0u8 } as _;
+
     #[pin_project]
     pub struct B<T: ?Sized> {
         #[pin]
