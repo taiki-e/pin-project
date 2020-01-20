@@ -159,6 +159,18 @@ fn where_clause_and_associated_type_fields() {
     }
 
     #[pin_project]
+    pub struct Struct3<T>
+    where
+        T: 'static,
+    {
+        field: T,
+    }
+
+    trait Static: 'static {}
+
+    impl<T> Static for Struct3<T> {}
+
+    #[pin_project]
     enum Enum<I>
     where
         I: Iterator,
@@ -243,6 +255,29 @@ fn trait_bounds_on_type_generics() {
     pub struct Struct5<'a, T: core::fmt::Debug + ?Sized> {
         field: &'a mut T,
     }
+
+    #[pin_project]
+    pub struct Struct6<'a, T: core::fmt::Debug = [u8; 16]> {
+        field: &'a mut T,
+    }
+
+    let _: Struct6<'_> = Struct6 { field: &mut [0u8; 16] };
+
+    #[pin_project]
+    pub struct Struct7<T: 'static> {
+        field: T,
+    }
+
+    trait Static: 'static {}
+
+    impl<T> Static for Struct7<T> {}
+
+    // TODO: support this
+    // #[pin_project]
+    // pub struct Struct8<'a, 'b: 'a> {
+    //     field1: &'a u8,
+    //     field2: &'b u8,
+    // }
 
     #[pin_project]
     pub struct TupleStruct<'a, T: ?Sized>(&'a mut T);
