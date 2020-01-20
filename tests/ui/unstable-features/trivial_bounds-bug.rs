@@ -7,26 +7,26 @@
 use std::marker::{PhantomData, PhantomPinned};
 
 fn phantom_pinned() {
-    struct Foo(PhantomPinned);
+    struct A(PhantomPinned);
 
     // bug of trivial_bounds?
-    impl Unpin for Foo where PhantomPinned: Unpin {} //~ ERROR E0277
+    impl Unpin for A where PhantomPinned: Unpin {} //~ ERROR E0277
 
     struct Wrapper<T>(T);
 
     impl<T> Unpin for Wrapper<T> where T: Unpin {}
 
-    struct Bar(PhantomPinned);
+    struct B(PhantomPinned);
 
-    impl Unpin for Bar where Wrapper<PhantomPinned>: Unpin {} //~ Ok
+    impl Unpin for B where Wrapper<PhantomPinned>: Unpin {} //~ Ok
 
     struct WrapperWithLifetime<'a, T>(PhantomData<&'a ()>, T);
 
     impl<T> Unpin for WrapperWithLifetime<'_, T> where T: Unpin {}
 
-    struct Baz(PhantomPinned);
+    struct C(PhantomPinned);
 
-    impl<'a> Unpin for Baz where WrapperWithLifetime<'a, PhantomPinned>: Unpin {}
+    impl<'a> Unpin for C where WrapperWithLifetime<'a, PhantomPinned>: Unpin {}
     // Ok
 }
 

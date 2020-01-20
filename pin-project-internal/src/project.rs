@@ -176,7 +176,7 @@ fn replace_ident(ident: &mut Ident, mutability: Mutability) {
 }
 
 // =================================================================================================
-// visitor
+// visitors
 
 struct FnVisitor {
     res: Result<()>,
