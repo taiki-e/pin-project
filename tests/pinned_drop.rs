@@ -27,7 +27,7 @@ fn safe_project() {
 }
 
 #[test]
-fn test_mut_argument() {
+fn mut_self_argument() {
     #[pin_project(PinnedDrop)]
     struct Struct {
         data: usize,
@@ -42,7 +42,7 @@ fn test_mut_argument() {
 }
 
 #[test]
-fn test_self_in_vec() {
+fn self_in_vec() {
     #[pin_project(PinnedDrop)]
     struct Struct {
         data: usize,
@@ -57,7 +57,7 @@ fn test_self_in_vec() {
 }
 
 #[test]
-fn test_self_in_macro_containing_fn() {
+fn self_in_macro_containing_fn() {
     #[pin_project(PinnedDrop)]
     pub struct Struct {
         data: usize,
@@ -83,7 +83,7 @@ fn test_self_in_macro_containing_fn() {
 }
 
 #[test]
-fn test_call_self() {
+fn self_call() {
     #[pin_project(PinnedDrop)]
     pub struct Struct {
         data: usize,
@@ -112,8 +112,67 @@ fn test_call_self() {
     }
 }
 
+// See also `ui/pinned_drop/self.rs`.
 #[test]
-fn test_self_match() {
+fn self_expr() {
+    #[pin_project(PinnedDrop)]
+    pub struct Struct {
+        x: usize,
+    }
+
+    #[pinned_drop]
+    impl PinnedDrop for Struct {
+        fn drop(mut self: Pin<&mut Self>) {
+            let _: Self = Self { x: 0 };
+        }
+    }
+
+    #[pin_project(PinnedDrop)]
+    pub struct TupleStruct(usize);
+
+    #[pinned_drop]
+    impl PinnedDrop for TupleStruct {
+        fn drop(mut self: Pin<&mut Self>) {
+            let _: Self = Self(0);
+        }
+    }
+
+    #[rustversion::since(1.37)]
+    #[pin_project(PinnedDrop)]
+    pub enum Enum {
+        StructVariant { x: usize },
+        TupleVariant(usize),
+    }
+
+    #[rustversion::since(1.37)]
+    #[pinned_drop]
+    impl PinnedDrop for Enum {
+        fn drop(mut self: Pin<&mut Self>) {
+            // let _: Self = Self::StructVariant { x: 0 }; //~ ERROR can't use generic parameters from outer function [E0401]
+            let _: Self = Self::TupleVariant(0);
+        }
+    }
+}
+
+// See also `ui/pinned_drop/self.rs`.
+#[test]
+fn self_pat() {
+    #[pin_project(PinnedDrop)]
+    pub struct Struct {
+        x: usize,
+    }
+
+    #[pinned_drop]
+    impl PinnedDrop for Struct {
+        fn drop(mut self: Pin<&mut Self>) {
+            // match *self {
+            //     Self { x: _ } => {} //~ ERROR can't use generic parameters from outer function [E0401]
+            // }
+            // if let Self { x: _ } = *self {} //~ ERROR can't use generic parameters from outer function [E0401]
+            // let Self { x: _ } = *self; //~ ERROR can't use generic parameters from outer function [E0401]
+        }
+    }
+
     #[pin_project(PinnedDrop)]
     pub struct TupleStruct(usize);
 
@@ -125,7 +184,27 @@ fn test_self_match() {
                 Self(_) => {}
             }
             if let Self(_) = *self {}
-            let _: Self = Self(0);
+            let Self(_) = *self;
+        }
+    }
+
+    #[rustversion::since(1.37)]
+    #[pin_project(PinnedDrop)]
+    pub enum Enum {
+        StructVariant { x: usize },
+        TupleVariant(usize),
+    }
+
+    #[rustversion::since(1.37)]
+    #[pinned_drop]
+    impl PinnedDrop for Enum {
+        fn drop(mut self: Pin<&mut Self>) {
+            // match *self {
+            //     Self::StructVariant { x: _ } => {} //~ ERROR can't use generic parameters from outer function [E0401]
+            //     Self::TupleVariant(_) => {} //~ ERROR can't use generic parameters from outer function [E0401]
+            // }
+            // if let Self::StructVariant { x: _ } = *self {} //~ ERROR can't use generic parameters from outer function [E0401]
+            // if let Self::TupleVariant(_) = *self {} //~ ERROR can't use generic parameters from outer function [E0401]
         }
     }
 }
