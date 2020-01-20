@@ -540,10 +540,10 @@ impl Context {
                 .generics
                 .lifetimes()
                 .enumerate()
-                .map(|(i, l)| {
+                .map(|(i, LifetimeDef { lifetime, .. })| {
                     let field_ident = format_ident!("__lifetime{}", i);
                     quote! {
-                        #field_ident: &#l ()
+                        #field_ident: &#lifetime ()
                     }
                 })
                 .collect();

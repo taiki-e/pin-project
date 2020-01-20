@@ -272,12 +272,11 @@ fn trait_bounds_on_type_generics() {
 
     impl<T> Static for Struct7<T> {}
 
-    // TODO: support this
-    // #[pin_project]
-    // pub struct Struct8<'a, 'b: 'a> {
-    //     field1: &'a u8,
-    //     field2: &'b u8,
-    // }
+    #[pin_project]
+    pub struct Struct8<'a, 'b: 'a> {
+        field1: &'a u8,
+        field2: &'b u8,
+    }
 
     #[pin_project]
     pub struct TupleStruct<'a, T: ?Sized>(&'a mut T);
