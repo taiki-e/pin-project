@@ -677,6 +677,7 @@ impl Context {
                 // impls, we emit one ourselves. If the user ends up writing a `PinnedDrop` impl,
                 // they'll get a "conflicting implementations of trait" error when coherence
                 // checks are run
+                #[allow(single_use_lifetimes)]
                 impl #impl_generics ::pin_project::#private::PinnedDrop for #ident #ty_generics #where_clause {
                     unsafe fn drop(self: ::core::pin::Pin<&mut Self>) {}
                 }
