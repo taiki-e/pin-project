@@ -611,7 +611,6 @@ impl Context {
         let ident = &self.orig.ident;
         let (impl_generics, ty_generics, where_clause) = self.orig.generics.split_for_impl();
 
-
         let private = Ident::new(CURRENT_PRIVATE_MODULE, Span::call_site());
         if let Some(pinned_drop) = self.pinned_drop {
             // Make the error message highlight `PinnedDrop` argument.
