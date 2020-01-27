@@ -6,6 +6,12 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 ## [Unreleased]
 
+## [0.4.8] - 2020-01-27
+
+* [Ensured that users cannot implement `PinnedDrop` without proper attribute argument.][180]
+
+[180]: https://github.com/taiki-e/pin-project/pull/180
+
 ## [0.4.7] - 2020-01-20
 
 * [Fixed support for lifetime bounds.][176]
@@ -302,7 +308,8 @@ See also [tracking issue for 0.4 release][21].
 
 Initial release
 
-[Unreleased]: https://github.com/taiki-e/pin-project/compare/v0.4.7...HEAD
+[Unreleased]: https://github.com/taiki-e/pin-project/compare/v0.4.8...HEAD
+[0.4.8]: https://github.com/taiki-e/pin-project/compare/v0.4.7...v0.4.8
 [0.4.7]: https://github.com/taiki-e/pin-project/compare/v0.4.6...v0.4.7
 [0.4.6]: https://github.com/taiki-e/pin-project/compare/v0.4.5...v0.4.6
 [0.4.5]: https://github.com/taiki-e/pin-project/compare/v0.4.4...v0.4.5
