@@ -611,8 +611,8 @@ impl Context {
         let ident = &self.orig.ident;
         let (impl_generics, ty_generics, where_clause) = self.orig.generics.split_for_impl();
 
+        let private = Ident::new(CURRENT_PRIVATE_MODULE, Span::call_site());
         if let Some(pinned_drop) = self.pinned_drop {
-            let private = Ident::new(CURRENT_PRIVATE_MODULE, Span::call_site());
             // Make the error message highlight `PinnedDrop` argument.
             // See https://github.com/taiki-e/pin-project/issues/16#issuecomment-513586812
             // for why this is only for the span of function calls, not the entire `impl` block.
@@ -666,6 +666,21 @@ impl Context {
                 impl<T: ::core::ops::Drop> #trait_ident for T {}
                 #[allow(single_use_lifetimes)]
                 impl #impl_generics #trait_ident for #ident #ty_generics #where_clause {}
+
+                // A dummy impl of `PinnedDrop`, to ensure that the user cannot implement it.
+                // Since the user did not pass `PinnedDrop` to `#[pin_project]`, any `PinnedDrop`
+                // impl will not actually be called. Unfortunately, we can't detect this situation
+                // directly from either the `#[pin_project]` or `#[pinned_drop]` attributes, since
+                // we don't know what other attirbutes/impl may exist.
+                //
+                // To ensure that users don't accidentally write a non-functional `PinnedDrop`
+                // impls, we emit one ourselves. If the user ends up writing a `PinnedDrop` impl,
+                // they'll get a "conflicting implementations of trait" error when coherence
+                // checks are run
+                #[allow(single_use_lifetimes)]
+                impl #impl_generics ::pin_project::#private::PinnedDrop for #ident #ty_generics #where_clause {
+                    unsafe fn drop(self: ::core::pin::Pin<&mut Self>) {}
+                }
             }
         }
     }
