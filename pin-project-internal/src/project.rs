@@ -17,7 +17,7 @@ fn replace_stmt(stmt: &mut Stmt, mutability: Mutability) -> Result<bool> {
     match stmt {
         Stmt::Expr(Expr::Match(expr)) | Stmt::Semi(Expr::Match(expr), _) => {
             Context::new(mutability).replace_expr_match(expr);
-            return Ok(true)
+            return Ok(true);
         }
         Stmt::Expr(Expr::If(expr_if)) => {
             if let Expr::Let(ref mut expr) = &mut *expr_if.cond {
