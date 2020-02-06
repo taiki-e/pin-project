@@ -4,7 +4,7 @@ error: Trait bound inner::Inner: std::marker::Unpin does not depend on any type 
 15 |     impl Unpin for A where Inner: Unpin {} //~ ERROR std::marker::Unpin does not depend on any type or lifetime parameters
    |                                   ^^^^^
    |
-note: lint level defined here
+note: the lint level is defined here
   --> $DIR/trivial_bounds.rs:6:9
    |
 6  | #![deny(trivial_bounds)]
