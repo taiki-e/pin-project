@@ -1,6 +1,9 @@
 error[E0308]: mismatched types
   --> $DIR/type-mismatch.rs:35:9
    |
+23 |     match &mut foo {
+   |           -------- this expression has type `&mut type_mismatch::__EnumProjection<'_, {integer}, {integer}, _, _>`
+...
 35 |         None => {} //~ ERROR mismatched types
    |         ^^^^ expected enum `type_mismatch::__EnumProjection`, found enum `std::option::Option`
    |
