@@ -6,6 +6,8 @@ error[E0119]: conflicting implementations of trait `FooMustNotImplDrop` for type
   | |
   | first implementation here
   | conflicting implementation for `Foo<_, _>`
+  |
+  = note: this error originates in a derive macro (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0119]: conflicting implementations of trait `std::ops::Drop` for type `Bar<_, _>`:
   --> $DIR/conflict-drop.rs:15:1
@@ -15,3 +17,5 @@ error[E0119]: conflicting implementations of trait `std::ops::Drop` for type `Ba
 ...
 27 | impl<T, U> Drop for Bar<T, U> {
    | ----------------------------- first implementation here
+   |
+   = note: this error originates in a derive macro (in Nightly builds, run with -Z macro-backtrace for more info)
