@@ -13,32 +13,37 @@ pub(crate) fn attribute(args: &TokenStream, input: Stmt, mutability: Mutability)
         .unwrap_or_else(|e| e.to_compile_error())
 }
 
-fn replace_stmt(stmt: &mut Stmt, mutability: Mutability) -> Result<bool> {
+fn replace_stmt(stmt: &mut Stmt, mutability: Mutability) -> Result<()> {
     match stmt {
         Stmt::Expr(Expr::Match(expr)) | Stmt::Semi(Expr::Match(expr), _) => {
             Context::new(mutability).replace_expr_match(expr);
-            return Ok(true);
         }
         Stmt::Expr(Expr::If(expr_if)) => {
-            if let Expr::Let(ref mut expr) = &mut *expr_if.cond {
+            let mut expr_if = expr_if;
+            while let Expr::Let(ref mut expr) = &mut *expr_if.cond {
                 Context::new(mutability).replace_expr_let(expr);
-                return Ok(true);
+                if let Some((_, ref mut expr)) = expr_if.else_branch {
+                    if let Expr::If(new_expr_if) = &mut **expr {
+                        expr_if = new_expr_if;
+                        continue
+                    }
+                }
+                break;
             }
         }
         Stmt::Local(local) => Context::new(mutability).replace_local(local)?,
         _ => {}
     }
-    Ok(false)
+    Ok(())
 }
 
 fn parse(mut stmt: Stmt, mutability: Mutability) -> Result<TokenStream> {
-    if !replace_stmt(&mut stmt, mutability)? {
-        match &mut stmt {
-            Stmt::Item(Item::Fn(item)) => replace_item_fn(item, mutability)?,
-            Stmt::Item(Item::Impl(item)) => replace_item_impl(item, mutability),
-            Stmt::Item(Item::Use(item)) => replace_item_use(item, mutability)?,
-            _ => {}
-        }
+    replace_stmt(&mut stmt, mutability)?;
+    match &mut stmt {
+        Stmt::Item(Item::Fn(item)) => replace_item_fn(item, mutability)?,
+        Stmt::Item(Item::Impl(item)) => replace_item_impl(item, mutability),
+        Stmt::Item(Item::Use(item)) => replace_item_use(item, mutability)?,
+        _ => {}
     }
 
     Ok(stmt.into_token_stream())
