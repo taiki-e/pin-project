@@ -86,6 +86,33 @@ fn project_stmt_expr() {
     assert_eq!(val, true);
 }
 
+#[rustversion::nightly]
+#[test]
+#[project]
+fn project_if_let() {
+    #[pin_project]
+    enum Foo<A, B> {
+        Variant1(#[pin] A),
+        Variant2(u8),
+        Variant3 {
+            #[pin] field: B
+        }
+    }
+
+    let mut foo: Foo<bool, f32> = Foo::Variant1(true);
+    let foo = Pin::new(&mut foo).project();
+
+    #[project]
+    if let Foo::Variant1(a) = foo {
+        let a: Pin<&mut bool> = a;
+        assert_eq!(*a, true);
+    } else if let Foo::Variant2(_) = foo {
+        unreachable!();
+    } else if let Foo::Variant3 { .. } = foo {
+        unreachable!();
+    }
+}
+
 #[test]
 fn project_impl() {
     #[pin_project]
