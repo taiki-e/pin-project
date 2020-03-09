@@ -25,7 +25,7 @@ fn replace_stmt(stmt: &mut Stmt, mutability: Mutability) -> Result<()> {
                 if let Some((_, ref mut expr)) = expr_if.else_branch {
                     if let Expr::If(new_expr_if) = &mut **expr {
                         expr_if = new_expr_if;
-                        continue
+                        continue;
                     }
                 }
                 break;
