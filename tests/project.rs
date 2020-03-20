@@ -2,6 +2,16 @@
 #![warn(rust_2018_idioms, single_use_lifetimes)]
 #![allow(dead_code)]
 
+// This hack is needed until https://github.com/rust-lang/rust/pull/69201
+// makes it way into stable.
+// Ceurrently, `#[attr] if true {}` doesn't even *parse* on stable,
+// which means that it will error even behind a `#[rustversion::nightly]`
+//
+// This trick makes sure that we don't even attempt to parse
+// the `#[project] if let _` test on stable.
+#[rustversion::nightly]
+include!("project_if_attr.rs.in");
+
 use pin_project::{pin_project, project};
 use std::pin::Pin;
 
