@@ -113,6 +113,7 @@ jobs:
       - name: cargo doc
         if: matrix.component == 'rustdoc'
         env:
-          RUSTDOCFLAGS: -Dwarnings
+          # TODO: once https://github.com/rust-lang/rust/issues/70814 fixed, remove '-Aunused_braces'
+          RUSTDOCFLAGS: -Dwarnings -Aunused_braces
         run: |
           cargo doc --no-deps --all --all-features
