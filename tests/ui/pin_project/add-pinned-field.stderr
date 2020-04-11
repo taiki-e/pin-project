@@ -2,7 +2,7 @@ error[E0277]: `std::marker::PhantomPinned` cannot be unpinned
   --> $DIR/add-pinned-field.rs:21:5
    |
 4  | fn is_unpin<T: Unpin>() {}
-   |    --------    ----- required by this bound in `is_unpin`
+   |                ----- required by this bound in `is_unpin`
 ...
 21 |     is_unpin::<Foo>(); //~ ERROR E0277
    |     ^^^^^^^^^^^^^^^ within `__Foo<'_>`, the trait `std::marker::Unpin` is not implemented for `std::marker::PhantomPinned`
@@ -14,7 +14,7 @@ error[E0277]: `std::marker::PhantomPinned` cannot be unpinned
   --> $DIR/add-pinned-field.rs:22:5
    |
 4  | fn is_unpin<T: Unpin>() {}
-   |    --------    ----- required by this bound in `is_unpin`
+   |                ----- required by this bound in `is_unpin`
 ...
 22 |     is_unpin::<Bar>(); //~ ERROR E0277
    |     ^^^^^^^^^^^^^^^ within `__Bar<'_>`, the trait `std::marker::Unpin` is not implemented for `std::marker::PhantomPinned`
