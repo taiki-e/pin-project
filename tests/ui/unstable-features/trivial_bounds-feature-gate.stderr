@@ -8,12 +8,10 @@ error[E0277]: `std::marker::PhantomPinned` cannot be unpinned
   = help: add `#![feature(trivial_bounds)]` to the crate attributes to enable
 
 error[E0277]: `std::marker::PhantomPinned` cannot be unpinned
- --> $DIR/trivial_bounds-feature-gate.rs:8:43
-  |
-8 |     impl Unpin for A where PhantomPinned: Unpin {} //~ ERROR E0277
-  |                                           ^^^^^ the trait `std::marker::Unpin` is not implemented for `std::marker::PhantomPinned`
-  |
-  = note: required by `std::marker::Unpin`
+   --> $DIR/trivial_bounds-feature-gate.rs:8:43
+    |
+8   |     impl Unpin for A where PhantomPinned: Unpin {} //~ ERROR E0277
+    |                                           ^^^^^ the trait `std::marker::Unpin` is not implemented for `std::marker::PhantomPinned`
 
 error[E0277]: `std::marker::PhantomPinned` cannot be unpinned
   --> $DIR/trivial_bounds-feature-gate.rs:16:5

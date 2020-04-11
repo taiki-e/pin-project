@@ -2,7 +2,7 @@ error[E0277]: the trait bound `Struct<(), ()>: pin_project::UnsafeUnpin` is not 
   --> $DIR/not-implement-unsafe-unpin.rs:13:16
    |
 10 | fn is_unpin<T: Unpin>() {}
-   |    --------    ----- required by this bound in `is_unpin`
+   |                ----- required by this bound in `is_unpin`
 ...
 13 |     is_unpin::<Struct<(), ()>>(); //~ ERROR E0277
    |                ^^^^^^^^^^^^^^ the trait `pin_project::UnsafeUnpin` is not implemented for `Struct<(), ()>`

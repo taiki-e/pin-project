@@ -14,7 +14,7 @@ error[E0277]: `std::marker::PhantomPinned` cannot be unpinned
   --> $DIR/remove-attr-from-struct.rs:22:5
    |
 5  | fn is_unpin<T: Unpin>() {}
-   |    --------    ----- required by this bound in `is_unpin`
+   |                ----- required by this bound in `is_unpin`
 ...
 22 |     is_unpin::<Foo>(); //~ ERROR E0277
    |     ^^^^^^^^^^^^^^^ within `Foo`, the trait `std::marker::Unpin` is not implemented for `std::marker::PhantomPinned`
@@ -25,7 +25,7 @@ error[E0277]: `std::marker::PhantomPinned` cannot be unpinned
   --> $DIR/remove-attr-from-struct.rs:23:5
    |
 5  | fn is_unpin<T: Unpin>() {}
-   |    --------    ----- required by this bound in `is_unpin`
+   |                ----- required by this bound in `is_unpin`
 ...
 23 |     is_unpin::<Bar>(); //~ ERROR E0277
    |     ^^^^^^^^^^^^^^^ within `Bar`, the trait `std::marker::Unpin` is not implemented for `std::marker::PhantomPinned`
