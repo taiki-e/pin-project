@@ -194,3 +194,24 @@ mod project_use_2 {
         fn project_use(self) {}
     }
 }
+
+#[pin_project]
+struct StructWhereClause<T>
+where
+    T: Copy,
+{
+    field: T,
+}
+
+#[pin_project]
+struct TupleStructWhereClause<T>(T)
+where
+    T: Copy;
+
+#[pin_project]
+enum EnumWhereClause<T>
+where
+    T: Copy,
+{
+    Variant(T),
+}
