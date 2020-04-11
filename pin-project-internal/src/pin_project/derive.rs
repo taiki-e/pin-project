@@ -261,12 +261,24 @@ impl Context {
         let proj_generics = &self.proj.generics;
         let where_clause = self.orig.generics.split_for_impl().2;
 
+        // For tuple structs, we need to generate `(T1, T2) where Foo: Bar`
+        // For non-tuple structs, we need to generate `where Foo: Bar { field1: T }`
+        let (where_clause_fields, where_clause_ref_fields) = match fields {
+            Fields::Named(_) => {
+                (quote!(#where_clause #proj_fields), quote!(#where_clause #proj_ref_fields))
+            }
+            Fields::Unnamed(_) => {
+                (quote!(#proj_fields #where_clause), quote!(#proj_ref_fields #where_clause))
+            }
+            Fields::Unit => unreachable!(),
+        };
+
         let mut proj_items = quote! {
             #[allow(clippy::mut_mut)] // This lint warns `&mut &mut <ty>`.
             #[allow(dead_code)] // This lint warns unused fields/variants.
-            #vis struct #proj_ident #proj_generics #where_clause #proj_fields
+            #vis struct #proj_ident #proj_generics #where_clause_fields
             #[allow(dead_code)] // This lint warns unused fields/variants.
-            #vis struct #proj_ref_ident #proj_generics #where_clause #proj_ref_fields
+            #vis struct #proj_ref_ident #proj_generics #where_clause_ref_fields
         };
 
         let proj_body = quote! {
