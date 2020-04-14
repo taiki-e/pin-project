@@ -6,6 +6,18 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 ## [Unreleased]
 
+## [0.4.9] - 2020-04-14
+
+* [Fixed lifetime inference error when associated types are used in fields.][188]
+
+* [Fixed compile error with tuple structs with `where` clauses.][186]
+
+* [`#[project]` attribute can now be used for `if let` expressions.][181]
+
+[188]: https://github.com/taiki-e/pin-project/pull/188
+[186]: https://github.com/taiki-e/pin-project/pull/186
+[181]: https://github.com/taiki-e/pin-project/pull/181
+
 ## [0.4.8] - 2020-01-27
 
 * [Ensured that users cannot implement `PinnedDrop` without proper attribute argument.][180]
@@ -308,7 +320,8 @@ See also [tracking issue for 0.4 release][21].
 
 Initial release
 
-[Unreleased]: https://github.com/taiki-e/pin-project/compare/v0.4.8...HEAD
+[Unreleased]: https://github.com/taiki-e/pin-project/compare/v0.4.9...HEAD
+[0.4.9]: https://github.com/taiki-e/pin-project/compare/v0.4.8...v0.4.9
 [0.4.8]: https://github.com/taiki-e/pin-project/compare/v0.4.7...v0.4.8
 [0.4.7]: https://github.com/taiki-e/pin-project/compare/v0.4.6...v0.4.7
 [0.4.6]: https://github.com/taiki-e/pin-project/compare/v0.4.5...v0.4.6
