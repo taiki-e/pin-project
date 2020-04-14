@@ -61,6 +61,29 @@ pub(crate) fn determine_lifetime_name(
     }
 }
 
+/// Like `insert_lifetime`, but also generates a bound of the form
+/// `OriginalType<A, B>: 'lifetime`. Used when generating the definition
+/// of a projection type
+pub(crate) fn insert_lifetime_and_bound(
+    generics: &mut Generics,
+    lifetime: Lifetime,
+    orig_generics: &Generics,
+    orig_ident: Ident,
+) -> WherePredicate {
+    insert_lifetime(generics, lifetime.clone());
+
+    let orig_type: syn::Type = syn::parse_quote!(#orig_ident #orig_generics);
+    let mut punct = Punctuated::new();
+    punct.push(TypeParamBound::Lifetime(lifetime));
+
+    WherePredicate::Type(PredicateType {
+        lifetimes: None,
+        bounded_ty: orig_type,
+        colon_token: syn::token::Colon::default(),
+        bounds: punct,
+    })
+}
+
 /// Inserts a `lifetime` at position `0` of `generics.params`.
 pub(crate) fn insert_lifetime(generics: &mut Generics, lifetime: Lifetime) {
     if generics.lt_token.is_none() {
