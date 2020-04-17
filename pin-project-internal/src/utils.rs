@@ -1,4 +1,4 @@
-use std::mem;
+use std::{iter::FromIterator, mem};
 
 use proc_macro2::{Group, TokenStream, TokenTree};
 use quote::{format_ident, quote_spanned};
@@ -191,7 +191,7 @@ impl<'a> ParseBufferExt<'a> for ParseBuffer<'a> {
 // visitors
 
 // Replace `self`/`Self` with `__self`/`self_ty`.
-// Based on https://github.com/dtolnay/async-trait/blob/0.1.22/src/receiver.rs
+// Based on https://github.com/dtolnay/async-trait/blob/0.1.30/src/receiver.rs
 
 pub(crate) struct ReplaceReceiver<'a> {
     self_ty: &'a Type,
@@ -202,7 +202,7 @@ impl<'a> ReplaceReceiver<'a> {
         Self { self_ty }
     }
 
-    fn self_to_qself(&mut self, qself: &mut Option<QSelf>, path: &mut Path) {
+    fn self_to_qself(&self, qself: &mut Option<QSelf>, path: &mut Path) {
         if path.leading_colon.is_some() {
             return;
         }
@@ -235,14 +235,27 @@ impl<'a> ReplaceReceiver<'a> {
     }
 
     fn self_to_expr_path(&self, path: &mut Path) {
+        if path.leading_colon.is_some() {
+            return;
+        }
+
+        let first = &path.segments[0];
+        if first.ident != "Self" || !first.arguments.is_empty() {
+            return;
+        }
+
         if let Type::Path(self_ty) = &self.self_ty {
-            *path = self_ty.path.clone();
+            let variant = mem::replace(path, self_ty.path.clone());
             for segment in &mut path.segments {
                 if let PathArguments::AngleBracketed(bracketed) = &mut segment.arguments {
                     if bracketed.colon2_token.is_none() && !bracketed.args.is_empty() {
                         bracketed.colon2_token = Some(token::Colon2::default());
                     }
                 }
+            }
+            if variant.segments.len() > 1 {
+                path.segments.push_punct(token::Colon2::default());
+                path.segments.extend(variant.segments.into_pairs().skip(1));
             }
         } else {
             let span = path.segments[0].ident.span();
@@ -285,10 +298,36 @@ impl VisitMut for ReplaceReceiver<'_> {
     }
 
     fn visit_expr_struct_mut(&mut self, expr: &mut ExprStruct) {
-        if expr.path.is_ident("Self") {
-            self.self_to_expr_path(&mut expr.path);
-        }
+        self.self_to_expr_path(&mut expr.path);
         visit_mut::visit_expr_struct_mut(self, expr);
+    }
+
+    fn visit_pat_path_mut(&mut self, pat: &mut PatPath) {
+        if pat.qself.is_none() {
+            self.self_to_qself(&mut pat.qself, &mut pat.path);
+        }
+        visit_mut::visit_pat_path_mut(self, pat);
+    }
+
+    fn visit_pat_struct_mut(&mut self, pat: &mut PatStruct) {
+        self.self_to_expr_path(&mut pat.path);
+        visit_mut::visit_pat_struct_mut(self, pat);
+    }
+
+    fn visit_pat_tuple_struct_mut(&mut self, pat: &mut PatTupleStruct) {
+        self.self_to_expr_path(&mut pat.path);
+        visit_mut::visit_pat_tuple_struct_mut(self, pat);
+    }
+
+    fn visit_item_mut(&mut self, node: &mut Item) {
+        match node {
+            // Visit `macro_rules!` because locally defined macros can refer to `self`.
+            Item::Macro(node) if node.mac.path.is_ident("macro_rules") => {
+                self.visit_macro_mut(&mut node.mac)
+            }
+            // Otherwise, do not recurse into nested items.
+            _ => {}
+        }
     }
 
     fn visit_macro_mut(&mut self, node: &mut Macro) {
@@ -298,12 +337,8 @@ impl VisitMut for ReplaceReceiver<'_> {
         // `fn`, then `self` is more likely to refer to something other than the
         // outer function's self argument.
         if !contains_fn(node.tokens.clone()) {
-            node.tokens = fold_token_stream(node.tokens.clone());
+            visit_token_stream(&mut node.tokens);
         }
-    }
-
-    fn visit_item_mut(&mut self, _: &mut Item) {
-        // Do not recurse into nested items.
     }
 }
 
@@ -315,25 +350,35 @@ fn contains_fn(tokens: TokenStream) -> bool {
     })
 }
 
-fn fold_token_stream(tokens: TokenStream) -> TokenStream {
-    tokens
-        .into_iter()
-        .map(|tt| match tt {
+fn visit_token_stream(tokens: &mut TokenStream) -> bool {
+    let mut out = Vec::new();
+    let mut modified = false;
+    for tt in tokens.clone() {
+        match tt {
             TokenTree::Ident(mut ident) => {
-                prepend_underscore_to_self(&mut ident);
-                TokenTree::Ident(ident)
+                modified |= prepend_underscore_to_self(&mut ident);
+                out.push(TokenTree::Ident(ident));
             }
             TokenTree::Group(group) => {
-                let content = fold_token_stream(group.stream());
-                TokenTree::Group(Group::new(group.delimiter(), content))
+                let mut content = group.stream();
+                modified |= visit_token_stream(&mut content);
+                let mut new = Group::new(group.delimiter(), content);
+                new.set_span(group.span());
+                out.push(TokenTree::Group(new));
             }
-            other => other,
-        })
-        .collect()
+            other => out.push(other),
+        }
+    }
+    if modified {
+        *tokens = TokenStream::from_iter(out);
+    }
+    modified
 }
 
-pub(crate) fn prepend_underscore_to_self(ident: &mut Ident) {
-    if ident == "self" {
+pub(crate) fn prepend_underscore_to_self(ident: &mut Ident) -> bool {
+    let modified = ident == "self";
+    if modified {
         *ident = Ident::new("__self", ident.span());
     }
+    modified
 }
