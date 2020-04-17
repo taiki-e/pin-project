@@ -25,6 +25,7 @@ jobs:
           # Rust version in README.md.
           - 1.33.0
           - 1.36.0
+          - 1.37.0
           - stable
           - beta
           - nightly
@@ -40,6 +41,9 @@ jobs:
           - build: 1.36.0
             os: ubuntu-latest
             rust: 1.36.0
+          - build: 1.37.0
+            os: ubuntu-latest
+            rust: 1.37.0
           - build: stable
             os: ubuntu-latest
             rust: stable
