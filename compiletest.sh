@@ -8,5 +8,5 @@
 # . ./compiletest.sh
 # ```
 
-TRYBUILD=overwrite RUSTFLAGS='--cfg pin_project_show_unpin_struct' cargo +nightly test -p pin-project --all-features --test compiletest -- --ignored
-# RUSTFLAGS='--cfg pin_project_show_unpin_struct' cargo +nightly test -p pin-project --all-features --test compiletest -- --ignored
+TRYBUILD=overwrite cargo +nightly test -p pin-project --all-features --test compiletest -- --ignored
+# cargo +nightly test -p pin-project --all-features --test compiletest -- --ignored

@@ -12,19 +12,6 @@
 // mem::take requires Rust 1.40
 #![allow(clippy::mem_replace_with_default)]
 #![allow(clippy::needless_doctest_main)]
-// While this crate supports stable Rust, it currently requires
-// nightly Rust in order for rustdoc to correctly document auto-generated
-// `Unpin` impls. This does not affect the runtime functionality of this crate,
-// nor does it affect the safety of the api provided by this crate.
-//
-// This is disabled by default and can be enabled using
-// `--cfg pin_project_show_unpin_struct` in RUSTFLAGS.
-//
-// Refs:
-// * https://github.com/taiki-e/pin-project/pull/53#issuecomment-525906867
-// * https://github.com/taiki-e/pin-project/pull/70
-// * https://github.com/rust-lang/rust/issues/63281
-#![cfg_attr(pin_project_show_unpin_struct, feature(proc_macro_def_site))]
 
 // older compilers require explicit `extern crate`.
 #[allow(unused_extern_crates)]
