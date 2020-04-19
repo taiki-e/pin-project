@@ -11,27 +11,68 @@ use crate::utils::*;
 use super::PIN;
 
 pub(super) fn parse_derive(input: TokenStream) -> Result<TokenStream> {
-    match syn::parse2(input)? {
+    let mut item = syn::parse2(input)?;
+
+    match &mut item {
         Item::Struct(ItemStruct { attrs, vis, ident, generics, fields, .. }) => {
-            validate_struct(&ident, &fields)?;
+            validate_struct(ident, fields)?;
             let mut cx = Context::new(attrs, vis, ident, generics)?;
 
-            let packed_check = cx.ensure_not_packed(&fields)?;
-            let mut proj_items = cx.parse_struct(&fields)?;
-            proj_items.extend(packed_check);
-            proj_items.extend(cx.make_unpin_impl());
-            proj_items.extend(cx.make_drop_impl());
+            // Do this first for a better error message.
+            let packed_check = cx.ensure_not_packed(fields)?;
+
+            let (mut proj_items, proj_impl) = cx.parse_struct(fields)?;
+            let unpin_impl = cx.make_unpin_impl();
+            let drop_impl = cx.make_drop_impl();
+
+            let dummy_const = format_ident!("__SCOPE_{}", ident);
+            proj_items.extend(quote! {
+                // All items except projected types are generated inside a `const` scope.
+                // This makes it impossible for user code to refer to these types.
+                // However, this prevents Rustdoc from displaying docs for any
+                // of our types. In particular, users cannot see the
+                // automatically generated `Unpin` impl for the '__UnpinStruct' types
+                //
+                // Previously, we provided a flag to correctly document the
+                // automatically generated `Unpin` impl by using def-site hygiene,
+                // but it is now removed.
+                //
+                // Refs:
+                // * https://github.com/rust-lang/rust/issues/63281
+                // * https://github.com/taiki-e/pin-project/pull/53#issuecomment-525906867
+                // * https://github.com/taiki-e/pin-project/pull/70
+                #[allow(non_upper_case_globals)]
+                const #dummy_const: () = {
+                    #proj_impl
+                    #unpin_impl
+                    #drop_impl
+                    #packed_check
+                };
+            });
+
             Ok(proj_items)
         }
         Item::Enum(ItemEnum { attrs, vis, ident, generics, brace_token, variants, .. }) => {
-            validate_enum(brace_token, &variants)?;
+            validate_enum(*brace_token, variants)?;
             let mut cx = Context::new(attrs, vis, ident, generics)?;
 
-            // We don't need to check for '#[repr(packed)]',
+            // We don't need to check for `#[repr(packed)]`,
             // since it does not apply to enums.
-            let mut proj_items = cx.parse_enum(&variants)?;
-            proj_items.extend(cx.make_unpin_impl());
-            proj_items.extend(cx.make_drop_impl());
+
+            let (mut proj_items, proj_impl) = cx.parse_enum(variants)?;
+            let unpin_impl = cx.make_unpin_impl();
+            let drop_impl = cx.make_drop_impl();
+
+            let dummy_const = format_ident!("__SCOPE_{}", ident);
+            proj_items.extend(quote! {
+                #[allow(non_upper_case_globals)]
+                const #dummy_const: () = {
+                    #proj_impl
+                    #unpin_impl
+                    #drop_impl
+                };
+            });
+
             Ok(proj_items)
         }
         item => Err(error!(item, "#[pin_project] attribute may only be used on structs or enums")),
@@ -141,7 +182,7 @@ impl Parse for Args {
             }
 
             // If this fails, it means that there is a `#[pin]` attribute
-            // inserted by something other than #[pin_project] attribute.
+            // inserted by something other than `#[pin_project]` attribute.
             Err(error!(TokenStream::new(), DUPLICATE_PIN))
         }
 
@@ -174,15 +215,15 @@ impl Parse for Args {
     }
 }
 
-struct OriginalType {
+struct OriginalType<'a> {
     /// Attributes of the original type.
-    attrs: Vec<Attribute>,
+    attrs: &'a [Attribute],
     /// Visibility of the original type.
-    vis: Visibility,
+    vis: &'a Visibility,
     /// Name of the original type.
-    ident: Ident,
+    ident: &'a Ident,
     /// Generics of the original type.
-    generics: Generics,
+    generics: &'a Generics,
 }
 
 struct ProjectedType {
@@ -201,8 +242,8 @@ struct ProjectedType {
     where_clause: WhereClause,
 }
 
-struct Context {
-    orig: OriginalType,
+struct Context<'a> {
+    orig: OriginalType<'a>,
     proj: ProjectedType,
     /// Types of the pinned fields.
     pinned_fields: Vec<Type>,
@@ -212,14 +253,14 @@ struct Context {
     unsafe_unpin: Option<Span>,
 }
 
-impl Context {
+impl<'a> Context<'a> {
     fn new(
-        attrs: Vec<Attribute>,
-        vis: Visibility,
-        ident: Ident,
-        mut generics: Generics,
+        attrs: &'a [Attribute],
+        vis: &'a Visibility,
+        ident: &'a Ident,
+        generics: &'a mut Generics,
     ) -> Result<Self> {
-        let Args { pinned_drop, unsafe_unpin } = Args::get(&attrs)?;
+        let Args { pinned_drop, unsafe_unpin } = Args::get(attrs)?;
 
         {
             let ty_generics = generics.split_for_impl().1;
@@ -246,9 +287,9 @@ impl Context {
 
         Ok(Self {
             proj: ProjectedType {
-                vis: determine_visibility(&vis),
-                mut_ident: proj_ident(&ident, Mutable),
-                ref_ident: proj_ident(&ident, Immutable),
+                vis: determine_visibility(vis),
+                mut_ident: proj_ident(ident, Mutable),
+                ref_ident: proj_ident(ident, Immutable),
                 lifetime,
                 generics: proj_generics,
                 where_clause,
@@ -260,14 +301,14 @@ impl Context {
         })
     }
 
-    fn parse_struct(&mut self, fields: &Fields) -> Result<TokenStream> {
+    fn parse_struct(&mut self, fields: &Fields) -> Result<(TokenStream, TokenStream)> {
         let (proj_pat, proj_init, proj_fields, proj_ref_fields) = match fields {
             Fields::Named(fields) => self.visit_named(fields)?,
             Fields::Unnamed(fields) => self.visit_unnamed(fields)?,
             Fields::Unit => unreachable!(),
         };
 
-        let orig_ident = &self.orig.ident;
+        let orig_ident = self.orig.ident;
         let proj_ident = &self.proj.mut_ident;
         let proj_ref_ident = &self.proj.ref_ident;
         let vis = &self.proj.vis;
@@ -286,7 +327,7 @@ impl Context {
             Fields::Unit => unreachable!(),
         };
 
-        let mut proj_items = quote! {
+        let proj_items = quote! {
             #[allow(clippy::mut_mut)] // This lint warns `&mut &mut <ty>`.
             #[allow(dead_code)] // This lint warns unused fields/variants.
             #vis struct #proj_ident #proj_generics #where_clause_fields
@@ -302,13 +343,12 @@ impl Context {
             let #orig_ident #proj_pat = self.get_ref();
             #proj_ref_ident #proj_init
         };
+        let proj_impl = self.make_proj_impl(&proj_body, &proj_ref_body);
 
-        proj_items.extend(self.make_proj_impl(&proj_body, &proj_ref_body));
-
-        Ok(proj_items)
+        Ok((proj_items, proj_impl))
     }
 
-    fn parse_enum(&mut self, variants: &Variants) -> Result<TokenStream> {
+    fn parse_enum(&mut self, variants: &Variants) -> Result<(TokenStream, TokenStream)> {
         let (proj_variants, proj_ref_variants, proj_arms, proj_ref_arms) =
             self.visit_variants(variants)?;
 
@@ -318,7 +358,7 @@ impl Context {
         let proj_generics = &self.proj.generics;
         let where_clause = &self.proj.where_clause;
 
-        let mut proj_items = quote! {
+        let proj_items = quote! {
             #[allow(clippy::mut_mut)] // This lint warns `&mut &mut <ty>`.
             #[allow(dead_code)] // This lint warns unused fields/variants.
             #vis enum #proj_ident #proj_generics #where_clause {
@@ -340,10 +380,9 @@ impl Context {
                 #proj_ref_arms
             }
         };
+        let proj_impl = self.make_proj_impl(&proj_body, &proj_ref_body);
 
-        proj_items.extend(self.make_proj_impl(&proj_body, &proj_ref_body));
-
-        Ok(proj_items)
+        Ok((proj_items, proj_impl))
     }
 
     fn visit_variants(
@@ -363,7 +402,7 @@ impl Context {
                 }
             };
 
-            let orig_ident = &self.orig.ident;
+            let orig_ident = self.orig.ident;
             let proj_ident = &self.proj.mut_ident;
             let proj_ref_ident = &self.proj.ref_ident;
             proj_variants.extend(quote! {
@@ -482,7 +521,7 @@ impl Context {
     fn make_unpin_impl(&mut self) -> TokenStream {
         if let Some(unsafe_unpin) = self.unsafe_unpin {
             let mut proj_generics = self.proj.generics.clone();
-            let orig_ident = &self.orig.ident;
+            let orig_ident = self.orig.ident;
             let lifetime = &self.proj.lifetime;
 
             let private = Ident::new(CURRENT_PRIVATE_MODULE, Span::call_site());
@@ -503,20 +542,6 @@ impl Context {
             }
         } else {
             let mut full_where_clause = self.orig.generics.where_clause.as_ref().cloned().unwrap();
-            let orig_ident = &self.orig.ident;
-
-            let make_span = || {
-                #[cfg(pin_project_show_unpin_struct)]
-                {
-                    proc_macro::Span::def_site().into()
-                }
-                #[cfg(not(pin_project_show_unpin_struct))]
-                {
-                    Span::call_site()
-                }
-            };
-
-            let struct_ident = format_ident!("__{}", orig_ident, span = make_span());
 
             // Generate a field in our new struct for every
             // pinned field in the original type.
@@ -552,7 +577,7 @@ impl Context {
             // ```
             //
             // This ensures that any unused type parameters
-            // don't end up with Unpin bounds.
+            // don't end up with `Unpin` bounds.
             let lifetime_fields: Vec<_> = self
                 .orig
                 .generics
@@ -566,9 +591,9 @@ impl Context {
                 })
                 .collect();
 
-            let scope_ident = format_ident!("__unpin_scope_{}", orig_ident);
-
-            let vis = &self.orig.vis;
+            let orig_ident = self.orig.ident;
+            let struct_ident = format_ident!("__{}", orig_ident);
+            let vis = self.orig.vis;
             let lifetime = &self.proj.lifetime;
             let type_params: Vec<_> = self.orig.generics.type_params().map(|t| &t.ident).collect();
             let proj_generics = &self.proj.generics;
@@ -580,19 +605,17 @@ impl Context {
             });
 
             let private = Ident::new(CURRENT_PRIVATE_MODULE, Span::call_site());
-            let inner_data = quote! {
+            quote! {
                 // This needs to have the same visibility as the original type,
                 // due to the limitations of the 'public in private' error.
                 //
-                // Out goal is to implement the public trait Unpin for
+                // Our goal is to implement the public trait `Unpin` for
                 // a potentially public user type. Because of this, rust
                 // requires that any types mentioned in the where clause of
-                // our Unpin impl also be public. This means that our generated
-                // 'UnpinStruct' type must also be public. However, we take
-                // steps to ensure that the user can never actually reference
-                // this 'public' type. These steps are described below.
-                //
-                // See also https://github.com/taiki-e/pin-project/pull/53.
+                // our `Unpin` impl also be public. This means that our generated
+                // `__UnpinStruct` type must also be public.
+                // However, we ensure that the user can never actually reference
+                // this 'public' type by creating this type in the inside of `const`.
                 #vis struct #struct_ident #proj_generics #where_clause {
                     __pin_project_use_generics: ::pin_project::#private::AlwaysUnpin<#lifetime, (#(#type_params),*)>,
 
@@ -601,42 +624,21 @@ impl Context {
                 }
 
                 impl #impl_generics ::core::marker::Unpin for #orig_ident #ty_generics #full_where_clause {}
-            };
-
-            if cfg!(pin_project_show_unpin_struct) {
-                // On nightly, we use def-site hygiene to make it impossible
-                // for user code to refer to any of the types we define.
-                // This allows us to omit wrapping the generated types
-                // in an fn() scope, allowing rustdoc to properly document
-                // them.
-                inner_data
-            } else {
-                // When we're not on nightly, we need to create an enclosing fn() scope
-                // for all of our generated items. This makes it impossible for
-                // user code to refer to any of our generated types, but has
-                // the advantage of preventing Rustdoc from displaying
-                // docs for any of our types. In particular, users cannot see
-                // the automatically generated Unpin impl for the 'UnpinStruct$Name' types.
-                quote! {
-                    #[allow(non_snake_case)]
-                    fn #scope_ident() {
-                        #inner_data
-                    }
-                }
             }
         }
     }
 
     /// Creates `Drop` implementation for original type.
     fn make_drop_impl(&self) -> TokenStream {
-        let ident = &self.orig.ident;
+        let ident = self.orig.ident;
         let (impl_generics, ty_generics, where_clause) = self.orig.generics.split_for_impl();
 
         let private = Ident::new(CURRENT_PRIVATE_MODULE, Span::call_site());
         if let Some(pinned_drop) = self.pinned_drop {
             // Make the error message highlight `PinnedDrop` argument.
             // See https://github.com/taiki-e/pin-project/issues/16#issuecomment-513586812
-            // for why this is only for the span of function calls, not the entire `impl` block.
+            // for why this is only for the span of function calls,
+            // not the entire `impl` block.
             let call_drop = quote_spanned! { pinned_drop =>
                 ::pin_project::#private::PinnedDrop::drop(pinned_self)
             };
@@ -649,7 +651,7 @@ impl Context {
                         // never move again.
                         let pinned_self = unsafe { ::core::pin::Pin::new_unchecked(self) };
                         // We call `pinned_drop` only once. Since `PinnedDrop::drop`
-                        // is an unsafe function and a private API, it is never called again in safe
+                        // is an unsafe method and a private API, it is never called again in safe
                         // code *unless the user uses a maliciously crafted macro*.
                         unsafe {
                             #call_drop;
@@ -658,7 +660,7 @@ impl Context {
                 }
             }
         } else {
-            // If the user does not provide a pinned_drop impl,
+            // If the user does not provide a `PinnedDrop` impl,
             // we need to ensure that they don't provide a `Drop` impl of their
             // own.
             // Based on https://github.com/upsuper/assert-impl/blob/f503255b292ab0ba8d085b657f4065403cfa46eb/src/lib.rs#L80-L87
@@ -697,7 +699,7 @@ impl Context {
                 // To ensure that users don't accidentally write a non-functional `PinnedDrop`
                 // impls, we emit one ourselves. If the user ends up writing a `PinnedDrop` impl,
                 // they'll get a "conflicting implementations of trait" error when coherence
-                // checks are run
+                // checks are run.
                 #[allow(single_use_lifetimes)]
                 impl #impl_generics ::pin_project::#private::PinnedDrop for #ident #ty_generics #where_clause {
                     unsafe fn drop(self: ::core::pin::Pin<&mut Self>) {}
@@ -710,7 +712,7 @@ impl Context {
     fn make_proj_impl(&self, proj_body: &TokenStream, proj_ref_body: &TokenStream) -> TokenStream {
         let vis = &self.proj.vis;
         let lifetime = &self.proj.lifetime;
-        let orig_ident = &self.orig.ident;
+        let orig_ident = self.orig.ident;
         let proj_ident = &self.proj.mut_ident;
         let proj_ref_ident = &self.proj.ref_ident;
 
@@ -764,38 +766,40 @@ impl Context {
 
         // Workaround for https://github.com/taiki-e/pin-project/issues/32
         // Through the tricky use of proc macros, it's possible to bypass
-        // the above check for the 'repr' attribute.
-        // To ensure that it's impossible to use pin projections on a #[repr(packed)]
+        // the above check for the `repr` attribute.
+        // To ensure that it's impossible to use pin projections on a `#[repr(packed)]`
         // struct, we generate code like this:
         //
+        // ```rust
         // #[deny(safe_packed_borrows)]
-        // fn enforce_not_packed_for_MyStruct(val: &MyStruct) {
-        //  let _field1 = &val.field1;
-        //  let _field2 = &val.field2;
-        //  ...
-        //  let _fieldn = &val.fieldn;
+        // fn assert_not_repr_packed(val: &MyStruct) {
+        //     let _field1 = &val.field1;
+        //     let _field2 = &val.field2;
+        //     ...
+        //     let _fieldn = &val.fieldn;
         // }
+        // ```
         //
         // Taking a reference to a packed field is unsafe, and applying
-        // #[deny(safe_packed_borrows)] makes sure that doing this without
-        // an 'unsafe' block (which we deliberately do not generate)
+        // `#[deny(safe_packed_borrows)]` makes sure that doing this without
+        // an `unsafe` block (which we deliberately do not generate)
         // is a hard error.
         //
-        // If the struct ends up having #[repr(packed)] applied somehow,
+        // If the struct ends up having `#[repr(packed)]` applied somehow,
         // this will generate an (unfriendly) error message. Under all reasonable
-        // circumstances, we'll detect the #[repr(packed)] attribute, and generate
+        // circumstances, we'll detect the `#[repr(packed)]` attribute, and generate
         // a much nicer error above.
         //
         // There is one exception: If the type of a struct field has an alignment of 1
         // (e.g. u8), it is always safe to take a reference to it, even if the struct
-        // is #[repr(packed)]. If the struct is composed entirely of types of alignment 1,
-        // our generated method will not trigger an error if the struct is #[repr(packed)]
+        // is `#[repr(packed)]`. If the struct is composed entirely of types of alignment 1,
+        // our generated method will not trigger an error if the struct is `#[repr(packed)]`.
         //
-        // Fortunately, this should have no observable consequence - #[repr(packed)]
+        // Fortunately, this should have no observable consequence - `#[repr(packed)]`
         // is essentially a no-op on such a type. Nevertheless, we include a test
         // to ensure that the compiler doesn't ever try to copy the fields on
         // such a struct when trying to drop it - which is reason we prevent
-        // #[repr(packed)] in the first place.
+        // `#[repr(packed)]` in the first place.
         //
         // See also https://github.com/taiki-e/pin-project/pull/34.
         let mut field_refs = vec![];
@@ -815,18 +819,15 @@ impl Context {
                     });
                 }
             }
-            Fields::Unit => {}
+            Fields::Unit => unreachable!(),
         }
 
         let (impl_generics, ty_generics, where_clause) = self.orig.generics.split_for_impl();
-
-        let struct_name = &self.orig.ident;
-        let method_name = format_ident!("__pin_project_assert_not_repr_packed_{}", self.orig.ident);
+        let ident = self.orig.ident;
         Ok(quote! {
             #[allow(single_use_lifetimes)]
-            #[allow(non_snake_case)]
             #[deny(safe_packed_borrows)]
-            fn #method_name #impl_generics (val: &#struct_name #ty_generics) #where_clause {
+            fn __assert_not_repr_packed #impl_generics (val: &#ident #ty_generics) #where_clause {
                 #(#field_refs)*
             }
         })

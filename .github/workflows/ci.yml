@@ -72,12 +72,10 @@ jobs:
       - name: cargo test
         run: |
           cargo test --all
-      - name: cargo test --cfg pin_project_show_unpin_struct
+      - name: cargo test -- --ignored
         if: matrix.rust == 'nightly'
-        env:
-          RUSTFLAGS: -Dwarnings --cfg pin_project_show_unpin_struct
         run: |
-          cargo test --all --all-features -- -Zunstable-options --include-ignored
+          cargo test --all -- --ignored
       # Refs: https://github.com/rust-lang/cargo/issues/5657
       - name: cargo check -Zminimal-versions
         if: matrix.rust == 'nightly'
