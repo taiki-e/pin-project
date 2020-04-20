@@ -13,6 +13,9 @@ description = """
 An internal crate to support pin_project - do not use directly
 """
 
+[package.metadata.docs.rs]
+targets = ["x86_64-unknown-linux-gnu"]
+
 [lib]
 proc-macro = true
 

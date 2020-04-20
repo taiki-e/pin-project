@@ -14,6 +14,9 @@ description = """
 A crate for safe and ergonomic pin-projection.
 """
 
+[package.metadata.docs.rs]
+targets = ["x86_64-unknown-linux-gnu"]
+
 [workspace]
 members = [
     "pin-project-internal",
