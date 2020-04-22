@@ -1,4 +1,4 @@
-name: ci
+name: CI
 
 on:
   pull_request:
@@ -12,29 +12,17 @@ on:
 
 env:
   RUSTFLAGS: -Dwarnings
+  RUST_BACKTRACE: 1
 
 jobs:
   test:
     name: test
-    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build:
+        include:
           # This is the minimum supported Rust version of this crate.
           # When updating this, the reminder to update the minimum supported
           # Rust version in README.md.
-          - 1.33.0
-          - 1.36.0
-          - 1.37.0
-          - stable
-          - beta
-          - nightly
-          # pin-project itself has no platform-dependent implementation.
-          # macOS is only used to check that pin-project can interoperate
-          # correctly with `#[cfg()]`.
-          - macos
-          # - windows
-        include:
           - build: 1.33.0
             os: ubuntu-latest
             rust: 1.33.0
@@ -53,12 +41,16 @@ jobs:
           - build: nightly
             os: ubuntu-latest
             rust: nightly
+          # pin-project itself has no platform-dependent implementation.
+          # macOS is only used to check that pin-project can interoperate
+          # correctly with `#[cfg()]`.
           - build: macos
             os: macos-latest
             rust: nightly
           # - build: windows
           #   os: windows-latest
           #   rust: nightly
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@master
       - name: Install Rust
@@ -85,7 +77,6 @@ jobs:
 
   style:
     name: style
-    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
@@ -93,6 +84,7 @@ jobs:
           - clippy
           - rustfmt
           - rustdoc
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
       - name: Install Rust
@@ -119,3 +111,28 @@ jobs:
           RUSTDOCFLAGS: -Dwarnings -Aunused_braces
         run: |
           cargo doc --no-deps --all --all-features
+
+  # Refs: https://github.com/rust-lang/crater/blob/9ab6f9697c901c4a44025cf0a39b73ad5b37d198/.github/workflows/bors.yml#L125-L149
+  #
+  # ALL THE PREVIOUS JOBS NEEDS TO BE ADDED TO THE `needs` SECTION OF THIS JOB!
+
+  ci-success:
+    name: ci
+    if: github.event_name == 'push' && success()
+    needs:
+      - style
+      - test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mark the job as a success
+        run: exit 0
+  ci-failure:
+    name: ci
+    if: github.event_name == 'push' && !success()
+    needs:
+      - style
+      - test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mark the job as a failure
+        run: exit 1
