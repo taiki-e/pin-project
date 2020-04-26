@@ -211,7 +211,11 @@ struct FnVisitor {
 impl FnVisitor {
     /// Returns the attribute name.
     fn name(&self) -> &str {
-        if self.mutability == Mutable { "project" } else { "project_ref" }
+        match self.mutability {
+            Mutable => "project",
+            Immutable => "project_ref",
+            Owned => "project_replace",
+        }
     }
 
     fn visit_stmt(&mut self, node: &mut Stmt) -> Result<()> {

@@ -22,7 +22,7 @@ pub struct Any(PhantomPinned);
 fn cfg() {
     // structs
 
-    #[pin_project]
+    #[pin_project(Replace)]
     pub struct SameName {
         #[cfg(target_os = "linux")]
         #[pin]
@@ -42,7 +42,7 @@ fn cfg() {
     #[cfg(not(target_os = "linux"))]
     let _x = SameName { inner: Other };
 
-    #[pin_project]
+    #[pin_project(Replace)]
     pub struct DifferentName {
         #[cfg(target_os = "linux")]
         #[pin]
@@ -62,7 +62,7 @@ fn cfg() {
     #[cfg(not(target_os = "linux"))]
     let _x = DifferentName { o: Other };
 
-    #[pin_project]
+    #[pin_project(Replace)]
     pub struct TupleStruct(
         #[cfg(target_os = "linux")]
         #[pin]
@@ -84,7 +84,7 @@ fn cfg() {
 
     // enums
 
-    #[pin_project]
+    #[pin_project(Replace)]
     pub enum Variant {
         #[cfg(target_os = "linux")]
         Inner(#[pin] Linux),
@@ -111,7 +111,7 @@ fn cfg() {
     #[cfg(not(target_os = "linux"))]
     let _x = Variant::Other(Other);
 
-    #[pin_project]
+    #[pin_project(Replace)]
     pub enum Field {
         SameName {
             #[cfg(target_os = "linux")]
@@ -168,7 +168,7 @@ fn cfg() {
 
 #[test]
 fn cfg_attr() {
-    #[pin_project]
+    #[pin_project(Replace)]
     pub struct SameCfg {
         #[cfg(target_os = "linux")]
         #[cfg_attr(target_os = "linux", pin)]
@@ -194,7 +194,7 @@ fn cfg_attr() {
     #[cfg(not(target_os = "linux"))]
     let _: Pin<&mut Other> = x.inner;
 
-    #[pin_project]
+    #[pin_project(Replace)]
     pub struct DifferentCfg {
         #[cfg(target_os = "linux")]
         #[cfg_attr(target_os = "linux", pin)]
@@ -234,7 +234,7 @@ fn cfg_attr() {
 #[test]
 fn cfg_attr_any_packed() {
     // Since `cfg(any())` can never be true, it is okay for this to pass.
-    #[pin_project]
+    #[pin_project(Replace)]
     #[cfg_attr(any(), repr(packed))]
     struct Struct {
         #[pin]

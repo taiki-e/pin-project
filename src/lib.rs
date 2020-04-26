@@ -58,6 +58,9 @@ pub use pin_project_internal::project;
 #[doc(inline)]
 pub use pin_project_internal::project_ref;
 
+#[doc(inline)]
+pub use pin_project_internal::project_replace;
+
 /// A trait used for custom implementations of [`Unpin`].
 /// This trait is used in conjunction with the `UnsafeUnpin`
 /// argument to [`pin_project`]
@@ -119,7 +122,7 @@ pub unsafe trait UnsafeUnpin {}
 #[doc(hidden)]
 pub mod __private {
     use super::UnsafeUnpin;
-    use core::{marker::PhantomData, pin::Pin};
+    use core::{marker::PhantomData, mem::ManuallyDrop, pin::Pin, ptr};
 
     #[doc(hidden)]
     pub use pin_project_internal::__PinProjectInternalDerive;
@@ -202,4 +205,34 @@ pub mod __private {
     pub struct AlwaysUnpin<'a, T: ?Sized>(PhantomData<&'a ()>, PhantomData<T>);
 
     impl<T: ?Sized> Unpin for AlwaysUnpin<'_, T> {}
+
+    // This is an internal helper used to ensure a value is dropped.
+    #[doc(hidden)]
+    pub struct UnsafeDropInPlaceGuard<T: ?Sized>(pub *mut T);
+
+    impl<T: ?Sized> Drop for UnsafeDropInPlaceGuard<T> {
+        #[allow(unsafe_code)]
+        fn drop(&mut self) {
+            unsafe {
+                ptr::drop_in_place(self.0);
+            }
+        }
+    }
+
+    // This is an internal helper used to ensure a value is overwritten without
+    // its destructor being called.
+    #[doc(hidden)]
+    pub struct UnsafeOverwriteGuard<T> {
+        pub value: ManuallyDrop<T>,
+        pub target: *mut T,
+    }
+
+    impl<T> Drop for UnsafeOverwriteGuard<T> {
+        #[allow(unsafe_code)]
+        fn drop(&mut self) {
+            unsafe {
+                ptr::write(self.target, ptr::read(&*self.value));
+            }
+        }
+    }
 }

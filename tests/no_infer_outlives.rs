@@ -10,7 +10,7 @@ impl<X, T> Bar<X> for Example<T> {
     type Y = Option<T>;
 }
 
-#[pin_project]
+#[pin_project(Replace)]
 struct Foo<A, B> {
     _x: <Example<A> as Bar<B>>::Y,
 }
