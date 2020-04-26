@@ -15,7 +15,7 @@ pub(crate) const CURRENT_PRIVATE_MODULE: &str = "__private";
 
 pub(crate) type Variants = Punctuated<Variant, token::Comma>;
 
-pub(crate) use Mutability::{Immutable, Mutable};
+pub(crate) use Mutability::{Immutable, Mutable, Owned};
 
 macro_rules! error {
     ($span:expr, $msg:expr) => {
@@ -30,14 +30,15 @@ macro_rules! error {
 pub(crate) enum Mutability {
     Mutable,
     Immutable,
+    Owned,
 }
 
 /// Creates the ident of projected type from the ident of the original type.
 pub(crate) fn proj_ident(ident: &Ident, mutability: Mutability) -> Ident {
-    if mutability == Mutable {
-        format_ident!("__{}Projection", ident)
-    } else {
-        format_ident!("__{}ProjectionRef", ident)
+    match mutability {
+        Mutability::Mutable => format_ident!("__{}Projection", ident),
+        Mutability::Immutable => format_ident!("__{}ProjectionRef", ident),
+        Mutability::Owned => format_ident!("__{}ProjectionOwned", ident),
     }
 }
 

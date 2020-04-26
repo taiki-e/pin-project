@@ -26,7 +26,7 @@ mod project;
 
 use proc_macro::TokenStream;
 
-use utils::{Immutable, Mutable};
+use utils::{Immutable, Mutable, Owned};
 
 /// An attribute that creates a projection struct covering all the fields.
 ///
@@ -520,7 +520,7 @@ pub fn project(args: TokenStream, input: TokenStream) -> TokenStream {
 /// `project_ref` method.
 ///
 /// This is the same as [`project`] attribute except it refers to the projected
-/// type returned by `project_ref` method.
+/// type returned by the `project_ref` method.
 ///
 /// See [`project`] attribute for more details.
 ///
@@ -529,6 +529,21 @@ pub fn project(args: TokenStream, input: TokenStream) -> TokenStream {
 pub fn project_ref(args: TokenStream, input: TokenStream) -> TokenStream {
     let input = syn::parse_macro_input!(input);
     project::attribute(&args.into(), input, Immutable).into()
+}
+
+/// An attribute to provide way to refer to the projected type returned by
+/// `project_replace` method.
+///
+/// This is the same as [`project`] attribute except it refers to the projected
+/// type returned by the `project_replace` method.
+///
+/// See [`project`] attribute for more details.
+///
+/// [`project`]: ./attr.project.html
+#[proc_macro_attribute]
+pub fn project_replace(args: TokenStream, input: TokenStream) -> TokenStream {
+    let input = syn::parse_macro_input!(input);
+    project::attribute(&args.into(), input, Owned).into()
 }
 
 /// An internal helper macro.
