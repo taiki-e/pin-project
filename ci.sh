@@ -22,3 +22,7 @@ cargo +nightly doc --no-deps --all --all-features
 
 echo "Running 'compiletest'"
 . ./compiletest.sh
+
+# See also https://docs.rs/macrotest/1/macrotest/#updating-expandedrs
+echo "Running 'expandtest'"
+cargo +nightly test --manifest-path tests/expand/Cargo.toml
