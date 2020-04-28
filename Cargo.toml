@@ -22,6 +22,7 @@ members = [
     "pin-project-internal",
     "tests/ui/auxiliary",
     "tests/doc",
+    "tests/expand",
 ]
 
 [dependencies]
