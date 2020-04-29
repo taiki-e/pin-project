@@ -398,7 +398,7 @@ impl<'a> Context<'a> {
             proj_items.extend(quote_spanned! { replace =>
                 #[allow(dead_code)] // This lint warns unused fields/variants.
                 #vis struct #proj_own_ident #orig_generics #where_clause_own_fields
-            })
+            });
         }
 
         let proj_mut_body = quote! {
@@ -453,7 +453,7 @@ impl<'a> Context<'a> {
         let proj_generics = &self.proj.generics;
         let where_clause = &self.proj.where_clause;
 
-        let proj_items = quote! {
+        let mut proj_items = quote! {
             #[allow(clippy::mut_mut)] // This lint warns `&mut &mut <ty>`.
             #[allow(dead_code)] // This lint warns unused fields/variants.
             #vis enum #proj_ident #proj_generics #where_clause {
@@ -463,11 +463,16 @@ impl<'a> Context<'a> {
             #vis enum #proj_ref_ident #proj_generics #where_clause {
                 #proj_ref_variants
             }
-            #[allow(dead_code)] // This lint warns unused fields/variants.
-            #vis enum #proj_own_ident #orig_generics #orig_where_clause {
-                #proj_own_variants
-            }
         };
+
+        if let Some(replace) = self.replace {
+            proj_items.extend(quote_spanned! { replace =>
+                #[allow(dead_code)] // This lint warns unused fields/variants.
+                #vis enum #proj_own_ident #orig_generics #orig_where_clause {
+                    #proj_own_variants
+                }
+            });
+        }
 
         let proj_mut_body = quote! {
             match self.get_unchecked_mut() {
