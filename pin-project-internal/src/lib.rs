@@ -226,6 +226,63 @@ use utils::{Immutable, Mutable, Owned};
 ///
 /// See also [`pinned_drop`] attribute.
 ///
+/// ### `project_replace()`
+///
+/// In addition to the `project()` and `project_ref()` methods which are always
+/// provided when you use the `#[pin_project]` attribute, there is a third method,
+/// `project_replace()` which can be useful in some situations. It is equivalent
+/// to [`Pin::set`], except that the unpinned fields are moved and returned,
+/// instead of being dropped in-place.
+///
+/// ```
+/// # #[rustversion::since(1.36)]
+/// # fn dox() {
+/// # use std::pin::Pin;
+/// # type ProjectionOwned = ();
+/// # trait Dox {
+/// fn project_replace(self: Pin<&mut Self>, other: Self) -> ProjectionOwned;
+/// # }
+/// # }
+/// ```
+///
+/// The `ProjectionOwned` type is identical to the `Self` type, except that
+/// all pinned fields have been replaced by equivalent `PhantomData` types.
+///
+/// This method is opt-in, because it is only supported for `Sized` types, and
+/// because it is incompatible with the `#[pinned_drop]` attribute described
+/// above. It can be enabled by using `#[pin_project(Replace)]`.
+///
+/// For example:
+///
+/// ```rust
+/// use pin_project::{pin_project, project_replace};
+///
+/// #[pin_project(Replace)]
+/// pub enum Foo<T> {
+///     A {
+///         #[pin]
+///         pinned_field: i32,
+///         unpinned_field: T,
+///     },
+///     B,
+/// }
+///
+/// #[project_replace]
+/// fn main() {
+///     let mut x = Box::pin(Foo::A { pinned_field: 42, unpinned_field: "hello" });
+///
+///     #[project_replace]
+///     match x.as_mut().project_replace(Foo::B) {
+///         Foo::A { unpinned_field, .. } => assert_eq!(unpinned_field, "hello"),
+///         Foo::B => unreachable!(),
+///     }
+/// }
+/// ```
+///
+/// The [`project_replace`] attributes are necessary whenever destructuring the return
+/// type of `project_replace()`, and work in exactly the same way as the
+/// [`project`] and [`project_ref`] attributes.
+///
 /// ## Supported Items
 ///
 /// The current pin-project supports the following types of items.
@@ -320,6 +377,7 @@ use utils::{Immutable, Mutable, Owned};
 /// [`UnsafeUnpin`]: https://docs.rs/pin-project/0.4/pin_project/trait.UnsafeUnpin.html
 /// [`project`]: ./attr.project.html
 /// [`project_ref`]: ./attr.project_ref.html
+/// [`project_replace`]: ./attr.project_replace.html
 /// [`pinned_drop`]: ./attr.pinned_drop.html
 #[proc_macro_attribute]
 pub fn pin_project(args: TokenStream, input: TokenStream) -> TokenStream {
