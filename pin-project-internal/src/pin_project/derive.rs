@@ -424,7 +424,11 @@ impl<'a> Context<'a> {
             };
 
             // Now create guards to drop all the pinned fields
-            #proj_drop
+            //
+            // Due to a compiler bug (https://github.com/rust-lang/rust/issues/47949)
+            // this must be in its own scope, or else `__result` will not be dropped
+            // if any of the destructors panic.
+            { #proj_drop }
 
             // Finally, return the result
             __result
@@ -555,7 +559,11 @@ impl<'a> Context<'a> {
                     };
 
                     // Now create guards to drop all the pinned fields
-                    #proj_drop
+                    //
+                    // Due to a compiler bug (https://github.com/rust-lang/rust/issues/47949)
+                    // this must be in its own scope, or else `__result` will not be dropped
+                    // if any of the destructors panic.
+                    { #proj_drop }
 
                     // Finally, return the result
                     __result
