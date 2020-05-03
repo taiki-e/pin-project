@@ -359,7 +359,6 @@ impl<'a> Context<'a> {
             Fields::Unit => unreachable!(),
         };
 
-        let orig_ident = self.orig.ident;
         let proj_ident = &self.proj.mut_ident;
         let proj_ref_ident = &self.proj.ref_ident;
         let proj_own_ident = &self.proj.own_ident;
@@ -402,16 +401,16 @@ impl<'a> Context<'a> {
         }
 
         let proj_mut_body = quote! {
-            let #orig_ident #proj_pat = self.get_unchecked_mut();
+            let Self #proj_pat = self.get_unchecked_mut();
             #proj_ident #proj_body
         };
         let proj_ref_body = quote! {
-            let #orig_ident #proj_pat = self.get_ref();
+            let Self #proj_pat = self.get_ref();
             #proj_ref_ident #proj_body
         };
         let proj_own_body = quote! {
             let __self_ptr: *mut Self = self.get_unchecked_mut();
-            let #orig_ident #proj_pat = &mut *__self_ptr;
+            let Self #proj_pat = &mut *__self_ptr;
 
             // First, extract all the unpinned fields
             let __result = #proj_own_ident #proj_move;
@@ -943,9 +942,9 @@ impl<'a> Context<'a> {
         let proj_ty_generics = self.proj.generics.split_for_impl().1;
         let (impl_generics, ty_generics, where_clause) = self.orig.generics.split_for_impl();
 
-        let replace_impl = self.replace.map(|replace| {
-            quote_spanned! { replace =>
-                #[allow(unsafe_code)]
+        let replace_impl = self.replace.map(|_replace| {
+            // TODO: Use `_replace`'s span.
+            quote! {
                 #vis fn project_replace(
                     self: ::core::pin::Pin<&mut Self>,
                     __replacement: Self,

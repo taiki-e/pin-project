@@ -30,6 +30,10 @@ fn main() {
         println!("cargo:rustc-cfg=cargo_expand");
     }
 
+    if env::var_os("CI").map_or(false, |v| v == "true") {
+        println!("cargo:rustc-cfg=ci");
+    }
+
     if is_nightly() {
         println!("cargo:rustc-cfg=nightly");
     }

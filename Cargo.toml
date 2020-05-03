@@ -23,6 +23,7 @@ members = [
     "tests/ui/auxiliary",
     "tests/doc",
     "tests/expand",
+    "tests/rust-2015"
 ]
 
 [dependencies]

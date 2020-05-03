@@ -57,7 +57,7 @@ const __SCOPE_Foo: () = {
             self: ::core::pin::Pin<&'pin mut Self>,
         ) -> __FooProjection<'pin, 'a, T> {
             unsafe {
-                let Foo { was_dropped, field } = self.get_unchecked_mut();
+                let Self { was_dropped, field } = self.get_unchecked_mut();
                 __FooProjection { was_dropped, field: ::core::pin::Pin::new_unchecked(field) }
             }
         }
@@ -65,7 +65,7 @@ const __SCOPE_Foo: () = {
             self: ::core::pin::Pin<&'pin Self>,
         ) -> __FooProjectionRef<'pin, 'a, T> {
             unsafe {
-                let Foo { was_dropped, field } = self.get_ref();
+                let Self { was_dropped, field } = self.get_ref();
                 __FooProjectionRef { was_dropped, field: ::core::pin::Pin::new_unchecked(field) }
             }
         }

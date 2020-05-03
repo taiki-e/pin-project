@@ -312,6 +312,16 @@ fn combine() {
 
     #[allow(unsafe_code)]
     unsafe impl<T: Unpin> UnsafeUnpin for Foo<T> {}
+
+    #[pin_project(UnsafeUnpin, Replace)]
+    pub struct Bar<T> {
+        field1: u8,
+        #[pin]
+        field2: T,
+    }
+
+    #[allow(unsafe_code)]
+    unsafe impl<T: Unpin> UnsafeUnpin for Bar<T> {}
 }
 
 #[test]

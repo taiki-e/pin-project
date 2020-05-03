@@ -10,14 +10,26 @@ error: duplicate `PinnedDrop` argument
 9 | #[pin_project(PinnedDrop, PinnedDrop)] //~ ERROR duplicate `PinnedDrop` argument
   |                           ^^^^^^^^^^
 
-error: duplicate `UnsafeUnpin` argument
-  --> $DIR/duplicate-argument.rs:15:40
+error: duplicate `Replace` argument
+  --> $DIR/duplicate-argument.rs:15:24
    |
-15 | #[pin_project(PinnedDrop, UnsafeUnpin, UnsafeUnpin)] //~ ERROR duplicate `UnsafeUnpin` argument
+15 | #[pin_project(Replace, Replace)] //~ ERROR duplicate `Replace` argument
+   |                        ^^^^^^^
+
+error: duplicate `UnsafeUnpin` argument
+  --> $DIR/duplicate-argument.rs:21:40
+   |
+21 | #[pin_project(PinnedDrop, UnsafeUnpin, UnsafeUnpin)] //~ ERROR duplicate `UnsafeUnpin` argument
    |                                        ^^^^^^^^^^^
 
 error: duplicate `PinnedDrop` argument
-  --> $DIR/duplicate-argument.rs:21:40
+  --> $DIR/duplicate-argument.rs:27:40
    |
-21 | #[pin_project(PinnedDrop, UnsafeUnpin, PinnedDrop, PinnedDrop)] //~ ERROR duplicate `PinnedDrop` argument
+27 | #[pin_project(PinnedDrop, UnsafeUnpin, PinnedDrop, PinnedDrop)] //~ ERROR duplicate `PinnedDrop` argument
    |                                        ^^^^^^^^^^
+
+error: arguments `PinnedDrop` and `Replace` are mutually exclusive
+  --> $DIR/duplicate-argument.rs:33:27
+   |
+33 | #[pin_project(PinnedDrop, Replace)] //~ ERROR arguments `PinnedDrop` and `Replace` are mutually exclusive
+   |                           ^^^^^^^

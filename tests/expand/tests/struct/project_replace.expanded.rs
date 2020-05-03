@@ -1,5 +1,5 @@
 use pin_project::pin_project;
-#[pin(__private())]
+#[pin(__private(Replace))]
 struct Struct<T, U> {
     #[pin]
     pinned: T,
@@ -22,12 +22,17 @@ where
     pinned: ::core::pin::Pin<&'pin (T)>,
     unpinned: &'pin (U),
 }
+#[allow(dead_code)]
+struct __StructProjectionOwned<T, U> {
+    pinned: ::core::marker::PhantomData<T>,
+    unpinned: U,
+}
 #[allow(non_upper_case_globals)]
 const __SCOPE_Struct: () = {
     impl<T, U> Struct<T, U> {
         fn project<'pin>(self: ::core::pin::Pin<&'pin mut Self>) -> __StructProjection<'pin, T, U> {
             unsafe {
-                let Struct { pinned, unpinned } = self.get_unchecked_mut();
+                let Self { pinned, unpinned } = self.get_unchecked_mut();
                 __StructProjection {
                     pinned: ::core::pin::Pin::new_unchecked(pinned),
                     unpinned,
@@ -38,11 +43,32 @@ const __SCOPE_Struct: () = {
             self: ::core::pin::Pin<&'pin Self>,
         ) -> __StructProjectionRef<'pin, T, U> {
             unsafe {
-                let Struct { pinned, unpinned } = self.get_ref();
+                let Self { pinned, unpinned } = self.get_ref();
                 __StructProjectionRef {
                     pinned: ::core::pin::Pin::new_unchecked(pinned),
                     unpinned,
                 }
+            }
+        }
+        fn project_replace(
+            self: ::core::pin::Pin<&mut Self>,
+            __replacement: Self,
+        ) -> __StructProjectionOwned<T, U> {
+            unsafe {
+                let __self_ptr: *mut Self = self.get_unchecked_mut();
+                let Self { pinned, unpinned } = &mut *__self_ptr;
+                let __result = __StructProjectionOwned {
+                    pinned: ::core::marker::PhantomData,
+                    unpinned: ::core::ptr::read(unpinned),
+                };
+                let __guard = ::pin_project::__private::UnsafeOverwriteGuard {
+                    target: __self_ptr,
+                    value: ::core::mem::ManuallyDrop::new(__replacement),
+                };
+                {
+                    let __guard = ::pin_project::__private::UnsafeDropInPlaceGuard(pinned);
+                }
+                __result
             }
         }
     }
