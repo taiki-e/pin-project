@@ -14,6 +14,10 @@ env:
   RUSTFLAGS: -Dwarnings
   RUST_BACKTRACE: 1
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   test:
     name: test
@@ -24,37 +28,30 @@ jobs:
           # When updating this, the reminder to update the minimum supported
           # Rust version in README.md.
           - build: 1.33.0
-            os: ubuntu-latest
             rust: 1.33.0
           - build: 1.36.0
-            os: ubuntu-latest
             rust: 1.36.0
           - build: 1.37.0
-            os: ubuntu-latest
             rust: 1.37.0
           - build: stable
-            os: ubuntu-latest
             rust: stable
           - build: beta
-            os: ubuntu-latest
             rust: beta
           - build: nightly
-            os: ubuntu-latest
             rust: nightly
           # pin-project itself has no platform-dependent implementation.
           # macOS is only used to check that pin-project can interoperate
           # correctly with `#[cfg()]`.
           - build: macos
-            os: macos-latest
+            os: macos
             rust: nightly
           # - build: windows
-          #   os: windows-latest
+          #   os: windows
           #   rust: nightly
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.os || 'ubuntu' }}-latest
     steps:
       - uses: actions/checkout@master
       - name: Install Rust
-        shell: bash
         run: |
           . ./ci/install-rust.sh ${{ matrix.rust }}
       - name: Install cargo-hack
@@ -92,12 +89,10 @@ jobs:
     steps:
       - uses: actions/checkout@master
       - name: Install Rust
-        shell: bash
         run: |
           . ./ci/install-rust.sh
       - name: Install component
         if: matrix.component != 'rustdoc'
-        shell: bash
         run: |
           . ./ci/install-component.sh ${{ matrix.component }}
       - name: cargo clippy
