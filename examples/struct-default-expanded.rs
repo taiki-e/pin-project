@@ -48,7 +48,7 @@ const __SCOPE_Struct: () = {
     impl<T, U> Struct<T, U> {
         fn project<'pin>(self: ::core::pin::Pin<&'pin mut Self>) -> __StructProjection<'pin, T, U> {
             unsafe {
-                let Struct { pinned, unpinned } = self.get_unchecked_mut();
+                let Self { pinned, unpinned } = self.get_unchecked_mut();
                 __StructProjection { pinned: ::core::pin::Pin::new_unchecked(pinned), unpinned }
             }
         }
@@ -56,7 +56,7 @@ const __SCOPE_Struct: () = {
             self: ::core::pin::Pin<&'pin Self>,
         ) -> __StructProjectionRef<'pin, T, U> {
             unsafe {
-                let Struct { pinned, unpinned } = self.get_ref();
+                let Self { pinned, unpinned } = self.get_ref();
                 __StructProjectionRef { pinned: ::core::pin::Pin::new_unchecked(pinned), unpinned }
             }
         }

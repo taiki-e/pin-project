@@ -52,7 +52,7 @@ const __SCOPE_Foo: () = {
             self: ::core::pin::Pin<&'pin mut Self>,
         ) -> __FooProjection<'pin, T, U> {
             unsafe {
-                let Foo { pinned, unpinned } = self.get_unchecked_mut();
+                let Self { pinned, unpinned } = self.get_unchecked_mut();
                 __FooProjection { pinned: ::core::pin::Pin::new_unchecked(pinned), unpinned }
             }
         }
@@ -60,7 +60,7 @@ const __SCOPE_Foo: () = {
             self: ::core::pin::Pin<&'pin Self>,
         ) -> __FooProjectionRef<'pin, T, U> {
             unsafe {
-                let Foo { pinned, unpinned } = self.get_ref();
+                let Self { pinned, unpinned } = self.get_ref();
                 __FooProjectionRef { pinned: ::core::pin::Pin::new_unchecked(pinned), unpinned }
             }
         }

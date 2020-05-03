@@ -1,7 +1,6 @@
 #![cfg(nightly)]
-#![cfg(target_os = "linux")]
 
-#[cfg_attr(not(cargo_expand), ignore)]
+#[cfg_attr(any(not(cargo_expand), all(ci, not(target_os = "linux"))), ignore)]
 #[test]
 fn expandtest() {
     macrotest::expand("tests/enum/*.rs");
