@@ -6,6 +6,14 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 ## [Unreleased]
 
+## [0.4.10] - 2020-05-04
+
+* [Added `project_replace` method and `#[project_replace]` attribute.][194]
+  `project_replace` method is optional and can be enabled by passing the `Replace` argument to `#[pin_project]` attribute.
+  See [the documentation](https://docs.rs/pin-project/0.4/pin_project/attr.pin_project.html#project_replace) for more details.
+
+[194]: https://github.com/taiki-e/pin-project/pull/194
+
 ## [0.4.9] - 2020-04-14
 
 * [Fixed lifetime inference error when associated types are used in fields.][188]
