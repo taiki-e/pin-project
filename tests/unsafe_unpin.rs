@@ -1,4 +1,3 @@
-#![warn(unsafe_code)]
 #![warn(rust_2018_idioms, single_use_lifetimes)]
 #![allow(dead_code)]
 
@@ -14,7 +13,6 @@ pub struct Blah<T, U> {
     field2: T,
 }
 
-#[allow(unsafe_code)]
 unsafe impl<T: Unpin, U> UnsafeUnpin for Blah<T, U> {}
 
 #[pin_project(UnsafeUnpin)]
@@ -25,7 +23,6 @@ pub struct OverlappingLifetimeNames<'pin, T, U> {
     field3: &'pin (),
 }
 
-#[allow(unsafe_code)]
 unsafe impl<T: Unpin, U> UnsafeUnpin for OverlappingLifetimeNames<'_, T, U> {}
 
 #[test]

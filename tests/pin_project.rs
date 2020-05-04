@@ -1,5 +1,3 @@
-#![no_std]
-#![warn(unsafe_code)]
 #![warn(rust_2018_idioms, single_use_lifetimes)]
 #![allow(dead_code)]
 
@@ -310,7 +308,6 @@ fn combine() {
         fn drop(self: Pin<&mut Self>) {}
     }
 
-    #[allow(unsafe_code)]
     unsafe impl<T: Unpin> UnsafeUnpin for Foo<T> {}
 
     #[pin_project(UnsafeUnpin, Replace)]
@@ -320,7 +317,6 @@ fn combine() {
         field2: T,
     }
 
-    #[allow(unsafe_code)]
     unsafe impl<T: Unpin> UnsafeUnpin for Bar<T> {}
 }
 

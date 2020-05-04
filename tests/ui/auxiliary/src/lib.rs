@@ -1,12 +1,5 @@
-#![warn(unsafe_code)]
-#![warn(rust_2018_idioms, single_use_lifetimes, unreachable_pub)]
-#![warn(clippy::all)]
-// mem::take requires Rust 1.40
-#![allow(clippy::mem_replace_with_default)]
-
-// older compilers require explicit `extern crate`.
-#[allow(unused_extern_crates)]
-extern crate proc_macro;
+#![cfg(nightly)]
+#![warn(rust_2018_idioms, single_use_lifetimes)]
 
 use proc_macro::TokenStream;
 use quote::{format_ident, ToTokens};

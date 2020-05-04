@@ -39,9 +39,8 @@
     no_crate_inject,
     attr(deny(warnings, rust_2018_idioms, single_use_lifetimes), allow(dead_code))
 ))]
-#![warn(unsafe_code)]
 #![warn(missing_docs, rust_2018_idioms, single_use_lifetimes, unreachable_pub)]
-#![warn(clippy::all)]
+#![warn(clippy::all, clippy::default_trait_access)]
 // mem::take requires Rust 1.40
 #![allow(clippy::mem_replace_with_default)]
 #![allow(clippy::needless_doctest_main)]
@@ -115,7 +114,6 @@ pub use pin_project_internal::project_replace;
 ///
 /// [`PhantomPinned`]: core::marker::PhantomPinned
 /// [`pin_project`]: attr.pin_project.html
-#[allow(unsafe_code)]
 pub unsafe trait UnsafeUnpin {}
 
 // Not public API.
@@ -142,7 +140,6 @@ pub mod __private {
     pub trait PinnedDrop {
         // Since calling it twice on the same object would be UB,
         // this method is unsafe.
-        #[allow(unsafe_code)]
         #[doc(hidden)]
         unsafe fn drop(self: Pin<&mut Self>);
     }
@@ -195,7 +192,6 @@ pub mod __private {
     #[doc(hidden)]
     pub struct Wrapper<'a, T: ?Sized>(PhantomData<&'a ()>, T);
 
-    #[allow(unsafe_code)]
     unsafe impl<T: ?Sized> UnsafeUnpin for Wrapper<'_, T> where T: UnsafeUnpin {}
 
     // This is an internal helper struct used by `pin-project-internal`.
@@ -211,7 +207,6 @@ pub mod __private {
     pub struct UnsafeDropInPlaceGuard<T: ?Sized>(pub *mut T);
 
     impl<T: ?Sized> Drop for UnsafeDropInPlaceGuard<T> {
-        #[allow(unsafe_code)]
         fn drop(&mut self) {
             unsafe {
                 ptr::drop_in_place(self.0);
@@ -228,7 +223,6 @@ pub mod __private {
     }
 
     impl<T> Drop for UnsafeOverwriteGuard<T> {
-        #[allow(unsafe_code)]
         fn drop(&mut self) {
             unsafe {
                 ptr::write(self.target, ptr::read(&*self.value));

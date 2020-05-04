@@ -1,3 +1,5 @@
+#![warn(rust_2018_idioms, single_use_lifetimes)]
+
 use pin_project::{pin_project, project};
 
 trait Bar<X> {

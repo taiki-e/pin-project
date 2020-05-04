@@ -1,4 +1,3 @@
-#![warn(unsafe_code)]
 #![warn(rust_2018_idioms, single_use_lifetimes)]
 
 // Based on https://github.com/serde-rs/serde/blob/v1.0.106/test_suite/build.rs
