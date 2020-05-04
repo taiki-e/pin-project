@@ -13,12 +13,12 @@ pub(crate) fn attribute(args: &TokenStream, input: Stmt, mutability: Mutability)
         .unwrap_or_else(|e| e.to_compile_error())
 }
 
-fn replace_stmt(stmt: &mut Stmt, mutability: Mutability) -> Result<()> {
-    match stmt {
-        Stmt::Expr(Expr::Match(expr)) | Stmt::Semi(Expr::Match(expr), _) => {
+fn replace_expr(expr: &mut Expr, mutability: Mutability) {
+    match expr {
+        Expr::Match(expr) => {
             Context::new(mutability).replace_expr_match(expr);
         }
-        Stmt::Expr(Expr::If(expr_if)) => {
+        Expr::If(expr_if) => {
             let mut expr_if = expr_if;
             while let Expr::Let(ref mut expr) = &mut *expr_if.cond {
                 Context::new(mutability).replace_expr_let(expr);
@@ -31,15 +31,14 @@ fn replace_stmt(stmt: &mut Stmt, mutability: Mutability) -> Result<()> {
                 break;
             }
         }
-        Stmt::Local(local) => Context::new(mutability).replace_local(local)?,
         _ => {}
     }
-    Ok(())
 }
 
 fn parse(mut stmt: Stmt, mutability: Mutability) -> Result<TokenStream> {
-    replace_stmt(&mut stmt, mutability)?;
     match &mut stmt {
+        Stmt::Expr(expr) | Stmt::Semi(expr, _) => replace_expr(expr, mutability),
+        Stmt::Local(local) => Context::new(mutability).replace_local(local)?,
         Stmt::Item(Item::Fn(item)) => replace_item_fn(item, mutability)?,
         Stmt::Item(Item::Impl(item)) => replace_item_impl(item, mutability),
         Stmt::Item(Item::Use(item)) => replace_item_use(item, mutability)?,
@@ -68,7 +67,7 @@ impl Context {
 
     fn compare_paths(&self, ident: &Ident, len: usize) -> bool {
         match &self.register {
-            Some((i, l)) => *l == len && ident == i,
+            Some((i, l)) => *l == len && i == ident,
             None => false,
         }
     }
@@ -99,7 +98,7 @@ impl Context {
     }
 
     fn replace_expr_match(&mut self, expr: &mut ExprMatch) {
-        expr.arms.iter_mut().for_each(|Arm { pat, .. }| self.replace_pat(pat, true))
+        expr.arms.iter_mut().for_each(|arm| self.replace_pat(&mut arm.pat, true))
     }
 
     fn replace_pat(&mut self, pat: &mut Pat, allow_pat_path: bool) {
@@ -155,6 +154,10 @@ fn is_replaceable(pat: &Pat, allow_pat_path: bool) -> bool {
     }
 }
 
+fn replace_ident(ident: &mut Ident, mutability: Mutability) {
+    *ident = proj_ident(ident, mutability);
+}
+
 fn replace_item_impl(item: &mut ItemImpl, mutability: Mutability) {
     let PathSegment { ident, arguments } = match &mut *item.self_ty {
         Type::Path(TypePath { qself: None, path }) => path.segments.last_mut().unwrap(),
@@ -185,106 +188,122 @@ fn replace_item_impl(item: &mut ItemImpl, mutability: Mutability) {
 }
 
 fn replace_item_fn(item: &mut ItemFn, mutability: Mutability) -> Result<()> {
+    struct FnVisitor {
+        res: Result<()>,
+        mutability: Mutability,
+    }
+
+    impl FnVisitor {
+        /// Returns the attribute name.
+        fn name(&self) -> &str {
+            match self.mutability {
+                Mutable => "project",
+                Immutable => "project_ref",
+                Owned => "project_replace",
+            }
+        }
+
+        fn visit_stmt(&mut self, node: &mut Stmt) -> Result<()> {
+            match node {
+                Stmt::Expr(expr) | Stmt::Semi(expr, _) => {
+                    visit_mut::visit_expr_mut(self, expr);
+                    self.visit_expr(expr)
+                }
+                Stmt::Local(local) => {
+                    visit_mut::visit_local_mut(self, local);
+                    if let Some(attr) = local.attrs.find_remove(self.name())? {
+                        parse_as_empty(&attr.tokens)?;
+                        Context::new(self.mutability).replace_local(local)?;
+                    }
+                    Ok(())
+                }
+                // Do not recurse into nested items.
+                Stmt::Item(_) => Ok(()),
+            }
+        }
+
+        fn visit_expr(&mut self, node: &mut Expr) -> Result<()> {
+            let attr = match node {
+                Expr::Match(expr) => expr.attrs.find_remove(self.name())?,
+                Expr::If(expr_if) => {
+                    if let Expr::Let(_) = &*expr_if.cond {
+                        expr_if.attrs.find_remove(self.name())?
+                    } else {
+                        None
+                    }
+                }
+                _ => return Ok(()),
+            };
+            if let Some(attr) = attr {
+                parse_as_empty(&attr.tokens)?;
+                replace_expr(node, self.mutability);
+            }
+            Ok(())
+        }
+    }
+
+    impl VisitMut for FnVisitor {
+        fn visit_stmt_mut(&mut self, node: &mut Stmt) {
+            if self.res.is_err() {
+                return;
+            }
+            if let Err(e) = self.visit_stmt(node) {
+                self.res = Err(e)
+            }
+        }
+
+        fn visit_expr_mut(&mut self, node: &mut Expr) {
+            if self.res.is_err() {
+                return;
+            }
+            if let Err(e) = self.visit_expr(node) {
+                self.res = Err(e)
+            }
+        }
+
+        fn visit_item_mut(&mut self, _: &mut Item) {
+            // Do not recurse into nested items.
+        }
+    }
+
     let mut visitor = FnVisitor { res: Ok(()), mutability };
     visitor.visit_block_mut(&mut item.block);
     visitor.res
 }
 
 fn replace_item_use(item: &mut ItemUse, mutability: Mutability) -> Result<()> {
+    struct UseTreeVisitor {
+        res: Result<()>,
+        mutability: Mutability,
+    }
+
+    impl VisitMut for UseTreeVisitor {
+        fn visit_use_tree_mut(&mut self, node: &mut UseTree) {
+            if self.res.is_err() {
+                return;
+            }
+
+            match node {
+                // Desugar `use tree::<name>` into `tree::__<name>Projection`.
+                UseTree::Name(name) => replace_ident(&mut name.ident, self.mutability),
+                UseTree::Glob(glob) => {
+                    self.res =
+                        Err(error!(glob, "#[project] attribute may not be used on glob imports"));
+                }
+                UseTree::Rename(rename) => {
+                    self.res = Err(error!(
+                        rename,
+                        "#[project] attribute may not be used on renamed imports"
+                    ));
+                }
+                node @ UseTree::Path(_) | node @ UseTree::Group(_) => {
+                    visit_mut::visit_use_tree_mut(self, node)
+                }
+            }
+        }
+    }
+
     let mut visitor = UseTreeVisitor { res: Ok(()), mutability };
     visitor.visit_item_use_mut(item);
     visitor.res
-}
-
-fn replace_ident(ident: &mut Ident, mutability: Mutability) {
-    *ident = proj_ident(ident, mutability);
-}
-
-// =================================================================================================
-// visitors
-
-struct FnVisitor {
-    res: Result<()>,
-    mutability: Mutability,
-}
-
-impl FnVisitor {
-    /// Returns the attribute name.
-    fn name(&self) -> &str {
-        match self.mutability {
-            Mutable => "project",
-            Immutable => "project_ref",
-            Owned => "project_replace",
-        }
-    }
-
-    fn visit_stmt(&mut self, node: &mut Stmt) -> Result<()> {
-        let attr = match node {
-            Stmt::Expr(Expr::Match(expr)) | Stmt::Semi(Expr::Match(expr), _) => {
-                expr.attrs.find_remove(self.name())?
-            }
-            Stmt::Local(local) => local.attrs.find_remove(self.name())?,
-            Stmt::Expr(Expr::If(expr_if)) => {
-                if let Expr::Let(_) = &*expr_if.cond {
-                    expr_if.attrs.find_remove(self.name())?
-                } else {
-                    None
-                }
-            }
-            _ => return Ok(()),
-        };
-        if let Some(attr) = attr {
-            parse_as_empty(&attr.tokens)?;
-            replace_stmt(node, self.mutability)?;
-        }
-        Ok(())
-    }
-}
-
-impl VisitMut for FnVisitor {
-    fn visit_stmt_mut(&mut self, node: &mut Stmt) {
-        if self.res.is_err() {
-            return;
-        }
-
-        visit_mut::visit_stmt_mut(self, node);
-
-        if let Err(e) = self.visit_stmt(node) {
-            self.res = Err(e)
-        }
-    }
-
-    fn visit_item_mut(&mut self, _: &mut Item) {
-        // Do not recurse into nested items.
-    }
-}
-
-struct UseTreeVisitor {
-    res: Result<()>,
-    mutability: Mutability,
-}
-
-impl VisitMut for UseTreeVisitor {
-    fn visit_use_tree_mut(&mut self, node: &mut UseTree) {
-        if self.res.is_err() {
-            return;
-        }
-
-        match node {
-            // Desugar `use tree::<name>` into `tree::__<name>Projection`.
-            UseTree::Name(name) => replace_ident(&mut name.ident, self.mutability),
-            UseTree::Glob(glob) => {
-                self.res =
-                    Err(error!(glob, "#[project] attribute may not be used on glob imports"));
-            }
-            UseTree::Rename(rename) => {
-                // TODO: Consider allowing the projected type to be renamed by `#[project] use Foo as Bar`.
-                self.res =
-                    Err(error!(rename, "#[project] attribute may not be used on renamed imports"));
-            }
-            node @ UseTree::Path(_) | node @ UseTree::Group(_) => {
-                visit_mut::visit_use_tree_mut(self, node)
-            }
-        }
-    }
 }
