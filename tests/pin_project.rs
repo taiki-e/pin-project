@@ -556,3 +556,27 @@ fn self_in_where_clause() {
         type Foo = Struct1<T>;
     }
 }
+
+#[test]
+fn where_clause() {
+    #[pin_project]
+    struct StructWhereClause<T>
+    where
+        T: Copy,
+    {
+        field: T,
+    }
+
+    #[pin_project]
+    struct TupleStructWhereClause<T>(T)
+    where
+        T: Copy;
+
+    #[pin_project]
+    enum EnumWhereClause<T>
+    where
+        T: Copy,
+    {
+        Variant(T),
+    }
+}

@@ -1,14 +1,12 @@
 #![warn(rust_2018_idioms, single_use_lifetimes)]
 #![allow(dead_code)]
 
-// This hack is needed until https://github.com/rust-lang/rust/pull/69201
-// makes it way into stable.
-// Ceurrently, `#[attr] if true {}` doesn't even *parse* on stable,
-// which means that it will error even behind a `#[rustversion::nightly]`
+// Ceurrently, `#[attr] if true {}` doesn't even *parse* on MSRV,
+// which means that it will error even behind a `#[rustversion::since(..)]`
 //
 // This trick makes sure that we don't even attempt to parse
-// the `#[project] if let _` test on stable.
-#[rustversion::nightly]
+// the `#[project] if let _` test on MSRV.
+#[rustversion::since(1.43)]
 include!("project_if_attr.rs.in");
 
 use pin_project::{pin_project, project};
@@ -194,23 +192,21 @@ mod project_use_2 {
     }
 }
 
-#[pin_project]
-struct StructWhereClause<T>
-where
-    T: Copy,
-{
-    field: T,
-}
+#[test]
+#[project]
+fn non_stmt_expr_match() {
+    #[pin_project]
+    enum Enum<A> {
+        Variant(#[pin] A),
+    }
 
-#[pin_project]
-struct TupleStructWhereClause<T>(T)
-where
-    T: Copy;
+    let mut x = Enum::Variant(1);
+    let x = Pin::new(&mut x).project();
 
-#[pin_project]
-enum EnumWhereClause<T>
-where
-    T: Copy,
-{
-    Variant(T),
+    Some(
+        #[project]
+        match x {
+            Enum::Variant(_x) => {}
+        },
+    );
 }
