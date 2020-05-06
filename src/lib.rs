@@ -125,21 +125,20 @@ pub mod __private {
     #[doc(hidden)]
     pub use pin_project_internal::__PinProjectInternalDerive;
 
-    // It is safe to implement PinnedDrop::drop, but it is not safe to call it.
-    // This is because destructors can be called multiple times (double dropping
-    // is unsound: https://github.com/rust-lang/rust/pull/62360).
+    // Implementing `PinnedDrop::drop` is safe, but calling it is not safe.
+    // This is because destructors can be called multiple times in safe code and
+    // [double dropping is unsound](https://github.com/rust-lang/rust/pull/62360).
     //
-    // Ideally, it would be desirable to be able to prohibit manual calls in the
-    // same way as Drop::drop, but the library cannot. So, by using macros and
-    // replacing them with private traits, we prevent users from calling
-    // PinnedDrop::drop.
+    // Ideally, it would be desirable to be able to forbid manual calls in
+    // the same way as [`Drop::drop`], but the library cannot do it. So, by using
+    // macros and replacing them with private traits, we prevent users from
+    // calling `PinnedDrop::drop`.
     //
-    // Users can implement `Drop` safely using `#[pinned_drop]`.
+    // Users can implement [`Drop`] safely using `#[pinned_drop]` and can drop a
+    // type that implements `PinnedDrop` using the [`drop`] function safely.
     // **Do not call or implement this trait directly.**
     #[doc(hidden)]
     pub trait PinnedDrop {
-        // Since calling it twice on the same object would be UB,
-        // this method is unsafe.
         #[doc(hidden)]
         unsafe fn drop(self: Pin<&mut Self>);
     }

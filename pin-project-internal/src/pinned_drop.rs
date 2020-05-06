@@ -3,7 +3,7 @@ use quote::{quote, quote_spanned, ToTokens};
 use syn::{spanned::Spanned, visit_mut::VisitMut, *};
 
 use crate::utils::{
-    parse_as_empty, prepend_underscore_to_self, ReplaceReceiver, CURRENT_PRIVATE_MODULE,
+    parse_as_empty, prepend_underscore_to_self, ReplaceReceiver, SliceExt, CURRENT_PRIVATE_MODULE,
 };
 
 pub(crate) fn attribute(args: &TokenStream, mut input: ItemImpl) -> TokenStream {
@@ -48,7 +48,7 @@ fn parse_method(method: &ImplItemMethod) -> Result<()> {
 
     if let ReturnType::Type(_, ty) = &method.sig.output {
         match &**ty {
-            Type::Tuple(TypeTuple { elems, .. }) if elems.is_empty() => {}
+            Type::Tuple(ty) if ty.elems.is_empty() => {}
             _ => return Err(error!(ty, "method `drop` must return the unit type")),
         }
     }
@@ -61,15 +61,16 @@ fn parse_method(method: &ImplItemMethod) -> Result<()> {
         }
     }
 
-    if let FnArg::Typed(PatType { pat, ty, .. }) = &method.sig.inputs[0] {
-        // !by_ref (mutability) ident !subpat: path
-        if let (Pat::Ident(PatIdent { by_ref: None, ident, subpat: None, .. }), Some(path)) =
-            (&**pat, get_ty_path(ty))
+    if let FnArg::Typed(pat) = &method.sig.inputs[0] {
+        // by-ref binding `ref (mut) self` and sub-patterns `@` are not allowed in receivers (rejected by rustc).
+        // <pat>: <path>
+        if let (Pat::Ident(pat @ PatIdent { by_ref: None, subpat: None, .. }), Some(path)) =
+            (&*pat.pat, get_ty_path(&pat.ty))
         {
             let ty = &path.segments.last().unwrap();
             if let PathArguments::AngleBracketed(args) = &ty.arguments {
-                // (mut) self: (path::)Pin<args>
-                if ident == "self" && args.args.len() == 1 && ty.ident == "Pin" {
+                // (mut) self: [<path>::]Pin<<args>>
+                if pat.ident == "self" && args.args.len() == 1 && ty.ident == "Pin" {
                     // &mut <elem>
                     if let GenericArgument::Type(Type::Reference(TypeReference {
                         mutability: Some(_),
@@ -96,6 +97,13 @@ fn parse_method(method: &ImplItemMethod) -> Result<()> {
 }
 
 fn parse(item: &mut ItemImpl) -> Result<()> {
+    const INVALID_ITEM: &str =
+        "#[pinned_drop] may only be used on implementation for the `PinnedDrop` trait";
+
+    if let Some(attr) = item.attrs.find("pinned_drop") {
+        return Err(error!(attr, "duplicate #[pinned_drop] attribute"));
+    }
+
     if let Some((_, path, _)) = &mut item.trait_ {
         if path.is_ident("PinnedDrop") {
             let private = Ident::new(CURRENT_PRIVATE_MODULE, Span::call_site());
@@ -104,16 +112,10 @@ fn parse(item: &mut ItemImpl) -> Result<()> {
             })
             .unwrap();
         } else {
-            return Err(error!(
-                path,
-                "#[pinned_drop] may only be used on implementation for the `PinnedDrop` trait"
-            ));
+            return Err(error!(path, INVALID_ITEM));
         }
     } else {
-        return Err(error!(
-            item.self_ty,
-            "#[pinned_drop] may only be used on implementation for the `PinnedDrop` trait"
-        ));
+        return Err(error!(item.self_ty, INVALID_ITEM));
     }
 
     if item.unsafety.is_some() {
