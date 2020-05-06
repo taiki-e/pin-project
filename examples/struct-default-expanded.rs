@@ -31,7 +31,7 @@ struct __StructProjection<'pin, T, U>
 where
     Struct<T, U>: 'pin,
 {
-    pinned: ::core::pin::Pin<&'pin mut (T)>,
+    pinned: ::pin_project::__reexport::pin::Pin<&'pin mut (T)>,
     unpinned: &'pin mut (U),
 }
 #[allow(dead_code)] // This lint warns unused fields/variants.
@@ -39,25 +39,33 @@ struct __StructProjectionRef<'pin, T, U>
 where
     Struct<T, U>: 'pin,
 {
-    pinned: ::core::pin::Pin<&'pin (T)>,
+    pinned: ::pin_project::__reexport::pin::Pin<&'pin (T)>,
     unpinned: &'pin (U),
 }
 
 #[allow(non_upper_case_globals)]
 const __SCOPE_Struct: () = {
     impl<T, U> Struct<T, U> {
-        fn project<'pin>(self: ::core::pin::Pin<&'pin mut Self>) -> __StructProjection<'pin, T, U> {
+        fn project<'pin>(
+            self: ::pin_project::__reexport::pin::Pin<&'pin mut Self>,
+        ) -> __StructProjection<'pin, T, U> {
             unsafe {
                 let Self { pinned, unpinned } = self.get_unchecked_mut();
-                __StructProjection { pinned: ::core::pin::Pin::new_unchecked(pinned), unpinned }
+                __StructProjection {
+                    pinned: ::pin_project::__reexport::pin::Pin::new_unchecked(pinned),
+                    unpinned,
+                }
             }
         }
         fn project_ref<'pin>(
-            self: ::core::pin::Pin<&'pin Self>,
+            self: ::pin_project::__reexport::pin::Pin<&'pin Self>,
         ) -> __StructProjectionRef<'pin, T, U> {
             unsafe {
                 let Self { pinned, unpinned } = self.get_ref();
-                __StructProjectionRef { pinned: ::core::pin::Pin::new_unchecked(pinned), unpinned }
+                __StructProjectionRef {
+                    pinned: ::pin_project::__reexport::pin::Pin::new_unchecked(pinned),
+                    unpinned,
+                }
             }
         }
     }
@@ -92,8 +100,8 @@ const __SCOPE_Struct: () = {
         __pin_project_use_generics: ::pin_project::__private::AlwaysUnpin<'pin, (T, U)>,
         __field0: T,
     }
-    impl<'pin, T, U> ::core::marker::Unpin for Struct<T, U> where
-        __Struct<'pin, T, U>: ::core::marker::Unpin
+    impl<'pin, T, U> ::pin_project::__reexport::marker::Unpin for Struct<T, U> where
+        __Struct<'pin, T, U>: ::pin_project::__reexport::marker::Unpin
     {
     }
 
@@ -104,14 +112,14 @@ const __SCOPE_Struct: () = {
     // the conflict with the second impl.
     trait StructMustNotImplDrop {}
     #[allow(clippy::drop_bounds)]
-    impl<T: ::core::ops::Drop> StructMustNotImplDrop for T {}
+    impl<T: ::pin_project::__reexport::ops::Drop> StructMustNotImplDrop for T {}
     #[allow(single_use_lifetimes)]
     impl<T, U> StructMustNotImplDrop for Struct<T, U> {}
     // A dummy impl of `PinnedDrop`, to ensure that users don't accidentally
     // write a non-functional `PinnedDrop` impls.
     #[allow(single_use_lifetimes)]
     impl<T, U> ::pin_project::__private::PinnedDrop for Struct<T, U> {
-        unsafe fn drop(self: ::core::pin::Pin<&mut Self>) {}
+        unsafe fn drop(self: ::pin_project::__reexport::pin::Pin<&mut Self>) {}
     }
 
     // Ensure that it's impossible to use pin projections on a #[repr(packed)] struct.

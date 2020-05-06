@@ -6,13 +6,13 @@
 // use pin_project::{pin_project, UnsafeUnpin};
 //
 // #[pin_project(UnsafeUnpin)]
-// pub struct Foo<T, U> {
+// pub struct Struct<T, U> {
 //     #[pin]
 //     pinned: T,
 //     unpinned: U,
 // }
 //
-// unsafe impl<T: Unpin, U> UnsafeUnpin for Foo<T, U> {}
+// unsafe impl<T: Unpin, U> UnsafeUnpin for Struct<T, U> {}
 //
 // fn main() {}
 // ```
@@ -21,7 +21,7 @@
 
 use pin_project::{pin_project, UnsafeUnpin};
 
-pub struct Foo<T, U> {
+pub struct Struct<T, U> {
     // #[pin]
     pinned: T,
     unpinned: U,
@@ -29,47 +29,53 @@ pub struct Foo<T, U> {
 
 #[allow(clippy::mut_mut)] // This lint warns `&mut &mut <ty>`.
 #[allow(dead_code)] // This lint warns unused fields/variants.
-pub(crate) struct __FooProjection<'pin, T, U>
+pub(crate) struct __StructProjection<'pin, T, U>
 where
-    Foo<T, U>: 'pin,
+    Struct<T, U>: 'pin,
 {
-    pinned: ::core::pin::Pin<&'pin mut (T)>,
+    pinned: ::pin_project::__reexport::pin::Pin<&'pin mut (T)>,
     unpinned: &'pin mut (U),
 }
 #[allow(dead_code)] // This lint warns unused fields/variants.
-pub(crate) struct __FooProjectionRef<'pin, T, U>
+pub(crate) struct __StructProjectionRef<'pin, T, U>
 where
-    Foo<T, U>: 'pin,
+    Struct<T, U>: 'pin,
 {
-    pinned: ::core::pin::Pin<&'pin (T)>,
+    pinned: ::pin_project::__reexport::pin::Pin<&'pin (T)>,
     unpinned: &'pin (U),
 }
 
 #[allow(non_upper_case_globals)]
-const __SCOPE_Foo: () = {
-    impl<T, U> Foo<T, U> {
+const __SCOPE_Struct: () = {
+    impl<T, U> Struct<T, U> {
         pub(crate) fn project<'pin>(
-            self: ::core::pin::Pin<&'pin mut Self>,
-        ) -> __FooProjection<'pin, T, U> {
+            self: ::pin_project::__reexport::pin::Pin<&'pin mut Self>,
+        ) -> __StructProjection<'pin, T, U> {
             unsafe {
                 let Self { pinned, unpinned } = self.get_unchecked_mut();
-                __FooProjection { pinned: ::core::pin::Pin::new_unchecked(pinned), unpinned }
+                __StructProjection {
+                    pinned: ::pin_project::__reexport::pin::Pin::new_unchecked(pinned),
+                    unpinned,
+                }
             }
         }
         pub(crate) fn project_ref<'pin>(
-            self: ::core::pin::Pin<&'pin Self>,
-        ) -> __FooProjectionRef<'pin, T, U> {
+            self: ::pin_project::__reexport::pin::Pin<&'pin Self>,
+        ) -> __StructProjectionRef<'pin, T, U> {
             unsafe {
                 let Self { pinned, unpinned } = self.get_ref();
-                __FooProjectionRef { pinned: ::core::pin::Pin::new_unchecked(pinned), unpinned }
+                __StructProjectionRef {
+                    pinned: ::pin_project::__reexport::pin::Pin::new_unchecked(pinned),
+                    unpinned,
+                }
             }
         }
     }
 
-    unsafe impl<T: Unpin, U> UnsafeUnpin for Foo<T, U> {}
+    unsafe impl<T: Unpin, U> UnsafeUnpin for Struct<T, U> {}
 
     #[allow(single_use_lifetimes)]
-    impl<'pin, T, U> ::core::marker::Unpin for Foo<T, U> where
+    impl<'pin, T, U> ::pin_project::__reexport::marker::Unpin for Struct<T, U> where
         ::pin_project::__private::Wrapper<'pin, Self>: ::pin_project::UnsafeUnpin
     {
     }
@@ -77,14 +83,14 @@ const __SCOPE_Foo: () = {
     // Ensure that struct does not implement `Drop`.
     //
     // See ./struct-default-expanded.rs for details.
-    trait FooMustNotImplDrop {}
+    trait StructMustNotImplDrop {}
     #[allow(clippy::drop_bounds)]
-    impl<T: ::core::ops::Drop> FooMustNotImplDrop for T {}
+    impl<T: ::pin_project::__reexport::ops::Drop> StructMustNotImplDrop for T {}
     #[allow(single_use_lifetimes)]
-    impl<T, U> FooMustNotImplDrop for Foo<T, U> {}
+    impl<T, U> StructMustNotImplDrop for Struct<T, U> {}
     #[allow(single_use_lifetimes)]
-    impl<T, U> ::pin_project::__private::PinnedDrop for Foo<T, U> {
-        unsafe fn drop(self: ::core::pin::Pin<&mut Self>) {}
+    impl<T, U> ::pin_project::__private::PinnedDrop for Struct<T, U> {
+        unsafe fn drop(self: ::pin_project::__reexport::pin::Pin<&mut Self>) {}
     }
 
     // Ensure that it's impossible to use pin projections on a #[repr(packed)] struct.
@@ -93,7 +99,7 @@ const __SCOPE_Foo: () = {
     // for details.
     #[allow(single_use_lifetimes)]
     #[deny(safe_packed_borrows)]
-    fn __assert_not_repr_packed<T, U>(val: &Foo<T, U>) {
+    fn __assert_not_repr_packed<T, U>(val: &Struct<T, U>) {
         &val.pinned;
         &val.unpinned;
     }

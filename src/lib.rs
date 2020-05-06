@@ -230,3 +230,11 @@ pub mod __private {
         }
     }
 }
+
+// Not public API.
+// See tests/overwriting_core_crate.rs for more.
+#[doc(hidden)]
+pub mod __reexport {
+    #[doc(hidden)]
+    pub use core::{marker, mem, ops, pin, ptr};
+}

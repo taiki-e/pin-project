@@ -15,7 +15,7 @@ where
     Enum<T, U>: 'pin,
 {
     V {
-        pinned: ::core::pin::Pin<&'pin mut (T)>,
+        pinned: ::pin_project::__reexport::pin::Pin<&'pin mut (T)>,
         unpinned: &'pin mut (U),
     },
     None,
@@ -26,7 +26,7 @@ where
     Enum<T, U>: 'pin,
 {
     V {
-        pinned: ::core::pin::Pin<&'pin (T)>,
+        pinned: ::pin_project::__reexport::pin::Pin<&'pin (T)>,
         unpinned: &'pin (U),
     },
     None,
@@ -34,7 +34,7 @@ where
 #[allow(dead_code)]
 enum __EnumProjectionOwned<T, U> {
     V {
-        pinned: ::core::marker::PhantomData<T>,
+        pinned: ::pin_project::__reexport::marker::PhantomData<T>,
         unpinned: U,
     },
     None,
@@ -42,11 +42,13 @@ enum __EnumProjectionOwned<T, U> {
 #[allow(non_upper_case_globals)]
 const __SCOPE_Enum: () = {
     impl<T, U> Enum<T, U> {
-        fn project<'pin>(self: ::core::pin::Pin<&'pin mut Self>) -> __EnumProjection<'pin, T, U> {
+        fn project<'pin>(
+            self: ::pin_project::__reexport::pin::Pin<&'pin mut Self>,
+        ) -> __EnumProjection<'pin, T, U> {
             unsafe {
                 match self.get_unchecked_mut() {
                     Enum::V { pinned, unpinned } => __EnumProjection::V {
-                        pinned: ::core::pin::Pin::new_unchecked(pinned),
+                        pinned: ::pin_project::__reexport::pin::Pin::new_unchecked(pinned),
                         unpinned,
                     },
                     Enum::None => __EnumProjection::None,
@@ -54,12 +56,12 @@ const __SCOPE_Enum: () = {
             }
         }
         fn project_ref<'pin>(
-            self: ::core::pin::Pin<&'pin Self>,
+            self: ::pin_project::__reexport::pin::Pin<&'pin Self>,
         ) -> __EnumProjectionRef<'pin, T, U> {
             unsafe {
                 match self.get_ref() {
                     Enum::V { pinned, unpinned } => __EnumProjectionRef::V {
-                        pinned: ::core::pin::Pin::new_unchecked(pinned),
+                        pinned: ::pin_project::__reexport::pin::Pin::new_unchecked(pinned),
                         unpinned,
                     },
                     Enum::None => __EnumProjectionRef::None,
@@ -67,7 +69,7 @@ const __SCOPE_Enum: () = {
             }
         }
         fn project_replace(
-            self: ::core::pin::Pin<&mut Self>,
+            self: ::pin_project::__reexport::pin::Pin<&mut Self>,
             __replacement: Self,
         ) -> __EnumProjectionOwned<T, U> {
             unsafe {
@@ -75,12 +77,12 @@ const __SCOPE_Enum: () = {
                 match &mut *__self_ptr {
                     Enum::V { pinned, unpinned } => {
                         let __result = __EnumProjectionOwned::V {
-                            pinned: ::core::marker::PhantomData,
-                            unpinned: ::core::ptr::read(unpinned),
+                            pinned: ::pin_project::__reexport::marker::PhantomData,
+                            unpinned: ::pin_project::__reexport::ptr::read(unpinned),
                         };
                         let __guard = ::pin_project::__private::UnsafeOverwriteGuard {
                             target: __self_ptr,
-                            value: ::core::mem::ManuallyDrop::new(__replacement),
+                            value: ::pin_project::__reexport::mem::ManuallyDrop::new(__replacement),
                         };
                         {
                             let __guard = ::pin_project::__private::UnsafeDropInPlaceGuard(pinned);
@@ -91,7 +93,7 @@ const __SCOPE_Enum: () = {
                         let __result = __EnumProjectionOwned::None;
                         let __guard = ::pin_project::__private::UnsafeOverwriteGuard {
                             target: __self_ptr,
-                            value: ::core::mem::ManuallyDrop::new(__replacement),
+                            value: ::pin_project::__reexport::mem::ManuallyDrop::new(__replacement),
                         };
                         {}
                         __result
@@ -104,16 +106,18 @@ const __SCOPE_Enum: () = {
         __pin_project_use_generics: ::pin_project::__private::AlwaysUnpin<'pin, (T, U)>,
         __field0: T,
     }
-    impl<'pin, T, U> ::core::marker::Unpin for Enum<T, U> where __Enum<'pin, T, U>: ::core::marker::Unpin
-    {}
+    impl<'pin, T, U> ::pin_project::__reexport::marker::Unpin for Enum<T, U> where
+        __Enum<'pin, T, U>: ::pin_project::__reexport::marker::Unpin
+    {
+    }
     trait EnumMustNotImplDrop {}
     #[allow(clippy::drop_bounds)]
-    impl<T: ::core::ops::Drop> EnumMustNotImplDrop for T {}
+    impl<T: ::pin_project::__reexport::ops::Drop> EnumMustNotImplDrop for T {}
     #[allow(single_use_lifetimes)]
     impl<T, U> EnumMustNotImplDrop for Enum<T, U> {}
     #[allow(single_use_lifetimes)]
     impl<T, U> ::pin_project::__private::PinnedDrop for Enum<T, U> {
-        unsafe fn drop(self: ::core::pin::Pin<&mut Self>) {}
+        unsafe fn drop(self: ::pin_project::__reexport::pin::Pin<&mut Self>) {}
     }
 };
 fn main() {}

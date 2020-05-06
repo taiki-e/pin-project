@@ -6,14 +6,14 @@ use pin_project::{pin_project, pinned_drop};
 use std::pin::Pin;
 
 #[pin_project(PinnedDrop)]
-pub struct Foo<'a, T> {
+pub struct Struct<'a, T> {
     was_dropped: &'a mut bool,
     #[pin]
     field: T,
 }
 
 #[pinned_drop]
-impl<T> PinnedDrop for Foo<'_, T> {
+impl<T> PinnedDrop for Struct<'_, T> {
     fn drop(self: Pin<&mut Self>) {
         **self.project().was_dropped = true;
     }

@@ -427,7 +427,7 @@ impl<'a> Context<'a> {
             // `self` with the replacement value without calling destructors.
             let __guard = ::pin_project::#private::UnsafeOverwriteGuard {
                 target: __self_ptr,
-                value: ::core::mem::ManuallyDrop::new(__replacement),
+                value: ::pin_project::__reexport::mem::ManuallyDrop::new(__replacement),
             };
 
             // Now create guards to drop all the pinned fields
@@ -562,7 +562,7 @@ impl<'a> Context<'a> {
                     // `self` with the replacement value without calling destructors.
                     let __guard = ::pin_project::#private::UnsafeOverwriteGuard {
                         target: __self_ptr,
-                        value: ::core::mem::ManuallyDrop::new(__replacement),
+                        value: ::pin_project::__reexport::mem::ManuallyDrop::new(__replacement),
                     };
 
                     // Now create guards to drop all the pinned fields
@@ -607,19 +607,19 @@ impl<'a> Context<'a> {
 
                 let lifetime = &self.proj.lifetime;
                 proj_fields.push(quote! {
-                    #vis #ident: ::core::pin::Pin<&#lifetime mut (#ty)>
+                    #vis #ident: ::pin_project::__reexport::pin::Pin<&#lifetime mut (#ty)>
                 });
                 proj_ref_fields.push(quote! {
-                    #vis #ident: ::core::pin::Pin<&#lifetime (#ty)>
+                    #vis #ident: ::pin_project::__reexport::pin::Pin<&#lifetime (#ty)>
                 });
                 proj_own_fields.push(quote! {
-                    #vis #ident: ::core::marker::PhantomData<#ty>
+                    #vis #ident: ::pin_project::__reexport::marker::PhantomData<#ty>
                 });
                 proj_body.push(quote! {
-                    #ident: ::core::pin::Pin::new_unchecked(#ident)
+                    #ident: ::pin_project::__reexport::pin::Pin::new_unchecked(#ident)
                 });
                 proj_move.push(quote! {
-                    #ident: ::core::marker::PhantomData
+                    #ident: ::pin_project::__reexport::marker::PhantomData
                 });
                 proj_drop.push(quote! {
                     let __guard = ::pin_project::#private::UnsafeDropInPlaceGuard(#ident);
@@ -639,7 +639,7 @@ impl<'a> Context<'a> {
                     #ident
                 });
                 proj_move.push(quote! {
-                    #ident: ::core::ptr::read(#ident)
+                    #ident: ::pin_project::__reexport::ptr::read(#ident)
                 });
             }
             proj_pat.push(ident);
@@ -684,19 +684,19 @@ impl<'a> Context<'a> {
 
                 let lifetime = &self.proj.lifetime;
                 proj_fields.push(quote! {
-                    #vis ::core::pin::Pin<&#lifetime mut (#ty)>
+                    #vis ::pin_project::__reexport::pin::Pin<&#lifetime mut (#ty)>
                 });
                 proj_ref_fields.push(quote! {
-                    #vis ::core::pin::Pin<&#lifetime (#ty)>
+                    #vis ::pin_project::__reexport::pin::Pin<&#lifetime (#ty)>
                 });
                 proj_own_fields.push(quote! {
-                    #vis ::core::marker::PhantomData<#ty>
+                    #vis ::pin_project::__reexport::marker::PhantomData<#ty>
                 });
                 proj_body.push(quote! {
-                    ::core::pin::Pin::new_unchecked(#id)
+                    ::pin_project::__reexport::pin::Pin::new_unchecked(#id)
                 });
                 proj_move.push(quote! {
-                    ::core::marker::PhantomData
+                    ::pin_project::__reexport::marker::PhantomData
                 });
                 proj_drop.push(quote! {
                     let __guard = ::pin_project::#private::UnsafeDropInPlaceGuard(#id);
@@ -716,7 +716,7 @@ impl<'a> Context<'a> {
                     #id
                 });
                 proj_move.push(quote! {
-                    ::core::ptr::read(#id)
+                    ::pin_project::__reexport::ptr::read(#id)
                 });
             }
             proj_pat.push(id);
@@ -762,7 +762,7 @@ impl<'a> Context<'a> {
 
             quote! {
                 #[allow(single_use_lifetimes)]
-                impl #impl_generics ::core::marker::Unpin for #orig_ident #ty_generics #where_clause {}
+                impl #impl_generics ::pin_project::__reexport::marker::Unpin for #orig_ident #ty_generics #where_clause {}
             }
         } else {
             let mut full_where_clause = self.orig.generics.where_clause.as_ref().cloned().unwrap();
@@ -825,7 +825,7 @@ impl<'a> Context<'a> {
             let (_, ty_generics, where_clause) = self.orig.generics.split_for_impl();
 
             full_where_clause.predicates.push(syn::parse_quote! {
-                #struct_ident #proj_ty_generics: ::core::marker::Unpin
+                #struct_ident #proj_ty_generics: ::pin_project::__reexport::marker::Unpin
             });
 
             let private = Ident::new(CURRENT_PRIVATE_MODULE, Span::call_site());
@@ -847,7 +847,7 @@ impl<'a> Context<'a> {
                     #(#lifetime_fields,)*
                 }
 
-                impl #impl_generics ::core::marker::Unpin for #orig_ident #ty_generics #full_where_clause {}
+                impl #impl_generics ::pin_project::__reexport::marker::Unpin for #orig_ident #ty_generics #full_where_clause {}
             }
         }
     }
@@ -869,11 +869,11 @@ impl<'a> Context<'a> {
 
             quote! {
                 #[allow(single_use_lifetimes)]
-                impl #impl_generics ::core::ops::Drop for #ident #ty_generics #where_clause {
+                impl #impl_generics ::pin_project::__reexport::ops::Drop for #ident #ty_generics #where_clause {
                     fn drop(&mut self) {
                         // Safety - we're in 'drop', so we know that 'self' will
                         // never move again.
-                        let pinned_self = unsafe { ::core::pin::Pin::new_unchecked(self) };
+                        let pinned_self = unsafe { ::pin_project::__reexport::pin::Pin::new_unchecked(self) };
                         // We call `pinned_drop` only once. Since `PinnedDrop::drop`
                         // is an unsafe method and a private API, it is never called again in safe
                         // code *unless the user uses a maliciously crafted macro*.
@@ -910,7 +910,7 @@ impl<'a> Context<'a> {
                 // This will result in a compilation error, which is exactly what we want.
                 trait #trait_ident {}
                 #[allow(clippy::drop_bounds)]
-                impl<T: ::core::ops::Drop> #trait_ident for T {}
+                impl<T: ::pin_project::__reexport::ops::Drop> #trait_ident for T {}
                 #[allow(single_use_lifetimes)]
                 impl #impl_generics #trait_ident for #ident #ty_generics #where_clause {}
 
@@ -926,7 +926,7 @@ impl<'a> Context<'a> {
                 // checks are run.
                 #[allow(single_use_lifetimes)]
                 impl #impl_generics ::pin_project::#private::PinnedDrop for #ident #ty_generics #where_clause {
-                    unsafe fn drop(self: ::core::pin::Pin<&mut Self>) {}
+                    unsafe fn drop(self: ::pin_project::__reexport::pin::Pin<&mut Self>) {}
                 }
             }
         }
@@ -954,7 +954,7 @@ impl<'a> Context<'a> {
             // TODO: Use `_replace`'s span.
             quote! {
                 #vis fn project_replace(
-                    self: ::core::pin::Pin<&mut Self>,
+                    self: ::pin_project::__reexport::pin::Pin<&mut Self>,
                     __replacement: Self,
                 ) -> #proj_own_ident #orig_ty_generics {
                     unsafe {
@@ -967,14 +967,14 @@ impl<'a> Context<'a> {
         quote! {
             impl #impl_generics #orig_ident #ty_generics #where_clause {
                 #vis fn project<#lifetime>(
-                    self: ::core::pin::Pin<&#lifetime mut Self>,
+                    self: ::pin_project::__reexport::pin::Pin<&#lifetime mut Self>,
                 ) -> #proj_ident #proj_ty_generics {
                     unsafe {
                         #proj_body
                     }
                 }
                 #vis fn project_ref<#lifetime>(
-                    self: ::core::pin::Pin<&#lifetime Self>,
+                    self: ::pin_project::__reexport::pin::Pin<&#lifetime Self>,
                 ) -> #proj_ref_ident #proj_ty_generics {
                     unsafe {
                         #proj_ref_body
