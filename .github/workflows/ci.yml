@@ -107,6 +107,7 @@ jobs:
         if: matrix.component == 'clippy'
         run: |
           cargo clippy --all --all-features
+          cargo clippy -p pin-project --all-features --test clippy
       - name: cargo fmt -- --check
         if: matrix.component == 'rustfmt'
         run: |

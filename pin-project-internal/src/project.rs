@@ -5,7 +5,10 @@ use syn::{
     *,
 };
 
-use crate::utils::*;
+use crate::utils::{
+    determine_lifetime_name, insert_lifetime, parse_as_empty, proj_ident, Immutable, Mutability,
+    Mutable, Owned, VecExt, DEFAULT_LIFETIME_NAME,
+};
 
 pub(crate) fn attribute(args: &TokenStream, input: Stmt, mutability: Mutability) -> TokenStream {
     parse_as_empty(args)

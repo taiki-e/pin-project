@@ -1,8 +1,7 @@
-#![no_std]
-#![warn(rust_2018_idioms, single_use_lifetimes)]
+extern crate pin_project;
 
-use core::pin::Pin;
 use pin_project::{pin_project, pinned_drop, UnsafeUnpin};
+use std::pin::Pin;
 
 #[pin_project]
 pub struct StructDefault<T, U> {

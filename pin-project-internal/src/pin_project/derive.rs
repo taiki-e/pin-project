@@ -6,7 +6,11 @@ use syn::{
     *,
 };
 
-use crate::utils::*;
+use crate::utils::{
+    determine_lifetime_name, determine_visibility, insert_lifetime_and_bound, proj_ident,
+    Immutable, Mutable, Owned, ParseBufferExt, ReplaceReceiver, SliceExt, Variants,
+    CURRENT_PRIVATE_MODULE, DEFAULT_LIFETIME_NAME,
+};
 
 use super::PIN;
 
@@ -99,7 +103,7 @@ fn validate_struct(ident: &Ident, fields: &Fields) -> Result<()> {
 
 fn validate_enum(brace_token: token::Brace, variants: &Variants) -> Result<()> {
     if variants.is_empty() {
-        return Err(syn::Error::new(
+        return Err(Error::new(
             brace_token.span,
             "#[pin_project] attribute may not be used on enums without variants",
         ));
@@ -157,6 +161,8 @@ impl Args {
                             }
                         }
                     };
+                    // This error message is not ideal, but as this should basically be
+                    // rejected by attribute side, users will rarely actually see this error.
                     return Err(error!(span, DUPLICATE_PIN));
                 }
                 prev = Some((attr, syn::parse2::<Self>(attr.tokens.clone())));
@@ -184,6 +190,8 @@ impl Parse for Args {
 
             // If this fails, it means that there is a `#[pin]` attribute
             // inserted by something other than `#[pin_project]` attribute.
+            // This error message is not ideal, but as this should basically be
+            // rejected by attribute side, users will rarely actually see this error.
             Err(error!(TokenStream::new(), DUPLICATE_PIN))
         }
 

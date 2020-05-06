@@ -7,19 +7,17 @@ use std::pin::Pin;
 #[project_ref] // Nightly does not need a dummy attribute to the function.
 #[test]
 fn project_stmt_expr() {
-    // struct
-
     #[pin_project]
-    struct Foo<T, U> {
+    struct Struct<T, U> {
         #[pin]
         field1: T,
         field2: U,
     }
 
-    let foo = Foo { field1: 1, field2: 2 };
+    let s = Struct { field1: 1, field2: 2 };
 
     #[project_ref]
-    let Foo { field1, field2 } = Pin::new(&foo).project_ref();
+    let Struct { field1, field2 } = Pin::new(&s).project_ref();
 
     let x: Pin<&i32> = field1;
     assert_eq!(*x, 1);
@@ -30,12 +28,12 @@ fn project_stmt_expr() {
     // tuple struct
 
     #[pin_project]
-    struct Bar<T, U>(#[pin] T, U);
+    struct TupleStruct<T, U>(#[pin] T, U);
 
-    let bar = Bar(1, 2);
+    let s = TupleStruct(1, 2);
 
     #[project_ref]
-    let Bar(x, y) = Pin::new(&bar).project_ref();
+    let TupleStruct(x, y) = Pin::new(&s).project_ref();
 
     let x: Pin<&i32> = x;
     assert_eq!(*x, 1);
@@ -43,10 +41,8 @@ fn project_stmt_expr() {
     let y: &i32 = y;
     assert_eq!(*y, 2);
 
-    // enum
-
     #[pin_project]
-    enum Baz<A, B, C, D> {
+    enum Enum<A, B, C, D> {
         Variant1(#[pin] A, B),
         Variant2 {
             #[pin]
@@ -56,31 +52,31 @@ fn project_stmt_expr() {
         None,
     }
 
-    let baz = Baz::Variant1(1, 2);
+    let e = Enum::Variant1(1, 2);
 
-    let baz = Pin::new(&baz).project_ref();
+    let e = Pin::new(&e).project_ref();
 
     #[project_ref]
-    match &baz {
-        Baz::Variant1(x, y) => {
+    match &e {
+        Enum::Variant1(x, y) => {
             let x: &Pin<&i32> = x;
             assert_eq!(**x, 1);
 
             let y: &&i32 = y;
             assert_eq!(**y, 2);
         }
-        Baz::Variant2 { field1, field2 } => {
+        Enum::Variant2 { field1, field2 } => {
             let _x: &Pin<&i32> = field1;
             let _y: &&i32 = field2;
         }
-        Baz::None => {}
+        Enum::None => {}
     }
 
     #[project_ref]
-    let val = match &baz {
-        Baz::Variant1(_, _) => true,
-        Baz::Variant2 { .. } => false,
-        Baz::None => false,
+    let val = match &e {
+        Enum::Variant1(_, _) => true,
+        Enum::Variant2 { .. } => false,
+        Enum::None => false,
     };
     assert_eq!(val, true);
 }

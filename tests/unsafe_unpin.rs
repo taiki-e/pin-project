@@ -41,26 +41,6 @@ fn trivial_bounds() {
 }
 
 #[test]
-fn dst() {
-    #[pin_project(UnsafeUnpin)]
-    pub struct A<T: ?Sized> {
-        x: T,
-    }
-
-    #[pin_project(UnsafeUnpin)]
-    pub struct B<T: ?Sized> {
-        #[pin]
-        x: T,
-    }
-
-    #[pin_project(UnsafeUnpin)]
-    pub struct C<T: ?Sized>(T);
-
-    #[pin_project(UnsafeUnpin)]
-    pub struct D<T: ?Sized>(#[pin] T);
-}
-
-#[test]
 fn test() {
     let mut x = OverlappingLifetimeNames { field1: 0, field2: 1, field3: &() };
     let x = Pin::new(&mut x);

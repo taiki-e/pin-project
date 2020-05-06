@@ -19,3 +19,6 @@ struct Foo<A, B> {
 
 #[project]
 impl<A, B> Foo<A, B> {}
+
+#[test]
+fn test() {}
