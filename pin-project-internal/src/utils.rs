@@ -141,11 +141,10 @@ impl SliceExt for [Attribute] {
         self.iter()
             .try_fold((0, None), |(i, mut prev), attr| {
                 if attr.path.is_ident(ident) {
-                    if prev.is_some() {
+                    if prev.replace(i).is_some() {
                         return Err(error!(attr, "duplicate #[{}] attribute", ident));
                     }
                     parse_as_empty(&attr.tokens)?;
-                    prev = Some(i);
                 }
                 Ok((i + 1, prev))
             })

@@ -176,8 +176,8 @@ impl Args {
 
 impl Parse for Args {
     fn parse(input: ParseStream<'_>) -> Result<Self> {
+        // `(<private>(<args>))` -> `<args>`
         fn parse_input(input: ParseStream<'_>) -> Result<ParseBuffer<'_>> {
-            // Extracts `#args` from `(#private(#args))`.
             if let Ok(content) = input.parenthesized() {
                 if let Ok(private) = content.parse::<Ident>() {
                     if private == CURRENT_PRIVATE_MODULE {
@@ -201,7 +201,7 @@ impl Parse for Args {
             let ident = input.parse::<Ident>()?;
             match &*ident.to_string() {
                 "PinnedDrop" => {
-                    if args.pinned_drop.is_some() {
+                    if args.pinned_drop.replace(ident.span()).is_some() {
                         return Err(error!(ident, "duplicate `PinnedDrop` argument"));
                     } else if args.replace.is_some() {
                         return Err(error!(
@@ -209,10 +209,9 @@ impl Parse for Args {
                             "arguments `PinnedDrop` and `Replace` are mutually exclusive"
                         ));
                     }
-                    args.pinned_drop = Some(ident.span());
                 }
                 "Replace" => {
-                    if args.replace.is_some() {
+                    if args.replace.replace(ident.span()).is_some() {
                         return Err(error!(ident, "duplicate `Replace` argument"));
                     } else if args.pinned_drop.is_some() {
                         return Err(error!(
@@ -220,13 +219,11 @@ impl Parse for Args {
                             "arguments `PinnedDrop` and `Replace` are mutually exclusive"
                         ));
                     }
-                    args.replace = Some(ident.span());
                 }
                 "UnsafeUnpin" => {
-                    if args.unsafe_unpin.is_some() {
+                    if args.unsafe_unpin.replace(ident.span()).is_some() {
                         return Err(error!(ident, "duplicate `UnsafeUnpin` argument"));
                     }
-                    args.unsafe_unpin = Some(ident.span());
                 }
                 _ => return Err(error!(ident, "unexpected argument: {}", ident)),
             }
