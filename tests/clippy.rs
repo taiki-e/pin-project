@@ -30,7 +30,6 @@ pub struct StructPinnedDrop<T, U> {
 
 #[pinned_drop]
 impl<T, U> PinnedDrop for StructPinnedDrop<T, U> {
-    #[allow(clippy::needless_pass_by_value)] // FIXME: https://github.com/rust-lang/rust-clippy/issues/3031?
     fn drop(self: Pin<&mut Self>) {}
 }
 
@@ -79,7 +78,6 @@ pub enum EnumPinnedDrop<T, U> {
 
 #[pinned_drop]
 impl<T, U> PinnedDrop for EnumPinnedDrop<T, U> {
-    #[allow(clippy::needless_pass_by_value)] // FIXME: https://github.com/rust-lang/rust-clippy/issues/3031?
     fn drop(self: Pin<&mut Self>) {}
 }
 

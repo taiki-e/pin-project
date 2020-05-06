@@ -123,29 +123,23 @@ fn parse(item: &mut ItemImpl) -> Result<()> {
         return Err(error!(item, "not all trait items implemented, missing: `drop`"));
     }
 
-    for (i, item) in item.items.iter().enumerate() {
-        match item {
-            ImplItem::Const(item) => {
-                return Err(error!(
-                    item,
-                    "const `{}` is not a member of trait `PinnedDrop`", item.ident
-                ));
-            }
-            ImplItem::Type(item) => {
-                return Err(error!(
-                    item,
-                    "type `{}` is not a member of trait `PinnedDrop`", item.ident
-                ));
-            }
-            ImplItem::Method(method) => {
-                parse_method(method)?;
-                if i != 0 {
-                    return Err(error!(method, "duplicate definitions with name `drop`"));
-                }
-            }
-            _ => parse_as_empty(&item.to_token_stream())?,
+    item.items.iter().enumerate().try_for_each(|(i, item)| match item {
+        ImplItem::Const(item) => {
+            Err(error!(item, "const `{}` is not a member of trait `PinnedDrop`", item.ident))
         }
-    }
+        ImplItem::Type(item) => {
+            Err(error!(item, "type `{}` is not a member of trait `PinnedDrop`", item.ident))
+        }
+        ImplItem::Method(method) => {
+            parse_method(method)?;
+            if i == 0 {
+                Ok(())
+            } else {
+                Err(error!(method, "duplicate definitions with name `drop`"))
+            }
+        }
+        _ => unreachable!("unexpected ImplItem"),
+    })?;
 
     expand_item(item);
 
@@ -180,6 +174,8 @@ fn expand_item(item: &mut ItemImpl) {
             prepend_underscore_to_self(&mut ident.ident);
         }
     }
+    // This lint does not warn the receiver.
+    drop_inner.attrs.push(syn::parse_quote!(#[allow(clippy::needless_pass_by_value)]));
     let mut visitor = ReplaceReceiver::new(&item.self_ty);
     visitor.visit_signature_mut(&mut drop_inner.sig);
     visitor.visit_block_mut(&mut drop_inner.block);

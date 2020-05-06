@@ -76,6 +76,7 @@ const __SCOPE_Struct: () = {
 };
 impl<T> ::pin_project::__private::PinnedDrop for Struct<'_, T> {
     unsafe fn drop(self: Pin<&mut Self>) {
+        #[allow(clippy::needless_pass_by_value)]
         fn __drop_inner<T>(__self: Pin<&mut Struct<'_, T>>) {
             **__self.project().was_dropped = true;
         }
