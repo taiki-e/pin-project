@@ -186,11 +186,20 @@ use utils::{Immutable, Mutable, Owned};
 /// To ensure that this requirement is upheld, the `#[pin_project]` attribute will
 /// provide a [`Drop`] impl for you. This `Drop` impl will delegate to an impl
 /// block annotated with `#[pinned_drop]` if you use the `PinnedDrop` argument
-/// to `#[pin_project]`. This impl block acts just like a normal [`Drop`] impl,
+/// to `#[pin_project]`.
+///
+/// This impl block acts just like a normal [`Drop`] impl,
 /// except for the following two:
 ///
 /// * `drop` method takes `Pin<&mut Self>`
 /// * Name of the trait is `PinnedDrop`.
+///
+/// ```rust
+/// # use std::pin::Pin;
+/// pub trait PinnedDrop {
+///     fn drop(self: Pin<&mut Self>);
+/// }
+/// ```
 ///
 /// `#[pin_project]` implements the actual [`Drop`] trait via `PinnedDrop` you
 /// implemented. To drop a type that implements `PinnedDrop`, use the [`drop`]
@@ -387,10 +396,26 @@ pub fn pin_project(args: TokenStream, input: TokenStream) -> TokenStream {
 /// An attribute for annotating an impl block that implements [`Drop`].
 ///
 /// This attribute is only needed when you wish to provide a [`Drop`]
-/// impl for your type. The impl block annotated with `#[pinned_drop]` acts just
-/// like a normal [`Drop`] impl, except for the fact that `drop` method takes
-/// `Pin<&mut Self>`. In particular, it will never be called more than once,
-/// just like [`Drop::drop`].
+/// impl for your type.
+///
+/// This impl block acts just like a normal [`Drop`] impl,
+/// except for the following two:
+///
+/// * `drop` method takes `Pin<&mut Self>`
+/// * Name of the trait is `PinnedDrop`.
+///
+/// ```rust
+/// # use std::pin::Pin;
+/// pub trait PinnedDrop {
+///     fn drop(self: Pin<&mut Self>);
+/// }
+/// ```
+///
+/// `#[pin_project]` implements the actual [`Drop`] trait via `PinnedDrop` you
+/// implemented. To drop a type that implements `PinnedDrop`, use the [`drop`]
+/// function just like dropping a type that directly implements [`Drop`].
+///
+/// In particular, it will never be called more than once, just like [`Drop::drop`].
 ///
 /// ## Example
 ///
@@ -416,9 +441,31 @@ pub fn pin_project(args: TokenStream, input: TokenStream) -> TokenStream {
 /// }
 /// ```
 ///
-/// See ["pinned-drop" section of `pin_project` attribute][pinned-drop] for more details.
+/// See also ["pinned-drop" section of `pin_project` attribute][pinned-drop].
 ///
 /// [pinned-drop]: ./attr.pin_project.html#pinned_drop
+///
+/// ## Why `#[pinned_drop]` attribute is needed?
+///
+/// Implementing `PinnedDrop::drop` is safe, but calling it is not safe.
+// This is because destructors can be called multiple times in safe code and
+/// [double dropping is unsound](https://github.com/rust-lang/rust/pull/62360).
+///
+/// Ideally, it would be desirable to be able to forbid manual calls in
+/// the same way as [`Drop::drop`], but the library cannot do it. So, by using
+/// macros and replacing them with private traits like the following, we prevent users from
+/// calling `PinnedDrop::drop` in safe code.
+///
+/// ```rust
+/// # use std::pin::Pin;
+/// pub trait PinnedDrop {
+///     unsafe fn drop(self: Pin<&mut Self>);
+/// }
+/// ```
+///
+/// This allows implementing [`Drop`] safely using `#[pinned_drop]`.
+/// Also by using the [`drop`] function just like dropping a type that directly implements [`Drop`],
+/// can drop safely a type that implements `PinnedDrop`.
 #[proc_macro_attribute]
 pub fn pinned_drop(args: TokenStream, input: TokenStream) -> TokenStream {
     let input = syn::parse_macro_input!(input);
