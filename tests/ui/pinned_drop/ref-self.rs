@@ -7,8 +7,8 @@ pub struct Struct {
 }
 
 impl Struct {
-    fn method_ref(ref self: Pin<&mut Self>) {} //~ ERROR expected identifier, found keyword `self`
-    fn method_ref_mut(ref mut self: Pin<&mut Self>) {} //~ ERROR expected identifier, found keyword `self`
+    fn take_ref_self(ref self: Pin<&mut Self>) {} //~ ERROR expected identifier, found keyword `self`
+    fn take_ref_mut_self(ref mut self: Pin<&mut Self>) {} //~ ERROR expected identifier, found keyword `self`
 }
 
 fn main() {}

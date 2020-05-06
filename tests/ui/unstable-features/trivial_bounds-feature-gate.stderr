@@ -24,9 +24,9 @@ error[E0277]: `std::marker::PhantomPinned` cannot be unpinned
    = help: add `#![feature(trivial_bounds)]` to the crate attributes to enable
 
 error[E0277]: `std::marker::PhantomPinned` cannot be unpinned
-  --> $DIR/trivial_bounds-feature-gate.rs:33:5
+  --> $DIR/trivial_bounds-feature-gate.rs:35:5
    |
-33 |     impl Unpin for A where Inner: Unpin {} //~ ERROR E0277
+35 |     impl Unpin for A where Inner: Unpin {} //~ ERROR E0277
    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ within `inner::Inner`, the trait `std::marker::Unpin` is not implemented for `std::marker::PhantomPinned`
    |
    = note: required because it appears within the type `inner::Inner`
@@ -34,9 +34,9 @@ error[E0277]: `std::marker::PhantomPinned` cannot be unpinned
    = help: add `#![feature(trivial_bounds)]` to the crate attributes to enable
 
 error[E0277]: `std::marker::PhantomPinned` cannot be unpinned
-  --> $DIR/trivial_bounds-feature-gate.rs:41:5
+  --> $DIR/trivial_bounds-feature-gate.rs:43:5
    |
-41 |     impl Unpin for B where Wrapper<Inner>: Unpin {} //~ ERROR E0277
+43 |     impl Unpin for B where Wrapper<Inner>: Unpin {} //~ ERROR E0277
    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ within `inner::Inner`, the trait `std::marker::Unpin` is not implemented for `std::marker::PhantomPinned`
    |
    = note: required because it appears within the type `inner::Inner`

@@ -53,7 +53,7 @@ impl Parse for Input {
 
         let ahead = input.fork();
         let _vis: Visibility = ahead.parse()?;
-        if !ahead.peek(Token![struct]) && !ahead.peek(Token![enum]) {
+        if !ahead.peek(token::Struct) && !ahead.peek(token::Enum) {
             // If we check this only on proc-macro-derive, it may generate unhelpful error messages.
             // So it is preferable to be able to detect it here.
             Err(error!(
@@ -63,7 +63,7 @@ impl Parse for Input {
         } else if let Some(attr) = attrs.find(PIN) {
             Err(error!(attr, "#[pin] attribute may only be used on fields of structs or variants"))
         } else if let Some(attr) = attrs.find("pin_project") {
-            Err(error!(attr, "only one #[pin_project] attribute is allowed"))
+            Err(error!(attr, "duplicate #[pin_project] attribute"))
         } else {
             Ok(Self { attrs, body: input.parse()? })
         }

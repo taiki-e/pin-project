@@ -5,7 +5,6 @@ use quote::{format_ident, quote_spanned};
 use syn::{
     parse::{ParseBuffer, ParseStream},
     punctuated::Punctuated,
-    token::{self, Comma},
     visit_mut::{self, VisitMut},
     *,
 };
@@ -45,7 +44,7 @@ pub(crate) fn proj_ident(ident: &Ident, mutability: Mutability) -> Ident {
 /// Determines the lifetime names. Ensure it doesn't overlap with any existing lifetime names.
 pub(crate) fn determine_lifetime_name(
     lifetime_name: &mut String,
-    generics: &Punctuated<GenericParam, Comma>,
+    generics: &Punctuated<GenericParam, token::Comma>,
 ) {
     let existing_lifetimes: Vec<String> = generics
         .iter()
@@ -73,14 +72,14 @@ pub(crate) fn insert_lifetime_and_bound(
 ) -> WherePredicate {
     insert_lifetime(generics, lifetime.clone());
 
-    let orig_type: syn::Type = syn::parse_quote!(#orig_ident #orig_generics);
+    let orig_type: Type = syn::parse_quote!(#orig_ident #orig_generics);
     let mut punct = Punctuated::new();
     punct.push(TypeParamBound::Lifetime(lifetime));
 
     WherePredicate::Type(PredicateType {
         lifetimes: None,
         bounded_ty: orig_type,
-        colon_token: syn::token::Colon::default(),
+        colon_token: token::Colon::default(),
         bounds: punct,
     })
 }

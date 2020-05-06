@@ -55,7 +55,7 @@ fn parse_method(method: &ImplItemMethod) -> Result<()> {
 
     if method.sig.inputs.len() != 1 {
         if method.sig.inputs.is_empty() {
-            return Err(syn::Error::new(method.sig.paren_token.span, INVALID_ARGUMENT));
+            return Err(Error::new(method.sig.paren_token.span, INVALID_ARGUMENT));
         } else {
             return Err(error!(&method.sig.inputs, INVALID_ARGUMENT));
         }

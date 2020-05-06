@@ -6,6 +6,4 @@ edition = "2015"
 publish = false
 
 [dependencies]
-
-[dev-dependencies]
 pin-project = { path = "../.." }

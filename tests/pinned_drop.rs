@@ -76,7 +76,7 @@ fn self_in_macro_containing_fn() {
                     pub fn f(self) {}
                 }
             });
-            self.data;
+            let _ = self.data;
         }
     }
 }
