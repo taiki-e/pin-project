@@ -92,28 +92,6 @@ const __SCOPE_Struct: () = {
         }
     }
 
-    // It is safe to implement PinnedDrop::drop, but it is not safe to call it.
-    // This is because destructors can be called multiple times (double dropping
-    // is unsound: rust-lang/rust#62360).
-    //
-    // Ideally, it would be desirable to be able to prohibit manual calls in the
-    // same way as Drop::drop, but the library cannot. So, by using macros and
-    // replacing them with private traits, we prevent users from calling
-    // PinnedDrop::drop.
-    //
-    // Users can implement `Drop` safely using `#[pinned_drop]`.
-    // **Do not call or implement this trait directly.**
-    impl<T> ::pin_project::__private::PinnedDrop for Struct<'_, T> {
-        // Since calling it twice on the same object would be UB,
-        // this method is unsafe.
-        unsafe fn drop(self: Pin<&mut Self>) {
-            fn __drop_inner<T>(__self: Pin<&mut Struct<'_, T>>) {
-                **__self.project().was_dropped = true;
-            }
-            __drop_inner(self);
-        }
-    }
-
     // Automatically create the appropriate conditional `Unpin` implementation.
     //
     // See ./struct-default-expanded.rs and https://github.com/taiki-e/pin-project/pull/53.
@@ -139,5 +117,28 @@ const __SCOPE_Struct: () = {
         &val.field;
     }
 };
+
+// It is safe to implement PinnedDrop::drop, but it is not safe to call it.
+// This is because destructors can be called multiple times (double dropping
+// is unsound: https://github.com/rust-lang/rust/pull/62360).
+//
+// Ideally, it would be desirable to be able to prohibit manual calls in the
+// same way as Drop::drop, but the library cannot. So, by using macros and
+// replacing them with private traits, we prevent users from calling
+// PinnedDrop::drop.
+//
+// Users can implement `Drop` safely using `#[pinned_drop]`.
+// **Do not call or implement this trait directly.**
+impl<T> ::pin_project::__private::PinnedDrop for Struct<'_, T> {
+    // Since calling it twice on the same object would be UB,
+    // this method is unsafe.
+    unsafe fn drop(self: Pin<&mut Self>) {
+        #[allow(clippy::needless_pass_by_value)]
+        fn __drop_inner<T>(__self: Pin<&mut Struct<'_, T>>) {
+            **__self.project().was_dropped = true;
+        }
+        __drop_inner(self);
+    }
+}
 
 fn main() {}

@@ -127,7 +127,7 @@ pub mod __private {
 
     // It is safe to implement PinnedDrop::drop, but it is not safe to call it.
     // This is because destructors can be called multiple times (double dropping
-    // is unsound: rust-lang/rust#62360).
+    // is unsound: https://github.com/rust-lang/rust/pull/62360).
     //
     // Ideally, it would be desirable to be able to prohibit manual calls in the
     // same way as Drop::drop, but the library cannot. So, by using macros and
