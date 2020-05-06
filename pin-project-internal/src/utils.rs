@@ -261,7 +261,7 @@ impl<'a> ReplaceReceiver<'a> {
             let span = path.segments[0].ident.span();
             let msg = "Self type of this impl is unsupported in expression position";
             let error = Error::new(span, msg).to_compile_error();
-            *path = parse_quote!(::core::marker::PhantomData::<#error>);
+            *path = parse_quote!(::pin_project::__reexport::marker::PhantomData::<#error>);
         }
     }
 }
