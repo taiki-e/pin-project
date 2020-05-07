@@ -603,7 +603,7 @@ impl<'a> Context<'a> {
         let mut proj_drop = Vec::with_capacity(fields.len());
 
         for Field { attrs, vis, ident, ty, .. } in fields {
-            if attrs.find_exact(PIN)?.is_some() {
+            if attrs.position_exact(PIN)?.is_some() {
                 self.pinned_fields.push(ty.clone());
 
                 let lifetime = &self.proj.lifetime;
@@ -679,7 +679,7 @@ impl<'a> Context<'a> {
 
         for (i, Field { attrs, vis, ty, .. }) in fields.iter().enumerate() {
             let id = format_ident!("_{}", i);
-            if attrs.find_exact(PIN)?.is_some() {
+            if attrs.position_exact(PIN)?.is_some() {
                 self.pinned_fields.push(ty.clone());
 
                 let lifetime = &self.proj.lifetime;

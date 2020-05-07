@@ -127,7 +127,6 @@ pub(crate) fn parse_as_empty(tokens: &TokenStream) -> Result<()> {
 pub(crate) trait SliceExt {
     fn position_exact(&self, ident: &str) -> Result<Option<usize>>;
     fn find(&self, ident: &str) -> Option<&Attribute>;
-    fn find_exact(&self, ident: &str) -> Result<Option<&Attribute>>;
 }
 
 pub(crate) trait VecExt {
@@ -151,10 +150,6 @@ impl SliceExt for [Attribute] {
 
     fn find(&self, ident: &str) -> Option<&Attribute> {
         self.iter().position(|attr| attr.path.is_ident(ident)).and_then(|i| self.get(i))
-    }
-
-    fn find_exact(&self, ident: &str) -> Result<Option<&Attribute>> {
-        self.position_exact(ident).map(|pos| pos.and_then(|i| self.get(i)))
     }
 }
 
