@@ -1,4 +1,4 @@
-use proc_macro2::{Span, TokenStream};
+use proc_macro2::TokenStream;
 use quote::quote;
 use syn::{
     parse::{Parse, ParseStream},
@@ -6,7 +6,7 @@ use syn::{
 };
 
 use super::PIN;
-use crate::utils::{SliceExt, CURRENT_PRIVATE_MODULE};
+use crate::utils::SliceExt;
 
 // To generate the correct `Unpin` implementation and the projection methods,
 // we need to collect the types of the pinned fields.
@@ -18,20 +18,19 @@ use crate::utils::{SliceExt, CURRENT_PRIVATE_MODULE};
 // At this stage, only attributes are parsed and the following attributes are
 // added to the attributes of the item.
 // * `#[derive(InternalDerive)]` - An internal helper macro that does the above processing.
-// * `#[pin(#private(#args))]` - Pass the argument of `#[pin_project]` to proc-macro-derive (`InternalDerive`).
+// * `#[pin(__private(#args))]` - Pass the argument of `#[pin_project]` to proc-macro-derive (`InternalDerive`).
 
 pub(super) fn parse_attribute(args: &TokenStream, input: TokenStream) -> Result<TokenStream> {
     let Input { mut attrs, body } = syn::parse2(input)?;
 
-    let private = Ident::new(CURRENT_PRIVATE_MODULE, Span::call_site());
     attrs.push(syn::parse_quote! {
-        #[derive(::pin_project::#private::__PinProjectInternalDerive)]
+        #[derive(::pin_project::__private::__PinProjectInternalDerive)]
     });
-    // Use `#private` to prevent users from trying to control `InternalDerive` manually.
-    // `#private` does not guarantee compatibility between patch versions,
+    // Use `__private` to prevent users from trying to control `InternalDerive` manually.
+    // `__private` does not guarantee compatibility between patch versions,
     // so it should be sufficient for this purpose in most cases.
     attrs.push(syn::parse_quote! {
-        #[pin(#private(#args))]
+        #[pin(__private(#args))]
     });
 
     Ok(quote! {
