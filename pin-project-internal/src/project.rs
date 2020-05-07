@@ -208,10 +208,7 @@ fn replace_item_fn(item: &mut ItemFn, mutability: Mutability) -> Result<()> {
 
         fn visit_stmt(&mut self, node: &mut Stmt) -> Result<()> {
             match node {
-                Stmt::Expr(expr) | Stmt::Semi(expr, _) => {
-                    visit_mut::visit_expr_mut(self, expr);
-                    self.visit_expr(expr)
-                }
+                Stmt::Expr(expr) | Stmt::Semi(expr, _) => self.visit_expr(expr),
                 Stmt::Local(local) => {
                     visit_mut::visit_local_mut(self, local);
                     if let Some(attr) = local.attrs.find_remove(self.name())? {
@@ -226,6 +223,7 @@ fn replace_item_fn(item: &mut ItemFn, mutability: Mutability) -> Result<()> {
         }
 
         fn visit_expr(&mut self, node: &mut Expr) -> Result<()> {
+            visit_mut::visit_expr_mut(self, node);
             let attr = match node {
                 Expr::Match(expr) => expr.attrs.find_remove(self.name())?,
                 Expr::If(expr_if) => {

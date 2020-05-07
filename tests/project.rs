@@ -204,3 +204,33 @@ fn non_stmt_expr_match() {
         },
     );
 }
+
+// https://github.com/taiki-e/pin-project/issues/206
+#[test]
+#[project]
+fn issue_206() {
+    #[pin_project]
+    enum Enum<A> {
+        Variant(#[pin] A),
+    }
+
+    let mut x = Enum::Variant(1);
+    let x = Pin::new(&mut x).project();
+
+    Some({
+        #[project]
+        match &x {
+            Enum::Variant(_) => {}
+        }
+    });
+
+    loop {
+        let _ = {
+            #[project]
+            match &x {
+                Enum::Variant(_) => {}
+            }
+        };
+        break;
+    }
+}
