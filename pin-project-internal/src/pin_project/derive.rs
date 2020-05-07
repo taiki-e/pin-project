@@ -6,13 +6,12 @@ use syn::{
     *,
 };
 
+use super::PIN;
 use crate::utils::{
     determine_lifetime_name, determine_visibility, insert_lifetime_and_bound, proj_ident,
     Immutable, Mutable, Owned, ParseBufferExt, ReplaceReceiver, SliceExt, Variants,
     CURRENT_PRIVATE_MODULE, DEFAULT_LIFETIME_NAME,
 };
-
-use super::PIN;
 
 pub(super) fn parse_derive(input: TokenStream) -> Result<TokenStream> {
     let mut item = syn::parse2(input)?;
@@ -131,8 +130,11 @@ fn validate_enum(brace_token: token::Brace, variants: &Variants) -> Result<()> {
 
 #[derive(Default)]
 struct Args {
+    /// `PinnedDrop`.
     pinned_drop: Option<Span>,
+    /// `UnsafeUnpin`.
     unsafe_unpin: Option<Span>,
+    /// `Replace`.
     replace: Option<Span>,
 }
 
@@ -195,37 +197,42 @@ impl Parse for Args {
             Err(error!(TokenStream::new(), DUPLICATE_PIN))
         }
 
+        // Replace `prev` with `new`. Returns `Err` if `prev` is `Some`.
+        fn replace<T>(prev: &mut Option<T>, new: T, token: &Ident) -> Result<()> {
+            if prev.replace(new).is_some() {
+                Err(error!(token, "duplicate `{}` argument", token))
+            } else {
+                Ok(())
+            }
+        }
+
         let input = parse_input(input)?;
         let mut args = Self::default();
         while !input.is_empty() {
-            let ident = input.parse::<Ident>()?;
-            match &*ident.to_string() {
+            let token = input.parse::<Ident>()?;
+            match &*token.to_string() {
                 "PinnedDrop" => {
-                    if args.pinned_drop.replace(ident.span()).is_some() {
-                        return Err(error!(ident, "duplicate `PinnedDrop` argument"));
-                    } else if args.replace.is_some() {
+                    replace(&mut args.pinned_drop, token.span(), &token)?;
+                    if args.replace.is_some() {
                         return Err(error!(
-                            ident,
+                            token,
                             "arguments `PinnedDrop` and `Replace` are mutually exclusive"
                         ));
                     }
                 }
                 "Replace" => {
-                    if args.replace.replace(ident.span()).is_some() {
-                        return Err(error!(ident, "duplicate `Replace` argument"));
-                    } else if args.pinned_drop.is_some() {
+                    replace(&mut args.replace, token.span(), &token)?;
+                    if args.pinned_drop.is_some() {
                         return Err(error!(
-                            ident,
+                            token,
                             "arguments `PinnedDrop` and `Replace` are mutually exclusive"
                         ));
                     }
                 }
                 "UnsafeUnpin" => {
-                    if args.unsafe_unpin.replace(ident.span()).is_some() {
-                        return Err(error!(ident, "duplicate `UnsafeUnpin` argument"));
-                    }
+                    replace(&mut args.unsafe_unpin, token.span(), &token)?;
                 }
-                _ => return Err(error!(ident, "unexpected argument: {}", ident)),
+                _ => return Err(error!(token, "unexpected argument: {}", token)),
             }
 
             if !input.is_empty() {
@@ -291,11 +298,11 @@ struct Context<'a> {
     proj: ProjectedType,
     /// Types of the pinned fields.
     pinned_fields: Vec<Type>,
-    /// `PinnedDrop` attribute.
+    /// `PinnedDrop` argument.
     pinned_drop: Option<Span>,
-    /// `UnsafeUnpin` attribute.
+    /// `UnsafeUnpin` argument.
     unsafe_unpin: Option<Span>,
-    // `Replace` attribute (requires Sized bound)
+    /// `Replace` argument (requires Sized bound)
     replace: Option<Span>,
 }
 

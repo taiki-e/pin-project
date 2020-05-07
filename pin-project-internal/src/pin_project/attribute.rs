@@ -5,9 +5,8 @@ use syn::{
     *,
 };
 
-use crate::utils::{SliceExt, CURRENT_PRIVATE_MODULE};
-
 use super::PIN;
+use crate::utils::{SliceExt, CURRENT_PRIVATE_MODULE};
 
 // To generate the correct `Unpin` implementation and the projection methods,
 // we need to collect the types of the pinned fields.
@@ -52,7 +51,7 @@ impl Parse for Input {
         let attrs = input.call(Attribute::parse_outer)?;
 
         let ahead = input.fork();
-        let _vis: Visibility = ahead.parse()?;
+        let _: Visibility = ahead.parse()?;
         if !ahead.peek(token::Struct) && !ahead.peek(token::Enum) {
             // If we check this only on proc-macro-derive, it may generate unhelpful error messages.
             // So it is preferable to be able to detect it here.

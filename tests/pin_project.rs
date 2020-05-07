@@ -5,7 +5,7 @@ use core::{marker::PhantomPinned, pin::Pin};
 use pin_project::{pin_project, pinned_drop, UnsafeUnpin};
 
 #[test]
-fn default() {
+fn projection() {
     #[pin_project(Replace)]
     struct Struct<T, U> {
         #[pin]

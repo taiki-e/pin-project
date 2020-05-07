@@ -67,26 +67,28 @@ fn parse_method(method: &ImplItemMethod) -> Result<()> {
         if let (Pat::Ident(pat @ PatIdent { by_ref: None, subpat: None, .. }), Some(path)) =
             (&*pat.pat, get_ty_path(&pat.ty))
         {
-            let ty = &path.segments.last().unwrap();
+            let ty = path.segments.last().unwrap();
             if let PathArguments::AngleBracketed(args) = &ty.arguments {
-                // (mut) self: [<path>::]Pin<<args>>
-                if pat.ident == "self" && args.args.len() == 1 && ty.ident == "Pin" {
-                    // &mut <elem>
-                    if let GenericArgument::Type(Type::Reference(TypeReference {
-                        mutability: Some(_),
-                        elem,
-                        ..
-                    })) = &args.args[0]
+                // <pat>: (<path>::)<ty><&mut <elem>..>
+                if let Some(GenericArgument::Type(Type::Reference(TypeReference {
+                    mutability: Some(_),
+                    elem,
+                    ..
+                }))) = &args.args.first()
+                {
+                    // (mut) self: (<path>::)Pin<&mut Self>
+                    if args.args.len() == 1
+                        && pat.ident == "self"
+                        && ty.ident == "Pin"
+                        && get_ty_path(elem).map_or(false, |path| path.is_ident("Self"))
                     {
-                        if get_ty_path(elem).map_or(false, |path| path.is_ident("Self")) {
-                            if method.sig.unsafety.is_some() {
-                                return Err(error!(
-                                    method.sig.unsafety,
-                                    "implementing the method `drop` is not unsafe"
-                                ));
-                            }
-                            return Ok(());
+                        if method.sig.unsafety.is_some() {
+                            return Err(error!(
+                                method.sig.unsafety,
+                                "implementing the method `drop` is not unsafe"
+                            ));
                         }
+                        return Ok(());
                     }
                 }
             }
