@@ -6,6 +6,17 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 ## [Unreleased]
 
+## [0.4.11] - 2020-05-07
+
+* [Fixed an issue that `#[project]` on non-statement expression does not work without unstable features.][197]
+
+* [Support overwriting the name of core crate.][199]
+
+* Improve documentation
+
+[197]: https://github.com/taiki-e/pin-project/pull/197
+[199]: https://github.com/taiki-e/pin-project/pull/199
+
 ## [0.4.10] - 2020-05-04
 
 * [Added `project_replace` method and `#[project_replace]` attribute.][194]
@@ -328,7 +339,8 @@ See also [tracking issue for 0.4 release][21].
 
 Initial release
 
-[Unreleased]: https://github.com/taiki-e/pin-project/compare/v0.4.10...HEAD
+[Unreleased]: https://github.com/taiki-e/pin-project/compare/v0.4.11...HEAD
+[0.4.11]: https://github.com/taiki-e/pin-project/compare/v0.4.10...v0.4.11
 [0.4.10]: https://github.com/taiki-e/pin-project/compare/v0.4.9...v0.4.10
 [0.4.9]: https://github.com/taiki-e/pin-project/compare/v0.4.8...v0.4.9
 [0.4.8]: https://github.com/taiki-e/pin-project/compare/v0.4.7...v0.4.8
