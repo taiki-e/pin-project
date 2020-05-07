@@ -26,7 +26,7 @@ mod project;
 
 use proc_macro::TokenStream;
 
-use utils::{Immutable, Mutable, Owned};
+use crate::utils::{Immutable, Mutable, Owned};
 
 /// An attribute that creates a projection struct covering all the fields.
 ///

@@ -5,9 +5,8 @@ use syn::{
     *,
 };
 
-use crate::utils::{SliceExt, CURRENT_PRIVATE_MODULE};
-
 use super::PIN;
+use crate::utils::{SliceExt, CURRENT_PRIVATE_MODULE};
 
 // To generate the correct `Unpin` implementation and the projection methods,
 // we need to collect the types of the pinned fields.

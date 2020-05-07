@@ -6,13 +6,12 @@ use syn::{
     *,
 };
 
+use super::PIN;
 use crate::utils::{
     determine_lifetime_name, determine_visibility, insert_lifetime_and_bound, proj_ident,
     Immutable, Mutable, Owned, ParseBufferExt, ReplaceReceiver, SliceExt, Variants,
     CURRENT_PRIVATE_MODULE, DEFAULT_LIFETIME_NAME,
 };
-
-use super::PIN;
 
 pub(super) fn parse_derive(input: TokenStream) -> Result<TokenStream> {
     let mut item = syn::parse2(input)?;
