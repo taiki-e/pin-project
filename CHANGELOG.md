@@ -6,7 +6,27 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 ## [Unreleased]
 
-## [0.4.11] - 2020-05-07
+## [0.4.13] - 2020-05-07
+
+* [Fixed a regression in 0.4.11.][207]
+
+  Changes from [0.4.10](https://github.com/taiki-e/pin-project/releases/tag/v0.4.10):
+
+  * [Fixed an issue that `#[project]` on non-statement expression does not work without unstable features.][197]
+
+  * [Support overwriting the name of core crate.][199]
+
+  * Improve documentation
+
+[207]: https://github.com/taiki-e/pin-project/pull/207
+
+## [0.4.12] - 2020-05-07
+
+* A release to avoid [a regression in 0.4.11][206]. No code changes from [0.4.10](https://github.com/taiki-e/pin-project/releases/tag/v0.4.10).
+
+[206]: https://github.com/taiki-e/pin-project/issues/206
+
+## [0.4.11] - 2020-05-07 - YANKED
 
 * [Fixed an issue that `#[project]` on non-statement expression does not work without unstable features.][197]
 
@@ -339,7 +359,9 @@ See also [tracking issue for 0.4 release][21].
 
 Initial release
 
-[Unreleased]: https://github.com/taiki-e/pin-project/compare/v0.4.11...HEAD
+[Unreleased]: https://github.com/taiki-e/pin-project/compare/v0.4.13...HEAD
+[0.4.13]: https://github.com/taiki-e/pin-project/compare/v0.4.11...v0.4.13
+[0.4.12]: https://github.com/taiki-e/pin-project/compare/v0.4.10...v0.4.12
 [0.4.11]: https://github.com/taiki-e/pin-project/compare/v0.4.10...v0.4.11
 [0.4.10]: https://github.com/taiki-e/pin-project/compare/v0.4.9...v0.4.10
 [0.4.9]: https://github.com/taiki-e/pin-project/compare/v0.4.8...v0.4.9
