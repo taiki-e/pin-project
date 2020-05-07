@@ -6,6 +6,10 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 ## [Unreleased]
 
+## [0.4.12] - 2020-05-07
+
+* Same as 0.4.10.
+
 ## [0.4.10] - 2020-05-04
 
 * [Added `project_replace` method and `#[project_replace]` attribute.][194]
@@ -329,6 +333,8 @@ See also [tracking issue for 0.4 release][21].
 Initial release
 
 [Unreleased]: https://github.com/taiki-e/pin-project/compare/v0.4.9...HEAD
+[0.4.12]: https://github.com/taiki-e/pin-project/compare/v0.4.10...v0.4.12
+[0.4.10]: https://github.com/taiki-e/pin-project/compare/v0.4.9...v0.4.10
 [0.4.9]: https://github.com/taiki-e/pin-project/compare/v0.4.8...v0.4.9
 [0.4.8]: https://github.com/taiki-e/pin-project/compare/v0.4.7...v0.4.8
 [0.4.7]: https://github.com/taiki-e/pin-project/compare/v0.4.6...v0.4.7
