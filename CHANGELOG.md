@@ -10,7 +10,7 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 * [Fixed a regression in 0.4.11.][207]
 
-  Changes from [0.4.10](https://github.com/taiki-e/pin-project/releases/tag/v0.4.10):
+  Changes from [0.4.10](https://github.com/taiki-e/pin-project/releases/tag/v0.4.10) and [0.4.12](https://github.com/taiki-e/pin-project/releases/tag/v0.4.12):
 
   * [Fixed an issue that `#[project]` on non-statement expression does not work without unstable features.][197]
 
