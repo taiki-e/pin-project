@@ -21,27 +21,21 @@ use crate::utils::SliceExt;
 // * `#[pin(__private(#args))]` - Pass the argument of `#[pin_project]` to proc-macro-derive (`InternalDerive`).
 
 pub(super) fn parse_attribute(args: &TokenStream, input: TokenStream) -> Result<TokenStream> {
-    let Input { mut attrs, body } = syn::parse2(input)?;
+    let Input { attrs: mut tokens, body } = syn::parse2(input)?;
 
-    attrs.push(syn::parse_quote! {
-        #[derive(::pin_project::__private::__PinProjectInternalDerive)]
-    });
+    tokens.extend(quote!(#[derive(::pin_project::__private::__PinProjectInternalDerive)]));
     // Use `__private` to prevent users from trying to control `InternalDerive` manually.
     // `__private` does not guarantee compatibility between patch versions,
     // so it should be sufficient for this purpose in most cases.
-    attrs.push(syn::parse_quote! {
-        #[pin(__private(#args))]
-    });
+    tokens.extend(quote!(#[pin(__private(#args))]));
 
-    Ok(quote! {
-        #(#attrs)*
-        #body
-    })
+    tokens.extend(body);
+    Ok(tokens)
 }
 
 #[allow(dead_code)] // https://github.com/rust-lang/rust/issues/56750
 struct Input {
-    attrs: Vec<Attribute>,
+    attrs: TokenStream,
     body: TokenStream,
 }
 
@@ -63,7 +57,7 @@ impl Parse for Input {
         } else if let Some(attr) = attrs.find("pin_project") {
             Err(error!(attr, "duplicate #[pin_project] attribute"))
         } else {
-            Ok(Self { attrs, body: input.parse()? })
+            Ok(Self { attrs: quote!(#(#attrs)*), body: input.parse()? })
         }
     }
 }

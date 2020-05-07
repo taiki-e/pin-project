@@ -66,7 +66,7 @@ pub(crate) fn insert_lifetime_and_bound(
     generics: &mut Generics,
     lifetime: Lifetime,
     orig_generics: &Generics,
-    orig_ident: Ident,
+    orig_ident: &Ident,
 ) -> WherePredicate {
     insert_lifetime(generics, lifetime.clone());
 

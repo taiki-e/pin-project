@@ -1,152 +1,178 @@
-mod invalid_argument {
+mod argument {
     use pin_project::pin_project;
 
     #[pin_project]
-    struct A<T> {
+    struct Unexpected1 {
         #[pin()] //~ ERROR unexpected token
-        field: T,
+        field: (),
     }
 
     #[pin_project]
-    struct B<T>(#[pin(foo)] T); //~ ERROR unexpected token
+    struct Unexpected2(#[pin(foo)] ()); //~ ERROR unexpected token
 
     #[pin_project]
-    enum C<T> {
-        A(#[pin(foo)] T), //~ ERROR unexpected token
+    enum Unexpected3 {
+        V(#[pin(foo)] ()), //~ ERROR unexpected token
     }
 
     #[pin_project]
-    enum D<T> {
-        A {
+    enum Unexpected4 {
+        V {
             #[pin(foo)] //~ ERROR unexpected token
-            field: T,
+            field: (),
         },
     }
 
     #[pin_project(UnsafeUnpin,,)] //~ ERROR expected identifier
-    struct E<T> {
+    struct Unexpected5 {
         #[pin]
-        field: T,
+        field: (),
     }
 
     #[pin_project(Foo)] //~ ERROR unexpected argument
-    struct F<T> {
+    struct Unexpected6 {
         #[pin]
-        field: T,
+        field: (),
     }
-}
 
-mod invalid_position {
-    use pin_project::pin_project;
-
-    #[pin_project]
-    #[pin] //~ ERROR may only be used on fields of structs or variants
-    struct Struct<T> {
+    #[pin_project()] // Ok
+    struct Unexpected7 {
         #[pin]
-        field: T,
+        field: (),
     }
-
-    #[pin_project]
-    enum Variant<T> {
-        #[pin] //~ ERROR may only be used on fields of structs or variants
-        A(T),
-    }
-
-    #[pin_project]
-    #[pin] //~ ERROR may only be used on fields of structs or variants
-    enum Enum<T> {
-        A(T),
-    }
-}
-
-mod duplicate_attribute {
-    use pin_project::pin_project;
-
-    #[pin_project]
-    struct Field<T> {
-        #[pin]
-        #[pin] //~ ERROR duplicate #[pin] attribute
-        field: T,
-    }
-
-    #[pin_project]
-    #[pin_project] //~ ERROR duplicate #[pin_project] attribute
-    struct Struct<T> {
-        #[pin]
-        field: T,
-    }
-}
-
-mod duplicate_argument {
-    use pin_project::pin_project;
 
     #[pin_project(UnsafeUnpin, UnsafeUnpin)] //~ ERROR duplicate `UnsafeUnpin` argument
-    struct UnsafeUnpin<T> {
+    struct UnsafeUnpin {
         #[pin]
-        field: T,
+        field: (),
     }
 
     #[pin_project(PinnedDrop, PinnedDrop)] //~ ERROR duplicate `PinnedDrop` argument
-    struct PinnedDrop<T> {
+    struct PinnedDrop {
         #[pin]
-        field: T,
+        field: (),
     }
 
     #[pin_project(Replace, Replace)] //~ ERROR duplicate `Replace` argument
-    struct Replace<T> {
+    struct Replace {
         #[pin]
-        field: T,
+        field: (),
     }
 
     #[pin_project(PinnedDrop, UnsafeUnpin, UnsafeUnpin)] //~ ERROR duplicate `UnsafeUnpin` argument
-    struct Duplicate3<T> {
+    struct Duplicate3 {
         #[pin]
-        field: T,
+        field: (),
     }
 
     #[pin_project(PinnedDrop, UnsafeUnpin, PinnedDrop, PinnedDrop)] //~ ERROR duplicate `PinnedDrop` argument
-    struct Duplicate4<T> {
+    struct Duplicate4 {
         #[pin]
-        field: T,
+        field: (),
     }
 
     #[pin_project(PinnedDrop, Replace)] //~ ERROR arguments `PinnedDrop` and `Replace` are mutually exclusive
-    struct Duplicate5<T> {
+    struct Duplicate5 {
         #[pin]
-        field: T,
+        field: (),
     }
 }
 
-mod unsupported_type {
+mod pin_attribute {
     use pin_project::pin_project;
 
     #[pin_project]
-    struct Struct1 {} //~ ERROR may not be used on structs with zero fields
-
-    #[pin_project]
-    struct Struct2(); //~ ERROR may not be used on structs with zero fields
-
-    #[pin_project]
-    struct Struct3; //~ ERROR may not be used on structs with units
-
-    #[pin_project]
-    enum Enum1 {} //~ ERROR may not be used on enums without variants
-
-    #[pin_project]
-    enum Enum2 {
-        A = 2, //~ ERROR may not be used on enums with discriminants
+    #[pin] //~ ERROR may only be used on fields of structs or variants
+    struct Struct {
+        #[pin]
+        field: (),
     }
 
     #[pin_project]
-    enum Enum3 {
-        A, //~ ERROR may not be used on enums that have no field
-        B,
+    enum Variant {
+        #[pin] //~ ERROR may only be used on fields of structs or variants
+        V(()),
+    }
+
+    #[pin_project]
+    #[pin] //~ ERROR may only be used on fields of structs or variants
+    enum Enum {
+        V(()),
+    }
+
+    #[pin_project]
+    struct DuplicateField1 {
+        #[pin]
+        #[pin] //~ ERROR duplicate #[pin] attribute
+        field: (),
+    }
+
+    #[pin_project]
+    struct DuplicateField2(
+        #[pin]
+        #[pin]
+        (),
+        //~^^ ERROR duplicate #[pin] attribute
+    );
+
+    #[pin_project]
+    enum DuplicateField3 {
+        V {
+            #[pin]
+            #[pin] //~ ERROR duplicate #[pin] attribute
+            field: (),
+        },
+    }
+
+    #[pin_project]
+    enum DuplicateField4 {
+        V(
+            #[pin]
+            #[pin]
+            (),
+            //~^^ ERROR duplicate #[pin] attribute
+        ),
+    }
+}
+
+mod pin_project_attribute {
+    use pin_project::pin_project;
+
+    #[pin_project]
+    #[pin_project] //~ ERROR duplicate #[pin_project] attribute
+    struct Duplicate {
+        #[pin]
+        field: (),
+    }
+
+    #[pin_project]
+    struct Struct {} //~ ERROR may not be used on structs with zero fields
+
+    #[pin_project]
+    struct TupleStruct(); //~ ERROR may not be used on structs with zero fields
+
+    #[pin_project]
+    struct UnitStruct; //~ ERROR may not be used on structs with zero fields
+
+    #[pin_project]
+    enum EnumEmpty {} //~ ERROR may not be used on enums without variants
+
+    #[pin_project]
+    enum EnumDiscriminant {
+        V = 2, //~ ERROR may not be used on enums with discriminants
+    }
+
+    #[pin_project]
+    enum EnumZeroFields {
+        Unit, //~ ERROR may not be used on enums with zero fields
+        Tuple(),
+        Struct {},
     }
 
     #[pin_project]
     union Union {
         //~^ ERROR may only be used on structs or enums
-        x: u8,
+        f: (),
     }
 }
 
