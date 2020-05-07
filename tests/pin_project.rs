@@ -1,14 +1,11 @@
 #![warn(rust_2018_idioms, single_use_lifetimes)]
 #![allow(dead_code)]
 
-use core::{
-    marker::{PhantomData, PhantomPinned},
-    pin::Pin,
-};
+use core::{marker::PhantomPinned, pin::Pin};
 use pin_project::{pin_project, pinned_drop, UnsafeUnpin};
 
 #[test]
-fn default() {
+fn projection() {
     #[pin_project(Replace)]
     struct Struct<T, U> {
         #[pin]
