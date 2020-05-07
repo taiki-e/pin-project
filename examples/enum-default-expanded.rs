@@ -41,6 +41,7 @@ where
     Unpinned(&'pin (U)),
 }
 
+#[doc(hidden)]
 #[allow(non_upper_case_globals)]
 const __SCOPE_Enum: () = {
     impl<T, U> Enum<T, U> {

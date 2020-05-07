@@ -8,6 +8,7 @@ enum Enum<T, U> {
     },
     None,
 }
+#[doc(hidden)]
 #[allow(clippy::mut_mut)]
 #[allow(dead_code)]
 enum __EnumProjection<'pin, T, U>
@@ -20,6 +21,7 @@ where
     },
     None,
 }
+#[doc(hidden)]
 #[allow(dead_code)]
 enum __EnumProjectionRef<'pin, T, U>
 where
@@ -31,6 +33,7 @@ where
     },
     None,
 }
+#[doc(hidden)]
 #[allow(dead_code)]
 enum __EnumProjectionOwned<T, U> {
     V {
@@ -39,6 +42,7 @@ enum __EnumProjectionOwned<T, U> {
     },
     None,
 }
+#[doc(hidden)]
 #[allow(non_upper_case_globals)]
 const __SCOPE_Enum: () = {
     impl<T, U> Enum<T, U> {

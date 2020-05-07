@@ -50,6 +50,7 @@ where
     field: ::pin_project::__reexport::pin::Pin<&'pin (T)>,
 }
 
+#[doc(hidden)]
 #[allow(non_upper_case_globals)]
 const __SCOPE_Struct: () = {
     impl<'a, T> Struct<'a, T> {
