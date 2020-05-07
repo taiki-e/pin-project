@@ -58,24 +58,20 @@ fn parse_method(method: &ImplItemMethod) -> Result<()> {
         }
     }
 
-    if let FnArg::Typed(pat) = &method.sig.inputs[0] {
-        // by-ref binding `ref (mut) self` and sub-patterns `@` are not allowed in receivers (rejected by rustc).
-        // <pat>: <path>
-        if let (Pat::Ident(pat @ PatIdent { by_ref: None, subpat: None, .. }), Some(path)) =
-            (&*pat.pat, get_ty_path(&pat.ty))
-        {
+    if let Some(FnArg::Typed(pat)) = &method.sig.receiver() {
+        // (mut) self: <path>
+        if let Some(path) = get_ty_path(&pat.ty) {
             let ty = path.segments.last().unwrap();
             if let PathArguments::AngleBracketed(args) = &ty.arguments {
-                // <pat>: (<path>::)<ty><&mut <elem>..>
+                // (mut) self: (<path>::)<ty><&mut <elem>..>
                 if let Some(GenericArgument::Type(Type::Reference(TypeReference {
                     mutability: Some(_),
                     elem,
                     ..
-                }))) = &args.args.first()
+                }))) = args.args.first()
                 {
                     // (mut) self: (<path>::)Pin<&mut Self>
                     if args.args.len() == 1
-                        && pat.ident == "self"
                         && ty.ident == "Pin"
                         && get_ty_path(elem).map_or(false, |path| path.is_ident("Self"))
                     {
@@ -188,8 +184,8 @@ fn expand_item(item: &mut ItemImpl) {
         }
     }
 
-    method.block = syn::parse_quote! {{
+    method.block.stmts = syn::parse_quote! {
         #drop_inner
         __drop_inner(self);
-    }};
+    };
 }
