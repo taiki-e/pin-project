@@ -4,6 +4,7 @@ enum Enum<T, U> {
     Pinned(#[pin] T),
     Unpinned(U),
 }
+#[doc(hidden)]
 #[allow(clippy::mut_mut)]
 #[allow(dead_code)]
 enum __EnumProjection<'pin, T, U>
@@ -13,6 +14,7 @@ where
     Pinned(::pin_project::__reexport::pin::Pin<&'pin mut (T)>),
     Unpinned(&'pin mut (U)),
 }
+#[doc(hidden)]
 #[allow(dead_code)]
 enum __EnumProjectionRef<'pin, T, U>
 where
@@ -21,6 +23,7 @@ where
     Pinned(::pin_project::__reexport::pin::Pin<&'pin (T)>),
     Unpinned(&'pin (U)),
 }
+#[doc(hidden)]
 #[allow(non_upper_case_globals)]
 const __SCOPE_Enum: () = {
     impl<T, U> Enum<T, U> {

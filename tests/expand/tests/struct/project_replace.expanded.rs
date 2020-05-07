@@ -5,6 +5,7 @@ struct Struct<T, U> {
     pinned: T,
     unpinned: U,
 }
+#[doc(hidden)]
 #[allow(clippy::mut_mut)]
 #[allow(dead_code)]
 struct __StructProjection<'pin, T, U>
@@ -14,6 +15,7 @@ where
     pinned: ::pin_project::__reexport::pin::Pin<&'pin mut (T)>,
     unpinned: &'pin mut (U),
 }
+#[doc(hidden)]
 #[allow(dead_code)]
 struct __StructProjectionRef<'pin, T, U>
 where
@@ -22,11 +24,13 @@ where
     pinned: ::pin_project::__reexport::pin::Pin<&'pin (T)>,
     unpinned: &'pin (U),
 }
+#[doc(hidden)]
 #[allow(dead_code)]
 struct __StructProjectionOwned<T, U> {
     pinned: ::pin_project::__reexport::marker::PhantomData<T>,
     unpinned: U,
 }
+#[doc(hidden)]
 #[allow(non_upper_case_globals)]
 const __SCOPE_Struct: () = {
     impl<T, U> Struct<T, U> {

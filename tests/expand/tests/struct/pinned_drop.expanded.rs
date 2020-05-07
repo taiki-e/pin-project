@@ -6,6 +6,7 @@ pub struct Struct<'a, T> {
     #[pin]
     field: T,
 }
+#[doc(hidden)]
 #[allow(clippy::mut_mut)]
 #[allow(dead_code)]
 pub(crate) struct __StructProjection<'pin, 'a, T>
@@ -15,6 +16,7 @@ where
     was_dropped: &'pin mut (&'a mut bool),
     field: ::pin_project::__reexport::pin::Pin<&'pin mut (T)>,
 }
+#[doc(hidden)]
 #[allow(dead_code)]
 pub(crate) struct __StructProjectionRef<'pin, 'a, T>
 where
@@ -23,6 +25,7 @@ where
     was_dropped: &'pin (&'a mut bool),
     field: ::pin_project::__reexport::pin::Pin<&'pin (T)>,
 }
+#[doc(hidden)]
 #[allow(non_upper_case_globals)]
 const __SCOPE_Struct: () = {
     impl<'a, T> Struct<'a, T> {

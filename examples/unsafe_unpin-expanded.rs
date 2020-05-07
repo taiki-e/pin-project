@@ -45,6 +45,7 @@ where
     unpinned: &'pin (U),
 }
 
+#[doc(hidden)]
 #[allow(non_upper_case_globals)]
 const __SCOPE_Struct: () = {
     impl<T, U> Struct<T, U> {
@@ -71,8 +72,6 @@ const __SCOPE_Struct: () = {
             }
         }
     }
-
-    unsafe impl<T: Unpin, U> UnsafeUnpin for Struct<T, U> {}
 
     #[allow(single_use_lifetimes)]
     impl<'pin, T, U> ::pin_project::__reexport::marker::Unpin for Struct<T, U> where
@@ -104,5 +103,7 @@ const __SCOPE_Struct: () = {
         &val.unpinned;
     }
 };
+
+unsafe impl<T: Unpin, U> UnsafeUnpin for Struct<T, U> {}
 
 fn main() {}

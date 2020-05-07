@@ -42,6 +42,7 @@ pub(super) fn parse_derive(input: TokenStream) -> Result<TokenStream> {
                 // * https://github.com/rust-lang/rust/issues/63281
                 // * https://github.com/taiki-e/pin-project/pull/53#issuecomment-525906867
                 // * https://github.com/taiki-e/pin-project/pull/70
+                #[doc(hidden)]
                 #[allow(non_upper_case_globals)]
                 const #dummy_const: () = {
                     #proj_impl
@@ -66,6 +67,7 @@ pub(super) fn parse_derive(input: TokenStream) -> Result<TokenStream> {
 
             let dummy_const = format_ident!("__SCOPE_{}", ident);
             proj_items.extend(quote! {
+                #[doc(hidden)]
                 #[allow(non_upper_case_globals)]
                 const #dummy_const: () = {
                     #proj_impl
@@ -379,16 +381,18 @@ impl<'a> Context<'a> {
         };
 
         let mut proj_items = quote! {
+            #[doc(hidden)] // TODO: If the user gave it a name, it should appear in the document.
             #[allow(clippy::mut_mut)] // This lint warns `&mut &mut <ty>`.
             #[allow(dead_code)] // This lint warns unused fields/variants.
             #vis struct #proj_ident #proj_generics #where_clause_fields
+            #[doc(hidden)] // TODO: If the user gave it a name, it should appear in the document.
             #[allow(dead_code)] // This lint warns unused fields/variants.
             #vis struct #proj_ref_ident #proj_generics #where_clause_ref_fields
         };
-
         if self.replace.is_some() {
             // Currently, using quote_spanned here does not seem to have any effect on the diagnostics.
             proj_items.extend(quote! {
+                #[doc(hidden)] // TODO: If the user gave it a name, it should appear in the document.
                 #[allow(dead_code)] // This lint warns unused fields/variants.
                 #vis struct #proj_own_ident #orig_generics #where_clause_own_fields
             });
@@ -451,20 +455,22 @@ impl<'a> Context<'a> {
         let where_clause = &self.proj.where_clause;
 
         let mut proj_items = quote! {
+            #[doc(hidden)] // TODO: If the user gave it a name, it should appear in the document.
             #[allow(clippy::mut_mut)] // This lint warns `&mut &mut <ty>`.
             #[allow(dead_code)] // This lint warns unused fields/variants.
             #vis enum #proj_ident #proj_generics #where_clause {
                 #proj_variants
             }
+            #[doc(hidden)] // TODO: If the user gave it a name, it should appear in the document.
             #[allow(dead_code)] // This lint warns unused fields/variants.
             #vis enum #proj_ref_ident #proj_generics #where_clause {
                 #proj_ref_variants
             }
         };
-
         if self.replace.is_some() {
             // Currently, using quote_spanned here does not seem to have any effect on the diagnostics.
             proj_items.extend(quote! {
+                #[doc(hidden)] // TODO: If the user gave it a name, it should appear in the document.
                 #[allow(dead_code)] // This lint warns unused fields/variants.
                 #vis enum #proj_own_ident #orig_generics #orig_where_clause {
                     #proj_own_variants
