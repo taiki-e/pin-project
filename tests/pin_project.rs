@@ -224,16 +224,16 @@ fn move_out() {
         val: NotCopy,
     }
 
-    let s = Struct { val: NotCopy };
-    let _val: NotCopy = s.val;
+    let x = Struct { val: NotCopy };
+    let _val: NotCopy = x.val;
 
     #[pin_project(Replace)]
     enum Enum {
         Variant(NotCopy),
     }
 
-    let e = Enum::Variant(NotCopy);
-    let _val: NotCopy = match e {
+    let x = Enum::Variant(NotCopy);
+    let _val: NotCopy = match x {
         Enum::Variant(val) => val,
     };
 }
@@ -668,5 +668,23 @@ fn self_in_where_clause() {
 
     impl<T> Trait2 for Struct2<T> {
         type Assoc = Struct1<T>;
+    }
+}
+
+#[test]
+fn no_infer_outlives() {
+    trait Bar<X> {
+        type Y;
+    }
+
+    struct Example<A>(A);
+
+    impl<X, T> Bar<X> for Example<T> {
+        type Y = Option<T>;
+    }
+
+    #[pin_project(Replace)]
+    struct Foo<A, B> {
+        _x: <Example<A> as Bar<B>>::Y,
     }
 }
