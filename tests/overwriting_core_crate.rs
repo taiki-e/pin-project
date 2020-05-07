@@ -8,7 +8,7 @@
 #[allow(unused_extern_crates)]
 extern crate pin_project as core;
 
-// Dummy module to check that the expansion refer to pin-project crate
+// Dummy module to check that the expansion refers to the crate.
 mod pin_project {}
 
 use ::pin_project::{pin_project, pinned_drop, UnsafeUnpin};
@@ -47,13 +47,6 @@ struct StructReplace<T, U> {
     #[pin]
     pinned: T,
     unpinned: U,
-}
-
-#[pin_project]
-struct StructMutMut<'a, T, U> {
-    #[pin]
-    pinned: &'a mut T,
-    unpinned: &'a mut U,
 }
 
 #[pin_project]
@@ -96,15 +89,6 @@ enum EnumReplace<T, U> {
         #[pin]
         pinned: T,
         unpinned: U,
-    },
-}
-
-#[pin_project]
-enum EnumMutMut<'a, T, U> {
-    Variant {
-        #[pin]
-        pinned: &'a mut T,
-        unpinned: &'a mut U,
     },
 }
 
