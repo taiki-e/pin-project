@@ -10,7 +10,7 @@ use super::PIN;
 use crate::utils::{
     determine_lifetime_name, determine_visibility, insert_lifetime_and_bound, proj_ident,
     Immutable, Mutable, Owned, ParseBufferExt, ReplaceReceiver, SliceExt, Variants,
-    CURRENT_PRIVATE_MODULE, DEFAULT_LIFETIME_NAME,
+    DEFAULT_LIFETIME_NAME,
 };
 
 pub(super) fn parse_derive(input: TokenStream) -> Result<TokenStream> {
@@ -178,11 +178,11 @@ impl Args {
 
 impl Parse for Args {
     fn parse(input: ParseStream<'_>) -> Result<Self> {
-        // `(<private>(<args>))` -> `<args>`
+        // `(__private(<args>))` -> `<args>`
         fn parse_input(input: ParseStream<'_>) -> Result<ParseBuffer<'_>> {
             if let Ok(content) = input.parenthesized() {
                 if let Ok(private) = content.parse::<Ident>() {
-                    if private == CURRENT_PRIVATE_MODULE {
+                    if private == "__private" {
                         if let Ok(args) = content.parenthesized() {
                             return Ok(args);
                         }
@@ -379,7 +379,6 @@ impl<'a> Context<'a> {
         let orig_where_clause = orig_generics.where_clause.take();
         let proj_generics = &self.proj.generics;
         let where_clause = &self.proj.where_clause;
-        let private = Ident::new(CURRENT_PRIVATE_MODULE, Span::call_site());
 
         // For tuple structs, we need to generate `(T1, T2) where Foo: Bar`
         // For non-tuple structs, we need to generate `where Foo: Bar { field1: T }`
@@ -429,7 +428,7 @@ impl<'a> Context<'a> {
 
             // Destructors will run in reverse order, so next create a guard to overwrite
             // `self` with the replacement value without calling destructors.
-            let __guard = ::pin_project::#private::UnsafeOverwriteGuard {
+            let __guard = ::pin_project::__private::UnsafeOverwriteGuard {
                 target: __self_ptr,
                 value: ::pin_project::__reexport::mem::ManuallyDrop::new(__replacement),
             };
@@ -517,7 +516,6 @@ impl<'a> Context<'a> {
         let mut proj_arms = TokenStream::new();
         let mut proj_ref_arms = TokenStream::new();
         let mut proj_own_arms = TokenStream::new();
-        let private = Ident::new(CURRENT_PRIVATE_MODULE, Span::call_site());
 
         for Variant { ident, fields, .. } in variants {
             let ProjectedFields {
@@ -564,7 +562,7 @@ impl<'a> Context<'a> {
 
                     // Destructors will run in reverse order, so next create a guard to overwrite
                     // `self` with the replacement value without calling destructors.
-                    let __guard = ::pin_project::#private::UnsafeOverwriteGuard {
+                    let __guard = ::pin_project::__private::UnsafeOverwriteGuard {
                         target: __self_ptr,
                         value: ::pin_project::__reexport::mem::ManuallyDrop::new(__replacement),
                     };
@@ -603,7 +601,6 @@ impl<'a> Context<'a> {
         let mut proj_own_fields = Vec::with_capacity(fields.len());
         let mut proj_move = Vec::with_capacity(fields.len());
         let mut proj_drop = Vec::with_capacity(fields.len());
-        let private = Ident::new(CURRENT_PRIVATE_MODULE, Span::call_site());
 
         for Field { attrs, vis, ident, ty, .. } in fields {
             if attrs.find_exact(PIN)?.is_some() {
@@ -626,7 +623,7 @@ impl<'a> Context<'a> {
                     #ident: ::pin_project::__reexport::marker::PhantomData
                 });
                 proj_drop.push(quote! {
-                    let __guard = ::pin_project::#private::UnsafeDropInPlaceGuard(#ident);
+                    let __guard = ::pin_project::__private::UnsafeDropInPlaceGuard(#ident);
                 });
             } else {
                 let lifetime = &self.proj.lifetime;
@@ -679,7 +676,6 @@ impl<'a> Context<'a> {
         let mut proj_own_fields = Vec::with_capacity(fields.len());
         let mut proj_move = Vec::with_capacity(fields.len());
         let mut proj_drop = Vec::with_capacity(fields.len());
-        let private = Ident::new(CURRENT_PRIVATE_MODULE, Span::call_site());
 
         for (i, Field { attrs, vis, ty, .. }) in fields.iter().enumerate() {
             let id = format_ident!("_{}", i);
@@ -703,7 +699,7 @@ impl<'a> Context<'a> {
                     ::pin_project::__reexport::marker::PhantomData
                 });
                 proj_drop.push(quote! {
-                    let __guard = ::pin_project::#private::UnsafeDropInPlaceGuard(#id);
+                    let __guard = ::pin_project::__private::UnsafeDropInPlaceGuard(#id);
                 });
             } else {
                 let lifetime = &self.proj.lifetime;
@@ -752,11 +748,10 @@ impl<'a> Context<'a> {
             let orig_ident = self.orig.ident;
             let lifetime = &self.proj.lifetime;
 
-            let private = Ident::new(CURRENT_PRIVATE_MODULE, Span::call_site());
             proj_generics.make_where_clause().predicates.push(
                 // Make the error message highlight `UnsafeUnpin` argument.
                 syn::parse2(quote_spanned! { unsafe_unpin =>
-                    ::pin_project::#private::Wrapper<#lifetime, Self>: ::pin_project::UnsafeUnpin
+                    ::pin_project::__private::Wrapper<#lifetime, Self>: ::pin_project::UnsafeUnpin
                 })
                 .unwrap(),
             );
@@ -832,7 +827,6 @@ impl<'a> Context<'a> {
                 #struct_ident #proj_ty_generics: ::pin_project::__reexport::marker::Unpin
             });
 
-            let private = Ident::new(CURRENT_PRIVATE_MODULE, Span::call_site());
             quote! {
                 // This needs to have the same visibility as the original type,
                 // due to the limitations of the 'public in private' error.
@@ -845,7 +839,7 @@ impl<'a> Context<'a> {
                 // However, we ensure that the user can never actually reference
                 // this 'public' type by creating this type in the inside of `const`.
                 #vis struct #struct_ident #proj_generics #where_clause {
-                    __pin_project_use_generics: ::pin_project::#private::AlwaysUnpin<#lifetime, (#(#type_params),*)>,
+                    __pin_project_use_generics: ::pin_project::__private::AlwaysUnpin<#lifetime, (#(#type_params),*)>,
 
                     #(#fields,)*
                     #(#lifetime_fields,)*
@@ -861,14 +855,13 @@ impl<'a> Context<'a> {
         let ident = self.orig.ident;
         let (impl_generics, ty_generics, where_clause) = self.orig.generics.split_for_impl();
 
-        let private = Ident::new(CURRENT_PRIVATE_MODULE, Span::call_site());
         if let Some(pinned_drop) = self.pinned_drop {
             // Make the error message highlight `PinnedDrop` argument.
             // See https://github.com/taiki-e/pin-project/issues/16#issuecomment-513586812
             // for why this is only for the span of function calls,
             // not the entire `impl` block.
             let call_drop = quote_spanned! { pinned_drop =>
-                ::pin_project::#private::PinnedDrop::drop(pinned_self)
+                ::pin_project::__private::PinnedDrop::drop(pinned_self)
             };
 
             quote! {
@@ -929,7 +922,7 @@ impl<'a> Context<'a> {
                 // they'll get a "conflicting implementations of trait" error when coherence
                 // checks are run.
                 #[allow(single_use_lifetimes)]
-                impl #impl_generics ::pin_project::#private::PinnedDrop for #ident #ty_generics #where_clause {
+                impl #impl_generics ::pin_project::__private::PinnedDrop for #ident #ty_generics #where_clause {
                     unsafe fn drop(self: ::pin_project::__reexport::pin::Pin<&mut Self>) {}
                 }
             }
