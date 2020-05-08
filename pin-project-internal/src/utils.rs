@@ -34,12 +34,23 @@ pub(crate) enum Mutability {
     Owned,
 }
 
-/// Creates the ident of projected type from the ident of the original type.
-pub(crate) fn proj_ident(ident: &Ident, mutability: Mutability) -> Ident {
-    match mutability {
-        Mutability::Mutable => format_ident!("__{}Projection", ident),
-        Mutability::Immutable => format_ident!("__{}ProjectionRef", ident),
-        Mutability::Owned => format_ident!("__{}ProjectionOwned", ident),
+impl Mutability {
+    /// Returns the name of method and attribute.
+    pub(crate) fn method_name(self) -> &'static str {
+        match self {
+            Mutable => "project",
+            Immutable => "project_ref",
+            Owned => "project_replace",
+        }
+    }
+
+    /// Creates the ident of the projected type from the ident of the original type.
+    pub(crate) fn proj_ident(self, ident: &Ident) -> Ident {
+        match self {
+            Mutable => format_ident!("__{}Projection", ident),
+            Immutable => format_ident!("__{}ProjectionRef", ident),
+            Owned => format_ident!("__{}ProjectionOwned", ident),
+        }
     }
 }
 

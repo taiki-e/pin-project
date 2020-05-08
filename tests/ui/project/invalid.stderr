@@ -10,14 +10,92 @@ error: unexpected token: (foo)
 17 |         #[project(foo)] //~ ERROR unexpected token
    |                  ^^^^^
 
-error: unexpected token: foo
-  --> $DIR/invalid.rs:24:15
+error: unexpected token: ()
+  --> $DIR/invalid.rs:24:18
    |
-24 |     #[project(foo)] //~ ERROR unexpected token
+24 |         #[project()] //~ ERROR unexpected token
+   |                  ^^
+
+error: unexpected token: (foo)
+  --> $DIR/invalid.rs:33:18
+   |
+33 |         #[project(foo)] //~ ERROR unexpected token
+   |                  ^^^^^
+
+error: unexpected token: foo
+  --> $DIR/invalid.rs:42:15
+   |
+42 |     #[project(foo)] //~ ERROR unexpected token
    |               ^^^
 
 error: duplicate #[project] attribute
-  --> $DIR/invalid.rs:38:9
+  --> $DIR/invalid.rs:56:9
    |
-38 |         #[project] //~ ERROR duplicate #[project] attribute
+56 |         #[project] //~ ERROR duplicate #[project] attribute
    |         ^^^^^^^^^^
+
+error: duplicate #[project_ref] attribute
+  --> $DIR/invalid.rs:64:9
+   |
+64 |         #[project_ref] //~ ERROR duplicate #[project_ref] attribute
+   |         ^^^^^^^^^^^^^^
+
+error: duplicate #[project_replace] attribute
+  --> $DIR/invalid.rs:72:9
+   |
+72 |         #[project_replace] //~ ERROR duplicate #[project_replace] attribute
+   |         ^^^^^^^^^^^^^^^^^^
+
+error: duplicate #[project] attribute
+  --> $DIR/invalid.rs:77:5
+   |
+77 |     #[project] //~ ERROR duplicate #[project] attribute
+   |     ^^^^^^^^^^
+
+error: duplicate #[project_ref] attribute
+  --> $DIR/invalid.rs:81:5
+   |
+81 |     #[project_ref] //~ ERROR duplicate #[project_ref] attribute
+   |     ^^^^^^^^^^^^^^
+
+error: duplicate #[project_replace] attribute
+  --> $DIR/invalid.rs:85:5
+   |
+85 |     #[project_replace] //~ ERROR duplicate #[project_replace] attribute
+   |     ^^^^^^^^^^^^^^^^^^
+
+error: duplicate #[project] attribute
+  --> $DIR/invalid.rs:89:5
+   |
+89 |     #[project] //~ ERROR duplicate #[project] attribute
+   |     ^^^^^^^^^^
+
+error: duplicate #[project_ref] attribute
+  --> $DIR/invalid.rs:93:5
+   |
+93 |     #[project_ref] //~ ERROR duplicate #[project_ref] attribute
+   |     ^^^^^^^^^^^^^^
+
+error: duplicate #[project_replace] attribute
+  --> $DIR/invalid.rs:97:5
+   |
+97 |     #[project_replace] //~ ERROR duplicate #[project_replace] attribute
+   |     ^^^^^^^^^^^^^^^^^^
+
+error: duplicate #[project] attribute
+   --> $DIR/invalid.rs:105:9
+    |
+105 |         #[project] //~ ERROR duplicate #[project] attribute
+    |         ^^^^^^^^^^
+
+error: duplicate #[project_ref] attribute
+   --> $DIR/invalid.rs:109:9
+    |
+109 |         #[project_ref] //~ ERROR duplicate #[project_ref] attribute
+    |         ^^^^^^^^^^^^^^
+
+error: duplicate #[project_replace] attribute
+   --> $DIR/invalid.rs:113:9
+    |
+113 |         #[project_replace] //~ ERROR duplicate #[project_replace] attribute
+    |         ^^^^^^^^^^^^^^^^^^

@@ -9,7 +9,7 @@
 #[rustversion::since(1.43)]
 include!("project_if_attr.rs.in");
 
-use pin_project::{pin_project, project};
+use pin_project::{pin_project, project, project_ref, project_replace};
 use std::pin::Pin;
 
 #[project] // Nightly does not need a dummy attribute to the function.
@@ -236,5 +236,34 @@ fn issue_206() {
             }
         };
         break;
+    }
+}
+
+#[project]
+#[project_ref]
+#[project_replace]
+#[test]
+fn combine() {
+    #[pin_project(Replace)]
+    enum Enum<A> {
+        V1(#[pin] A),
+        V2,
+    }
+
+    let mut x = Enum::V1(1);
+    #[project]
+    match Pin::new(&mut x).project() {
+        Enum::V1(_) => {}
+        Enum::V2 => unreachable!(),
+    }
+    #[project_ref]
+    match Pin::new(&x).project_ref() {
+        Enum::V1(_) => {}
+        Enum::V2 => unreachable!(),
+    }
+    #[project_replace]
+    match Pin::new(&mut x).project_replace(Enum::V2) {
+        Enum::V1(_) => {}
+        Enum::V2 => unreachable!(),
     }
 }
