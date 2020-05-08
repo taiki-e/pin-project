@@ -58,6 +58,7 @@ pub(super) fn parse_derive(input: TokenStream) -> Result<TokenStream> {
         // * https://github.com/taiki-e/pin-project/pull/70
         #[doc(hidden)]
         #[allow(non_upper_case_globals)]
+        #[allow(single_use_lifetimes)] // https://github.com/rust-lang/rust/issues/55058
         const #dummy_const: () = {
             #scoped_items
             #unpin_impl
@@ -291,11 +292,11 @@ impl<'a> Context<'a> {
 
         let ty_generics = generics.split_for_impl().1;
         let self_ty = syn::parse_quote!(#ident #ty_generics);
-        let mut visitor = ReplaceReceiver::new(&self_ty);
+        let mut visitor = ReplaceReceiver(&self_ty);
         visitor.visit_where_clause_mut(generics.make_where_clause());
 
         let mut lifetime_name = String::from("'pin");
-        determine_lifetime_name(&mut lifetime_name, &generics.params);
+        determine_lifetime_name(&mut lifetime_name, generics);
         let lifetime = Lifetime::new(&lifetime_name, Span::call_site());
 
         let mut proj_generics = generics.clone();
@@ -377,9 +378,11 @@ impl<'a> Context<'a> {
             #[doc(hidden)] // TODO: If the user gave it a name, it should appear in the document.
             #[allow(clippy::mut_mut)] // This lint warns `&mut &mut <ty>`.
             #[allow(dead_code)] // This lint warns unused fields/variants.
+            #[allow(single_use_lifetimes)] // https://github.com/rust-lang/rust/issues/55058
             #vis struct #proj_ident #proj_generics #where_clause_fields
             #[doc(hidden)] // TODO: If the user gave it a name, it should appear in the document.
             #[allow(dead_code)] // This lint warns unused fields/variants.
+            #[allow(single_use_lifetimes)] // https://github.com/rust-lang/rust/issues/55058
             #vis struct #proj_ref_ident #proj_generics #where_clause_ref_fields
         };
         if self.replace.is_some() {
@@ -387,6 +390,7 @@ impl<'a> Context<'a> {
             proj_items.extend(quote! {
                 #[doc(hidden)] // TODO: If the user gave it a name, it should appear in the document.
                 #[allow(dead_code)] // This lint warns unused fields/variants.
+                #[allow(single_use_lifetimes)] // https://github.com/rust-lang/rust/issues/55058
                 #vis struct #proj_own_ident #orig_generics #where_clause_own_fields
             });
         }
@@ -458,11 +462,13 @@ impl<'a> Context<'a> {
             #[doc(hidden)] // TODO: If the user gave it a name, it should appear in the document.
             #[allow(clippy::mut_mut)] // This lint warns `&mut &mut <ty>`.
             #[allow(dead_code)] // This lint warns unused fields/variants.
+            #[allow(single_use_lifetimes)] // https://github.com/rust-lang/rust/issues/55058
             #vis enum #proj_ident #proj_generics #where_clause {
                 #proj_variants
             }
             #[doc(hidden)] // TODO: If the user gave it a name, it should appear in the document.
             #[allow(dead_code)] // This lint warns unused fields/variants.
+            #[allow(single_use_lifetimes)] // https://github.com/rust-lang/rust/issues/55058
             #vis enum #proj_ref_ident #proj_generics #where_clause {
                 #proj_ref_variants
             }
@@ -472,6 +478,7 @@ impl<'a> Context<'a> {
             proj_items.extend(quote! {
                 #[doc(hidden)] // TODO: If the user gave it a name, it should appear in the document.
                 #[allow(dead_code)] // This lint warns unused fields/variants.
+                #[allow(single_use_lifetimes)] // https://github.com/rust-lang/rust/issues/55058
                 #vis enum #proj_own_ident #orig_generics #orig_where_clause {
                     #proj_own_variants
                 }
@@ -715,7 +722,6 @@ impl<'a> Context<'a> {
             let ty_generics = self.orig.generics.split_for_impl().1;
 
             quote! {
-                #[allow(single_use_lifetimes)]
                 impl #impl_generics ::pin_project::__reexport::marker::Unpin for #orig_ident #ty_generics #where_clause {}
             }
         } else {
@@ -801,7 +807,6 @@ impl<'a> Context<'a> {
             // For interoperability with `forbid(unsafe_code)`, `unsafe` token should be call-site span.
             let unsafety = token::Unsafe::default();
             quote_spanned! { pinned_drop =>
-                #[allow(single_use_lifetimes)]
                 impl #impl_generics ::pin_project::__reexport::ops::Drop for #ident #ty_generics #where_clause {
                     fn drop(&mut self) {
                         // Safety - we're in 'drop', so we know that 'self' will
@@ -844,7 +849,6 @@ impl<'a> Context<'a> {
                 trait #trait_ident {}
                 #[allow(clippy::drop_bounds)]
                 impl<T: ::pin_project::__reexport::ops::Drop> #trait_ident for T {}
-                #[allow(single_use_lifetimes)]
                 impl #impl_generics #trait_ident for #ident #ty_generics #where_clause {}
 
                 // A dummy impl of `PinnedDrop`, to ensure that the user cannot implement it.
@@ -857,7 +861,6 @@ impl<'a> Context<'a> {
                 // impls, we emit one ourselves. If the user ends up writing a `PinnedDrop` impl,
                 // they'll get a "conflicting implementations of trait" error when coherence
                 // checks are run.
-                #[allow(single_use_lifetimes)]
                 impl #impl_generics ::pin_project::__private::PinnedDrop for #ident #ty_generics #where_clause {
                     unsafe fn drop(self: ::pin_project::__reexport::pin::Pin<&mut Self>) {}
                 }
@@ -1000,7 +1003,6 @@ impl<'a> Context<'a> {
         let (impl_generics, ty_generics, where_clause) = self.orig.generics.split_for_impl();
         let ident = self.orig.ident;
         Ok(quote! {
-            #[allow(single_use_lifetimes)]
             #[deny(safe_packed_borrows)]
             fn __assert_not_repr_packed #impl_generics (val: &#ident #ty_generics) #where_clause {
                 #(#field_refs)*

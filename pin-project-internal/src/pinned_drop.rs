@@ -167,9 +167,8 @@ fn expand_item(item: &mut ItemImpl) {
             prepend_underscore_to_self(&mut ident.ident);
         }
     }
-    // This lint does not warn the receiver.
-    drop_inner.attrs.push(syn::parse_quote!(#[allow(clippy::needless_pass_by_value)]));
-    let mut visitor = ReplaceReceiver::new(&item.self_ty);
+
+    let mut visitor = ReplaceReceiver(&item.self_ty);
     visitor.visit_signature_mut(&mut drop_inner.sig);
     visitor.visit_block_mut(&mut drop_inner.block);
 
@@ -182,6 +181,7 @@ fn expand_item(item: &mut ItemImpl) {
     }
 
     method.block.stmts = syn::parse_quote! {
+        #[allow(clippy::needless_pass_by_value)] // This lint does not warn the receiver.
         #drop_inner
         __drop_inner(self);
     };
