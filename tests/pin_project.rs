@@ -688,3 +688,58 @@ fn no_infer_outlives() {
         _x: <Example<A> as Bar<B>>::Y,
     }
 }
+
+// https://github.com/rust-lang/rust/issues/47949
+// https://github.com/taiki-e/pin-project/pull/194#discussion_r419098111
+#[test]
+fn project_replace_panic() {
+    use std::panic;
+
+    #[pin_project(Replace)]
+    struct S<T, U> {
+        #[pin]
+        pinned: T,
+        unpinned: U,
+    }
+
+    struct D<'a>(&'a mut bool, bool);
+    impl Drop for D<'_> {
+        fn drop(&mut self) {
+            *self.0 = true;
+            if self.1 {
+                panic!()
+            }
+        }
+    }
+
+    let (mut a, mut b, mut c, mut d) = (false, false, false, false);
+    let res = panic::catch_unwind(panic::AssertUnwindSafe(|| {
+        let mut x = S { pinned: D(&mut a, true), unpinned: D(&mut b, false) };
+        let _y = Pin::new(&mut x)
+            .project_replace(S { pinned: D(&mut c, false), unpinned: D(&mut d, false) });
+        // Previous `x.pinned` was dropped and panicked when `project_replace` is called, so this is unreachable.
+        unreachable!();
+    }));
+    assert!(res.is_err());
+    assert!(a);
+    assert!(b);
+    assert!(c);
+    assert!(d);
+
+    let (mut a, mut b, mut c, mut d) = (false, false, false, false);
+    let res = panic::catch_unwind(panic::AssertUnwindSafe(|| {
+        let mut x = S { pinned: D(&mut a, false), unpinned: D(&mut b, true) };
+        {
+            let _y = Pin::new(&mut x)
+                .project_replace(S { pinned: D(&mut c, false), unpinned: D(&mut d, false) });
+            // `_y` (previous `x.unpinned`) live to the end of this scope, so this is not unreachable,
+            // unreachable!();
+        }
+        unreachable!();
+    }));
+    assert!(res.is_err());
+    assert!(a);
+    assert!(b);
+    assert!(c);
+    assert!(d);
+}
