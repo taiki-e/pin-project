@@ -2,48 +2,117 @@ mod argument {
     use pin_project::{pin_project, project};
 
     #[pin_project]
-    struct A<T>(#[pin] T);
+    struct A(#[pin] ());
 
     #[project]
-    fn unexpected_stmt1() {
-        let mut x = A(0);
+    fn unexpected_local1() {
+        let mut x = A(());
         #[project()] //~ ERROR unexpected token
         let A(_) = Pin::new(&mut x).project();
     }
 
     #[project]
-    fn unexpected_stmt2() {
-        let mut x = A(0);
+    fn unexpected_local1() {
+        let mut x = A(());
         #[project(foo)] //~ ERROR unexpected token
         let A(_) = Pin::new(&mut x).project();
     }
 
+    #[project]
+    fn unexpected_expr1() {
+        let mut x = A(());
+        #[project()] //~ ERROR unexpected token
+        match Pin::new(&mut x).project() {
+            A(_) => {}
+        }
+    }
+
+    #[project]
+    fn unexpected_expr1() {
+        let mut x = A(());
+        #[project(foo)] //~ ERROR unexpected token
+        match Pin::new(&mut x).project() {
+            A(_) => {}
+        }
+    }
+
     #[project()] // Ok
-    fn unexpected_fn1() {}
+    fn unexpected_item1() {}
 
     #[project(foo)] //~ ERROR unexpected token
-    fn unexpected_fn2() {}
+    fn unexpected_item2() {}
 }
 
 mod attribute {
-    use pin_project::{pin_project, project};
+    use pin_project::{pin_project, project, project_ref, project_replace};
 
-    #[pin_project]
-    struct A<T>(#[pin] T);
+    #[pin_project(Replace)]
+    struct A(#[pin] ());
 
     #[project]
-    fn duplicate_stmt() {
-        let mut x = A(0);
+    fn duplicate_stmt_project() {
+        let mut x = A(());
         #[project]
         #[project] //~ ERROR duplicate #[project] attribute
         let A(_) = Pin::new(&mut x).project();
     }
 
-    // FIXME: Using #[project] on a function that doesn't contain #[project] is no-op,
-    //        but, ideally, it should be detected.
+    #[project_ref]
+    fn duplicate_stmt_project_ref() {
+        let mut x = A(());
+        #[project_ref]
+        #[project_ref] //~ ERROR duplicate #[project_ref] attribute
+        let A(_) = Pin::new(&mut x).project();
+    }
+
+    #[project_replace]
+    fn duplicate_stmt_project_replace() {
+        let mut x = A(());
+        #[project_replace]
+        #[project_replace] //~ ERROR duplicate #[project_replace] attribute
+        let A(_) = Pin::new(&mut x).project();
+    }
+
     #[project]
-    #[project] // Ok
-    fn duplicate_fn() {}
+    #[project] //~ ERROR duplicate #[project] attribute
+    fn duplicate_fn_project() {}
+
+    #[project_ref]
+    #[project_ref] //~ ERROR duplicate #[project_ref] attribute
+    fn duplicate_fn_project_ref() {}
+
+    #[project_replace]
+    #[project_replace] //~ ERROR duplicate #[project_replace] attribute
+    fn duplicate_fn_project_replace() {}
+
+    #[project]
+    #[project] //~ ERROR duplicate #[project] attribute
+    impl A {}
+
+    #[project_ref]
+    #[project_ref] //~ ERROR duplicate #[project_ref] attribute
+    impl A {}
+
+    #[project_replace]
+    #[project_replace] //~ ERROR duplicate #[project_replace] attribute
+    impl A {}
+
+    #[allow(unused_imports)]
+    mod use_ {
+        use pin_project::{project, project_ref, project_replace};
+
+        #[project]
+        #[project] //~ ERROR duplicate #[project] attribute
+        use super::A;
+
+        #[project_ref]
+        #[project_ref] //~ ERROR duplicate #[project_ref] attribute
+        use super::A;
+
+        #[project_replace]
+        #[project_replace] //~ ERROR duplicate #[project_replace] attribute
+        use super::A;
+    }
 }
 
 fn main() {}
