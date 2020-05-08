@@ -13,72 +13,59 @@ use crate::utils::{
 };
 
 pub(super) fn parse_derive(input: TokenStream) -> Result<TokenStream> {
-    match &mut syn::parse2(input)? {
-        Item::Struct(ItemStruct { attrs, vis, ident, generics, fields, .. }) => {
-            validate_struct(ident, fields)?;
-            let mut cx = Context::new(attrs, vis, ident, generics)?;
+    let mut input = syn::parse2(input)?;
+    let DeriveInput { attrs, vis, ident, generics, data } = &mut input;
+    let mut cx = Context::new(attrs, vis, ident, generics)?;
+    let packed_check;
 
+    let (mut items, scoped_items) = match data {
+        Data::Struct(data) => {
             // Do this first for a better error message.
-            let packed_check = cx.ensure_not_packed(fields)?;
-
-            let (mut proj_items, proj_impl) = cx.parse_struct(fields)?;
-            let unpin_impl = cx.make_unpin_impl();
-            let drop_impl = cx.make_drop_impl();
-
-            let dummy_const = format_ident!("__SCOPE_{}", ident);
-            proj_items.extend(quote! {
-                // All items except projected types are generated inside a `const` scope.
-                // This makes it impossible for user code to refer to these types.
-                // However, this prevents Rustdoc from displaying docs for any
-                // of our types. In particular, users cannot see the
-                // automatically generated `Unpin` impl for the '__UnpinStruct' types
-                //
-                // Previously, we provided a flag to correctly document the
-                // automatically generated `Unpin` impl by using def-site hygiene,
-                // but it is now removed.
-                //
-                // Refs:
-                // * https://github.com/rust-lang/rust/issues/63281
-                // * https://github.com/taiki-e/pin-project/pull/53#issuecomment-525906867
-                // * https://github.com/taiki-e/pin-project/pull/70
-                #[doc(hidden)]
-                #[allow(non_upper_case_globals)]
-                const #dummy_const: () = {
-                    #proj_impl
-                    #unpin_impl
-                    #drop_impl
-                    #packed_check
-                };
-            });
-
-            Ok(proj_items)
+            packed_check = Some(cx.ensure_not_packed(&data.fields)?);
+            cx.parse_struct(data)?
         }
-        Item::Enum(ItemEnum { attrs, vis, ident, generics, brace_token, variants, .. }) => {
-            validate_enum(*brace_token, variants)?;
-            let mut cx = Context::new(attrs, vis, ident, generics)?;
-
+        Data::Enum(data) => {
             // We don't need to check for `#[repr(packed)]`,
             // since it does not apply to enums.
-
-            let (mut proj_items, proj_impl) = cx.parse_enum(variants)?;
-            let unpin_impl = cx.make_unpin_impl();
-            let drop_impl = cx.make_drop_impl();
-
-            let dummy_const = format_ident!("__SCOPE_{}", ident);
-            proj_items.extend(quote! {
-                #[doc(hidden)]
-                #[allow(non_upper_case_globals)]
-                const #dummy_const: () = {
-                    #proj_impl
-                    #unpin_impl
-                    #drop_impl
-                };
-            });
-
-            Ok(proj_items)
+            packed_check = None;
+            cx.parse_enum(data)?
         }
-        item => Err(error!(item, "#[pin_project] attribute may only be used on structs or enums")),
-    }
+        Data::Union(_) => {
+            return Err(error!(
+                input,
+                "#[pin_project] attribute may only be used on structs or enums"
+            ));
+        }
+    };
+
+    let unpin_impl = cx.make_unpin_impl();
+    let drop_impl = cx.make_drop_impl();
+    let dummy_const = format_ident!("__SCOPE_{}", ident);
+    items.extend(quote! {
+        // All items except projected types are generated inside a `const` scope.
+        // This makes it impossible for user code to refer to these types.
+        // However, this prevents Rustdoc from displaying docs for any
+        // of our types. In particular, users cannot see the
+        // automatically generated `Unpin` impl for the '__UnpinStruct' types
+        //
+        // Previously, we provided a flag to correctly document the
+        // automatically generated `Unpin` impl by using def-site hygiene,
+        // but it is now removed.
+        //
+        // Refs:
+        // * https://github.com/rust-lang/rust/issues/63281
+        // * https://github.com/taiki-e/pin-project/pull/53#issuecomment-525906867
+        // * https://github.com/taiki-e/pin-project/pull/70
+        #[doc(hidden)]
+        #[allow(non_upper_case_globals)]
+        const #dummy_const: () = {
+            #scoped_items
+            #unpin_impl
+            #drop_impl
+            #packed_check
+        };
+    });
+    Ok(items)
 }
 
 fn validate_struct(ident: &Ident, fields: &Fields) -> Result<()> {
@@ -341,7 +328,12 @@ impl<'a> Context<'a> {
         })
     }
 
-    fn parse_struct(&mut self, fields: &Fields) -> Result<(TokenStream, TokenStream)> {
+    fn parse_struct(
+        &mut self,
+        DataStruct { fields, .. }: &DataStruct,
+    ) -> Result<(TokenStream, TokenStream)> {
+        validate_struct(self.orig.ident, fields)?;
+
         let ProjectedFields {
             proj_pat,
             proj_body,
@@ -438,7 +430,12 @@ impl<'a> Context<'a> {
         Ok((proj_items, proj_impl))
     }
 
-    fn parse_enum(&mut self, variants: &Variants) -> Result<(TokenStream, TokenStream)> {
+    fn parse_enum(
+        &mut self,
+        DataEnum { brace_token, variants, .. }: &DataEnum,
+    ) -> Result<(TokenStream, TokenStream)> {
+        validate_enum(*brace_token, variants)?;
+
         let ProjectedVariants {
             proj_variants,
             proj_ref_variants,
@@ -997,7 +994,7 @@ impl<'a> Context<'a> {
                     field_refs.push(quote!(&val.#index;));
                 }
             }
-            Fields::Unit => unreachable!(),
+            Fields::Unit => {}
         }
 
         let (impl_generics, ty_generics, where_clause) = self.orig.generics.split_for_impl();

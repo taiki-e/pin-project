@@ -170,3 +170,21 @@ error: #[pin_project] attribute may only be used on structs or enums
 160 | |         f: (),
 161 | |     }
     | |_____^
+
+error: #[pin_project] attribute may not be used on #[repr(packed)] types
+   --> $DIR/invalid.rs:169:12
+    |
+169 |     #[repr(packed)]
+    |            ^^^^^^
+
+error: #[pin_project] attribute may not be used on #[repr(packed)] types
+   --> $DIR/invalid.rs:173:12
+    |
+173 |     #[repr(packed)]
+    |            ^^^^^^
+
+error: #[pin_project] attribute may not be used on #[repr(packed)] types
+   --> $DIR/invalid.rs:177:12
+    |
+177 |     #[repr(packed)]
+    |            ^^^^^^
