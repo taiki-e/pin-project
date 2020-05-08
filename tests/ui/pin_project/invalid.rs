@@ -1,84 +1,68 @@
-mod argument {
+mod pin_argument {
     use pin_project::pin_project;
 
     #[pin_project]
-    struct Unexpected1 {
+    struct Struct {
         #[pin()] //~ ERROR unexpected token
         field: (),
     }
 
     #[pin_project]
-    struct Unexpected2(#[pin(foo)] ()); //~ ERROR unexpected token
+    struct TupleStruct(#[pin(foo)] ()); //~ ERROR unexpected token
 
     #[pin_project]
-    enum Unexpected3 {
+    enum EnumTuple {
         V(#[pin(foo)] ()), //~ ERROR unexpected token
     }
 
     #[pin_project]
-    enum Unexpected4 {
+    enum EnumStruct {
         V {
             #[pin(foo)] //~ ERROR unexpected token
             field: (),
         },
     }
-
-    #[pin_project(UnsafeUnpin,,)] //~ ERROR expected identifier
-    struct Unexpected5 {
-        #[pin]
-        field: (),
-    }
-
-    #[pin_project(Foo)] //~ ERROR unexpected argument
-    struct Unexpected6 {
-        #[pin]
-        field: (),
-    }
-
-    #[pin_project()] // Ok
-    struct Unexpected7 {
-        #[pin]
-        field: (),
-    }
-
-    #[pin_project(UnsafeUnpin, UnsafeUnpin)] //~ ERROR duplicate `UnsafeUnpin` argument
-    struct UnsafeUnpin {
-        #[pin]
-        field: (),
-    }
-
-    #[pin_project(PinnedDrop, PinnedDrop)] //~ ERROR duplicate `PinnedDrop` argument
-    struct PinnedDrop {
-        #[pin]
-        field: (),
-    }
-
-    #[pin_project(Replace, Replace)] //~ ERROR duplicate `Replace` argument
-    struct Replace {
-        #[pin]
-        field: (),
-    }
-
-    #[pin_project(PinnedDrop, UnsafeUnpin, UnsafeUnpin)] //~ ERROR duplicate `UnsafeUnpin` argument
-    struct Duplicate3 {
-        #[pin]
-        field: (),
-    }
-
-    #[pin_project(PinnedDrop, UnsafeUnpin, PinnedDrop, PinnedDrop)] //~ ERROR duplicate `PinnedDrop` argument
-    struct Duplicate4 {
-        #[pin]
-        field: (),
-    }
-
-    #[pin_project(PinnedDrop, Replace)] //~ ERROR arguments `PinnedDrop` and `Replace` are mutually exclusive
-    struct Duplicate5 {
-        #[pin]
-        field: (),
-    }
 }
 
 mod pin_attribute {
+    use pin_project::pin_project;
+
+    #[pin_project]
+    struct DuplicateStruct {
+        #[pin]
+        #[pin] //~ ERROR duplicate #[pin] attribute
+        field: (),
+    }
+
+    #[pin_project]
+    struct DuplicateTupleStruct(
+        #[pin]
+        #[pin]
+        (),
+        //~^^ ERROR duplicate #[pin] attribute
+    );
+
+    #[pin_project]
+    enum DuplicateEnumTuple {
+        V(
+            #[pin]
+            #[pin]
+            (),
+            //~^^ ERROR duplicate #[pin] attribute
+        ),
+    }
+
+    #[pin_project]
+    enum DuplicateEnumStruct {
+        V {
+            #[pin]
+            #[pin] //~ ERROR duplicate #[pin] attribute
+            field: (),
+        },
+    }
+}
+
+mod pin_item {
     use pin_project::pin_project;
 
     #[pin_project]
@@ -99,40 +83,40 @@ mod pin_attribute {
     enum Enum {
         V(()),
     }
+}
 
-    #[pin_project]
-    struct DuplicateField1 {
-        #[pin]
-        #[pin] //~ ERROR duplicate #[pin] attribute
-        field: (),
-    }
+mod pin_project_argument {
+    use pin_project::pin_project;
 
-    #[pin_project]
-    struct DuplicateField2(
-        #[pin]
-        #[pin]
-        (),
-        //~^^ ERROR duplicate #[pin] attribute
-    );
+    #[pin_project(UnsafeUnpin,,)] //~ ERROR expected identifier
+    struct Unexpected1(#[pin] ());
 
-    #[pin_project]
-    enum DuplicateField3 {
-        V {
-            #[pin]
-            #[pin] //~ ERROR duplicate #[pin] attribute
-            field: (),
-        },
-    }
+    #[pin_project(Foo)] //~ ERROR unexpected argument
+    struct Unexpected2(#[pin] ());
 
-    #[pin_project]
-    enum DuplicateField4 {
-        V(
-            #[pin]
-            #[pin]
-            (),
-            //~^^ ERROR duplicate #[pin] attribute
-        ),
-    }
+    #[pin_project(,UnsafeUnpin)] //~ ERROR expected identifier
+    struct Unexpected3(#[pin] ());
+
+    #[pin_project()] // Ok
+    struct Unexpected4(#[pin] ());
+
+    #[pin_project(UnsafeUnpin, UnsafeUnpin)] //~ ERROR duplicate `UnsafeUnpin` argument
+    struct DuplicateUnsafeUnpin(#[pin] ());
+
+    #[pin_project(PinnedDrop, PinnedDrop)] //~ ERROR duplicate `PinnedDrop` argument
+    struct DuplicatePinnedDrop(#[pin] ());
+
+    #[pin_project(Replace, Replace)] //~ ERROR duplicate `Replace` argument
+    struct DuplicateReplace(#[pin] ());
+
+    #[pin_project(PinnedDrop, UnsafeUnpin, UnsafeUnpin)] //~ ERROR duplicate `UnsafeUnpin` argument
+    struct Duplicate3(#[pin] ());
+
+    #[pin_project(PinnedDrop, UnsafeUnpin, PinnedDrop, UnsafeUnpin)] //~ ERROR duplicate `PinnedDrop` argument
+    struct Duplicate4(#[pin] ());
+
+    #[pin_project(PinnedDrop, Replace)] //~ ERROR arguments `PinnedDrop` and `Replace` are mutually exclusive
+    struct PinnedDropWithReplace(#[pin] ());
 }
 
 mod pin_project_attribute {
@@ -140,10 +124,11 @@ mod pin_project_attribute {
 
     #[pin_project]
     #[pin_project] //~ ERROR duplicate #[pin_project] attribute
-    struct Duplicate {
-        #[pin]
-        field: (),
-    }
+    struct Duplicate(#[pin] ());
+}
+
+mod pin_project_item {
+    use pin_project::pin_project;
 
     #[pin_project]
     struct Struct {} //~ ERROR may not be used on structs with zero fields

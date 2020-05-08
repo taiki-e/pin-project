@@ -4,7 +4,7 @@ use std::marker::PhantomPinned;
 fn is_unpin<T: Unpin>() {}
 
 #[pin_project(UnsafeUnpin)]
-pub struct Blah<T, U> {
+struct Blah<T, U> {
     field1: U,
     #[pin]
     field2: T,
@@ -13,13 +13,13 @@ pub struct Blah<T, U> {
 unsafe impl<T: Unpin, U> UnsafeUnpin for Blah<T, U> {}
 
 #[pin_project(UnsafeUnpin)]
-pub struct TrivialBounds {
+struct TrivialBounds {
     #[pin]
     field1: PhantomPinned,
 }
 
 #[pin_project(UnsafeUnpin)]
-pub struct OverlappingLifetimeNames<'pin, T, U> {
+struct OverlappingLifetimeNames<'pin, T, U> {
     #[pin]
     field1: U,
     #[pin]

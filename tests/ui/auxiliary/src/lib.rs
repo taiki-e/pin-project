@@ -22,7 +22,7 @@ pub fn hidden_repr_cfg_not_any(args: TokenStream, input: TokenStream) -> TokenSt
 
 #[proc_macro_attribute]
 pub fn add_pinned_field(_: TokenStream, input: TokenStream) -> TokenStream {
-    let mut item = syn::parse_macro_input!(input as ItemStruct);
+    let mut item: ItemStruct = syn::parse_macro_input!(input);
     let fields = if let Fields::Named(fields) = &mut item.fields { fields } else { unreachable!() };
     fields.named.push(Field {
         attrs: vec![syn::parse_quote!(#[pin])],
@@ -31,12 +31,13 @@ pub fn add_pinned_field(_: TokenStream, input: TokenStream) -> TokenStream {
         colon_token: Some(token::Colon::default()),
         ty: syn::parse_quote!(::std::marker::PhantomPinned),
     });
+
     item.into_token_stream().into()
 }
 
 #[proc_macro_attribute]
 pub fn remove_attr(args: TokenStream, input: TokenStream) -> TokenStream {
-    let mut item = syn::parse_macro_input!(input as ItemStruct);
+    let mut item: ItemStruct = syn::parse_macro_input!(input);
     match &*args.to_string() {
         "field" => {
             if let Fields::Named(fields) = &mut item.fields { fields } else { unreachable!() }
@@ -53,8 +54,9 @@ pub fn remove_attr(args: TokenStream, input: TokenStream) -> TokenStream {
 
 #[proc_macro_attribute]
 pub fn add_pin_attr(args: TokenStream, input: TokenStream) -> TokenStream {
-    let mut item = syn::parse_macro_input!(input as ItemStruct);
+    let mut item: ItemStruct = syn::parse_macro_input!(input);
     assert_eq!(&*args.to_string(), "struct");
     item.attrs.push(syn::parse_quote!(#[pin]));
+
     item.into_token_stream().into()
 }

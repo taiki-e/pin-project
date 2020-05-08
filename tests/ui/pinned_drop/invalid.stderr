@@ -1,125 +1,125 @@
 error: unexpected token: foo
- --> $DIR/invalid.rs:7:19
+ --> $DIR/invalid.rs:8:19
   |
-7 |     #[pinned_drop(foo)] //~ ERROR unexpected token
+8 |     #[pinned_drop(foo)] //~ ERROR unexpected token
   |                   ^^^
 
 error: duplicate #[pinned_drop] attribute
-  --> $DIR/invalid.rs:16:5
+  --> $DIR/invalid.rs:29:5
    |
-16 |     #[pinned_drop] //~ ERROR duplicate #[pinned_drop] attribute
+29 |     #[pinned_drop] //~ ERROR duplicate #[pinned_drop] attribute
    |     ^^^^^^^^^^^^^^
 
 error: #[pinned_drop] may only be used on implementation for the `PinnedDrop` trait
-  --> $DIR/invalid.rs:29:10
+  --> $DIR/invalid.rs:42:10
    |
-29 |     impl Drop for TraitImpl {} //~ ERROR may only be used on implementation for the `PinnedDrop` trait
+42 |     impl Drop for TraitImpl {} //~ ERROR may only be used on implementation for the `PinnedDrop` trait
    |          ^^^^
 
 error: #[pinned_drop] may only be used on implementation for the `PinnedDrop` trait
-  --> $DIR/invalid.rs:35:10
+  --> $DIR/invalid.rs:48:10
    |
-35 |     impl InherentImpl {} //~ ERROR may only be used on implementation for the `PinnedDrop` trait
+48 |     impl InherentImpl {} //~ ERROR may only be used on implementation for the `PinnedDrop` trait
    |          ^^^^^^^^^^^^
 
 error: expected `impl`
-  --> $DIR/invalid.rs:38:5
+  --> $DIR/invalid.rs:51:5
    |
-38 |     fn drop(_: Pin<&mut ()>) {} //~ ERROR expected `impl`
+51 |     fn drop(_: Pin<&mut ()>) {} //~ ERROR expected `impl`
    |     ^^
 
 error: implementing the trait `PinnedDrop` is not unsafe
-  --> $DIR/invalid.rs:48:5
+  --> $DIR/invalid.rs:61:5
    |
-48 |     unsafe impl PinnedDrop for Impl {
+61 |     unsafe impl PinnedDrop for Impl {
    |     ^^^^^^
 
 error: implementing the method `drop` is not unsafe
-  --> $DIR/invalid.rs:58:9
+  --> $DIR/invalid.rs:71:9
    |
-58 |         unsafe fn drop(self: Pin<&mut Self>) {} //~ ERROR implementing the method `drop` is not unsafe
+71 |         unsafe fn drop(self: Pin<&mut Self>) {} //~ ERROR implementing the method `drop` is not unsafe
    |         ^^^^^^
 
 error: not all trait items implemented, missing: `drop`
-  --> $DIR/invalid.rs:69:5
+  --> $DIR/invalid.rs:82:5
    |
-69 |     impl PinnedDrop for Empty {} //~ ERROR not all trait items implemented, missing: `drop`
+82 |     impl PinnedDrop for Empty {} //~ ERROR not all trait items implemented, missing: `drop`
    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error: const `A` is not a member of trait `PinnedDrop`
-  --> $DIR/invalid.rs:76:9
+  --> $DIR/invalid.rs:89:9
    |
-76 |         const A: u8 = 0; //~ ERROR const `A` is not a member of trait `PinnedDrop`
+89 |         const A: u8 = 0; //~ ERROR const `A` is not a member of trait `PinnedDrop`
    |         ^^^^^^^^^^^^^^^^
 
 error: const `A` is not a member of trait `PinnedDrop`
-  --> $DIR/invalid.rs:86:9
+  --> $DIR/invalid.rs:99:9
    |
-86 |         const A: u8 = 0; //~ ERROR const `A` is not a member of trait `PinnedDrop`
+99 |         const A: u8 = 0; //~ ERROR const `A` is not a member of trait `PinnedDrop`
    |         ^^^^^^^^^^^^^^^^
 
 error: type `A` is not a member of trait `PinnedDrop`
-  --> $DIR/invalid.rs:94:9
-   |
-94 |         type A = u8; //~ ERROR type `A` is not a member of trait `PinnedDrop`
-   |         ^^^^^^^^^^^^
+   --> $DIR/invalid.rs:107:9
+    |
+107 |         type A = u8; //~ ERROR type `A` is not a member of trait `PinnedDrop`
+    |         ^^^^^^^^^^^^
 
 error: type `A` is not a member of trait `PinnedDrop`
-   --> $DIR/invalid.rs:104:9
+   --> $DIR/invalid.rs:117:9
     |
-104 |         type A = u8; //~ ERROR type `A` is not a member of trait `PinnedDrop`
+117 |         type A = u8; //~ ERROR type `A` is not a member of trait `PinnedDrop`
     |         ^^^^^^^^^^^^
 
 error: duplicate definitions with name `drop`
-   --> $DIR/invalid.rs:113:9
+   --> $DIR/invalid.rs:126:9
     |
-113 |         fn drop(self: Pin<&mut Self>) {} //~ ERROR duplicate definitions with name `drop`
+126 |         fn drop(self: Pin<&mut Self>) {} //~ ERROR duplicate definitions with name `drop`
     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error: method `drop` must return the unit type
-   --> $DIR/invalid.rs:134:42
+   --> $DIR/invalid.rs:147:42
     |
-134 |         fn drop(self: Pin<&mut Self>) -> Self {} //~ ERROR method `drop` must return the unit type
+147 |         fn drop(self: Pin<&mut Self>) -> Self {} //~ ERROR method `drop` must return the unit type
     |                                          ^^^^
 
 error: method `drop` must take an argument `self: Pin<&mut Self>`
-   --> $DIR/invalid.rs:142:16
+   --> $DIR/invalid.rs:155:16
     |
-142 |         fn drop() {} //~ ERROR method `drop` must take an argument `self: Pin<&mut Self>`
+155 |         fn drop() {} //~ ERROR method `drop` must take an argument `self: Pin<&mut Self>`
     |                ^^
 
 error: method `drop` must take an argument `self: Pin<&mut Self>`
-   --> $DIR/invalid.rs:150:17
+   --> $DIR/invalid.rs:163:17
     |
-150 |         fn drop(self: Pin<&mut Self>, _: ()) {} //~ ERROR method `drop` must take an argument `self: Pin<&mut Self>`
+163 |         fn drop(self: Pin<&mut Self>, _: ()) {} //~ ERROR method `drop` must take an argument `self: Pin<&mut Self>`
     |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error: method `drop` must take an argument `self: Pin<&mut Self>`
-   --> $DIR/invalid.rs:158:17
+   --> $DIR/invalid.rs:171:17
     |
-158 |         fn drop(&mut self) {} //~ ERROR method `drop` must take an argument `self: Pin<&mut Self>`
+171 |         fn drop(&mut self) {} //~ ERROR method `drop` must take an argument `self: Pin<&mut Self>`
     |                 ^^^^^^^^^
 
 error: method `drop` must take an argument `self: Pin<&mut Self>`
-   --> $DIR/invalid.rs:166:17
+   --> $DIR/invalid.rs:179:17
     |
-166 |         fn drop(_: Pin<&mut Self>) {} //~ ERROR method `drop` must take an argument `self: Pin<&mut Self>`
+179 |         fn drop(_: Pin<&mut Self>) {} //~ ERROR method `drop` must take an argument `self: Pin<&mut Self>`
     |                 ^^^^^^^^^^^^^^^^^
 
 error: method `drop` must take an argument `self: Pin<&mut Self>`
-   --> $DIR/invalid.rs:174:17
+   --> $DIR/invalid.rs:187:17
     |
-174 |         fn drop(self: Pin<&Self>) {} //~ ERROR method `drop` must take an argument `self: Pin<&mut Self>`
+187 |         fn drop(self: Pin<&Self>) {} //~ ERROR method `drop` must take an argument `self: Pin<&mut Self>`
     |                 ^^^^^^^^^^^^^^^^
 
 error: method `drop` must take an argument `self: Pin<&mut Self>`
-   --> $DIR/invalid.rs:182:17
+   --> $DIR/invalid.rs:195:17
     |
-182 |         fn drop(self: Pin<&mut ()>) {} //~ ERROR method `drop` must take an argument `self: Pin<&mut Self>`
+195 |         fn drop(self: Pin<&mut ()>) {} //~ ERROR method `drop` must take an argument `self: Pin<&mut Self>`
     |                 ^^^^^^^^^^^^^^^^^^
 
 error: method `pinned_drop` is not a member of trait `PinnedDrop
-   --> $DIR/invalid.rs:190:12
+   --> $DIR/invalid.rs:203:12
     |
-190 |         fn pinned_drop(&mut self) {} //~ ERROR method `pinned_drop` is not a member of trait `PinnedDrop
+203 |         fn pinned_drop(&mut self) {} //~ ERROR method `pinned_drop` is not a member of trait `PinnedDrop
     |            ^^^^^^^^^^^

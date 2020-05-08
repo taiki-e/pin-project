@@ -7,7 +7,7 @@ error: unexpected token: ()
 error: unexpected token: (foo)
   --> $DIR/invalid.rs:11:29
    |
-11 |     struct Unexpected2(#[pin(foo)] ()); //~ ERROR unexpected token
+11 |     struct TupleStruct(#[pin(foo)] ()); //~ ERROR unexpected token
    |                             ^^^^^
 
 error: unexpected token: (foo)
@@ -22,145 +22,151 @@ error: unexpected token: (foo)
 21 |             #[pin(foo)] //~ ERROR unexpected token
    |                  ^^^^^
 
-error: expected identifier
-  --> $DIR/invalid.rs:26:31
+error: duplicate #[pin] attribute
+  --> $DIR/invalid.rs:33:9
    |
-26 |     #[pin_project(UnsafeUnpin,,)] //~ ERROR expected identifier
-   |                               ^
+33 |         #[pin] //~ ERROR duplicate #[pin] attribute
+   |         ^^^^^^
 
-error: unexpected argument: Foo
-  --> $DIR/invalid.rs:32:19
+error: duplicate #[pin] attribute
+  --> $DIR/invalid.rs:40:9
    |
-32 |     #[pin_project(Foo)] //~ ERROR unexpected argument
-   |                   ^^^
+40 |         #[pin]
+   |         ^^^^^^
 
-error: duplicate `UnsafeUnpin` argument
-  --> $DIR/invalid.rs:44:32
+error: duplicate #[pin] attribute
+  --> $DIR/invalid.rs:49:13
    |
-44 |     #[pin_project(UnsafeUnpin, UnsafeUnpin)] //~ ERROR duplicate `UnsafeUnpin` argument
-   |                                ^^^^^^^^^^^
+49 |             #[pin]
+   |             ^^^^^^
 
-error: duplicate `PinnedDrop` argument
-  --> $DIR/invalid.rs:50:31
+error: duplicate #[pin] attribute
+  --> $DIR/invalid.rs:59:13
    |
-50 |     #[pin_project(PinnedDrop, PinnedDrop)] //~ ERROR duplicate `PinnedDrop` argument
-   |                               ^^^^^^^^^^
-
-error: duplicate `Replace` argument
-  --> $DIR/invalid.rs:56:28
-   |
-56 |     #[pin_project(Replace, Replace)] //~ ERROR duplicate `Replace` argument
-   |                            ^^^^^^^
-
-error: duplicate `UnsafeUnpin` argument
-  --> $DIR/invalid.rs:62:44
-   |
-62 |     #[pin_project(PinnedDrop, UnsafeUnpin, UnsafeUnpin)] //~ ERROR duplicate `UnsafeUnpin` argument
-   |                                            ^^^^^^^^^^^
-
-error: duplicate `PinnedDrop` argument
-  --> $DIR/invalid.rs:68:44
-   |
-68 |     #[pin_project(PinnedDrop, UnsafeUnpin, PinnedDrop, PinnedDrop)] //~ ERROR duplicate `PinnedDrop` argument
-   |                                            ^^^^^^^^^^
-
-error: arguments `PinnedDrop` and `Replace` are mutually exclusive
-  --> $DIR/invalid.rs:74:31
-   |
-74 |     #[pin_project(PinnedDrop, Replace)] //~ ERROR arguments `PinnedDrop` and `Replace` are mutually exclusive
-   |                               ^^^^^^^
+59 |             #[pin] //~ ERROR duplicate #[pin] attribute
+   |             ^^^^^^
 
 error: #[pin] attribute may only be used on fields of structs or variants
-  --> $DIR/invalid.rs:85:5
+  --> $DIR/invalid.rs:69:5
    |
-85 |     #[pin] //~ ERROR may only be used on fields of structs or variants
+69 |     #[pin] //~ ERROR may only be used on fields of structs or variants
    |     ^^^^^^
 
 error: #[pin] attribute may only be used on fields of structs or variants
-  --> $DIR/invalid.rs:93:9
+  --> $DIR/invalid.rs:77:9
    |
-93 |         #[pin] //~ ERROR may only be used on fields of structs or variants
+77 |         #[pin] //~ ERROR may only be used on fields of structs or variants
    |         ^^^^^^
 
 error: #[pin] attribute may only be used on fields of structs or variants
-  --> $DIR/invalid.rs:98:5
+  --> $DIR/invalid.rs:82:5
    |
-98 |     #[pin] //~ ERROR may only be used on fields of structs or variants
+82 |     #[pin] //~ ERROR may only be used on fields of structs or variants
    |     ^^^^^^
 
-error: duplicate #[pin] attribute
-   --> $DIR/invalid.rs:106:9
-    |
-106 |         #[pin] //~ ERROR duplicate #[pin] attribute
-    |         ^^^^^^
+error: expected identifier
+  --> $DIR/invalid.rs:91:31
+   |
+91 |     #[pin_project(UnsafeUnpin,,)] //~ ERROR expected identifier
+   |                               ^
 
-error: duplicate #[pin] attribute
-   --> $DIR/invalid.rs:113:9
-    |
-113 |         #[pin]
-    |         ^^^^^^
+error: unexpected argument: Foo
+  --> $DIR/invalid.rs:94:19
+   |
+94 |     #[pin_project(Foo)] //~ ERROR unexpected argument
+   |                   ^^^
 
-error: duplicate #[pin] attribute
-   --> $DIR/invalid.rs:122:13
-    |
-122 |             #[pin] //~ ERROR duplicate #[pin] attribute
-    |             ^^^^^^
+error: expected identifier
+  --> $DIR/invalid.rs:97:19
+   |
+97 |     #[pin_project(,UnsafeUnpin)] //~ ERROR expected identifier
+   |                   ^
 
-error: duplicate #[pin] attribute
-   --> $DIR/invalid.rs:131:13
+error: duplicate `UnsafeUnpin` argument
+   --> $DIR/invalid.rs:103:32
     |
-131 |             #[pin]
-    |             ^^^^^^
+103 |     #[pin_project(UnsafeUnpin, UnsafeUnpin)] //~ ERROR duplicate `UnsafeUnpin` argument
+    |                                ^^^^^^^^^^^
+
+error: duplicate `PinnedDrop` argument
+   --> $DIR/invalid.rs:106:31
+    |
+106 |     #[pin_project(PinnedDrop, PinnedDrop)] //~ ERROR duplicate `PinnedDrop` argument
+    |                               ^^^^^^^^^^
+
+error: duplicate `Replace` argument
+   --> $DIR/invalid.rs:109:28
+    |
+109 |     #[pin_project(Replace, Replace)] //~ ERROR duplicate `Replace` argument
+    |                            ^^^^^^^
+
+error: duplicate `UnsafeUnpin` argument
+   --> $DIR/invalid.rs:112:44
+    |
+112 |     #[pin_project(PinnedDrop, UnsafeUnpin, UnsafeUnpin)] //~ ERROR duplicate `UnsafeUnpin` argument
+    |                                            ^^^^^^^^^^^
+
+error: duplicate `PinnedDrop` argument
+   --> $DIR/invalid.rs:115:44
+    |
+115 |     #[pin_project(PinnedDrop, UnsafeUnpin, PinnedDrop, UnsafeUnpin)] //~ ERROR duplicate `PinnedDrop` argument
+    |                                            ^^^^^^^^^^
+
+error: arguments `PinnedDrop` and `Replace` are mutually exclusive
+   --> $DIR/invalid.rs:118:31
+    |
+118 |     #[pin_project(PinnedDrop, Replace)] //~ ERROR arguments `PinnedDrop` and `Replace` are mutually exclusive
+    |                               ^^^^^^^
 
 error: duplicate #[pin_project] attribute
-   --> $DIR/invalid.rs:142:5
+   --> $DIR/invalid.rs:126:5
     |
-142 |     #[pin_project] //~ ERROR duplicate #[pin_project] attribute
+126 |     #[pin_project] //~ ERROR duplicate #[pin_project] attribute
     |     ^^^^^^^^^^^^^^
 
 error: #[pin_project] attribute may not be used on structs with zero fields
-   --> $DIR/invalid.rs:149:19
+   --> $DIR/invalid.rs:134:19
     |
-149 |     struct Struct {} //~ ERROR may not be used on structs with zero fields
+134 |     struct Struct {} //~ ERROR may not be used on structs with zero fields
     |                   ^^
 
 error: #[pin_project] attribute may not be used on structs with zero fields
-   --> $DIR/invalid.rs:152:23
+   --> $DIR/invalid.rs:137:23
     |
-152 |     struct TupleStruct(); //~ ERROR may not be used on structs with zero fields
+137 |     struct TupleStruct(); //~ ERROR may not be used on structs with zero fields
     |                       ^^
 
 error: #[pin_project] attribute may not be used on structs with zero fields
-   --> $DIR/invalid.rs:155:12
+   --> $DIR/invalid.rs:140:12
     |
-155 |     struct UnitStruct; //~ ERROR may not be used on structs with zero fields
+140 |     struct UnitStruct; //~ ERROR may not be used on structs with zero fields
     |            ^^^^^^^^^^
 
 error: #[pin_project] attribute may not be used on enums without variants
-   --> $DIR/invalid.rs:158:20
+   --> $DIR/invalid.rs:143:20
     |
-158 |     enum EnumEmpty {} //~ ERROR may not be used on enums without variants
+143 |     enum EnumEmpty {} //~ ERROR may not be used on enums without variants
     |                    ^^
 
 error: #[pin_project] attribute may not be used on enums with discriminants
-   --> $DIR/invalid.rs:162:13
+   --> $DIR/invalid.rs:147:13
     |
-162 |         V = 2, //~ ERROR may not be used on enums with discriminants
+147 |         V = 2, //~ ERROR may not be used on enums with discriminants
     |             ^
 
 error: #[pin_project] attribute may not be used on enums with zero fields
-   --> $DIR/invalid.rs:167:9
+   --> $DIR/invalid.rs:152:9
     |
-167 | /         Unit, //~ ERROR may not be used on enums with zero fields
-168 | |         Tuple(),
-169 | |         Struct {},
+152 | /         Unit, //~ ERROR may not be used on enums with zero fields
+153 | |         Tuple(),
+154 | |         Struct {},
     | |__________________^
 
 error: #[pin_project] attribute may only be used on structs or enums
-   --> $DIR/invalid.rs:173:5
+   --> $DIR/invalid.rs:158:5
     |
-173 | /     union Union {
-174 | |         //~^ ERROR may only be used on structs or enums
-175 | |         f: (),
-176 | |     }
+158 | /     union Union {
+159 | |         //~^ ERROR may only be used on structs or enums
+160 | |         f: (),
+161 | |     }
     | |_____^

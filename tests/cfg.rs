@@ -9,20 +9,20 @@ use std::{marker::PhantomPinned, pin::Pin};
 fn is_unpin<T: Unpin>() {}
 
 #[cfg(target_os = "linux")]
-pub struct Linux;
+struct Linux;
 #[cfg(not(target_os = "linux"))]
-pub struct Other;
+struct Other;
 
 // Use this type to check that `cfg(any())` is working properly.
 // If `cfg(any())` is not working properly, `is_unpin` will fail.
-pub struct Any(PhantomPinned);
+struct Any(PhantomPinned);
 
 #[test]
 fn cfg() {
     // structs
 
     #[pin_project(Replace)]
-    pub struct SameName {
+    struct SameName {
         #[cfg(target_os = "linux")]
         #[pin]
         inner: Linux,
@@ -42,7 +42,7 @@ fn cfg() {
     let _x = SameName { inner: Other };
 
     #[pin_project(Replace)]
-    pub struct DifferentName {
+    struct DifferentName {
         #[cfg(target_os = "linux")]
         #[pin]
         l: Linux,
@@ -62,7 +62,7 @@ fn cfg() {
     let _x = DifferentName { o: Other };
 
     #[pin_project(Replace)]
-    pub struct TupleStruct(
+    struct TupleStruct(
         #[cfg(target_os = "linux")]
         #[pin]
         Linux,
@@ -84,7 +84,7 @@ fn cfg() {
     // enums
 
     #[pin_project(Replace)]
-    pub enum Variant {
+    enum Variant {
         #[cfg(target_os = "linux")]
         Inner(#[pin] Linux),
         #[cfg(not(target_os = "linux"))]
@@ -111,7 +111,7 @@ fn cfg() {
     let _x = Variant::Other(Other);
 
     #[pin_project(Replace)]
-    pub enum Field {
+    enum Field {
         SameName {
             #[cfg(target_os = "linux")]
             #[pin]
@@ -168,7 +168,7 @@ fn cfg() {
 #[test]
 fn cfg_attr() {
     #[pin_project(Replace)]
-    pub struct SameCfg {
+    struct SameCfg {
         #[cfg(target_os = "linux")]
         #[cfg_attr(target_os = "linux", pin)]
         inner: Linux,
@@ -194,7 +194,7 @@ fn cfg_attr() {
     let _: Pin<&mut Other> = x.inner;
 
     #[pin_project(Replace)]
-    pub struct DifferentCfg {
+    struct DifferentCfg {
         #[cfg(target_os = "linux")]
         #[cfg_attr(target_os = "linux", pin)]
         inner: Linux,

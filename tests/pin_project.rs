@@ -1,7 +1,10 @@
 #![warn(rust_2018_idioms, single_use_lifetimes)]
 #![allow(dead_code)]
 
-use core::{marker::PhantomPinned, pin::Pin};
+use core::{
+    marker::{PhantomData, PhantomPinned},
+    pin::Pin,
+};
 use pin_project::{pin_project, pinned_drop, UnsafeUnpin};
 
 #[test]
@@ -27,11 +30,23 @@ fn projection() {
     assert_eq!(s_orig.as_ref().field2, 2);
 
     let mut s = Struct { field1: 1, field2: 2 };
-    let s = Pin::new(&mut s).project();
 
-    let __StructProjection { field1, field2 } = s;
+    let __StructProjection { field1, field2 } = Pin::new(&mut s).project();
     let _: Pin<&mut i32> = field1;
     let _: &mut i32 = field2;
+
+    let __StructProjectionRef { field1, field2 } = Pin::new(&s).project_ref();
+    let _: Pin<&i32> = field1;
+    let _: &i32 = field2;
+
+    let mut s = Pin::new(&mut s);
+    let __StructProjectionOwned { field1, field2 } =
+        s.as_mut().project_replace(Struct { field1: 3, field2: 4 });
+    let _: PhantomData<i32> = field1;
+    let _: i32 = field2;
+    assert_eq!(field2, 2);
+    assert_eq!(s.field1, 3);
+    assert_eq!(s.field2, 4);
 
     #[pin_project(Replace)]
     struct TupleStruct<T, U>(#[pin] T, U);
