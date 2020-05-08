@@ -1,13 +1,26 @@
-mod invalid_attribute {
+mod argument {
     use pin_project::{pin_project, pinned_drop};
+    use std::pin::Pin;
 
     #[pin_project(PinnedDrop)]
-    struct UnexpectedArg(());
+    struct UnexpectedArg1(());
 
     #[pinned_drop(foo)] //~ ERROR unexpected token
-    impl PinnedDrop for UnexpectedArg {
+    impl PinnedDrop for UnexpectedArg1 {
         fn drop(self: Pin<&mut Self>) {}
     }
+
+    #[pin_project(PinnedDrop)]
+    struct UnexpectedArg2(());
+
+    #[pinned_drop()] // Ok
+    impl PinnedDrop for UnexpectedArg2 {
+        fn drop(self: Pin<&mut Self>) {}
+    }
+}
+
+mod attribute {
+    use pin_project::{pin_project, pinned_drop};
 
     #[pin_project(PinnedDrop)]
     struct Duplicate(());
@@ -19,7 +32,7 @@ mod invalid_attribute {
     }
 }
 
-mod invalid_item {
+mod item {
     use pin_project::{pin_project, pinned_drop};
 
     #[pin_project(PinnedDrop)]
@@ -59,7 +72,7 @@ mod unsafety {
     }
 }
 
-mod invalid_assoc_item {
+mod assoc_item {
     use pin_project::{pin_project, pinned_drop};
 
     #[pin_project(PinnedDrop)]
@@ -114,7 +127,7 @@ mod invalid_assoc_item {
     }
 }
 
-mod invalid_method {
+mod method {
     use pin_project::{pin_project, pinned_drop};
     use std::pin::Pin;
 

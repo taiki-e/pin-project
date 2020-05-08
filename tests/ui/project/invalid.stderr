@@ -1,11 +1,23 @@
-error: unexpected token: (foo)
-  --> $DIR/invalid.rs:12:14
+error: unexpected token: ()
+  --> $DIR/invalid.rs:10:18
    |
-12 |     #[project(foo)] //~ ERROR unexpected token
-   |              ^^^^^
+10 |         #[project()] //~ ERROR unexpected token
+   |                  ^^
+
+error: unexpected token: (foo)
+  --> $DIR/invalid.rs:17:18
+   |
+17 |         #[project(foo)] //~ ERROR unexpected token
+   |                  ^^^^^
+
+error: unexpected token: foo
+  --> $DIR/invalid.rs:24:15
+   |
+24 |     #[project(foo)] //~ ERROR unexpected token
+   |               ^^^
 
 error: duplicate #[project] attribute
-  --> $DIR/invalid.rs:20:5
+  --> $DIR/invalid.rs:38:9
    |
-20 |     #[project] //~ ERROR duplicate #[project] attribute
-   |     ^^^^^^^^^^
+38 |         #[project] //~ ERROR duplicate #[project] attribute
+   |         ^^^^^^^^^^

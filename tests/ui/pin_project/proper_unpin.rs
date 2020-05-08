@@ -13,7 +13,7 @@ struct Foo<T, U> {
 }
 
 #[pin_project]
-pub struct TrivialBounds {
+struct TrivialBounds {
     #[pin]
     field1: PhantomPinned,
 }
