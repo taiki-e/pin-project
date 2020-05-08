@@ -161,4 +161,21 @@ mod pin_project_item {
     }
 }
 
+// #[repr(packed)] is always detected first, even on unsupported structs.
+mod pin_project_item_packed {
+    use pin_project::pin_project;
+
+    #[pin_project]
+    #[repr(packed)]
+    struct Struct {} //~ ERROR may not be used on #[repr(packed)] types
+
+    #[pin_project]
+    #[repr(packed)]
+    struct TupleStruct(); //~ ERROR may not be used on #[repr(packed)] types
+
+    #[pin_project]
+    #[repr(packed)]
+    struct UnitStruct; //~ ERROR may not be used on #[repr(packed)] types
+}
+
 fn main() {}
