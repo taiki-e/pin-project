@@ -7,7 +7,7 @@ use syn::{
 
 use crate::utils::{
     determine_lifetime_name, insert_lifetime, parse_as_empty, proj_ident, Immutable, Mutability,
-    Mutable, Owned, VecExt, DEFAULT_LIFETIME_NAME,
+    Mutable, Owned, VecExt,
 };
 
 pub(crate) fn attribute(args: &TokenStream, input: Stmt, mutability: Mutability) -> TokenStream {
@@ -169,7 +169,7 @@ fn replace_item_impl(item: &mut ItemImpl, mutability: Mutability) {
 
     replace_ident(ident, mutability);
 
-    let mut lifetime_name = String::from(DEFAULT_LIFETIME_NAME);
+    let mut lifetime_name = String::from("'pin");
     determine_lifetime_name(&mut lifetime_name, &item.generics.params);
     item.items
         .iter_mut()

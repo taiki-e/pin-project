@@ -22,7 +22,7 @@ pub mod pub_use {
     // Confirm that the visibility of the original type is not changed.
     pub use crate::pub_::{Default, Replace};
 }
-pub mod pub_crate_use {
+pub mod pub_use2 {
     // Ok
     #[allow(unused_imports)]
     pub(crate) use crate::pub_::{
@@ -40,11 +40,13 @@ mod pub_crate {
     #[pin_project(Replace)]
     pub(crate) struct Replace(());
 }
-// Ok
-#[allow(unused_imports)]
-pub(crate) use pub_crate::{
-    __DefaultProjection, __DefaultProjectionRef, __ReplaceProjection, __ReplaceProjectionOwned,
-    __ReplaceProjectionRef,
-};
+pub mod pub_crate_use {
+    // Ok
+    #[allow(unused_imports)]
+    pub(crate) use crate::pub_crate::{
+        __DefaultProjection, __DefaultProjectionRef, __ReplaceProjection, __ReplaceProjectionOwned,
+        __ReplaceProjectionRef,
+    };
+}
 
 fn main() {}
