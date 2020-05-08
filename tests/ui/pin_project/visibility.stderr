@@ -1,0 +1,39 @@
+error[E0365]: `__DefaultProjection` is private, and cannot be re-exported
+  --> $DIR/visibility.rs:12:13
+   |
+12 |     pub use crate::pub_::__DefaultProjection; //~ ERROR E0365
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ re-export of private `__DefaultProjection`
+   |
+   = note: consider declaring type or module `__DefaultProjection` with `pub`
+
+error[E0365]: `__DefaultProjectionRef` is private, and cannot be re-exported
+  --> $DIR/visibility.rs:14:13
+   |
+14 |     pub use crate::pub_::__DefaultProjectionRef; //~ ERROR E0365
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ re-export of private `__DefaultProjectionRef`
+   |
+   = note: consider declaring type or module `__DefaultProjectionRef` with `pub`
+
+error[E0365]: `__ReplaceProjection` is private, and cannot be re-exported
+  --> $DIR/visibility.rs:16:13
+   |
+16 |     pub use crate::pub_::__ReplaceProjection; //~ ERROR E0365
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ re-export of private `__ReplaceProjection`
+   |
+   = note: consider declaring type or module `__ReplaceProjection` with `pub`
+
+error[E0365]: `__ReplaceProjectionOwned` is private, and cannot be re-exported
+  --> $DIR/visibility.rs:18:13
+   |
+18 |     pub use crate::pub_::__ReplaceProjectionOwned; //~ ERROR E0365
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ re-export of private `__ReplaceProjectionOwned`
+   |
+   = note: consider declaring type or module `__ReplaceProjectionOwned` with `pub`
+
+error[E0365]: `__ReplaceProjectionRef` is private, and cannot be re-exported
+  --> $DIR/visibility.rs:20:13
+   |
+20 |     pub use crate::pub_::__ReplaceProjectionRef; //~ ERROR E0365
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ re-export of private `__ReplaceProjectionRef`
+   |
+   = note: consider declaring type or module `__ReplaceProjectionRef` with `pub`
