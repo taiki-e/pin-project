@@ -321,9 +321,23 @@ fn overlapping_lifetime_names() {
     }
 
     #[pin_project(Replace)]
-    pub struct Struct2<'pin, '_pin, '__pin, 'pin_, 'pin__> {
+    pub struct Struct2<'pin, 'pin_, 'pin__> {
         #[pin]
-        field: &'pin &'_pin &'__pin &'pin_ &'pin__ (),
+        field: &'pin &'pin_ &'pin__ (),
+    }
+
+    pub trait A<'a> {}
+
+    #[allow(single_use_lifetimes)] // https://github.com/rust-lang/rust/issues/55058
+    #[pin_project(Replace)]
+    pub struct HRTB<'pin___, T>
+    where
+        for<'pin> &'pin T: Unpin,
+        T: for<'pin> A<'pin>,
+        for<'pin, 'pin_, 'pin__> &'pin &'pin_ &'pin__ T: Unpin,
+    {
+        #[pin]
+        field: &'pin___ mut T,
     }
 }
 

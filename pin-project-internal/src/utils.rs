@@ -44,21 +44,21 @@ pub(crate) fn proj_ident(ident: &Ident, mutability: Mutability) -> Ident {
 }
 
 /// Determines the lifetime names. Ensure it doesn't overlap with any existing lifetime names.
-pub(crate) fn determine_lifetime_name(
-    lifetime_name: &mut String,
-    generics: &Punctuated<GenericParam, token::Comma>,
-) {
-    let existing_lifetimes: Vec<String> = generics
-        .iter()
-        .filter_map(|param| {
-            if let GenericParam::Lifetime(LifetimeDef { lifetime, .. }) = param {
-                Some(lifetime.to_string())
-            } else {
-                None
-            }
-        })
-        .collect();
-    while existing_lifetimes.iter().any(|name| name.starts_with(&**lifetime_name)) {
+pub(crate) fn determine_lifetime_name(lifetime_name: &mut String, generics: &mut Generics) {
+    struct CollectLifetimes(Vec<String>);
+
+    impl VisitMut for CollectLifetimes {
+        fn visit_lifetime_def_mut(&mut self, node: &mut LifetimeDef) {
+            self.0.push(node.lifetime.to_string())
+        }
+    }
+
+    debug_assert!(lifetime_name.starts_with('\''));
+
+    let mut lifetimes = CollectLifetimes(Vec::new());
+    lifetimes.visit_generics_mut(generics);
+
+    while lifetimes.0.iter().any(|name| name.starts_with(&**lifetime_name)) {
         lifetime_name.push('_');
     }
 }
@@ -174,15 +174,9 @@ impl<'a> ParseBufferExt<'a> for ParseBuffer<'a> {
 // Replace `self`/`Self` with `__self`/`self_ty`.
 // Based on https://github.com/dtolnay/async-trait/blob/0.1.30/src/receiver.rs
 
-pub(crate) struct ReplaceReceiver<'a> {
-    self_ty: &'a Type,
-}
+pub(crate) struct ReplaceReceiver<'a>(pub(crate) &'a Type);
 
-impl<'a> ReplaceReceiver<'a> {
-    pub(crate) fn new(self_ty: &'a Type) -> Self {
-        Self { self_ty }
-    }
-
+impl ReplaceReceiver<'_> {
     fn self_to_qself(&self, qself: &mut Option<QSelf>, path: &mut Path) {
         if path.leading_colon.is_some() {
             return;
@@ -200,7 +194,7 @@ impl<'a> ReplaceReceiver<'a> {
 
         *qself = Some(QSelf {
             lt_token: token::Lt::default(),
-            ty: Box::new(self.self_ty.clone()),
+            ty: Box::new(self.0.clone()),
             position: 0,
             as_token: None,
             gt_token: token::Gt::default(),
@@ -225,7 +219,7 @@ impl<'a> ReplaceReceiver<'a> {
             return;
         }
 
-        if let Type::Path(self_ty) = &self.self_ty {
+        if let Type::Path(self_ty) = &self.0 {
             let variant = mem::replace(path, self_ty.path.clone());
             for segment in &mut path.segments {
                 if let PathArguments::AngleBracketed(bracketed) = &mut segment.arguments {
@@ -252,7 +246,7 @@ impl VisitMut for ReplaceReceiver<'_> {
     fn visit_type_mut(&mut self, ty: &mut Type) {
         if let Type::Path(node) = ty {
             if node.qself.is_none() && node.path.is_ident("Self") {
-                *ty = self.self_ty.clone();
+                *ty = self.0.clone();
             } else {
                 self.visit_type_path_mut(node);
             }

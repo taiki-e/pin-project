@@ -5,6 +5,7 @@ struct TupleStruct<T, U>(#[pin] T, U);
 #[doc(hidden)]
 #[allow(clippy::mut_mut)]
 #[allow(dead_code)]
+#[allow(single_use_lifetimes)]
 struct __TupleStructProjection<'pin, T, U>(
     ::pin_project::__reexport::pin::Pin<&'pin mut (T)>,
     &'pin mut (U),
@@ -13,6 +14,7 @@ where
     TupleStruct<T, U>: 'pin;
 #[doc(hidden)]
 #[allow(dead_code)]
+#[allow(single_use_lifetimes)]
 struct __TupleStructProjectionRef<'pin, T, U>(
     ::pin_project::__reexport::pin::Pin<&'pin (T)>,
     &'pin (U),
@@ -21,6 +23,7 @@ where
     TupleStruct<T, U>: 'pin;
 #[doc(hidden)]
 #[allow(non_upper_case_globals)]
+#[allow(single_use_lifetimes)]
 const __SCOPE_TupleStruct: () = {
     impl<T, U> TupleStruct<T, U> {
         fn project<'pin>(
@@ -51,7 +54,6 @@ const __SCOPE_TupleStruct: () = {
         __TupleStruct<'pin, T, U>: ::pin_project::__reexport::marker::Unpin
     {
     }
-    #[allow(single_use_lifetimes)]
     impl<T, U> ::pin_project::__reexport::ops::Drop for TupleStruct<T, U> {
         fn drop(&mut self) {
             let pinned_self = unsafe { ::pin_project::__reexport::pin::Pin::new_unchecked(self) };
@@ -60,7 +62,6 @@ const __SCOPE_TupleStruct: () = {
             }
         }
     }
-    #[allow(single_use_lifetimes)]
     #[deny(safe_packed_borrows)]
     fn __assert_not_repr_packed<T, U>(val: &TupleStruct<T, U>) {
         &val.0;

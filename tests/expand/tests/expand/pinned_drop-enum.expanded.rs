@@ -13,6 +13,7 @@ enum Enum<T, U> {
 #[doc(hidden)]
 #[allow(clippy::mut_mut)]
 #[allow(dead_code)]
+#[allow(single_use_lifetimes)]
 enum __EnumProjection<'pin, T, U>
 where
     Enum<T, U>: 'pin,
@@ -29,6 +30,7 @@ where
 }
 #[doc(hidden)]
 #[allow(dead_code)]
+#[allow(single_use_lifetimes)]
 enum __EnumProjectionRef<'pin, T, U>
 where
     Enum<T, U>: 'pin,
@@ -42,6 +44,7 @@ where
 }
 #[doc(hidden)]
 #[allow(non_upper_case_globals)]
+#[allow(single_use_lifetimes)]
 const __SCOPE_Enum: () = {
     impl<T, U> Enum<T, U> {
         fn project<'pin>(
@@ -88,7 +91,6 @@ const __SCOPE_Enum: () = {
         __Enum<'pin, T, U>: ::pin_project::__reexport::marker::Unpin
     {
     }
-    #[allow(single_use_lifetimes)]
     impl<T, U> ::pin_project::__reexport::ops::Drop for Enum<T, U> {
         fn drop(&mut self) {
             let pinned_self = unsafe { ::pin_project::__reexport::pin::Pin::new_unchecked(self) };
