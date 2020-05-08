@@ -1,8 +1,13 @@
-use pin_project::pin_project;
-#[pin(__private())]
+use pin_project::{pin_project, UnsafeUnpin};
+#[pin(__private(UnsafeUnpin))]
 enum Enum<T, U> {
-    Pinned(#[pin] T),
-    Unpinned(U),
+    Struct {
+        #[pin]
+        pinned: T,
+        unpinned: U,
+    },
+    Tuple(#[pin] T, U),
+    Unit,
 }
 #[doc(hidden)]
 #[allow(clippy::mut_mut)]
@@ -11,8 +16,15 @@ enum __EnumProjection<'pin, T, U>
 where
     Enum<T, U>: 'pin,
 {
-    Pinned(::pin_project::__reexport::pin::Pin<&'pin mut (T)>),
-    Unpinned(&'pin mut (U)),
+    Struct {
+        pinned: ::pin_project::__reexport::pin::Pin<&'pin mut (T)>,
+        unpinned: &'pin mut (U),
+    },
+    Tuple(
+        ::pin_project::__reexport::pin::Pin<&'pin mut (T)>,
+        &'pin mut (U),
+    ),
+    Unit,
 }
 #[doc(hidden)]
 #[allow(dead_code)]
@@ -20,8 +32,12 @@ enum __EnumProjectionRef<'pin, T, U>
 where
     Enum<T, U>: 'pin,
 {
-    Pinned(::pin_project::__reexport::pin::Pin<&'pin (T)>),
-    Unpinned(&'pin (U)),
+    Struct {
+        pinned: ::pin_project::__reexport::pin::Pin<&'pin (T)>,
+        unpinned: &'pin (U),
+    },
+    Tuple(::pin_project::__reexport::pin::Pin<&'pin (T)>, &'pin (U)),
+    Unit,
 }
 #[doc(hidden)]
 #[allow(non_upper_case_globals)]
@@ -32,10 +48,15 @@ const __SCOPE_Enum: () = {
         ) -> __EnumProjection<'pin, T, U> {
             unsafe {
                 match self.get_unchecked_mut() {
-                    Enum::Pinned(_0) => __EnumProjection::Pinned(
+                    Enum::Struct { pinned, unpinned } => __EnumProjection::Struct {
+                        pinned: ::pin_project::__reexport::pin::Pin::new_unchecked(pinned),
+                        unpinned,
+                    },
+                    Enum::Tuple(_0, _1) => __EnumProjection::Tuple(
                         ::pin_project::__reexport::pin::Pin::new_unchecked(_0),
+                        _1,
                     ),
-                    Enum::Unpinned(_0) => __EnumProjection::Unpinned(_0),
+                    Enum::Unit => __EnumProjection::Unit,
                 }
             }
         }
@@ -44,20 +65,22 @@ const __SCOPE_Enum: () = {
         ) -> __EnumProjectionRef<'pin, T, U> {
             unsafe {
                 match self.get_ref() {
-                    Enum::Pinned(_0) => __EnumProjectionRef::Pinned(
+                    Enum::Struct { pinned, unpinned } => __EnumProjectionRef::Struct {
+                        pinned: ::pin_project::__reexport::pin::Pin::new_unchecked(pinned),
+                        unpinned,
+                    },
+                    Enum::Tuple(_0, _1) => __EnumProjectionRef::Tuple(
                         ::pin_project::__reexport::pin::Pin::new_unchecked(_0),
+                        _1,
                     ),
-                    Enum::Unpinned(_0) => __EnumProjectionRef::Unpinned(_0),
+                    Enum::Unit => __EnumProjectionRef::Unit,
                 }
             }
         }
     }
-    struct __Enum<'pin, T, U> {
-        __pin_project_use_generics: ::pin_project::__private::AlwaysUnpin<'pin, (T, U)>,
-        __field0: T,
-    }
+    #[allow(single_use_lifetimes)]
     impl<'pin, T, U> ::pin_project::__reexport::marker::Unpin for Enum<T, U> where
-        __Enum<'pin, T, U>: ::pin_project::__reexport::marker::Unpin
+        ::pin_project::__private::Wrapper<'pin, Self>: ::pin_project::UnsafeUnpin
     {
     }
     trait EnumMustNotImplDrop {}

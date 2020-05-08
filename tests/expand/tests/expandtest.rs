@@ -4,6 +4,5 @@
 #[cfg_attr(any(not(cargo_expand), all(ci, not(target_os = "linux"))), ignore)]
 #[test]
 fn expandtest() {
-    macrotest::expand("tests/enum/*.rs");
-    macrotest::expand("tests/struct/*.rs");
+    macrotest::expand("tests/expand/*.rs");
 }

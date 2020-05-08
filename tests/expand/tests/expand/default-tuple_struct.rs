@@ -1,9 +1,6 @@
 use pin_project::pin_project;
 
 #[pin_project]
-enum Enum<T, U> {
-    Pinned(#[pin] T),
-    Unpinned(U),
-}
+struct TupleStruct<T, U>(#[pin] T, U);
 
 fn main() {}

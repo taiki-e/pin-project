@@ -1,13 +1,14 @@
 use pin_project::pin_project;
 
-#[pin_project(Replace)]
-enum Enum<T, U> {
-    V {
+#[pin_project]
+pub enum Enum<T, U> {
+    Struct {
         #[pin]
         pinned: T,
         unpinned: U,
     },
-    None,
+    Tuple(#[pin] T, U),
+    Unit,
 }
 
 fn main() {}

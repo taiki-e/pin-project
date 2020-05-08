@@ -1,9 +1,9 @@
-use pin_project::{pin_project, UnsafeUnpin};
-#[pin(__private(UnsafeUnpin))]
+use pin_project::pin_project;
+#[pin(__private())]
 pub struct Struct<T, U> {
     #[pin]
-    pinned: T,
-    unpinned: U,
+    pub pinned: T,
+    pub unpinned: U,
 }
 #[doc(hidden)]
 #[allow(clippy::mut_mut)]
@@ -12,8 +12,8 @@ pub(crate) struct __StructProjection<'pin, T, U>
 where
     Struct<T, U>: 'pin,
 {
-    pinned: ::pin_project::__reexport::pin::Pin<&'pin mut (T)>,
-    unpinned: &'pin mut (U),
+    pub pinned: ::pin_project::__reexport::pin::Pin<&'pin mut (T)>,
+    pub unpinned: &'pin mut (U),
 }
 #[doc(hidden)]
 #[allow(dead_code)]
@@ -21,8 +21,8 @@ pub(crate) struct __StructProjectionRef<'pin, T, U>
 where
     Struct<T, U>: 'pin,
 {
-    pinned: ::pin_project::__reexport::pin::Pin<&'pin (T)>,
-    unpinned: &'pin (U),
+    pub pinned: ::pin_project::__reexport::pin::Pin<&'pin (T)>,
+    pub unpinned: &'pin (U),
 }
 #[doc(hidden)]
 #[allow(non_upper_case_globals)]
@@ -51,9 +51,12 @@ const __SCOPE_Struct: () = {
             }
         }
     }
-    #[allow(single_use_lifetimes)]
+    pub struct __Struct<'pin, T, U> {
+        __pin_project_use_generics: ::pin_project::__private::AlwaysUnpin<'pin, (T, U)>,
+        __field0: T,
+    }
     impl<'pin, T, U> ::pin_project::__reexport::marker::Unpin for Struct<T, U> where
-        ::pin_project::__private::Wrapper<'pin, Self>: ::pin_project::UnsafeUnpin
+        __Struct<'pin, T, U>: ::pin_project::__reexport::marker::Unpin
     {
     }
     trait StructMustNotImplDrop {}
@@ -72,5 +75,4 @@ const __SCOPE_Struct: () = {
         &val.unpinned;
     }
 };
-unsafe impl<T: Unpin, U> UnsafeUnpin for Struct<T, U> {}
 fn main() {}
