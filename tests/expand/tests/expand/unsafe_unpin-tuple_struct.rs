@@ -1,11 +1,7 @@
 use pin_project::{pin_project, UnsafeUnpin};
 
 #[pin_project(UnsafeUnpin)]
-pub struct Struct<T, U> {
-    #[pin]
-    pinned: T,
-    unpinned: U,
-}
+struct TupleStruct<T, U>(#[pin] T, U);
 
 unsafe impl<T: Unpin, U> UnsafeUnpin for Struct<T, U> {}
 

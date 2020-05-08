@@ -2,16 +2,16 @@ use pin_project::{pin_project, pinned_drop};
 use std::pin::Pin;
 
 #[pin_project(PinnedDrop)]
-pub struct Struct<'a, T> {
-    was_dropped: &'a mut bool,
+struct Struct<T, U> {
     #[pin]
-    field: T,
+    pinned: T,
+    unpinned: U,
 }
 
 #[pinned_drop]
-impl<T> PinnedDrop for Struct<'_, T> {
+impl<T, U> PinnedDrop for Struct<T, U> {
     fn drop(self: Pin<&mut Self>) {
-        **self.project().was_dropped = true;
+        let _this = self;
     }
 }
 
