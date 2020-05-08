@@ -145,6 +145,7 @@ fn project_impl() {
     }
 
     #[allow(single_use_lifetimes)]
+    #[allow(clippy::needless_lifetimes)]
     #[project]
     impl<T, U> HasOverlappingLifetimes2<T, U> {
         fn foo<'pin>(&'pin self) {}
@@ -186,6 +187,7 @@ mod project_use_2 {
     }
 }
 
+#[allow(clippy::unnecessary_operation, clippy::unit_arg)]
 #[test]
 #[project]
 fn non_stmt_expr_match() {
@@ -206,6 +208,7 @@ fn non_stmt_expr_match() {
 }
 
 // https://github.com/taiki-e/pin-project/issues/206
+#[allow(clippy::unnecessary_operation, clippy::unit_arg)]
 #[test]
 #[project]
 fn issue_206() {
@@ -224,6 +227,7 @@ fn issue_206() {
         }
     });
 
+    #[allow(clippy::never_loop)]
     loop {
         let _ = {
             #[project]

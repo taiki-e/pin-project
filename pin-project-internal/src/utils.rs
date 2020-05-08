@@ -1,5 +1,5 @@
 use proc_macro2::{Group, TokenStream, TokenTree};
-use quote::{format_ident, quote_spanned};
+use quote::format_ident;
 use std::{iter::FromIterator, mem};
 use syn::{
     parse::{ParseBuffer, ParseStream},
@@ -7,8 +7,6 @@ use syn::{
     visit_mut::{self, VisitMut},
     *,
 };
-
-pub(crate) const DEFAULT_LIFETIME_NAME: &str = "'pin";
 
 pub(crate) type Variants = Punctuated<Variant, token::Comma>;
 
@@ -20,6 +18,12 @@ macro_rules! error {
     };
     ($span:expr, $($tt:tt)*) => {
         error!($span, format!($($tt)*))
+    };
+}
+
+macro_rules! parse_quote_spanned {
+    ($span:expr => $($tt:tt)*) => {
+        syn::parse2(quote::quote_spanned!($span => $($tt)*)).unwrap_or_else(|e| panic!("{}", e))
     };
 }
 
@@ -84,31 +88,16 @@ pub(crate) fn insert_lifetime_and_bound(
 
 /// Inserts a `lifetime` at position `0` of `generics.params`.
 pub(crate) fn insert_lifetime(generics: &mut Generics, lifetime: Lifetime) {
-    if generics.lt_token.is_none() {
-        generics.lt_token = Some(token::Lt::default())
-    }
-    if generics.gt_token.is_none() {
-        generics.gt_token = Some(token::Gt::default())
-    }
+    generics.lt_token.get_or_insert_with(token::Lt::default);
+    generics.gt_token.get_or_insert_with(token::Gt::default);
 
-    generics.params.insert(
-        0,
-        GenericParam::Lifetime(LifetimeDef {
-            attrs: Vec::new(),
-            lifetime,
-            colon_token: None,
-            bounds: Punctuated::new(),
-        }),
-    );
+    generics.params.insert(0, GenericParam::Lifetime(LifetimeDef::new(lifetime)));
 }
 
 /// Determines the visibility of the projected type and projection method.
 pub(crate) fn determine_visibility(vis: &Visibility) -> Visibility {
     if let Visibility::Public(token) = vis {
-        syn::parse2(quote_spanned! { token.pub_token.span =>
-            pub(crate)
-        })
-        .unwrap()
+        parse_quote_spanned!(token.pub_token.span => pub(crate))
     } else {
         vis.clone()
     }

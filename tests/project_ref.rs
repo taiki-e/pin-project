@@ -139,6 +139,7 @@ fn project_impl() {
     }
 
     #[allow(single_use_lifetimes)]
+    #[allow(clippy::needless_lifetimes)]
     #[project_ref]
     impl<T, U> HasOverlappingLifetimes2<T, U> {
         fn foo<'pin>(&'pin self) {}

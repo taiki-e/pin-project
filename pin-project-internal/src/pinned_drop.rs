@@ -1,5 +1,5 @@
 use proc_macro2::TokenStream;
-use quote::{quote, quote_spanned, ToTokens};
+use quote::{quote, ToTokens};
 use syn::{spanned::Spanned, visit_mut::VisitMut, *};
 
 use crate::utils::{parse_as_empty, prepend_underscore_to_self, ReplaceReceiver, SliceExt};
@@ -50,12 +50,10 @@ fn parse_method(method: &ImplItemMethod) -> Result<()> {
         }
     }
 
-    if method.sig.inputs.len() != 1 {
-        if method.sig.inputs.is_empty() {
-            return Err(Error::new(method.sig.paren_token.span, INVALID_ARGUMENT));
-        } else {
-            return Err(error!(&method.sig.inputs, INVALID_ARGUMENT));
-        }
+    match method.sig.inputs.len() {
+        1 => {}
+        0 => return Err(Error::new(method.sig.paren_token.span, INVALID_ARGUMENT)),
+        _ => return Err(error!(&method.sig.inputs, INVALID_ARGUMENT)),
     }
 
     if let Some(FnArg::Typed(pat)) = &method.sig.receiver() {
@@ -101,10 +99,9 @@ fn parse(item: &mut ItemImpl) -> Result<()> {
 
     if let Some((_, path, _)) = &mut item.trait_ {
         if path.is_ident("PinnedDrop") {
-            *path = syn::parse2(quote_spanned! { path.span() =>
+            *path = parse_quote_spanned! { path.span() =>
                 ::pin_project::__private::PinnedDrop
-            })
-            .unwrap();
+            };
         } else {
             return Err(error!(path, INVALID_ITEM));
         }
@@ -119,27 +116,27 @@ fn parse(item: &mut ItemImpl) -> Result<()> {
         return Err(error!(item, "not all trait items implemented, missing: `drop`"));
     }
 
-    item.items.iter().enumerate().try_for_each(|(i, item)| match item {
-        ImplItem::Const(item) => {
-            Err(error!(item, "const `{}` is not a member of trait `PinnedDrop`", item.ident))
-        }
-        ImplItem::Type(item) => {
-            Err(error!(item, "type `{}` is not a member of trait `PinnedDrop`", item.ident))
-        }
-        ImplItem::Method(method) => {
-            parse_method(method)?;
-            if i == 0 {
-                Ok(())
-            } else {
-                Err(error!(method, "duplicate definitions with name `drop`"))
+    item.items
+        .iter()
+        .enumerate()
+        .try_for_each(|(i, item)| match item {
+            ImplItem::Const(item) => {
+                Err(error!(item, "const `{}` is not a member of trait `PinnedDrop`", item.ident))
             }
-        }
-        _ => unreachable!("unexpected ImplItem"),
-    })?;
-
-    expand_item(item);
-
-    Ok(())
+            ImplItem::Type(item) => {
+                Err(error!(item, "type `{}` is not a member of trait `PinnedDrop`", item.ident))
+            }
+            ImplItem::Method(method) => {
+                parse_method(method)?;
+                if i == 0 {
+                    Ok(())
+                } else {
+                    Err(error!(method, "duplicate definitions with name `drop`"))
+                }
+            }
+            _ => unreachable!("unexpected ImplItem"),
+        })
+        .map(|()| expand_item(item))
 }
 
 // from:

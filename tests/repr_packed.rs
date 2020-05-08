@@ -35,14 +35,15 @@ fn weird_repr_packed() {
         }
     }
 
+    #[allow(clippy::let_and_return)]
     let field_addr = {
         // We let this field drop by going out of scope,
         // rather than explicitly calling drop(foo).
         // Calling drop(foo) causes 'foo' to be moved
         // into the 'drop' function, resulting in a different
         // address.
-        let foo = Foo { field: 27 };
-        let field_addr = &foo.field as *const u8 as usize;
+        let x = Foo { field: 27 };
+        let field_addr = &x.field as *const u8 as usize;
         field_addr
     };
     assert_eq!(field_addr, FIELD_ADDR.with(|f| f.get()));

@@ -10,20 +10,21 @@ fn project_if_let() {
         }
     }
 
-    let mut foo: Foo<bool, f32> = Foo::Variant1(true);
-    let foo = Pin::new(&mut foo).project();
+    let mut x: Foo<bool, f32> = Foo::Variant1(true);
+    let x = Pin::new(&mut x).project();
 
     #[project]
-    if let Foo::Variant1(a) = foo {
+    if let Foo::Variant1(a) = x {
         let a: Pin<&mut bool> = a;
         assert_eq!(*a, true);
-    } else if let Foo::Variant2(_) = foo {
+    } else if let Foo::Variant2(_) = x {
         unreachable!();
-    } else if let Foo::Variant3 { .. } = foo {
+    } else if let Foo::Variant3 { .. } = x {
         unreachable!();
     }
 }
 
+#[allow(clippy::unnecessary_operation, clippy::unit_arg)]
 #[test]
 #[project]
 fn non_stmt_expr_if_let() {
