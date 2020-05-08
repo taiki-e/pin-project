@@ -248,6 +248,7 @@ fn move_out() {
     }
 
     let x = Enum::Variant(NotCopy);
+    #[allow(clippy::infallible_destructuring_match)]
     let _val: NotCopy = match x {
         Enum::Variant(val) => val,
     };

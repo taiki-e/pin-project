@@ -15,6 +15,7 @@
 // ```
 
 #![allow(dead_code, unused_imports, unused_parens)]
+#![allow(clippy::no_effect, clippy::just_underscores_and_digits)]
 
 use pin_project::pin_project;
 

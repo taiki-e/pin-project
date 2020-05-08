@@ -164,6 +164,7 @@ fn self_pat() {
     #[pinned_drop]
     impl PinnedDrop for Struct {
         #[allow(irrefutable_let_patterns)]
+        #[allow(clippy::match_single_binding)]
         fn drop(mut self: Pin<&mut Self>) {
             match *self {
                 Self { x: _ } => {}
