@@ -6,6 +6,46 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 ## [Unreleased]
 
+## [0.4.14] - 2020-05-09
+
+* [Added `!Unpin` argument to `#[pin_project]` attribute for guarantee the type is `!Unpin`.][219]
+
+  ```rust
+  use pin_project::pin_project;
+  #[pin_project(!Unpin)]
+  struct Struct<T, U> {
+      field: T,
+  }
+  ```
+
+  This is equivalent to use `#[pin]` attribute for `PhantomPinned` field.
+
+  ```rust
+  use pin_project::pin_project;
+  use std::marker::PhantomPinned;
+  #[pin_project]
+  struct Struct<T, U> {
+      field: T,
+      #[pin] // Note that using `PhantomPinned` without `#[pin]` attribute has no effect.
+      _pin: PhantomPinned,
+  }
+  ```
+
+  *[Note: This raises the minimum supported Rust version of this crate from rustc 1.33 to rustc 1.34.](https://github.com/taiki-e/pin-project/pull/219#pullrequestreview-408644187)*
+
+* [Fixed an issue where duplicate `#[project]` attributes were ignored.][218]
+
+* [Fixed compile error and warnings with HRTB.][217]
+
+* [Hide generated items from --document-private-items.][211] See [#211][211] for more details.
+
+* Improve documentation
+
+[211]: https://github.com/taiki-e/pin-project/pull/211
+[217]: https://github.com/taiki-e/pin-project/pull/217
+[218]: https://github.com/taiki-e/pin-project/pull/218
+[219]: https://github.com/taiki-e/pin-project/pull/219
+
 ## [0.4.13] - 2020-05-07
 
 * [Fixed a regression in 0.4.11.][207]
@@ -53,9 +93,9 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 * [`#[project]` attribute can now be used for `if let` expressions.][181]
 
-[188]: https://github.com/taiki-e/pin-project/pull/188
-[186]: https://github.com/taiki-e/pin-project/pull/186
 [181]: https://github.com/taiki-e/pin-project/pull/181
+[186]: https://github.com/taiki-e/pin-project/pull/186
+[188]: https://github.com/taiki-e/pin-project/pull/188
 
 ## [0.4.8] - 2020-01-27
 
@@ -205,14 +245,14 @@ Changes since the 0.4.0-beta.1 release:
   }
   ```
 
-* [Prevented UnpinStruct from appearing in the document by default.][71] See [taiki-e/pin-project#71][71] for more details.
+* [Prevented UnpinStruct from appearing in the document by default.][71] See [#71][71] for more details.
 
 [69]: https://github.com/taiki-e/pin-project/pull/69
 [71]: https://github.com/taiki-e/pin-project/pull/69
 
 ## [0.4.0-alpha.8] - 2019-09-03
 
-* [Improved document of generated code.][62]. Also added an option to control the document of generated code. See [taiki-e/pin-project#62][62] for more details.
+* [Improved document of generated code.][62]. Also added an option to control the document of generated code. See [#62][62] for more details.
 
 * [Improved error messages][61]
 
@@ -359,7 +399,8 @@ See also [tracking issue for 0.4 release][21].
 
 Initial release
 
-[Unreleased]: https://github.com/taiki-e/pin-project/compare/v0.4.13...HEAD
+[Unreleased]: https://github.com/taiki-e/pin-project/compare/v0.4.14...HEAD
+[0.4.14]: https://github.com/taiki-e/pin-project/compare/v0.4.13...v0.4.14
 [0.4.13]: https://github.com/taiki-e/pin-project/compare/v0.4.11...v0.4.13
 [0.4.12]: https://github.com/taiki-e/pin-project/compare/v0.4.10...v0.4.12
 [0.4.11]: https://github.com/taiki-e/pin-project/compare/v0.4.10...v0.4.11
