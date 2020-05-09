@@ -63,6 +63,7 @@ const __SCOPE_Struct: () = {
         __Struct<'pin, T, U>: ::pin_project::__reexport::marker::Unpin
     {
     }
+    unsafe impl<T, U> ::pin_project::UnsafeUnpin for Struct<T, U> {}
     impl<T, U> ::pin_project::__reexport::ops::Drop for Struct<T, U> {
         fn drop(&mut self) {
             let pinned_self = unsafe { ::pin_project::__reexport::pin::Pin::new_unchecked(self) };

@@ -91,6 +91,7 @@ const __SCOPE_Enum: () = {
         __Enum<'pin, T, U>: ::pin_project::__reexport::marker::Unpin
     {
     }
+    unsafe impl<T, U> ::pin_project::UnsafeUnpin for Enum<T, U> {}
     impl<T, U> ::pin_project::__reexport::ops::Drop for Enum<T, U> {
         fn drop(&mut self) {
             let pinned_self = unsafe { ::pin_project::__reexport::pin::Pin::new_unchecked(self) };

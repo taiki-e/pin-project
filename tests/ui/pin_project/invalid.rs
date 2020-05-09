@@ -100,14 +100,17 @@ mod pin_project_argument {
     #[pin_project()] // Ok
     struct Unexpected4(#[pin] ());
 
-    #[pin_project(UnsafeUnpin, UnsafeUnpin)] //~ ERROR duplicate `UnsafeUnpin` argument
-    struct DuplicateUnsafeUnpin(#[pin] ());
-
     #[pin_project(PinnedDrop, PinnedDrop)] //~ ERROR duplicate `PinnedDrop` argument
     struct DuplicatePinnedDrop(#[pin] ());
 
     #[pin_project(Replace, Replace)] //~ ERROR duplicate `Replace` argument
     struct DuplicateReplace(#[pin] ());
+
+    #[pin_project(UnsafeUnpin, UnsafeUnpin)] //~ ERROR duplicate `UnsafeUnpin` argument
+    struct DuplicateUnsafeUnpin(#[pin] ());
+
+    #[pin_project(!Unpin, !Unpin)] //~ ERROR duplicate `!Unpin` argument
+    struct DuplicateNotUnpin(#[pin] ());
 
     #[pin_project(PinnedDrop, UnsafeUnpin, UnsafeUnpin)] //~ ERROR duplicate `UnsafeUnpin` argument
     struct Duplicate3(#[pin] ());
@@ -116,7 +119,22 @@ mod pin_project_argument {
     struct Duplicate4(#[pin] ());
 
     #[pin_project(PinnedDrop, Replace)] //~ ERROR arguments `PinnedDrop` and `Replace` are mutually exclusive
-    struct PinnedDropWithReplace(#[pin] ());
+    struct PinnedDropWithReplace1(#[pin] ());
+
+    #[pin_project(Replace, UnsafeUnpin, PinnedDrop)] //~ ERROR arguments `PinnedDrop` and `Replace` are mutually exclusive
+    struct PinnedDropWithReplace2(#[pin] ());
+
+    #[pin_project(UnsafeUnpin, !Unpin)] //~ ERROR arguments `UnsafeUnpin` and `!Unpin` are mutually exclusive
+    struct UnsafeUnpinWithNotUnpin1(#[pin] ());
+
+    #[pin_project(!Unpin, PinnedDrop, UnsafeUnpin)] //~ ERROR arguments `UnsafeUnpin` and `!Unpin` are mutually exclusive
+    struct UnsafeUnpinWithNotUnpin2(#[pin] ());
+
+    #[pin_project(!)] //~ ERROR unexpected end of input, expected `Unpin`
+    struct NotUnpin1(#[pin] ());
+
+    #[pin_project(Unpin)] //~ ERROR unexpected argument
+    struct NotUnpin2(#[pin] ());
 }
 
 mod pin_project_attribute {

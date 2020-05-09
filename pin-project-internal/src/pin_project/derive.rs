@@ -103,14 +103,13 @@ fn validate_enum(brace_token: token::Brace, variants: &Variants) -> Result<()> {
     }
 }
 
-#[derive(Default)]
 struct Args {
-    /// `PinnedDrop`.
+    /// `PinnedDrop` argument.
     pinned_drop: Option<Span>,
-    /// `UnsafeUnpin`.
-    unsafe_unpin: Option<Span>,
-    /// `Replace`.
+    /// `Replace` argument.
     replace: Option<Span>,
+    /// `UnsafeUnpin` or `!Unpin` argument.
+    unpin_impl: UnpinImpl,
 }
 
 const DUPLICATE_PIN: &str = "duplicate #[pin] attribute";
@@ -151,6 +150,10 @@ impl Args {
 
 impl Parse for Args {
     fn parse(input: ParseStream<'_>) -> Result<Self> {
+        mod kw {
+            syn::custom_keyword!(Unpin);
+        }
+
         // `(__private(<args>))` -> `<args>`
         fn parse_input(input: ParseStream<'_>) -> Result<ParseBuffer<'_>> {
             if let Ok(content) = input.parenthesized() {
@@ -171,7 +174,7 @@ impl Parse for Args {
         }
 
         // Replace `prev` with `new`. Returns `Err` if `prev` is `Some`.
-        fn replace<T>(prev: &mut Option<T>, new: T, token: &Ident) -> Result<()> {
+        fn update<T>(prev: &mut Option<T>, new: T, token: &Ident) -> Result<()> {
             if prev.replace(new).is_some() {
                 Err(error!(token, "duplicate `{}` argument", token))
             } else {
@@ -180,32 +183,26 @@ impl Parse for Args {
         }
 
         let input = parse_input(input)?;
-        let mut args = Self::default();
+        let mut pinned_drop = None;
+        let mut replace = None;
+        let mut unsafe_unpin = None;
+        let mut not_unpin = None;
         while !input.is_empty() {
-            let token = input.parse::<Ident>()?;
-            match &*token.to_string() {
-                "PinnedDrop" => {
-                    replace(&mut args.pinned_drop, token.span(), &token)?;
-                    if args.replace.is_some() {
-                        return Err(error!(
-                            token,
-                            "arguments `PinnedDrop` and `Replace` are mutually exclusive"
-                        ));
-                    }
+            if input.peek(token::Bang) {
+                let t: token::Bang = input.parse()?;
+                let k: kw::Unpin = input.parse()?;
+                if not_unpin.replace(k).is_some() {
+                    let span = quote!(#t #k);
+                    return Err(error!(span, "duplicate `!Unpin` argument",));
                 }
-                "Replace" => {
-                    replace(&mut args.replace, token.span(), &token)?;
-                    if args.pinned_drop.is_some() {
-                        return Err(error!(
-                            token,
-                            "arguments `PinnedDrop` and `Replace` are mutually exclusive"
-                        ));
-                    }
+            } else {
+                let token = input.parse::<Ident>()?;
+                match &*token.to_string() {
+                    "PinnedDrop" => update(&mut pinned_drop, token.span(), &token)?,
+                    "Replace" => update(&mut replace, token.span(), &token)?,
+                    "UnsafeUnpin" => update(&mut unsafe_unpin, token.span(), &token)?,
+                    _ => return Err(error!(token, "unexpected argument: {}", token)),
                 }
-                "UnsafeUnpin" => {
-                    replace(&mut args.unsafe_unpin, token.span(), &token)?;
-                }
-                _ => return Err(error!(token, "unexpected argument: {}", token)),
             }
 
             if !input.is_empty() {
@@ -213,7 +210,25 @@ impl Parse for Args {
             }
         }
 
-        Ok(args)
+        if let (Some(span), Some(_)) = (pinned_drop, replace) {
+            return Err(Error::new(
+                span,
+                "arguments `PinnedDrop` and `Replace` are mutually exclusive",
+            ));
+        }
+        let unpin_impl = match (unsafe_unpin, not_unpin) {
+            (Some(span), Some(_)) => {
+                return Err(Error::new(
+                    span,
+                    "arguments `UnsafeUnpin` and `!Unpin` are mutually exclusive",
+                ));
+            }
+            (None, None) => UnpinImpl::Default,
+            (Some(span), None) => UnpinImpl::Unsafe(span),
+            (None, Some(span)) => UnpinImpl::Negative(span.span),
+        };
+
+        Ok(Self { pinned_drop, replace, unpin_impl })
     }
 }
 
@@ -275,10 +290,19 @@ struct Context<'a> {
     pinned_fields: Vec<Type>,
     /// `PinnedDrop` argument.
     pinned_drop: Option<Span>,
-    /// `UnsafeUnpin` argument.
-    unsafe_unpin: Option<Span>,
     /// `Replace` argument (requires Sized bound)
     replace: Option<Span>,
+    /// `UnsafeUnpin` or `!Unpin` argument.
+    unpin_impl: UnpinImpl,
+}
+
+#[derive(Clone, Copy)]
+enum UnpinImpl {
+    Default,
+    /// `UnsafeUnpin`.
+    Unsafe(Span),
+    /// `!Unpin`.
+    Negative(Span),
 }
 
 impl<'a> Context<'a> {
@@ -288,7 +312,7 @@ impl<'a> Context<'a> {
         ident: &'a Ident,
         generics: &'a mut Generics,
     ) -> Result<Self> {
-        let Args { pinned_drop, unsafe_unpin, replace } = Args::get(attrs)?;
+        let Args { pinned_drop, replace, unpin_impl } = Args::get(attrs)?;
 
         let ty_generics = generics.split_for_impl().1;
         let self_ty = syn::parse_quote!(#ident #ty_generics);
@@ -312,6 +336,9 @@ impl<'a> Context<'a> {
         where_clause.predicates.push(pred);
 
         Ok(Self {
+            pinned_drop,
+            replace,
+            unpin_impl,
             proj: ProjectedType {
                 vis: determine_visibility(vis),
                 mut_ident: Mutable.proj_ident(ident),
@@ -322,9 +349,6 @@ impl<'a> Context<'a> {
                 where_clause,
             },
             orig: OriginalType { attrs, vis, ident, generics },
-            pinned_drop,
-            unsafe_unpin,
-            replace,
             pinned_fields: Vec::new(),
         })
     }
@@ -704,96 +728,138 @@ impl<'a> Context<'a> {
         })
     }
 
-    /// Creates conditional `Unpin` implementation for original type.
-    fn make_unpin_impl(&mut self) -> TokenStream {
-        if let Some(unsafe_unpin) = self.unsafe_unpin {
-            let mut proj_generics = self.proj.generics.clone();
-            let orig_ident = self.orig.ident;
-            let lifetime = &self.proj.lifetime;
+    /// Creates `Unpin` implementation for original type.
+    fn make_unpin_impl(&self) -> TokenStream {
+        match self.unpin_impl {
+            UnpinImpl::Unsafe(span) => {
+                let mut proj_generics = self.proj.generics.clone();
+                let orig_ident = self.orig.ident;
+                let lifetime = &self.proj.lifetime;
 
-            proj_generics.make_where_clause().predicates.push(
-                // Make the error message highlight `UnsafeUnpin` argument.
-                parse_quote_spanned! { unsafe_unpin =>
-                    ::pin_project::__private::Wrapper<#lifetime, Self>: ::pin_project::UnsafeUnpin
-                },
-            );
+                proj_generics.make_where_clause().predicates.push(
+                    // Make the error message highlight `UnsafeUnpin` argument.
+                    parse_quote_spanned! { span =>
+                        ::pin_project::__private::Wrapper<#lifetime, Self>: ::pin_project::UnsafeUnpin
+                    },
+                );
 
-            let (impl_generics, _, where_clause) = proj_generics.split_for_impl();
-            let ty_generics = self.orig.generics.split_for_impl().1;
+                let (impl_generics, _, where_clause) = proj_generics.split_for_impl();
+                let ty_generics = self.orig.generics.split_for_impl().1;
 
-            quote! {
-                impl #impl_generics ::pin_project::__reexport::marker::Unpin for #orig_ident #ty_generics #where_clause {}
-            }
-        } else {
-            let mut full_where_clause = self.orig.generics.where_clause.as_ref().cloned().unwrap();
-
-            // Generate a field in our new struct for every
-            // pinned field in the original type.
-            let fields = self.pinned_fields.iter().enumerate().map(|(i, ty)| {
-                let field_ident = format_ident!("__field{}", i);
-                quote!(#field_ident: #ty)
-            });
-
-            // We could try to determine the subset of type parameters
-            // and lifetimes that are actually used by the pinned fields
-            // (as opposed to those only used by unpinned fields).
-            // However, this would be tricky and error-prone, since
-            // it's possible for users to create types that would alias
-            // with generic parameters (e.g. 'struct T').
-            //
-            // Instead, we generate a use of every single type parameter
-            // and lifetime used in the original struct. For type parameters,
-            // we generate code like this:
-            //
-            // ```rust
-            // struct AlwaysUnpin<T: ?Sized>(PhantomData<T>) {}
-            // impl<T: ?Sized> Unpin for AlwaysUnpin<T> {}
-            //
-            // ...
-            // _field: AlwaysUnpin<(A, B, C)>
-            // ```
-            //
-            // This ensures that any unused type parameters
-            // don't end up with `Unpin` bounds.
-            let lifetime_fields = self.orig.generics.lifetimes().enumerate().map(
-                |(i, LifetimeDef { lifetime, .. })| {
-                    let field_ident = format_ident!("__lifetime{}", i);
-                    quote!(#field_ident: &#lifetime ())
-                },
-            );
-
-            let orig_ident = self.orig.ident;
-            let struct_ident = format_ident!("__{}", orig_ident);
-            let vis = self.orig.vis;
-            let lifetime = &self.proj.lifetime;
-            let type_params = self.orig.generics.type_params().map(|t| &t.ident);
-            let proj_generics = &self.proj.generics;
-            let (impl_generics, proj_ty_generics, _) = proj_generics.split_for_impl();
-            let (_, ty_generics, where_clause) = self.orig.generics.split_for_impl();
-
-            full_where_clause.predicates.push(syn::parse_quote! {
-                #struct_ident #proj_ty_generics: ::pin_project::__reexport::marker::Unpin
-            });
-
-            quote! {
-                // This needs to have the same visibility as the original type,
-                // due to the limitations of the 'public in private' error.
-                //
-                // Our goal is to implement the public trait `Unpin` for
-                // a potentially public user type. Because of this, rust
-                // requires that any types mentioned in the where clause of
-                // our `Unpin` impl also be public. This means that our generated
-                // `__UnpinStruct` type must also be public.
-                // However, we ensure that the user can never actually reference
-                // this 'public' type by creating this type in the inside of `const`.
-                #vis struct #struct_ident #proj_generics #where_clause {
-                    __pin_project_use_generics: ::pin_project::__private::AlwaysUnpin<#lifetime, (#(#type_params),*)>,
-
-                    #(#fields,)*
-                    #(#lifetime_fields,)*
+                quote! {
+                    impl #impl_generics ::pin_project::__reexport::marker::Unpin for #orig_ident #ty_generics #where_clause {}
                 }
+            }
+            UnpinImpl::Negative(span) => {
+                let mut proj_generics = self.proj.generics.clone();
+                let orig_ident = self.orig.ident;
+                let lifetime = &self.proj.lifetime;
 
-                impl #impl_generics ::pin_project::__reexport::marker::Unpin for #orig_ident #ty_generics #full_where_clause {}
+                proj_generics.make_where_clause().predicates.push(parse_quote! {
+                    ::pin_project::__private::Wrapper<
+                        #lifetime, ::pin_project::__reexport::marker::PhantomPinned
+                    >: ::pin_project::__reexport::marker::Unpin
+                });
+
+                let (proj_impl_generics, _, proj_where_clause) = proj_generics.split_for_impl();
+                let (impl_generics, ty_generics, orig_where_clause) =
+                    self.orig.generics.split_for_impl();
+
+                // For interoperability with `forbid(unsafe_code)`, `unsafe` token should be call-site span.
+                let unsafety = token::Unsafe::default();
+                quote_spanned! { span =>
+                    impl #proj_impl_generics ::pin_project::__reexport::marker::Unpin for #orig_ident #ty_generics #proj_where_clause {}
+
+                    // A dummy impl of `UnsafeUnpin`, to ensure that the user cannot implement it.
+                    //
+                    // To ensure that users don't accidentally write a non-functional `UnsafeUnpin`
+                    // impls, we emit one ourselves. If the user ends up writing a `UnsafeUnpin` impl,
+                    // they'll get a "conflicting implementations of trait" error when coherence
+                    // checks are run.
+                    #unsafety impl #impl_generics ::pin_project::UnsafeUnpin for #orig_ident #ty_generics #orig_where_clause {}
+                }
+            }
+            UnpinImpl::Default => {
+                let mut full_where_clause =
+                    self.orig.generics.where_clause.as_ref().cloned().unwrap();
+
+                // Generate a field in our new struct for every
+                // pinned field in the original type.
+                let fields = self.pinned_fields.iter().enumerate().map(|(i, ty)| {
+                    let field_ident = format_ident!("__field{}", i);
+                    quote!(#field_ident: #ty)
+                });
+
+                // We could try to determine the subset of type parameters
+                // and lifetimes that are actually used by the pinned fields
+                // (as opposed to those only used by unpinned fields).
+                // However, this would be tricky and error-prone, since
+                // it's possible for users to create types that would alias
+                // with generic parameters (e.g. 'struct T').
+                //
+                // Instead, we generate a use of every single type parameter
+                // and lifetime used in the original struct. For type parameters,
+                // we generate code like this:
+                //
+                // ```rust
+                // struct AlwaysUnpin<T: ?Sized>(PhantomData<T>) {}
+                // impl<T: ?Sized> Unpin for AlwaysUnpin<T> {}
+                //
+                // ...
+                // _field: AlwaysUnpin<(A, B, C)>
+                // ```
+                //
+                // This ensures that any unused type parameters
+                // don't end up with `Unpin` bounds.
+                let lifetime_fields = self.orig.generics.lifetimes().enumerate().map(
+                    |(i, LifetimeDef { lifetime, .. })| {
+                        let field_ident = format_ident!("__lifetime{}", i);
+                        quote!(#field_ident: &#lifetime ())
+                    },
+                );
+
+                let orig_ident = self.orig.ident;
+                let struct_ident = format_ident!("__{}", orig_ident);
+                let vis = self.orig.vis;
+                let lifetime = &self.proj.lifetime;
+                let type_params = self.orig.generics.type_params().map(|t| &t.ident);
+                let proj_generics = &self.proj.generics;
+                let (proj_impl_generics, proj_ty_generics, _) = proj_generics.split_for_impl();
+                let (impl_generics, ty_generics, where_clause) =
+                    self.orig.generics.split_for_impl();
+
+                full_where_clause.predicates.push(syn::parse_quote! {
+                    #struct_ident #proj_ty_generics: ::pin_project::__reexport::marker::Unpin
+                });
+
+                quote! {
+                    // This needs to have the same visibility as the original type,
+                    // due to the limitations of the 'public in private' error.
+                    //
+                    // Our goal is to implement the public trait `Unpin` for
+                    // a potentially public user type. Because of this, rust
+                    // requires that any types mentioned in the where clause of
+                    // our `Unpin` impl also be public. This means that our generated
+                    // `__UnpinStruct` type must also be public.
+                    // However, we ensure that the user can never actually reference
+                    // this 'public' type by creating this type in the inside of `const`.
+                    #vis struct #struct_ident #proj_generics #where_clause {
+                        __pin_project_use_generics: ::pin_project::__private::AlwaysUnpin<#lifetime, (#(#type_params),*)>,
+
+                        #(#fields,)*
+                        #(#lifetime_fields,)*
+                    }
+
+                    impl #proj_impl_generics ::pin_project::__reexport::marker::Unpin for #orig_ident #ty_generics #full_where_clause {}
+
+                    // A dummy impl of `UnsafeUnpin`, to ensure that the user cannot implement it.
+                    //
+                    // To ensure that users don't accidentally write a non-functional `UnsafeUnpin`
+                    // impls, we emit one ourselves. If the user ends up writing a `UnsafeUnpin` impl,
+                    // they'll get a "conflicting implementations of trait" error when coherence
+                    // checks are run.
+                    unsafe impl #impl_generics ::pin_project::UnsafeUnpin for #orig_ident #ty_generics #where_clause {}
+                }
             }
         }
     }

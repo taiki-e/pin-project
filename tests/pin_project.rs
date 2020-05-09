@@ -363,6 +363,23 @@ fn combine() {
     }
 
     unsafe impl<T: Unpin> UnsafeUnpin for Struct2<T> {}
+
+    #[pin_project(PinnedDrop, !Unpin)]
+    pub struct Struct3<T> {
+        #[pin]
+        field: T,
+    }
+
+    #[pinned_drop]
+    impl<T> PinnedDrop for Struct3<T> {
+        fn drop(self: Pin<&mut Self>) {}
+    }
+
+    #[pin_project(!Unpin, Replace)]
+    pub struct Struct4<T> {
+        #[pin]
+        field: T,
+    }
 }
 
 #[test]
@@ -572,6 +589,17 @@ fn dst() {
         fn drop(self: Pin<&mut Self>) {}
     }
 
+    #[pin_project(!Unpin)]
+    struct Struct9<T: ?Sized> {
+        x: T,
+    }
+
+    #[pin_project(!Unpin)]
+    struct Struct10<T: ?Sized> {
+        #[pin]
+        x: T,
+    }
+
     #[pin_project]
     struct TupleStruct1<T: ?Sized>(T);
 
@@ -599,6 +627,12 @@ fn dst() {
     impl<T: ?Sized> PinnedDrop for TupleStruct8<T> {
         fn drop(self: Pin<&mut Self>) {}
     }
+
+    #[pin_project(!Unpin)]
+    struct TupleStruct9<T: ?Sized>(T);
+
+    #[pin_project(!Unpin)]
+    struct TupleStruct10<T: ?Sized>(#[pin] T);
 }
 
 #[allow(explicit_outlives_requirements)] // https://github.com/rust-lang/rust/issues/60993

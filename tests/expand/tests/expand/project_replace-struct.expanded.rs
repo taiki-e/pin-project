@@ -90,6 +90,7 @@ const __SCOPE_Struct: () = {
         __Struct<'pin, T, U>: ::pin_project::__reexport::marker::Unpin
     {
     }
+    unsafe impl<T, U> ::pin_project::UnsafeUnpin for Struct<T, U> {}
     trait StructMustNotImplDrop {}
     #[allow(clippy::drop_bounds)]
     impl<T: ::pin_project::__reexport::ops::Drop> StructMustNotImplDrop for T {}

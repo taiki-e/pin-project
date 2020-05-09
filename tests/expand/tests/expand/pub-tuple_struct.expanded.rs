@@ -53,6 +53,7 @@ const __SCOPE_TupleStruct: () = {
         __TupleStruct<'pin, T, U>: ::pin_project::__reexport::marker::Unpin
     {
     }
+    unsafe impl<T, U> ::pin_project::UnsafeUnpin for TupleStruct<T, U> {}
     trait TupleStructMustNotImplDrop {}
     #[allow(clippy::drop_bounds)]
     impl<T: ::pin_project::__reexport::ops::Drop> TupleStructMustNotImplDrop for T {}

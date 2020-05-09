@@ -6,7 +6,9 @@ edition = "2018"
 publish = false
 
 [lib]
+path = "lib.rs"
 proc-macro = true
+
 
 [dependencies]
 quote = "1.0"
