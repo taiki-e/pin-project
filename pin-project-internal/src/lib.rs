@@ -28,15 +28,14 @@ use proc_macro::TokenStream;
 
 use crate::utils::{Immutable, Mutable, Owned};
 
-/// An attribute that creates a projection struct covering all the fields.
+/// An attribute that creates a projection type covering all the fields of struct or enum.
 ///
-/// This attribute creates a projection struct according to the following rules:
+/// This attribute creates a projection type according to the following rules:
 ///
-/// - For the field that uses `#[pin]` attribute, makes the pinned reference to
-/// the field.
-/// - For the other fields, makes the unpinned reference to the field.
+/// * For the field that uses `#[pin]` attribute, makes the pinned reference to the field.
+/// * For the other fields, makes the unpinned reference to the field.
 ///
-/// The following methods are implemented on the original `#[pin_project]` type:
+/// And the following methods are implemented on the original `#[pin_project]` type:
 ///
 /// ```
 /// # #[rustversion::since(1.36)]
@@ -51,27 +50,23 @@ use crate::utils::{Immutable, Mutable, Owned};
 /// # }
 /// ```
 ///
-/// The visibility of the projected type and projection method is based on the
-/// original type. However, if the visibility of the original type is `pub`,
-/// the visibility of the projected type and the projection method is `pub(crate)`.
+/// The visibility of the projected type and projection method is based on the original type.
+/// However, if the visibility of the original type is `pub`, the visibility of the projected type
+/// and the projection method is downgraded to `pub(crate)`.
 ///
-/// If you want to call the `project` method multiple times or later use the
-/// original Pin type, it needs to use [`.as_mut()`][`Pin::as_mut`] to avoid
-/// consuming the `Pin`.
-///
-/// ## Safety
+/// # Safety
 ///
 /// This attribute is completely safe. In the absence of other `unsafe` code *that you write*,
-/// it is impossible to cause undefined behavior with this attribute.
+/// it is impossible to cause [undefined behavior][undefined-behavior] with this attribute.
 ///
 /// This is accomplished by enforcing the four requirements for pin projection
-/// stated in [the Rust documentation](https://doc.rust-lang.org/nightly/std/pin/index.html#projections-and-structural-pinning):
+/// stated in [the Rust documentation][pin-projection]:
 ///
-/// 1. The struct must only be Unpin if all the structural fields are Unpin.
+/// 1. The struct must only be [`Unpin`] if all the structural fields are [`Unpin`].
 ///
-///    To enforce this, this attribute will automatically generate an `Unpin` implementation
-///    for you, which will require that all structurally pinned fields be `Unpin`
-///    If you wish to provide an manual `Unpin` impl, you can do so via the
+///    To enforce this, this attribute will automatically generate an [`Unpin`] implementation
+///    for you, which will require that all structurally pinned fields be [`Unpin`]
+///    If you wish to provide an manual [`Unpin`] impl, you can do so via the
 ///    `UnsafeUnpin` argument.
 ///
 /// 2. The destructor of the struct must not move structural fields out of its argument.
@@ -85,25 +80,25 @@ use crate::utils::{Immutable, Mutable, Owned};
 ///    impl MyStructMustNotImplDrop for MyStruct {}
 ///    ```
 ///
-///    If you attempt to provide an Drop impl, the blanket impl will
+///    If you attempt to provide an [`Drop`] impl, the blanket impl will
 ///    then apply to your type, causing a compile-time error due to
 ///    the conflict with the second impl.
 ///
-///    If you wish to provide a custom `Drop` impl, you can annotate a function
-///    with `#[pinned_drop]`. This function takes a pinned version of your struct -
-///    that is, `Pin<&mut MyStruct>` where `MyStruct` is the type of your struct.
+///    If you wish to provide a custom [`Drop`] impl, you can annotate a function
+///    with [`#[pinned_drop]`][pinned-drop]. This function takes a pinned version of your struct -
+///    that is, [`Pin`]`<&mut MyStruct>` where `MyStruct` is the type of your struct.
 ///
 ///    You can call `project()` on this type as usual, along with any other
 ///    methods you have defined. Because your code is never provided with
 ///    a `&mut MyStruct`, it is impossible to move out of pin-projectable
 ///    fields in safe code in your destructor.
 ///
-/// 3. You must make sure that you uphold the Drop guarantee: once your struct is pinned,
+/// 3. You must make sure that you uphold the [`Drop` guarantee][drop-guarantee]: once your struct is pinned,
 ///    the memory that contains the content is not overwritten or deallocated without calling the content's destructors.
 ///
 ///    Safe code doesn't need to worry about this - the only wait to violate this requirement
 ///    is to manually deallocate memory (which is `unsafe`), or to overwrite a field with something else.
-///    Because your custom destructor takes `Pin<&mut MyStruct`, it's impossible to obtain
+///    Because your custom destructor takes [`Pin`]`<&mut MyStruct>`, it's impossible to obtain
 ///    a mutable reference to a pin-projected field in safe code.
 ///
 /// 4. You must not offer any other operations that could lead to data being moved out of the structural fields when your type is pinned.
@@ -111,11 +106,10 @@ use crate::utils::{Immutable, Mutable, Owned};
 ///    As with requirement 3, it is impossible for safe code to violate this. This crate ensures that safe code can never
 ///    obtain a mutable reference to `#[pin]` fields, which prevents you from ever moving out of them in safe code.
 ///
-/// Pin projections are also incompatible with `#[repr(packed)]` structs. Attempting to use this attribute
-/// on a `#[repr(packed)]` struct results in a compile-time error.
+/// Pin projections are also incompatible with [`#[repr(packed)]`][repr-packed] structs. Attempting to use this attribute
+/// on a [`#[repr(packed)]`][repr-packed] struct results in a compile-time error.
 ///
-///
-/// ## Examples
+/// # Examples
 ///
 /// Using `#[pin_project]` will automatically create the appropriate
 /// conditional [`Unpin`] implementation:
@@ -125,48 +119,123 @@ use crate::utils::{Immutable, Mutable, Owned};
 /// use std::pin::Pin;
 ///
 /// #[pin_project]
-/// struct Foo<T, U> {
+/// struct Struct<T, U> {
 ///     #[pin]
-///     future: T,
-///     field: U,
+///     pinned: T,
+///     unpinned: U,
 /// }
 ///
-/// impl<T, U> Foo<T, U> {
-///     fn baz(self: Pin<&mut Self>) {
+/// impl<T, U> Struct<T, U> {
+///     fn method(self: Pin<&mut Self>) {
 ///         let this = self.project();
-///         let _: Pin<&mut T> = this.future; // Pinned reference to the field
-///         let _: &mut U = this.field; // Normal reference to the field
+///         let _: Pin<&mut T> = this.pinned; // Pinned reference to the field
+///         let _: &mut U = this.unpinned; // Normal reference to the field
 ///     }
 /// }
 /// ```
 ///
-/// Note that borrowing the field where `#[pin]` attribute is used multiple
-/// times requires using [`.as_mut()`][`Pin::as_mut`] to avoid
-/// consuming the `Pin`.
+/// If you want to call the `project()` method multiple times or later use the
+/// original [`Pin`] type, it needs to use [`.as_mut()`][`Pin::as_mut`] to avoid
+/// consuming the [`Pin`].
+///
+/// ## Supported Items
+///
+/// `#[pin_project]` can be used on structs and enums.
+///
+/// [Structs](https://doc.rust-lang.org/reference/items/structs.html):
+///
+/// ```rust
+/// use pin_project::pin_project;
+/// use std::pin::Pin;
+///
+/// #[pin_project]
+/// struct Struct<T, U> {
+///     #[pin]
+///     pinned: T,
+///     unpinned: U,
+/// }
+///
+/// impl<T, U> Struct<T, U> {
+///     fn method(self: Pin<&mut Self>) {
+///         let this = self.project();
+///         let _: Pin<&mut T> = this.pinned;
+///         let _: &mut U = this.unpinned;
+///     }
+/// }
+/// ```
+///
+/// [Tuple structs](https://doc.rust-lang.org/reference/items/structs.html):
+///
+/// ```rust
+/// use pin_project::pin_project;
+/// use std::pin::Pin;
+///
+/// #[pin_project]
+/// struct TupleStruct<T, U>(#[pin] T, U);
+///
+/// impl<T, U> TupleStruct<T, U> {
+///     fn method(self: Pin<&mut Self>) {
+///         let this = self.project();
+///         let _: Pin<&mut T> = this.0;
+///         let _: &mut U = this.1;
+///     }
+/// }
+/// ```
+///
+/// [Enums](https://doc.rust-lang.org/reference/items/enumerations.html):
+///
+/// `#[pin_project]` supports enums, but to use it, you need to use with the
+/// [`project`] attribute.
+///
+/// The attribute at the expression position is not stable, so you need to use
+/// a dummy [`project`] attribute for the function.
+///
+/// ```rust
+/// use pin_project::{pin_project, project};
+/// use std::pin::Pin;
+///
+/// #[pin_project]
+/// enum Enum<T, U> {
+///     Tuple(#[pin] T),
+///     Struct { field: U },
+///     Unit,
+/// }
+///
+/// impl<T, U> Enum<T, U> {
+///     #[project] // Nightly does not need a dummy attribute to the function.
+///     fn method(self: Pin<&mut Self>) {
+///         #[project]
+///         match self.project() {
+///             Enum::Tuple(x) => {
+///                 let _: Pin<&mut T> = x;
+///             }
+///             Enum::Struct { field } => {
+///                 let _: &mut U = field;
+///             }
+///             Enum::Unit => {}
+///         }
+///     }
+/// }
+/// ```
+///
+/// See also [`project`] and [`project_ref`] attributes.
+///
+/// ## `UnsafeUnpin`
 ///
 /// If you want to implement [`Unpin`] manually, you must use the `UnsafeUnpin`
 /// argument to `#[pin_project]`.
 ///
 /// ```rust
 /// use pin_project::{pin_project, UnsafeUnpin};
-/// use std::pin::Pin;
 ///
 /// #[pin_project(UnsafeUnpin)]
-/// struct Foo<T, U> {
+/// struct Struct<T, U> {
 ///     #[pin]
-///     future: T,
-///     field: U,
+///     pinned: T,
+///     unpinned: U,
 /// }
 ///
-/// impl<T, U> Foo<T, U> {
-///     fn baz(self: Pin<&mut Self>) {
-///         let this = self.project();
-///         let _: Pin<&mut T> = this.future; // Pinned reference to the field
-///         let _: &mut U = this.field; // Normal reference to the field
-///     }
-/// }
-///
-/// unsafe impl<T: Unpin, U> UnsafeUnpin for Foo<T, U> {} // Conditional Unpin impl
+/// unsafe impl<T: Unpin, U> UnsafeUnpin for Struct<T, U> {}
 /// ```
 ///
 /// Note the usage of the unsafe [`UnsafeUnpin`] trait, instead of the usual
@@ -177,21 +246,21 @@ use crate::utils::{Immutable, Mutable, Owned};
 ///
 /// See [`UnsafeUnpin`] trait for more details.
 ///
-/// ### `#[pinned_drop]`
+/// ## `#[pinned_drop]`
 ///
-/// In order to correctly implement pin projections, a type's `Drop` impl must
+/// In order to correctly implement pin projections, a type's [`Drop`] impl must
 /// not move out of any structurally pinned fields. Unfortunately, [`Drop::drop`]
-/// takes `&mut Self`, not `Pin<&mut Self>`.
+/// takes `&mut Self`, not [`Pin`]`<&mut Self>`.
 ///
 /// To ensure that this requirement is upheld, the `#[pin_project]` attribute will
-/// provide a [`Drop`] impl for you. This `Drop` impl will delegate to an impl
+/// provide a [`Drop`] impl for you. This [`Drop`] impl will delegate to an impl
 /// block annotated with `#[pinned_drop]` if you use the `PinnedDrop` argument
 /// to `#[pin_project]`.
 ///
 /// This impl block acts just like a normal [`Drop`] impl,
 /// except for the following two:
 ///
-/// * `drop` method takes `Pin<&mut Self>`
+/// * `drop` method takes [`Pin`]`<&mut Self>`
 /// * Name of the trait is `PinnedDrop`.
 ///
 /// ```rust
@@ -214,14 +283,14 @@ use crate::utils::{Immutable, Mutable, Owned};
 /// use std::{fmt::Debug, pin::Pin};
 ///
 /// #[pin_project(PinnedDrop)]
-/// pub struct Foo<T: Debug, U: Debug> {
+/// struct Struct<T: Debug, U: Debug> {
 ///     #[pin]
 ///     pinned_field: T,
 ///     unpin_field: U,
 /// }
 ///
 /// #[pinned_drop]
-/// impl<T: Debug, U: Debug> PinnedDrop for Foo<T, U> {
+/// impl<T: Debug, U: Debug> PinnedDrop for Struct<T, U> {
 ///     fn drop(self: Pin<&mut Self>) {
 ///         println!("Dropping pinned field: {:?}", self.pinned_field);
 ///         println!("Dropping unpin field: {:?}", self.unpin_field);
@@ -229,13 +298,13 @@ use crate::utils::{Immutable, Mutable, Owned};
 /// }
 ///
 /// fn main() {
-///     let _x = Foo { pinned_field: true, unpin_field: 40 };
+///     let _x = Struct { pinned_field: true, unpin_field: 40 };
 /// }
 /// ```
 ///
 /// See also [`pinned_drop`] attribute.
 ///
-/// ### `project_replace()`
+/// ## `project_replace()`
 ///
 /// In addition to the `project()` and `project_ref()` methods which are always
 /// provided when you use the `#[pin_project]` attribute, there is a third method,
@@ -255,10 +324,10 @@ use crate::utils::{Immutable, Mutable, Owned};
 /// ```
 ///
 /// The `ProjectionOwned` type is identical to the `Self` type, except that
-/// all pinned fields have been replaced by equivalent `PhantomData` types.
+/// all pinned fields have been replaced by equivalent [`PhantomData`] types.
 ///
-/// This method is opt-in, because it is only supported for `Sized` types, and
-/// because it is incompatible with the `#[pinned_drop]` attribute described
+/// This method is opt-in, because it is only supported for [`Sized`] types, and
+/// because it is incompatible with the [`#[pinned_drop]`][pinned-drop] attribute described
 /// above. It can be enabled by using `#[pin_project(Replace)]`.
 ///
 /// For example:
@@ -267,7 +336,7 @@ use crate::utils::{Immutable, Mutable, Owned};
 /// use pin_project::{pin_project, project_replace};
 ///
 /// #[pin_project(Replace)]
-/// pub enum Foo<T> {
+/// enum Struct<T> {
 ///     A {
 ///         #[pin]
 ///         pinned_field: i32,
@@ -278,12 +347,12 @@ use crate::utils::{Immutable, Mutable, Owned};
 ///
 /// #[project_replace]
 /// fn main() {
-///     let mut x = Box::pin(Foo::A { pinned_field: 42, unpinned_field: "hello" });
+///     let mut x = Box::pin(Struct::A { pinned_field: 42, unpinned_field: "hello" });
 ///
 ///     #[project_replace]
-///     match x.as_mut().project_replace(Foo::B) {
-///         Foo::A { unpinned_field, .. } => assert_eq!(unpinned_field, "hello"),
-///         Foo::B => unreachable!(),
+///     match x.as_mut().project_replace(Struct::B) {
+///         Struct::A { unpinned_field, .. } => assert_eq!(unpinned_field, "hello"),
+///         Struct::B => unreachable!(),
 ///     }
 /// }
 /// ```
@@ -292,102 +361,22 @@ use crate::utils::{Immutable, Mutable, Owned};
 /// type of `project_replace()`, and work in exactly the same way as the
 /// [`project`] and [`project_ref`] attributes.
 ///
-/// ## Supported Items
-///
-/// The current pin-project supports the following types of items.
-///
-/// ### Structs (structs with named fields):
-///
-/// ```rust
-/// use pin_project::pin_project;
-/// use std::pin::Pin;
-///
-/// #[pin_project]
-/// struct Foo<T, U> {
-///     #[pin]
-///     future: T,
-///     field: U,
-/// }
-///
-/// impl<T, U> Foo<T, U> {
-///     fn baz(self: Pin<&mut Self>) {
-///         let this = self.project();
-///         let _: Pin<&mut T> = this.future;
-///         let _: &mut U = this.field;
-///     }
-/// }
-/// ```
-///
-/// ### Tuple structs (structs with unnamed fields):
-///
-/// ```rust
-/// use pin_project::pin_project;
-/// use std::pin::Pin;
-///
-/// #[pin_project]
-/// struct Foo<T, U>(#[pin] T, U);
-///
-/// impl<T, U> Foo<T, U> {
-///     fn baz(self: Pin<&mut Self>) {
-///         let this = self.project();
-///         let _: Pin<&mut T> = this.0;
-///         let _: &mut U = this.1;
-///     }
-/// }
-/// ```
-///
-/// Structs without fields (unit-like struct and zero fields struct) are not
-/// supported.
-///
-/// ### Enums
-///
-/// `pin_project` also supports enums, but to use it, you need to use with the
-/// [`project`] attribute.
-///
-/// The attribute at the expression position is not stable, so you need to use
-/// a dummy `#[project]` attribute for the function.
-///
-/// ```rust
-/// use pin_project::{pin_project, project};
-/// use std::pin::Pin;
-///
-/// #[pin_project]
-/// enum Foo<A, B, C> {
-///     Tuple(#[pin] A, B),
-///     Struct { field: C },
-///     Unit,
-/// }
-///
-/// impl<A, B, C> Foo<A, B, C> {
-///     #[project] // Nightly does not need a dummy attribute to the function.
-///     fn baz(self: Pin<&mut Self>) {
-///         #[project]
-///         match self.project() {
-///             Foo::Tuple(x, y) => {
-///                 let _: Pin<&mut A> = x;
-///                 let _: &mut B = y;
-///             }
-///             Foo::Struct { field } => {
-///                 let _: &mut C = field;
-///             }
-///             Foo::Unit => {}
-///         }
-///     }
-/// }
-/// ```
-///
-/// Enums without variants (zero-variant enums) are not supported.
-///
-/// See also [`project`] and [`project_ref`] attributes.
-///
+/// [`PhantomData`]: core::marker::PhantomData
+/// [`PhantomPinned`]: core::marker::PhantomPinned
 /// [`Pin::as_mut`]: core::pin::Pin::as_mut
 /// [`Pin::set`]: core::pin::Pin::set
-/// [`drop`]: Drop::drop
+/// [`Pin`]: core::pin::Pin
 /// [`UnsafeUnpin`]: https://docs.rs/pin-project/0.4/pin_project/trait.UnsafeUnpin.html
-/// [`project`]: ./attr.project.html
+/// [`pinned_drop`]: ./attr.pinned_drop.html
 /// [`project_ref`]: ./attr.project_ref.html
 /// [`project_replace`]: ./attr.project_replace.html
-/// [`pinned_drop`]: ./attr.pinned_drop.html
+/// [`project`]: ./attr.project.html
+/// [drop-guarantee]: https://doc.rust-lang.org/nightly/std/pin/index.html#drop-guarantee
+/// [pinned-drop]: ./attr.pin_project.html#pinned_drop
+/// [repr-packed]: https://doc.rust-lang.org/nomicon/other-reprs.html#reprpacked
+/// [pin-projection]: https://doc.rust-lang.org/nightly/std/pin/index.html#projections-and-structural-pinning
+/// [undefined-behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html
+/// [unsafe-unpin]: ./attr.pin_project.html#pinned_drop
 #[proc_macro_attribute]
 pub fn pin_project(args: TokenStream, input: TokenStream) -> TokenStream {
     pin_project::attribute(&args.into(), input.into()).into()
@@ -401,7 +390,7 @@ pub fn pin_project(args: TokenStream, input: TokenStream) -> TokenStream {
 /// This impl block acts just like a normal [`Drop`] impl,
 /// except for the following two:
 ///
-/// * `drop` method takes `Pin<&mut Self>`
+/// * `drop` method takes [`Pin`]`<&mut Self>`
 /// * Name of the trait is `PinnedDrop`.
 ///
 /// ```rust
@@ -441,9 +430,7 @@ pub fn pin_project(args: TokenStream, input: TokenStream) -> TokenStream {
 /// }
 /// ```
 ///
-/// See also ["pinned-drop" section of `pin_project` attribute][pinned-drop].
-///
-/// [pinned-drop]: ./attr.pin_project.html#pinned_drop
+/// See also ["pinned-drop" section of `#[pin_project]` attribute][pinned-drop].
 ///
 /// ## Why `#[pinned_drop]` attribute is needed?
 ///
@@ -466,6 +453,9 @@ pub fn pin_project(args: TokenStream, input: TokenStream) -> TokenStream {
 /// This allows implementing [`Drop`] safely using `#[pinned_drop]`.
 /// Also by using the [`drop`] function just like dropping a type that directly implements [`Drop`],
 /// can drop safely a type that implements `PinnedDrop`.
+///
+/// [`Pin`]: core::pin::Pin
+/// [pinned-drop]: ./attr.pin_project.html#pinned_drop
 #[proc_macro_attribute]
 pub fn pinned_drop(args: TokenStream, input: TokenStream) -> TokenStream {
     let input = syn::parse_macro_input!(input);
@@ -476,47 +466,6 @@ pub fn pinned_drop(args: TokenStream, input: TokenStream) -> TokenStream {
 /// `project` method.
 ///
 /// The following syntaxes are supported.
-///
-/// ## `impl` blocks
-///
-/// All methods (and associated functions) in `#[project] impl` block become
-/// methods of the projected type. If you want to implement methods on the
-/// original type, you need to create another (non-`#[project]`) `impl` block.
-///
-/// To call a method implemented in `#[project] impl` block, you need to first
-/// get the projected-type with `let this = self.project();`.
-///
-/// ### Examples
-///
-/// ```rust
-/// use pin_project::{pin_project, project};
-/// use std::pin::Pin;
-///
-/// #[pin_project]
-/// struct Foo<T, U> {
-///     #[pin]
-///     future: T,
-///     field: U,
-/// }
-///
-/// // impl for the original type
-/// impl<T, U> Foo<T, U> {
-///     fn bar(self: Pin<&mut Self>) {
-///         self.project().baz()
-///     }
-/// }
-///
-/// // impl for the projected type
-/// #[project]
-/// impl<T, U> Foo<T, U> {
-///     fn baz(self) {
-///         let Self { future, field } = self;
-///
-///         let _: Pin<&mut T> = future;
-///         let _: &mut U = field;
-///     }
-/// }
-/// ```
 ///
 /// ## `let` bindings
 ///
@@ -580,6 +529,47 @@ pub fn pinned_drop(args: TokenStream, input: TokenStream) -> TokenStream {
 ///             }
 ///             Foo::Unit => {}
 ///         }
+///     }
+/// }
+/// ```
+///
+/// ## `impl` blocks
+///
+/// All methods and associated functions in `#[project] impl` block become
+/// methods of the projected type. If you want to implement methods on the
+/// original type, you need to create another (non-`#[project]`) `impl` block.
+///
+/// To call a method implemented in `#[project] impl` block, you need to first
+/// get the projected-type with `let this = self.project();`.
+///
+/// ### Examples
+///
+/// ```rust
+/// use pin_project::{pin_project, project};
+/// use std::pin::Pin;
+///
+/// #[pin_project]
+/// struct Foo<T, U> {
+///     #[pin]
+///     future: T,
+///     field: U,
+/// }
+///
+/// // impl for the original type
+/// impl<T, U> Foo<T, U> {
+///     fn bar(self: Pin<&mut Self>) {
+///         self.project().baz()
+///     }
+/// }
+///
+/// // impl for the projected type
+/// #[project]
+/// impl<T, U> Foo<T, U> {
+///     fn baz(self) {
+///         let Self { future, field } = self;
+///
+///         let _: Pin<&mut T> = future;
+///         let _: &mut U = field;
 ///     }
 /// }
 /// ```
