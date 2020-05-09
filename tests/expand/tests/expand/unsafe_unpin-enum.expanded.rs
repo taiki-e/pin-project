@@ -93,4 +93,5 @@ const __SCOPE_Enum: () = {
         unsafe fn drop(self: ::pin_project::__reexport::pin::Pin<&mut Self>) {}
     }
 };
+unsafe impl<T: Unpin, U> UnsafeUnpin for Enum<T, U> {}
 fn main() {}

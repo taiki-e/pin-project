@@ -1,6 +1,5 @@
-use pin_project::{pin_project, pinned_drop};
-use std::pin::Pin;
-#[pin(__private(PinnedDrop))]
+use pin_project::pin_project;
+# [ pin ( __private ( ! Unpin ) ) ]
 struct TupleStruct<T, U>(#[pin] T, U);
 #[doc(hidden)]
 #[allow(clippy::mut_mut)]
@@ -46,22 +45,18 @@ const __SCOPE_TupleStruct: () = {
             }
         }
     }
-    struct __TupleStruct<'pin, T, U> {
-        __pin_project_use_generics: ::pin_project::__private::AlwaysUnpin<'pin, (T, U)>,
-        __field0: T,
-    }
     impl<'pin, T, U> ::pin_project::__reexport::marker::Unpin for TupleStruct<T, U> where
-        __TupleStruct<'pin, T, U>: ::pin_project::__reexport::marker::Unpin
+        ::pin_project::__private::Wrapper<'pin, ::pin_project::__reexport::marker::PhantomPinned>:
+            ::pin_project::__reexport::marker::Unpin
     {
     }
     unsafe impl<T, U> ::pin_project::UnsafeUnpin for TupleStruct<T, U> {}
-    impl<T, U> ::pin_project::__reexport::ops::Drop for TupleStruct<T, U> {
-        fn drop(&mut self) {
-            let pinned_self = unsafe { ::pin_project::__reexport::pin::Pin::new_unchecked(self) };
-            unsafe {
-                ::pin_project::__private::PinnedDrop::drop(pinned_self);
-            }
-        }
+    trait TupleStructMustNotImplDrop {}
+    #[allow(clippy::drop_bounds)]
+    impl<T: ::pin_project::__reexport::ops::Drop> TupleStructMustNotImplDrop for T {}
+    impl<T, U> TupleStructMustNotImplDrop for TupleStruct<T, U> {}
+    impl<T, U> ::pin_project::__private::PinnedDrop for TupleStruct<T, U> {
+        unsafe fn drop(self: ::pin_project::__reexport::pin::Pin<&mut Self>) {}
     }
     #[deny(safe_packed_borrows)]
     fn __assert_not_repr_packed<T, U>(val: &TupleStruct<T, U>) {
@@ -69,13 +64,4 @@ const __SCOPE_TupleStruct: () = {
         &val.1;
     }
 };
-impl<T, U> ::pin_project::__private::PinnedDrop for TupleStruct<T, U> {
-    unsafe fn drop(self: Pin<&mut Self>) {
-        #[allow(clippy::needless_pass_by_value)]
-        fn __drop_inner<T, U>(__self: Pin<&mut TupleStruct<T, U>>) {
-            let _this = __self;
-        }
-        __drop_inner(self);
-    }
-}
 fn main() {}

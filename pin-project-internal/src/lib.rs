@@ -220,6 +220,40 @@ use crate::utils::{Immutable, Mutable, Owned};
 ///
 /// See also [`project`] and [`project_ref`] attributes.
 ///
+/// ## `!Unpin`
+///
+/// If you want to ensure that [`Unpin`] is not implemented, use the `!Unpin`
+/// argument to `#[pin_project]`.
+///
+/// ```rust
+/// use pin_project::pin_project;
+///
+/// #[pin_project(!Unpin)]
+/// struct Struct<T, U> {
+///     #[pin]
+///     pinned: T,
+///     unpinned: U,
+/// }
+/// ```
+///
+/// You can also ensure `!Unpin` by using `#[pin]` attribute for [`PhantomPinned`] field.
+///
+/// ```rust
+/// use pin_project::pin_project;
+/// use std::marker::PhantomPinned;
+///
+/// #[pin_project]
+/// struct Struct<T, U> {
+///     #[pin]
+///     pinned: T,
+///     unpinned: U,
+///     #[pin]
+///     _pin: PhantomPinned,
+/// }
+/// ```
+///
+/// Note that using [`PhantomPinned`] without `#[pin]` attribute has no effect.
+///
 /// ## `UnsafeUnpin`
 ///
 /// If you want to implement [`Unpin`] manually, you must use the `UnsafeUnpin`

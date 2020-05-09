@@ -1,6 +1,6 @@
-use pin_project::{pin_project, UnsafeUnpin};
+use pin_project::pin_project;
 
-#[pin_project(UnsafeUnpin)]
+#[pin_project(!Unpin)]
 enum Enum<T, U> {
     Struct {
         #[pin]
@@ -10,7 +10,5 @@ enum Enum<T, U> {
     Tuple(#[pin] T, U),
     Unit,
 }
-
-unsafe impl<T: Unpin, U> UnsafeUnpin for Enum<T, U> {}
 
 fn main() {}

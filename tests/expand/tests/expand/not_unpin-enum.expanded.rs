@@ -1,6 +1,6 @@
 use pin_project::pin_project;
-#[pin(__private())]
-pub enum Enum<T, U> {
+# [ pin ( __private ( ! Unpin ) ) ]
+enum Enum<T, U> {
     Struct {
         #[pin]
         pinned: T,
@@ -13,7 +13,7 @@ pub enum Enum<T, U> {
 #[allow(clippy::mut_mut)]
 #[allow(dead_code)]
 #[allow(single_use_lifetimes)]
-pub(crate) enum __EnumProjection<'pin, T, U>
+enum __EnumProjection<'pin, T, U>
 where
     Enum<T, U>: 'pin,
 {
@@ -30,7 +30,7 @@ where
 #[doc(hidden)]
 #[allow(dead_code)]
 #[allow(single_use_lifetimes)]
-pub(crate) enum __EnumProjectionRef<'pin, T, U>
+enum __EnumProjectionRef<'pin, T, U>
 where
     Enum<T, U>: 'pin,
 {
@@ -46,7 +46,7 @@ where
 #[allow(single_use_lifetimes)]
 const __SCOPE_Enum: () = {
     impl<T, U> Enum<T, U> {
-        pub(crate) fn project<'pin>(
+        fn project<'pin>(
             self: ::pin_project::__reexport::pin::Pin<&'pin mut Self>,
         ) -> __EnumProjection<'pin, T, U> {
             unsafe {
@@ -63,7 +63,7 @@ const __SCOPE_Enum: () = {
                 }
             }
         }
-        pub(crate) fn project_ref<'pin>(
+        fn project_ref<'pin>(
             self: ::pin_project::__reexport::pin::Pin<&'pin Self>,
         ) -> __EnumProjectionRef<'pin, T, U> {
             unsafe {
@@ -81,13 +81,9 @@ const __SCOPE_Enum: () = {
             }
         }
     }
-    pub struct __Enum<'pin, T, U> {
-        __pin_project_use_generics: ::pin_project::__private::AlwaysUnpin<'pin, (T, U)>,
-        __field0: T,
-        __field1: T,
-    }
     impl<'pin, T, U> ::pin_project::__reexport::marker::Unpin for Enum<T, U> where
-        __Enum<'pin, T, U>: ::pin_project::__reexport::marker::Unpin
+        ::pin_project::__private::Wrapper<'pin, ::pin_project::__reexport::marker::PhantomPinned>:
+            ::pin_project::__reexport::marker::Unpin
     {
     }
     unsafe impl<T, U> ::pin_project::UnsafeUnpin for Enum<T, U> {}

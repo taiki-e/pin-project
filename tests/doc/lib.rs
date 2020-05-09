@@ -11,5 +11,5 @@
 // * https://github.com/rust-lang/rust/issues/62210
 // * https://github.com/rust-lang/rust/pull/63803
 
-#[doc(include = "../../../README.md")]
+#[doc(include = "../../README.md")]
 const _README: () = ();

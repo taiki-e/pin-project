@@ -12,7 +12,7 @@ echo "Running 'cargo fmt -- --check'"
 cargo +nightly fmt --all -- --check
 
 echo "Running 'cargo clippy'"
-cargo +nightly clippy --all --all-features
+cargo +nightly clippy --all --all-features --all-targets
 
 echo "Running 'cargo test'"
 cargo +nightly test --all --all-features
