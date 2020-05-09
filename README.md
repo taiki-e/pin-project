@@ -11,8 +11,8 @@
 [docs-url]: https://docs.rs/pin-project
 [license-badge]: https://img.shields.io/crates/l/pin-project.svg
 [license]: #license
-[rustc-badge]: https://img.shields.io/badge/rustc-1.33+-lightgray.svg
-[rustc-url]: https://blog.rust-lang.org/2019/02/28/Rust-1.33.0.html
+[rustc-badge]: https://img.shields.io/badge/rustc-1.34+-lightgray.svg
+[rustc-url]: https://blog.rust-lang.org/2019/04/11/Rust-1.34.0.html
 
 A crate for safe and ergonomic pin-projection.
 
@@ -29,7 +29,7 @@ Add this to your `Cargo.toml`:
 pin-project = "0.4"
 ```
 
-The current pin-project requires Rust 1.33 or later.
+The current pin-project requires Rust 1.34 or later.
 
 ## Examples
 
