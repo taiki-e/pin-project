@@ -8,7 +8,7 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 ## [0.4.14] - 2020-05-09
 
-* [Added `!Unpin` argument to `#[pin_project]` attribute for guarantee the type is `!Unpin`.][219]
+* [Added `!Unpin` option to `#[pin_project]` attribute for guarantee the type is `!Unpin`.][219]
 
   ```rust
   use pin_project::pin_project;
