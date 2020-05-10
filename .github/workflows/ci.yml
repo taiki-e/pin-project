@@ -66,13 +66,14 @@ jobs:
         if: matrix.rust == 'nightly'
         run: |
           rustup target add thumbv7m-none-eabi
-      - name: cargo test
+      - name: cargo test (stable)
+        if: matrix.rust != 'nightly'
         run: |
-          cargo test --all --all-features
-      - name: cargo test --test compiletest
+          cargo test --all --all-features --exclude expandtest
+      - name: cargo test (nightly)
         if: matrix.rust == 'nightly'
         run: |
-          cargo test -p pin-project --all-features --test compiletest -- --ignored
+          cargo test --all --all-features -- -Zunstable-options --include-ignored
       - name: cargo check --target thumbv7m-none-eabi
         if: matrix.rust == 'nightly'
         run: |
