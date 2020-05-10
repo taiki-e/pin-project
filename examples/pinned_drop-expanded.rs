@@ -33,8 +33,10 @@ pub struct Struct<'a, T> {
     field: T,
 }
 
+#[doc(hidden)]
 #[allow(clippy::mut_mut)] // This lint warns `&mut &mut <ty>`.
 #[allow(dead_code)] // This lint warns unused fields/variants.
+#[allow(single_use_lifetimes)]
 pub(crate) struct __StructProjection<'pin, 'a, T>
 where
     Struct<'a, T>: 'pin,
@@ -42,7 +44,9 @@ where
     was_dropped: &'pin mut (&'a mut bool),
     field: ::pin_project::__reexport::pin::Pin<&'pin mut (T)>,
 }
+#[doc(hidden)]
 #[allow(dead_code)] // This lint warns unused fields/variants.
+#[allow(single_use_lifetimes)]
 pub(crate) struct __StructProjectionRef<'pin, 'a, T>
 where
     Struct<'a, T>: 'pin,
@@ -53,6 +57,7 @@ where
 
 #[doc(hidden)]
 #[allow(non_upper_case_globals)]
+#[allow(single_use_lifetimes)]
 const __SCOPE_Struct: () = {
     impl<'a, T> Struct<'a, T> {
         pub(crate) fn project<'pin>(
@@ -79,7 +84,6 @@ const __SCOPE_Struct: () = {
         }
     }
 
-    #[allow(single_use_lifetimes)]
     impl<'a, T> ::pin_project::__reexport::ops::Drop for Struct<'a, T> {
         fn drop(&mut self) {
             // Safety - we're in 'drop', so we know that 'self' will
@@ -107,12 +111,12 @@ const __SCOPE_Struct: () = {
         __Struct<'pin, 'a, T>: ::pin_project::__reexport::marker::Unpin
     {
     }
+    unsafe impl<'a, T> ::pin_project::UnsafeUnpin for Struct<'a, T> {}
 
     // Ensure that it's impossible to use pin projections on a #[repr(packed)] struct.
     //
     // See ./struct-default-expanded.rs and https://github.com/taiki-e/pin-project/pull/34
     // for details.
-    #[allow(single_use_lifetimes)]
     #[deny(safe_packed_borrows)]
     fn __assert_not_repr_packed<'a, T>(val: &Struct<'a, T>) {
         &val.was_dropped;

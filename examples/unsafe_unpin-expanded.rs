@@ -28,8 +28,10 @@ pub struct Struct<T, U> {
     unpinned: U,
 }
 
+#[doc(hidden)]
 #[allow(clippy::mut_mut)] // This lint warns `&mut &mut <ty>`.
 #[allow(dead_code)] // This lint warns unused fields/variants.
+#[allow(single_use_lifetimes)]
 pub(crate) struct __StructProjection<'pin, T, U>
 where
     Struct<T, U>: 'pin,
@@ -37,7 +39,9 @@ where
     pinned: ::pin_project::__reexport::pin::Pin<&'pin mut (T)>,
     unpinned: &'pin mut (U),
 }
+#[doc(hidden)]
 #[allow(dead_code)] // This lint warns unused fields/variants.
+#[allow(single_use_lifetimes)]
 pub(crate) struct __StructProjectionRef<'pin, T, U>
 where
     Struct<T, U>: 'pin,
@@ -48,6 +52,7 @@ where
 
 #[doc(hidden)]
 #[allow(non_upper_case_globals)]
+#[allow(single_use_lifetimes)]
 const __SCOPE_Struct: () = {
     impl<T, U> Struct<T, U> {
         pub(crate) fn project<'pin>(
@@ -74,7 +79,6 @@ const __SCOPE_Struct: () = {
         }
     }
 
-    #[allow(single_use_lifetimes)]
     impl<'pin, T, U> ::pin_project::__reexport::marker::Unpin for Struct<T, U> where
         ::pin_project::__private::Wrapper<'pin, Self>: ::pin_project::UnsafeUnpin
     {
@@ -86,9 +90,7 @@ const __SCOPE_Struct: () = {
     trait StructMustNotImplDrop {}
     #[allow(clippy::drop_bounds)]
     impl<T: ::pin_project::__reexport::ops::Drop> StructMustNotImplDrop for T {}
-    #[allow(single_use_lifetimes)]
     impl<T, U> StructMustNotImplDrop for Struct<T, U> {}
-    #[allow(single_use_lifetimes)]
     impl<T, U> ::pin_project::__private::PinnedDrop for Struct<T, U> {
         unsafe fn drop(self: ::pin_project::__reexport::pin::Pin<&mut Self>) {}
     }
@@ -97,7 +99,6 @@ const __SCOPE_Struct: () = {
     //
     // See ./struct-default-expanded.rs and https://github.com/taiki-e/pin-project/pull/34
     // for details.
-    #[allow(single_use_lifetimes)]
     #[deny(safe_packed_borrows)]
     fn __assert_not_repr_packed<T, U>(val: &Struct<T, U>) {
         &val.pinned;
