@@ -6,6 +6,12 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 ## [Unreleased]
 
+## [0.4.15] - 2020-05-10
+
+* [`#[project]` attribute can now handle all project* attributes in that scope with one wrapper attribute.][220]
+
+[220]: https://github.com/taiki-e/pin-project/pull/220
+
 ## [0.4.14] - 2020-05-09
 
 * [Added `!Unpin` option to `#[pin_project]` attribute for guarantee the type is `!Unpin`.][219]
@@ -399,7 +405,8 @@ See also [tracking issue for 0.4 release][21].
 
 Initial release
 
-[Unreleased]: https://github.com/taiki-e/pin-project/compare/v0.4.14...HEAD
+[Unreleased]: https://github.com/taiki-e/pin-project/compare/v0.4.15...HEAD
+[0.4.15]: https://github.com/taiki-e/pin-project/compare/v0.4.14...v0.4.15
 [0.4.14]: https://github.com/taiki-e/pin-project/compare/v0.4.13...v0.4.14
 [0.4.13]: https://github.com/taiki-e/pin-project/compare/v0.4.11...v0.4.13
 [0.4.12]: https://github.com/taiki-e/pin-project/compare/v0.4.10...v0.4.12
