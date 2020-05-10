@@ -69,3 +69,30 @@ fn project_replace_stmt_expr() {
         Enum::None => panic!(),
     }
 }
+
+#[project_replace]
+#[test]
+fn combine() {
+    #[pin_project(Replace)]
+    enum Enum<A> {
+        V1(#[pin] A),
+        V2,
+    }
+
+    let mut x = Enum::V1(1);
+    #[project]
+    match Pin::new(&mut x).project() {
+        Enum::V1(_) => {}
+        Enum::V2 => unreachable!(),
+    }
+    #[project_ref]
+    match Pin::new(&x).project_ref() {
+        Enum::V1(_) => {}
+        Enum::V2 => unreachable!(),
+    }
+    #[project_replace]
+    match Pin::new(&mut x).project_replace(Enum::V2) {
+        Enum::V1(_) => {}
+        Enum::V2 => unreachable!(),
+    }
+}

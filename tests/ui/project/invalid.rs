@@ -74,6 +74,78 @@ mod attribute {
     }
 
     #[project]
+    fn combine_stmt_project1() {
+        let mut x = A(());
+        #[project]
+        #[project_ref] //~ ERROR are mutually exclusive
+        let A(_) = Pin::new(&mut x).project();
+    }
+
+    #[project]
+    fn combine_stmt_project2() {
+        let mut x = A(());
+        #[project]
+        #[project_replace] //~ ERROR are mutually exclusive
+        let A(_) = Pin::new(&mut x).project();
+    }
+
+    #[project]
+    fn combine_stmt_project3() {
+        let mut x = A(());
+        #[project_ref]
+        #[project_replace] //~ ERROR are mutually exclusive
+        let A(_) = Pin::new(&mut x).project();
+    }
+
+    #[project_ref]
+    fn combine_stmt_project_ref1() {
+        let mut x = A(());
+        #[project]
+        #[project_ref] //~ ERROR are mutually exclusive
+        let A(_) = Pin::new(&mut x).project();
+    }
+
+    #[project_ref]
+    fn combine_stmt_project_ref2() {
+        let mut x = A(());
+        #[project]
+        #[project_replace] //~ ERROR are mutually exclusive
+        let A(_) = Pin::new(&mut x).project();
+    }
+
+    #[project_ref]
+    fn combine_stmt_project_ref3() {
+        let mut x = A(());
+        #[project_ref]
+        #[project_replace] //~ ERROR are mutually exclusive
+        let A(_) = Pin::new(&mut x).project();
+    }
+
+    #[project_replace]
+    fn combine_stmt_project_replace1() {
+        let mut x = A(());
+        #[project]
+        #[project_ref] //~ ERROR are mutually exclusive
+        let A(_) = Pin::new(&mut x).project();
+    }
+
+    #[project_replace]
+    fn combine_stmt_project_replace2() {
+        let mut x = A(());
+        #[project]
+        #[project_replace] //~ ERROR are mutually exclusive
+        let A(_) = Pin::new(&mut x).project();
+    }
+
+    #[project_replace]
+    fn combine_stmt_project_replace3() {
+        let mut x = A(());
+        #[project_ref]
+        #[project_replace] //~ ERROR are mutually exclusive
+        let A(_) = Pin::new(&mut x).project();
+    }
+
+    #[project]
     #[project] //~ ERROR duplicate #[project] attribute
     fn duplicate_fn_project() {}
 

@@ -46,56 +46,110 @@ error: duplicate #[project_replace] attribute
 72 |         #[project_replace] //~ ERROR duplicate #[project_replace] attribute
    |         ^^^^^^^^^^^^^^^^^^
 
-error: duplicate #[project] attribute
-  --> $DIR/invalid.rs:77:5
+error: attributes `project_ref` and `project` are mutually exclusive
+  --> $DIR/invalid.rs:79:9
    |
-77 |     #[project] //~ ERROR duplicate #[project] attribute
-   |     ^^^^^^^^^^
+79 |         #[project]
+   |         ^^^^^^^^^^
 
-error: duplicate #[project_ref] attribute
-  --> $DIR/invalid.rs:81:5
+error: attributes `project` and `project_replace` are mutually exclusive
+  --> $DIR/invalid.rs:88:9
    |
-81 |     #[project_ref] //~ ERROR duplicate #[project_ref] attribute
-   |     ^^^^^^^^^^^^^^
+88 |         #[project_replace] //~ ERROR are mutually exclusive
+   |         ^^^^^^^^^^^^^^^^^^
 
-error: duplicate #[project_replace] attribute
-  --> $DIR/invalid.rs:85:5
+error: attributes `project_ref` and `project_replace` are mutually exclusive
+  --> $DIR/invalid.rs:96:9
    |
-85 |     #[project_replace] //~ ERROR duplicate #[project_replace] attribute
-   |     ^^^^^^^^^^^^^^^^^^
+96 |         #[project_replace] //~ ERROR are mutually exclusive
+   |         ^^^^^^^^^^^^^^^^^^
 
-error: duplicate #[project] attribute
-  --> $DIR/invalid.rs:89:5
-   |
-89 |     #[project] //~ ERROR duplicate #[project] attribute
-   |     ^^^^^^^^^^
-
-error: duplicate #[project_ref] attribute
-  --> $DIR/invalid.rs:93:5
-   |
-93 |     #[project_ref] //~ ERROR duplicate #[project_ref] attribute
-   |     ^^^^^^^^^^^^^^
-
-error: duplicate #[project_replace] attribute
-  --> $DIR/invalid.rs:97:5
-   |
-97 |     #[project_replace] //~ ERROR duplicate #[project_replace] attribute
-   |     ^^^^^^^^^^^^^^^^^^
-
-error: duplicate #[project] attribute
-   --> $DIR/invalid.rs:105:9
+error: attributes `project_ref` and `project` are mutually exclusive
+   --> $DIR/invalid.rs:103:9
     |
-105 |         #[project] //~ ERROR duplicate #[project] attribute
+103 |         #[project]
+    |         ^^^^^^^^^^
+
+error: attributes `project` and `project_replace` are mutually exclusive
+   --> $DIR/invalid.rs:112:9
+    |
+112 |         #[project_replace] //~ ERROR are mutually exclusive
+    |         ^^^^^^^^^^^^^^^^^^
+
+error: attributes `project_ref` and `project_replace` are mutually exclusive
+   --> $DIR/invalid.rs:120:9
+    |
+120 |         #[project_replace] //~ ERROR are mutually exclusive
+    |         ^^^^^^^^^^^^^^^^^^
+
+error: attributes `project_ref` and `project` are mutually exclusive
+   --> $DIR/invalid.rs:127:9
+    |
+127 |         #[project]
+    |         ^^^^^^^^^^
+
+error: attributes `project` and `project_replace` are mutually exclusive
+   --> $DIR/invalid.rs:136:9
+    |
+136 |         #[project_replace] //~ ERROR are mutually exclusive
+    |         ^^^^^^^^^^^^^^^^^^
+
+error: attributes `project_ref` and `project_replace` are mutually exclusive
+   --> $DIR/invalid.rs:144:9
+    |
+144 |         #[project_replace] //~ ERROR are mutually exclusive
+    |         ^^^^^^^^^^^^^^^^^^
+
+error: duplicate #[project] attribute
+   --> $DIR/invalid.rs:149:5
+    |
+149 |     #[project] //~ ERROR duplicate #[project] attribute
+    |     ^^^^^^^^^^
+
+error: duplicate #[project_ref] attribute
+   --> $DIR/invalid.rs:153:5
+    |
+153 |     #[project_ref] //~ ERROR duplicate #[project_ref] attribute
+    |     ^^^^^^^^^^^^^^
+
+error: duplicate #[project_replace] attribute
+   --> $DIR/invalid.rs:157:5
+    |
+157 |     #[project_replace] //~ ERROR duplicate #[project_replace] attribute
+    |     ^^^^^^^^^^^^^^^^^^
+
+error: duplicate #[project] attribute
+   --> $DIR/invalid.rs:161:5
+    |
+161 |     #[project] //~ ERROR duplicate #[project] attribute
+    |     ^^^^^^^^^^
+
+error: duplicate #[project_ref] attribute
+   --> $DIR/invalid.rs:165:5
+    |
+165 |     #[project_ref] //~ ERROR duplicate #[project_ref] attribute
+    |     ^^^^^^^^^^^^^^
+
+error: duplicate #[project_replace] attribute
+   --> $DIR/invalid.rs:169:5
+    |
+169 |     #[project_replace] //~ ERROR duplicate #[project_replace] attribute
+    |     ^^^^^^^^^^^^^^^^^^
+
+error: duplicate #[project] attribute
+   --> $DIR/invalid.rs:177:9
+    |
+177 |         #[project] //~ ERROR duplicate #[project] attribute
     |         ^^^^^^^^^^
 
 error: duplicate #[project_ref] attribute
-   --> $DIR/invalid.rs:109:9
+   --> $DIR/invalid.rs:181:9
     |
-109 |         #[project_ref] //~ ERROR duplicate #[project_ref] attribute
+181 |         #[project_ref] //~ ERROR duplicate #[project_ref] attribute
     |         ^^^^^^^^^^^^^^
 
 error: duplicate #[project_replace] attribute
-   --> $DIR/invalid.rs:113:9
+   --> $DIR/invalid.rs:185:9
     |
-113 |         #[project_replace] //~ ERROR duplicate #[project_replace] attribute
+185 |         #[project_replace] //~ ERROR duplicate #[project_replace] attribute
     |         ^^^^^^^^^^^^^^^^^^

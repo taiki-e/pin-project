@@ -6,7 +6,8 @@ use syn::{
 };
 
 use crate::utils::{
-    determine_lifetime_name, insert_lifetime, parse_as_empty, Mutability, SliceExt, VecExt,
+    determine_lifetime_name, insert_lifetime, parse_as_empty, Immutable, Mutability, Mutable,
+    Owned, SliceExt, VecExt,
 };
 
 pub(crate) fn attribute(args: &TokenStream, input: Stmt, mutability: Mutability) -> TokenStream {
@@ -199,10 +200,7 @@ fn replace_item_impl(item: &mut ItemImpl, mutability: Mutability) -> Result<()> 
 }
 
 fn replace_item_fn(item: &mut ItemFn, mutability: Mutability) -> Result<()> {
-    struct FnVisitor {
-        res: Result<()>,
-        mutability: Mutability,
-    }
+    struct FnVisitor(Result<()>);
 
     impl FnVisitor {
         fn visit_stmt(&mut self, node: &mut Stmt) -> Result<()> {
@@ -210,10 +208,22 @@ fn replace_item_fn(item: &mut ItemFn, mutability: Mutability) -> Result<()> {
                 Stmt::Expr(expr) | Stmt::Semi(expr, _) => self.visit_expr(expr),
                 Stmt::Local(local) => {
                     visit_mut::visit_local_mut(self, local);
-                    if let Some(attr) = local.attrs.find_remove(self.mutability.method_name())? {
-                        parse_as_empty(&attr.tokens)?;
-                        Context::new(self.mutability).replace_local(local)?;
+
+                    let mut prev = None;
+                    for &mutability in &[Immutable, Mutable, Owned] {
+                        if let Some(attr) = local.attrs.find_remove(mutability.method_name())? {
+                            if let Some(prev) = prev.replace(mutability) {
+                                return Err(error!(
+                                    attr,
+                                    "attributes `{}` and `{}` are mutually exclusive",
+                                    prev.method_name(),
+                                    mutability.method_name(),
+                                ));
+                            }
+                            Context::new(mutability).replace_local(local)?;
+                        }
                     }
+
                     Ok(())
                 }
                 // Do not recurse into nested items.
@@ -223,20 +233,48 @@ fn replace_item_fn(item: &mut ItemFn, mutability: Mutability) -> Result<()> {
 
         fn visit_expr(&mut self, node: &mut Expr) -> Result<()> {
             visit_mut::visit_expr_mut(self, node);
-            let attr = match node {
-                Expr::Match(expr) => expr.attrs.find_remove(self.mutability.method_name())?,
-                Expr::If(expr_if) => {
-                    if let Expr::Let(_) = &*expr_if.cond {
-                        expr_if.attrs.find_remove(self.mutability.method_name())?
-                    } else {
-                        None
+            match node {
+                Expr::Match(expr) => {
+                    let mut prev = None;
+                    for &mutability in &[Immutable, Mutable, Owned] {
+                        if let Some(attr) = expr.attrs.find_remove(mutability.method_name())? {
+                            if let Some(prev) = prev.replace(mutability) {
+                                return Err(error!(
+                                    attr,
+                                    "attributes `{}` and `{}` are mutually exclusive",
+                                    prev.method_name(),
+                                    mutability.method_name(),
+                                ));
+                            }
+                        }
+                    }
+                    if let Some(mutability) = prev {
+                        replace_expr(node, mutability);
                     }
                 }
-                _ => return Ok(()),
-            };
-            if let Some(attr) = attr {
-                parse_as_empty(&attr.tokens)?;
-                replace_expr(node, self.mutability);
+                Expr::If(expr_if) => {
+                    if let Expr::Let(_) = &*expr_if.cond {
+                        let mut prev = None;
+                        for &mutability in &[Immutable, Mutable, Owned] {
+                            if let Some(attr) =
+                                expr_if.attrs.find_remove(mutability.method_name())?
+                            {
+                                if let Some(prev) = prev.replace(mutability) {
+                                    return Err(error!(
+                                        attr,
+                                        "attributes `{}` and `{}` are mutually exclusive",
+                                        prev.method_name(),
+                                        mutability.method_name(),
+                                    ));
+                                }
+                            }
+                        }
+                        if let Some(mutability) = prev {
+                            replace_expr(node, mutability);
+                        }
+                    }
+                }
+                _ => {}
             }
             Ok(())
         }
@@ -244,20 +282,20 @@ fn replace_item_fn(item: &mut ItemFn, mutability: Mutability) -> Result<()> {
 
     impl VisitMut for FnVisitor {
         fn visit_stmt_mut(&mut self, node: &mut Stmt) {
-            if self.res.is_err() {
+            if self.0.is_err() {
                 return;
             }
             if let Err(e) = self.visit_stmt(node) {
-                self.res = Err(e)
+                self.0 = Err(e)
             }
         }
 
         fn visit_expr_mut(&mut self, node: &mut Expr) {
-            if self.res.is_err() {
+            if self.0.is_err() {
                 return;
             }
             if let Err(e) = self.visit_expr(node) {
-                self.res = Err(e)
+                self.0 = Err(e)
             }
         }
 
@@ -270,9 +308,9 @@ fn replace_item_fn(item: &mut ItemFn, mutability: Mutability) -> Result<()> {
         return Err(error!(attr, "duplicate #[{}] attribute", mutability.method_name()));
     }
 
-    let mut visitor = FnVisitor { res: Ok(()), mutability };
+    let mut visitor = FnVisitor(Ok(()));
     visitor.visit_block_mut(&mut item.block);
-    visitor.res
+    visitor.0
 }
 
 fn replace_item_use(item: &mut ItemUse, mutability: Mutability) -> Result<()> {
