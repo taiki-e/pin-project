@@ -1,4 +1,4 @@
-// See ./pinned_drop-expanded.rs for generated code.
+// See ./unsafe_unpin-expanded.rs for generated code.
 
 #![allow(dead_code)]
 

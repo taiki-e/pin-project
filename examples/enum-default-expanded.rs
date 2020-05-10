@@ -24,8 +24,10 @@ enum Enum<T, U> {
     Unpinned(U),
 }
 
+#[doc(hidden)]
 #[allow(clippy::mut_mut)] // This lint warns `&mut &mut <ty>`.
 #[allow(dead_code)] // This lint warns unused fields/variants.
+#[allow(single_use_lifetimes)]
 enum __EnumProjection<'pin, T, U>
 where
     Enum<T, U>: 'pin,
@@ -33,7 +35,9 @@ where
     Pinned(::pin_project::__reexport::pin::Pin<&'pin mut (T)>),
     Unpinned(&'pin mut (U)),
 }
+#[doc(hidden)]
 #[allow(dead_code)] // This lint warns unused fields/variants.
+#[allow(single_use_lifetimes)]
 enum __EnumProjectionRef<'pin, T, U>
 where
     Enum<T, U>: 'pin,
@@ -44,6 +48,7 @@ where
 
 #[doc(hidden)]
 #[allow(non_upper_case_globals)]
+#[allow(single_use_lifetimes)]
 const __SCOPE_Enum: () = {
     impl<T, U> Enum<T, U> {
         fn project<'pin>(
@@ -84,6 +89,7 @@ const __SCOPE_Enum: () = {
         __Enum<'pin, T, U>: ::pin_project::__reexport::marker::Unpin
     {
     }
+    unsafe impl<T, U> ::pin_project::UnsafeUnpin for Enum<T, U> {}
 
     // Ensure that enum does not implement `Drop`.
     //
@@ -91,9 +97,7 @@ const __SCOPE_Enum: () = {
     trait EnumMustNotImplDrop {}
     #[allow(clippy::drop_bounds)]
     impl<T: ::pin_project::__reexport::ops::Drop> EnumMustNotImplDrop for T {}
-    #[allow(single_use_lifetimes)]
     impl<T, U> EnumMustNotImplDrop for Enum<T, U> {}
-    #[allow(single_use_lifetimes)]
     impl<T, U> ::pin_project::__private::PinnedDrop for Enum<T, U> {
         unsafe fn drop(self: ::pin_project::__reexport::pin::Pin<&mut Self>) {}
     }
