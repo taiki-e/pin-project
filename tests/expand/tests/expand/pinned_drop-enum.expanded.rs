@@ -105,6 +105,7 @@ impl<T, U> ::pin_project::__private::PinnedDrop for Enum<T, U> {
     unsafe fn drop(self: Pin<&mut Self>) {
         #[allow(clippy::needless_pass_by_value)]
         fn __drop_inner<T, U>(__self: Pin<&mut Enum<T, U>>) {
+            fn __drop_inner() {}
             let _this = __self;
         }
         __drop_inner(self);
