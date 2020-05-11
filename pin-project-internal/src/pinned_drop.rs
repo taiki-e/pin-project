@@ -53,10 +53,10 @@ fn parse_method(method: &ImplItemMethod) -> Result<()> {
     match method.sig.inputs.len() {
         1 => {}
         0 => return Err(Error::new(method.sig.paren_token.span, INVALID_ARGUMENT)),
-        _ => return Err(error!(&method.sig.inputs, INVALID_ARGUMENT)),
+        _ => return Err(error!(method.sig.inputs, INVALID_ARGUMENT)),
     }
 
-    if let Some(FnArg::Typed(pat)) = &method.sig.receiver() {
+    if let Some(FnArg::Typed(pat)) = method.sig.receiver() {
         // (mut) self: <path>
         if let Some(path) = get_ty_path(&pat.ty) {
             let ty = path.segments.last().unwrap();
@@ -149,6 +149,7 @@ fn parse(item: &mut ItemImpl) -> Result<()> {
 //
 // unsafe fn drop(self: Pin<&mut Self>) {
 //     fn __drop_inner<T>(__self: Pin<&mut Foo<'_, T>>) {
+//         fn __drop_inner() {}
 //         // something
 //     }
 //     __drop_inner(self);
@@ -160,14 +161,16 @@ fn expand_item(item: &mut ItemImpl) {
     let mut drop_inner = method.clone();
 
     // `fn drop(mut self: Pin<&mut Self>)` -> `fn __drop_inner<T>(mut __self: Pin<&mut Receiver>)`
-    drop_inner.sig.ident = Ident::new("__drop_inner", drop_inner.sig.ident.span());
+    let ident = Ident::new("__drop_inner", drop_inner.sig.ident.span());
+    // Add a dummy `__drop_inner` function to prevent users call outer `__drop_inner`.
+    drop_inner.block.stmts.insert(0, parse_quote!(fn #ident() {}));
+    drop_inner.sig.ident = ident;
     drop_inner.sig.generics = item.generics.clone();
     if let FnArg::Typed(arg) = &mut drop_inner.sig.inputs[0] {
         if let Pat::Ident(ident) = &mut *arg.pat {
             prepend_underscore_to_self(&mut ident.ident);
         }
     }
-
     let mut visitor = ReplaceReceiver(&item.self_ty);
     visitor.visit_signature_mut(&mut drop_inner.sig);
     visitor.visit_block_mut(&mut drop_inner.block);

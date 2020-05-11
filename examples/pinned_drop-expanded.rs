@@ -142,6 +142,9 @@ impl<T> ::pin_project::__private::PinnedDrop for Struct<'_, T> {
     unsafe fn drop(self: Pin<&mut Self>) {
         #[allow(clippy::needless_pass_by_value)]
         fn __drop_inner<T>(__self: Pin<&mut Struct<'_, T>>) {
+            // A dummy `__drop_inner` function to prevent users call outer `__drop_inner`.
+            fn __drop_inner() {}
+
             **__self.project().was_dropped = true;
         }
         __drop_inner(self);
