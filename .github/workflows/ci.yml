@@ -23,31 +23,22 @@ jobs:
     name: test
     strategy:
       matrix:
-        include:
+        rust:
           # This is the minimum supported Rust version of this crate.
-          # When updating this, the reminder to update the minimum supported
-          # Rust version in README.md.
-          - build: 1.34.0
-            rust: 1.34.0
-          - build: 1.36.0
-            rust: 1.36.0
-          - build: 1.37.0
-            rust: 1.37.0
-          - build: stable
-            rust: stable
-          - build: beta
-            rust: beta
-          - build: nightly
+          # When updating this, the reminder to update the minimum supported Rust version in README.md.
+          - 1.34.0
+          - 1.36.0
+          - 1.37.0
+          - stable
+          - beta
+        include:
+          - os: ubuntu
             rust: nightly
           # pin-project itself has no platform-dependent implementation.
           # macOS is only used to check that pin-project can interoperate
           # correctly with `#[cfg()]`.
-          - build: macos
-            os: macos
+          - os: macos
             rust: nightly
-          # - build: windows
-          #   os: windows
-          #   rust: nightly
     runs-on: ${{ matrix.os || 'ubuntu' }}-latest
     steps:
       - uses: actions/checkout@master
@@ -58,32 +49,40 @@ jobs:
         if: matrix.rust == 'nightly'
         run: |
           cargo install cargo-hack
-      - name: Install cargo-expand
-        if: matrix.rust == 'nightly' && matrix.build != 'macos'
-        run: |
-          cargo install cargo-expand
       - name: Add targets
         if: matrix.rust == 'nightly'
         run: |
           rustup target add thumbv7m-none-eabi
-      - name: cargo test (stable)
-        if: matrix.rust != 'nightly'
+      - name: cargo test
         run: |
           cargo test --all --all-features --exclude expandtest
-      - name: cargo test (nightly)
+      - name: cargo test (compiletest)
         if: matrix.rust == 'nightly'
         run: |
-          cargo test --all --all-features -- -Zunstable-options --include-ignored
-      - name: cargo check --target thumbv7m-none-eabi
+          cargo test -p pin-project --all-features --test compiletest -- --ignored
+      - name: cargo check (no-std)
         if: matrix.rust == 'nightly'
         run: |
           cargo check --target thumbv7m-none-eabi --manifest-path tests/no-std/Cargo.toml
-      # Refs: https://github.com/rust-lang/cargo/issues/5657
-      - name: cargo check -Zminimal-versions
+      - name: cargo check (minimal versions)
         if: matrix.rust == 'nightly'
         run: |
-          cargo update -Zminimal-versions
-          cargo hack check --all --all-features --no-dev-deps --ignore-private
+          . ./ci/check-minimal-versions.sh
+
+  expandtest:
+    name: expandtest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Install Rust
+        run: |
+          . ./ci/install-rust.sh
+      - name: Install cargo-expand
+        run: |
+          cargo install cargo-expand
+      - name: cargo test (expandtest)
+        run: |
+          cargo test --all-features --manifest-path tests/expand/Cargo.toml
 
   style:
     name: style
@@ -101,7 +100,6 @@ jobs:
         run: |
           . ./ci/install-rust.sh
       - name: Install component
-        if: matrix.component != 'rustdoc'
         run: |
           . ./ci/install-component.sh ${{ matrix.component }}
       - name: cargo clippy
@@ -120,7 +118,9 @@ jobs:
         run: |
           cargo doc --no-deps --all --all-features
 
-  # Refs: https://github.com/rust-lang/crater/blob/9ab6f9697c901c4a44025cf0a39b73ad5b37d198/.github/workflows/bors.yml#L125-L149
+  # These jobs don't actually test anything, but they're used to tell bors the
+  # build completed, as there is no practical way to detect when a workflow is
+  # successful listening to webhooks only.
   #
   # ALL THE PREVIOUS JOBS NEEDS TO BE ADDED TO THE `needs` SECTION OF THIS JOB!
 
@@ -130,6 +130,7 @@ jobs:
     needs:
       - style
       - test
+      - expandtest
     runs-on: ubuntu-latest
     steps:
       - name: Mark the job as a success
@@ -140,6 +141,7 @@ jobs:
     needs:
       - style
       - test
+      - expandtest
     runs-on: ubuntu-latest
     steps:
       - name: Mark the job as a failure
