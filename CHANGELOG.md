@@ -8,7 +8,7 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 ## [0.4.17] - 2020-05-18
 
-* [Allowed naming the projected types.][202]
+* [Support naming the projection types.][202]
 
   By passing an argument with the same name as the method to the attribute, you can name the projection type returned from the method:
 
