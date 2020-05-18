@@ -110,6 +110,12 @@ struct Args {
     replace: Option<Span>,
     /// `UnsafeUnpin` or `!Unpin` argument.
     unpin_impl: UnpinImpl,
+    /// `project = <ident>`.
+    project: Option<Ident>,
+    /// `project_ref = <ident>`.
+    project_ref: Option<Ident>,
+    /// `project_replace = <ident>`.
+    project_replace: Option<Ident>,
 }
 
 const DUPLICATE_PIN: &str = "duplicate #[pin] attribute";
@@ -187,6 +193,9 @@ impl Parse for Args {
         let mut replace = None;
         let mut unsafe_unpin = None;
         let mut not_unpin = None;
+        let mut project = None;
+        let mut project_ref = None;
+        let mut project_replace: Option<(Span, Ident)> = None;
         while !input.is_empty() {
             if input.peek(token::Bang) {
                 let t: token::Bang = input.parse()?;
@@ -201,6 +210,18 @@ impl Parse for Args {
                     "PinnedDrop" => update(&mut pinned_drop, token.span(), &token)?,
                     "Replace" => update(&mut replace, token.span(), &token)?,
                     "UnsafeUnpin" => update(&mut unsafe_unpin, token.span(), &token)?,
+                    "project" => {
+                        let _: token::Eq = input.parse()?;
+                        update(&mut project, input.parse()?, &token)?;
+                    }
+                    "project_ref" => {
+                        let _: token::Eq = input.parse()?;
+                        update(&mut project_ref, input.parse()?, &token)?;
+                    }
+                    "project_replace" => {
+                        let _: token::Eq = input.parse()?;
+                        update(&mut project_replace, (token.span(), input.parse()?), &token)?;
+                    }
                     _ => return Err(error!(token, "unexpected argument: {}", token)),
                 }
             }
@@ -228,7 +249,21 @@ impl Parse for Args {
             (None, Some(span)) => UnpinImpl::Negative(span.span),
         };
 
-        Ok(Self { pinned_drop, replace, unpin_impl })
+        if let (Some((span, _)), None) = (&project_replace, replace) {
+            Err(Error::new(
+                *span,
+                "`project_replace` argument can only be used together with `Replace` argument",
+            ))
+        } else {
+            Ok(Self {
+                pinned_drop,
+                replace,
+                unpin_impl,
+                project,
+                project_ref,
+                project_replace: project_replace.map(|(_, i)| i),
+            })
+        }
     }
 }
 
@@ -294,6 +329,12 @@ struct Context<'a> {
     replace: Option<Span>,
     /// `UnsafeUnpin` or `!Unpin` argument.
     unpin_impl: UnpinImpl,
+    /// `project` argument.
+    project: bool,
+    /// `project_ref` argument.
+    project_ref: bool,
+    /// `project_replace` argument.
+    project_replace: bool,
 }
 
 #[derive(Clone, Copy)]
@@ -312,7 +353,8 @@ impl<'a> Context<'a> {
         ident: &'a Ident,
         generics: &'a mut Generics,
     ) -> Result<Self> {
-        let Args { pinned_drop, replace, unpin_impl } = Args::get(attrs)?;
+        let Args { pinned_drop, unpin_impl, replace, project, project_ref, project_replace } =
+            Args::get(attrs)?;
 
         let ty_generics = generics.split_for_impl().1;
         let self_ty = syn::parse_quote!(#ident #ty_generics);
@@ -339,11 +381,14 @@ impl<'a> Context<'a> {
             pinned_drop,
             replace,
             unpin_impl,
+            project: project.is_some(),
+            project_ref: project_ref.is_some(),
+            project_replace: project_replace.is_some(),
             proj: ProjectedType {
                 vis: determine_visibility(vis),
-                mut_ident: Mutable.proj_ident(ident),
-                ref_ident: Immutable.proj_ident(ident),
-                own_ident: Owned.proj_ident(ident),
+                mut_ident: project.unwrap_or_else(|| Mutable.proj_ident(ident)),
+                ref_ident: project_ref.unwrap_or_else(|| Immutable.proj_ident(ident)),
+                own_ident: project_replace.unwrap_or_else(|| Owned.proj_ident(ident)),
                 lifetime,
                 generics: proj_generics,
                 where_clause,
@@ -398,13 +443,18 @@ impl<'a> Context<'a> {
             Fields::Unit => unreachable!(),
         };
 
+        // If the user gave it a name, it should appear in the document.
+        let doc_attr = quote!(#[doc(hidden)]);
+        let doc_proj = if self.project { None } else { Some(&doc_attr) };
+        let doc_proj_ref = if self.project_ref { None } else { Some(&doc_attr) };
+        let doc_proj_own = if self.project_replace { None } else { Some(&doc_attr) };
         let mut proj_items = quote! {
-            #[doc(hidden)] // TODO: If the user gave it a name, it should appear in the document.
+            #doc_proj
             #[allow(clippy::mut_mut)] // This lint warns `&mut &mut <ty>`.
             #[allow(dead_code)] // This lint warns unused fields/variants.
             #[allow(single_use_lifetimes)] // https://github.com/rust-lang/rust/issues/55058
             #vis struct #proj_ident #proj_generics #where_clause_fields
-            #[doc(hidden)] // TODO: If the user gave it a name, it should appear in the document.
+            #doc_proj_ref
             #[allow(dead_code)] // This lint warns unused fields/variants.
             #[allow(single_use_lifetimes)] // https://github.com/rust-lang/rust/issues/55058
             #vis struct #proj_ref_ident #proj_generics #where_clause_ref_fields
@@ -412,7 +462,7 @@ impl<'a> Context<'a> {
         if self.replace.is_some() {
             // Currently, using quote_spanned here does not seem to have any effect on the diagnostics.
             proj_items.extend(quote! {
-                #[doc(hidden)] // TODO: If the user gave it a name, it should appear in the document.
+                #doc_proj_own
                 #[allow(dead_code)] // This lint warns unused fields/variants.
                 #[allow(single_use_lifetimes)] // https://github.com/rust-lang/rust/issues/55058
                 #vis struct #proj_own_ident #orig_generics #where_clause_own_fields
@@ -482,15 +532,20 @@ impl<'a> Context<'a> {
         let proj_generics = &self.proj.generics;
         let where_clause = &self.proj.where_clause;
 
+        // If the user gave it a name, it should appear in the document.
+        let doc_attr = quote!(#[doc(hidden)]);
+        let doc_proj = if self.project { None } else { Some(&doc_attr) };
+        let doc_proj_ref = if self.project_ref { None } else { Some(&doc_attr) };
+        let doc_proj_own = if self.project_replace { None } else { Some(&doc_attr) };
         let mut proj_items = quote! {
-            #[doc(hidden)] // TODO: If the user gave it a name, it should appear in the document.
+            #doc_proj
             #[allow(clippy::mut_mut)] // This lint warns `&mut &mut <ty>`.
             #[allow(dead_code)] // This lint warns unused fields/variants.
             #[allow(single_use_lifetimes)] // https://github.com/rust-lang/rust/issues/55058
             #vis enum #proj_ident #proj_generics #where_clause {
                 #proj_variants
             }
-            #[doc(hidden)] // TODO: If the user gave it a name, it should appear in the document.
+            #doc_proj_ref
             #[allow(dead_code)] // This lint warns unused fields/variants.
             #[allow(single_use_lifetimes)] // https://github.com/rust-lang/rust/issues/55058
             #vis enum #proj_ref_ident #proj_generics #where_clause {
@@ -500,7 +555,7 @@ impl<'a> Context<'a> {
         if self.replace.is_some() {
             // Currently, using quote_spanned here does not seem to have any effect on the diagnostics.
             proj_items.extend(quote! {
-                #[doc(hidden)] // TODO: If the user gave it a name, it should appear in the document.
+                #doc_proj_own
                 #[allow(dead_code)] // This lint warns unused fields/variants.
                 #[allow(single_use_lifetimes)] // https://github.com/rust-lang/rust/issues/55058
                 #vis enum #proj_own_ident #orig_generics #orig_where_clause {

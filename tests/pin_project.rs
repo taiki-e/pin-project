@@ -9,7 +9,12 @@ use pin_project::{pin_project, pinned_drop, UnsafeUnpin};
 
 #[test]
 fn projection() {
-    #[pin_project(Replace)]
+    #[pin_project(
+        Replace,
+        project = StructProj,
+        project_ref = StructProjRef,
+        project_replace = StructProjOwn,
+    )]
     struct Struct<T, U> {
         #[pin]
         field1: T,
@@ -31,16 +36,16 @@ fn projection() {
 
     let mut s = Struct { field1: 1, field2: 2 };
 
-    let __StructProjection { field1, field2 } = Pin::new(&mut s).project();
+    let StructProj { field1, field2 } = Pin::new(&mut s).project();
     let _: Pin<&mut i32> = field1;
     let _: &mut i32 = field2;
 
-    let __StructProjectionRef { field1, field2 } = Pin::new(&s).project_ref();
+    let StructProjRef { field1, field2 } = Pin::new(&s).project_ref();
     let _: Pin<&i32> = field1;
     let _: &i32 = field2;
 
     let mut s = Pin::new(&mut s);
-    let __StructProjectionOwned { field1, field2 } =
+    let StructProjOwn { field1, field2 } =
         s.as_mut().project_replace(Struct { field1: 3, field2: 4 });
     let _: PhantomData<i32> = field1;
     let _: i32 = field2;
@@ -60,7 +65,7 @@ fn projection() {
     let y: &mut i32 = s.1;
     assert_eq!(*y, 2);
 
-    #[pin_project(Replace)]
+    #[pin_project(Replace, project = EnumProj)]
     #[derive(Eq, PartialEq, Debug)]
     enum Enum<A, B, C, D> {
         Variant1(#[pin] A, B),
@@ -77,18 +82,18 @@ fn projection() {
     let e = e_orig.as_mut().project();
 
     match e {
-        __EnumProjection::Variant1(x, y) => {
+        EnumProj::Variant1(x, y) => {
             let x: Pin<&mut i32> = x;
             assert_eq!(*x, 1);
 
             let y: &mut i32 = y;
             assert_eq!(*y, 2);
         }
-        __EnumProjection::Variant2 { field1, field2 } => {
+        EnumProj::Variant2 { field1, field2 } => {
             let _x: Pin<&mut i32> = field1;
             let _y: &mut i32 = field2;
         }
-        __EnumProjection::None => {}
+        EnumProj::None => {}
     }
 
     assert_eq!(Pin::into_ref(e_orig).get_ref(), &Enum::Variant1(1, 2));
@@ -97,21 +102,21 @@ fn projection() {
     let mut e = Pin::new(&mut e).project();
 
     match &mut e {
-        __EnumProjection::Variant1(x, y) => {
+        EnumProj::Variant1(x, y) => {
             let _x: &mut Pin<&mut i32> = x;
             let _y: &mut &mut i32 = y;
         }
-        __EnumProjection::Variant2 { field1, field2 } => {
+        EnumProj::Variant2 { field1, field2 } => {
             let x: &mut Pin<&mut i32> = field1;
             assert_eq!(**x, 3);
 
             let y: &mut &mut i32 = field2;
             assert_eq!(**y, 4);
         }
-        __EnumProjection::None => {}
+        EnumProj::None => {}
     }
 
-    if let __EnumProjection::Variant2 { field1, field2 } = e {
+    if let EnumProj::Variant2 { field1, field2 } = e {
         let x: Pin<&mut i32> = field1;
         assert_eq!(*x, 3);
 
@@ -122,7 +127,7 @@ fn projection() {
 
 #[test]
 fn enum_project_set() {
-    #[pin_project(Replace)]
+    #[pin_project(Replace, project = EnumProj)]
     #[derive(Eq, PartialEq, Debug)]
     enum Enum {
         Variant1(#[pin] u8),
@@ -134,7 +139,7 @@ fn enum_project_set() {
     let e_proj = e_orig.as_mut().project();
 
     match e_proj {
-        __EnumProjection::Variant1(val) => {
+        EnumProj::Variant1(val) => {
             let new_e = Enum::Variant2(val.as_ref().get_ref() == &25);
             e_orig.set(new_e);
         }
@@ -409,7 +414,7 @@ fn lifetime_project() {
         unpinned: U,
     }
 
-    #[pin_project(Replace)]
+    #[pin_project(Replace, project = EnumProj, project_ref = EnumProjRef)]
     enum Enum<T, U> {
         Variant {
             #[pin]
@@ -439,12 +444,12 @@ fn lifetime_project() {
     impl<T, U> Enum<T, U> {
         fn get_pin_ref<'a>(self: Pin<&'a Self>) -> Pin<&'a T> {
             match self.project_ref() {
-                __EnumProjectionRef::Variant { pinned, .. } => pinned,
+                EnumProjRef::Variant { pinned, .. } => pinned,
             }
         }
         fn get_pin_mut<'a>(self: Pin<&'a mut Self>) -> Pin<&'a mut T> {
             match self.project() {
-                __EnumProjection::Variant { pinned, .. } => pinned,
+                EnumProj::Variant { pinned, .. } => pinned,
             }
         }
     }
@@ -467,7 +472,7 @@ fn lifetime_project_elided() {
         unpinned: U,
     }
 
-    #[pin_project(Replace)]
+    #[pin_project(Replace, project = EnumProj, project_ref = EnumProjRef)]
     enum Enum<T, U> {
         Variant {
             #[pin]
@@ -497,12 +502,12 @@ fn lifetime_project_elided() {
     impl<T, U> Enum<T, U> {
         fn get_pin_ref(self: Pin<&Self>) -> Pin<&T> {
             match self.project_ref() {
-                __EnumProjectionRef::Variant { pinned, .. } => pinned,
+                EnumProjRef::Variant { pinned, .. } => pinned,
             }
         }
         fn get_pin_mut(self: Pin<&mut Self>) -> Pin<&mut T> {
             match self.project() {
-                __EnumProjection::Variant { pinned, .. } => pinned,
+                EnumProj::Variant { pinned, .. } => pinned,
             }
         }
     }

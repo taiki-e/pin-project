@@ -1,0 +1,21 @@
+error[E0428]: the name `A` is defined multiple times
+ --> $DIR/conflict-naming.rs:3:1
+  |
+3 | #[pin_project(project = A, project_ref = A)] //~ ERROR E0428,E0308
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  | |
+  | `A` redefined here
+  | previous definition of the type `A` here
+  |
+  = note: `A` must be defined only once in the type namespace of this module
+  = note: this error originates in a derive macro (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0308]: mismatched types
+ --> $DIR/conflict-naming.rs:3:1
+  |
+3 | #[pin_project(project = A, project_ref = A)] //~ ERROR E0428,E0308
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ types differ in mutability
+  |
+  = note: expected mutable reference `&mut ()`
+                     found reference `&()`
+  = note: this error originates in a derive macro (in Nightly builds, run with -Z macro-backtrace for more info)

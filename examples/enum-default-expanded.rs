@@ -5,7 +5,7 @@
 //
 // use pin_project::pin_project;
 //
-// #[pin_project]
+// #[pin_project(project = EnumProj)]
 // enum Enum<T, U> {
 //     Pinned(#[pin] T),
 //     Unpinned(U),
@@ -24,11 +24,10 @@ enum Enum<T, U> {
     Unpinned(U),
 }
 
-#[doc(hidden)]
 #[allow(clippy::mut_mut)] // This lint warns `&mut &mut <ty>`.
 #[allow(dead_code)] // This lint warns unused fields/variants.
 #[allow(single_use_lifetimes)]
-enum __EnumProjection<'pin, T, U>
+enum EnumProj<'pin, T, U>
 where
     Enum<T, U>: 'pin,
 {
@@ -53,13 +52,13 @@ const __SCOPE_Enum: () = {
     impl<T, U> Enum<T, U> {
         fn project<'pin>(
             self: ::pin_project::__reexport::pin::Pin<&'pin mut Self>,
-        ) -> __EnumProjection<'pin, T, U> {
+        ) -> EnumProj<'pin, T, U> {
             unsafe {
                 match self.get_unchecked_mut() {
-                    Enum::Pinned(_0) => __EnumProjection::Pinned(
-                        ::pin_project::__reexport::pin::Pin::new_unchecked(_0),
-                    ),
-                    Enum::Unpinned(_0) => __EnumProjection::Unpinned(_0),
+                    Enum::Pinned(_0) => {
+                        EnumProj::Pinned(::pin_project::__reexport::pin::Pin::new_unchecked(_0))
+                    }
+                    Enum::Unpinned(_0) => EnumProj::Unpinned(_0),
                 }
             }
         }

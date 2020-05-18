@@ -50,6 +50,27 @@ use crate::utils::{Immutable, Mutable, Owned};
 /// # }
 /// ```
 ///
+/// By passing an argument with the same name as the method to the attribute,
+/// you can name the projection type returned from the method:
+///
+/// ```rust
+/// use pin_project::pin_project;
+/// use std::pin::Pin;
+///
+/// #[pin_project(project = EnumProj)]
+/// enum Enum<T> {
+///     Variant(#[pin] T),
+/// }
+///
+/// fn func<T>(x: Pin<&mut Enum<T>>) {
+///     match x.project() {
+///         EnumProj::Variant(y) => {
+///             let _: Pin<&mut T> = y;
+///         }
+///     }
+/// }
+/// ```
+///
 /// The visibility of the projected type and projection method is based on the original type.
 /// However, if the visibility of the original type is `pub`, the visibility of the projected type
 /// and the projection method is downgraded to `pub(crate)`.
@@ -67,7 +88,7 @@ use crate::utils::{Immutable, Mutable, Owned};
 ///    To enforce this, this attribute will automatically generate an [`Unpin`] implementation
 ///    for you, which will require that all structurally pinned fields be [`Unpin`]
 ///    If you wish to provide an manual [`Unpin`] impl, you can do so via the
-///    `UnsafeUnpin` argument.
+///    [`UnsafeUnpin`][unsafe-unpin] argument.
 ///
 /// 2. The destructor of the struct must not move structural fields out of its argument.
 ///
@@ -84,8 +105,8 @@ use crate::utils::{Immutable, Mutable, Owned};
 ///    then apply to your type, causing a compile-time error due to
 ///    the conflict with the second impl.
 ///
-///    If you wish to provide a custom [`Drop`] impl, you can annotate a function
-///    with [`#[pinned_drop]`][pinned-drop]. This function takes a pinned version of your struct -
+///    If you wish to provide a custom [`Drop`] impl, you can annotate an impl
+///    with [`#[pinned_drop]`][pinned-drop]. This impl takes a pinned version of your struct -
 ///    that is, [`Pin`]`<&mut MyStruct>` where `MyStruct` is the type of your struct.
 ///
 ///    You can call `project()` on this type as usual, along with any other
@@ -184,17 +205,14 @@ use crate::utils::{Immutable, Mutable, Owned};
 ///
 /// [Enums](https://doc.rust-lang.org/reference/items/enumerations.html):
 ///
-/// `#[pin_project]` supports enums, but to use it, you need to use with the
-/// [`project`] attribute.
-///
-/// The attribute at the expression position is not stable, so you need to use
-/// a dummy [`project`] attribute for the function.
+/// `#[pin_project]` supports enums, but to use it, you need to name the
+/// projection type returned from the method or to use with the [`project`] attribute.
 ///
 /// ```rust
-/// use pin_project::{pin_project, project};
+/// use pin_project::pin_project;
 /// use std::pin::Pin;
 ///
-/// #[pin_project]
+/// #[pin_project(project = EnumProj)]
 /// enum Enum<T, U> {
 ///     Tuple(#[pin] T),
 ///     Struct { field: U },
@@ -202,17 +220,15 @@ use crate::utils::{Immutable, Mutable, Owned};
 /// }
 ///
 /// impl<T, U> Enum<T, U> {
-///     #[project] // Nightly does not need a dummy attribute to the function.
 ///     fn method(self: Pin<&mut Self>) {
-///         #[project]
 ///         match self.project() {
-///             Enum::Tuple(x) => {
+///             EnumProj::Tuple(x) => {
 ///                 let _: Pin<&mut T> = x;
 ///             }
-///             Enum::Struct { field } => {
+///             EnumProj::Struct { field } => {
 ///                 let _: &mut U = field;
 ///             }
-///             Enum::Unit => {}
+///             EnumProj::Unit => {}
 ///         }
 ///     }
 /// }
@@ -410,7 +426,7 @@ use crate::utils::{Immutable, Mutable, Owned};
 /// [repr-packed]: https://doc.rust-lang.org/nomicon/other-reprs.html#reprpacked
 /// [pin-projection]: https://doc.rust-lang.org/nightly/std/pin/index.html#projections-and-structural-pinning
 /// [undefined-behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html
-/// [unsafe-unpin]: ./attr.pin_project.html#pinned_drop
+/// [unsafe-unpin]: ./attr.pin_project.html#unsafeunpin
 #[proc_macro_attribute]
 pub fn pin_project(args: TokenStream, input: TokenStream) -> TokenStream {
     pin_project::attribute(&args.into(), input.into()).into()
