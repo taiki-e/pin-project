@@ -37,3 +37,43 @@ error[E0365]: `__ReplaceProjectionRef` is private, and cannot be re-exported
    |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ re-export of private `__ReplaceProjectionRef`
    |
    = note: consider declaring type or module `__ReplaceProjectionRef` with `pub`
+
+error[E0365]: `DProj` is private, and cannot be re-exported
+  --> $DIR/visibility.rs:63:13
+   |
+63 |     pub use crate::pub_renamed::DProj; //~ ERROR E0365
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^ re-export of private `DProj`
+   |
+   = note: consider declaring type or module `DProj` with `pub`
+
+error[E0365]: `DProjRef` is private, and cannot be re-exported
+  --> $DIR/visibility.rs:65:13
+   |
+65 |     pub use crate::pub_renamed::DProjRef; //~ ERROR E0365
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ re-export of private `DProjRef`
+   |
+   = note: consider declaring type or module `DProjRef` with `pub`
+
+error[E0365]: `RProj` is private, and cannot be re-exported
+  --> $DIR/visibility.rs:67:13
+   |
+67 |     pub use crate::pub_renamed::RProj; //~ ERROR E0365
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^ re-export of private `RProj`
+   |
+   = note: consider declaring type or module `RProj` with `pub`
+
+error[E0365]: `RProjOwn` is private, and cannot be re-exported
+  --> $DIR/visibility.rs:69:13
+   |
+69 |     pub use crate::pub_renamed::RProjOwn; //~ ERROR E0365
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ re-export of private `RProjOwn`
+   |
+   = note: consider declaring type or module `RProjOwn` with `pub`
+
+error[E0365]: `RProjRef` is private, and cannot be re-exported
+  --> $DIR/visibility.rs:71:13
+   |
+71 |     pub use crate::pub_renamed::RProjRef; //~ ERROR E0365
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ re-export of private `RProjRef`
+   |
+   = note: consider declaring type or module `RProjRef` with `pub`

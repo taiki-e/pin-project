@@ -118,6 +118,18 @@ mod pin_project_argument {
     #[pin_project(PinnedDrop, UnsafeUnpin, PinnedDrop, UnsafeUnpin)] //~ ERROR duplicate `PinnedDrop` argument
     struct Duplicate4(#[pin] ());
 
+    #[pin_project(project = A, project = B)] //~ ERROR duplicate `project` argument
+    struct DuplicateProject(#[pin] ());
+
+    #[pin_project(project_ref = A, project_ref = B)] //~ ERROR duplicate `project_ref` argument
+    struct DuplicateProjectRef(#[pin] ());
+
+    #[pin_project(project_replace = A, project_replace = B)] //~ ERROR duplicate `project_replace` argument
+    struct DuplicateProjectReplace(#[pin] ());
+
+    #[pin_project(project_replace = A)] //~ ERROR `project_replace` argument can only be used together with `Replace` argument
+    struct ProjectReplaceWithoutReplace(#[pin] ());
+
     #[pin_project(PinnedDrop, Replace)] //~ ERROR arguments `PinnedDrop` and `Replace` are mutually exclusive
     struct PinnedDropWithReplace1(#[pin] ());
 
@@ -135,6 +147,24 @@ mod pin_project_argument {
 
     #[pin_project(Unpin)] //~ ERROR unexpected argument
     struct NotUnpin2(#[pin] ());
+
+    #[pin_project(project)] //~ ERROR expected `=`
+    struct Project1(#[pin] ());
+
+    #[pin_project(project = )] //~ ERROR unexpected end of input, expected identifier
+    struct Project2(#[pin] ());
+
+    #[pin_project(project_ref)] //~ ERROR expected `=`
+    struct ProjectRef1(#[pin] ());
+
+    #[pin_project(project_ref = )] //~ ERROR unexpected end of input, expected identifier
+    struct ProjectRef2(#[pin] ());
+
+    #[pin_project(project_replace)] //~ ERROR expected `=`
+    struct ProjectReplace1(#[pin] ());
+
+    #[pin_project(project_replace = )] //~ ERROR unexpected end of input, expected identifier
+    struct ProjectReplace2(#[pin] ());
 }
 
 mod pin_project_attribute {
