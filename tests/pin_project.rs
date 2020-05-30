@@ -760,6 +760,7 @@ fn no_infer_outlives() {
 
 // https://github.com/rust-lang/rust/issues/47949
 // https://github.com/taiki-e/pin-project/pull/194#discussion_r419098111
+#[allow(clippy::many_single_char_names)]
 #[test]
 fn project_replace_panic() {
     use std::panic;
