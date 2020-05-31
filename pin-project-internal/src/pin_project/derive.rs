@@ -8,8 +8,8 @@ use syn::{
 
 use super::PIN;
 use crate::utils::{
-    determine_lifetime_name, determine_visibility, insert_lifetime_and_bound, Immutable, Mutable,
-    Owned, ParseBufferExt, ReplaceReceiver, SliceExt, Variants,
+    determine_lifetime_name, determine_visibility, insert_lifetime_and_bound, ParseBufferExt,
+    ProjKind, ReplaceReceiver, SliceExt, Variants,
 };
 
 pub(super) fn parse_derive(input: TokenStream) -> Result<TokenStream> {
@@ -386,9 +386,9 @@ impl<'a> Context<'a> {
             project_replace: project_replace.is_some(),
             proj: ProjectedType {
                 vis: determine_visibility(vis),
-                mut_ident: project.unwrap_or_else(|| Mutable.proj_ident(ident)),
-                ref_ident: project_ref.unwrap_or_else(|| Immutable.proj_ident(ident)),
-                own_ident: project_replace.unwrap_or_else(|| Owned.proj_ident(ident)),
+                mut_ident: project.unwrap_or_else(|| ProjKind::Mutable.proj_ident(ident)),
+                ref_ident: project_ref.unwrap_or_else(|| ProjKind::Immutable.proj_ident(ident)),
+                own_ident: project_replace.unwrap_or_else(|| ProjKind::Owned.proj_ident(ident)),
                 lifetime,
                 generics: proj_generics,
                 where_clause,

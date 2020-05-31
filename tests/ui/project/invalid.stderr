@@ -46,11 +46,11 @@ error: duplicate #[project_replace] attribute
 72 |         #[project_replace] //~ ERROR duplicate #[project_replace] attribute
    |         ^^^^^^^^^^^^^^^^^^
 
-error: attributes `project_ref` and `project` are mutually exclusive
-  --> $DIR/invalid.rs:79:9
+error: attributes `project` and `project_ref` are mutually exclusive
+  --> $DIR/invalid.rs:80:9
    |
-79 |         #[project]
-   |         ^^^^^^^^^^
+80 |         #[project_ref] //~ ERROR are mutually exclusive
+   |         ^^^^^^^^^^^^^^
 
 error: attributes `project` and `project_replace` are mutually exclusive
   --> $DIR/invalid.rs:88:9
@@ -64,11 +64,11 @@ error: attributes `project_ref` and `project_replace` are mutually exclusive
 96 |         #[project_replace] //~ ERROR are mutually exclusive
    |         ^^^^^^^^^^^^^^^^^^
 
-error: attributes `project_ref` and `project` are mutually exclusive
-   --> $DIR/invalid.rs:103:9
+error: attributes `project` and `project_ref` are mutually exclusive
+   --> $DIR/invalid.rs:104:9
     |
-103 |         #[project]
-    |         ^^^^^^^^^^
+104 |         #[project_ref] //~ ERROR are mutually exclusive
+    |         ^^^^^^^^^^^^^^
 
 error: attributes `project` and `project_replace` are mutually exclusive
    --> $DIR/invalid.rs:112:9
@@ -82,11 +82,11 @@ error: attributes `project_ref` and `project_replace` are mutually exclusive
 120 |         #[project_replace] //~ ERROR are mutually exclusive
     |         ^^^^^^^^^^^^^^^^^^
 
-error: attributes `project_ref` and `project` are mutually exclusive
-   --> $DIR/invalid.rs:127:9
+error: attributes `project` and `project_ref` are mutually exclusive
+   --> $DIR/invalid.rs:128:9
     |
-127 |         #[project]
-    |         ^^^^^^^^^^
+128 |         #[project_ref] //~ ERROR are mutually exclusive
+    |         ^^^^^^^^^^^^^^
 
 error: attributes `project` and `project_replace` are mutually exclusive
    --> $DIR/invalid.rs:136:9

@@ -26,7 +26,7 @@ mod project;
 
 use proc_macro::TokenStream;
 
-use crate::utils::{Immutable, Mutable, Owned};
+use crate::utils::ProjKind;
 
 /// An attribute that creates a projection type covering all the fields of struct or enum.
 ///
@@ -647,7 +647,7 @@ pub fn pinned_drop(args: TokenStream, input: TokenStream) -> TokenStream {
 #[proc_macro_attribute]
 pub fn project(args: TokenStream, input: TokenStream) -> TokenStream {
     let input = syn::parse_macro_input!(input);
-    project::attribute(&args.into(), input, Mutable).into()
+    project::attribute(&args.into(), input, ProjKind::Mutable).into()
 }
 
 /// An attribute to provide way to refer to the projected type returned by
@@ -662,7 +662,7 @@ pub fn project(args: TokenStream, input: TokenStream) -> TokenStream {
 #[proc_macro_attribute]
 pub fn project_ref(args: TokenStream, input: TokenStream) -> TokenStream {
     let input = syn::parse_macro_input!(input);
-    project::attribute(&args.into(), input, Immutable).into()
+    project::attribute(&args.into(), input, ProjKind::Immutable).into()
 }
 
 /// An attribute to provide way to refer to the projected type returned by
@@ -677,7 +677,7 @@ pub fn project_ref(args: TokenStream, input: TokenStream) -> TokenStream {
 #[proc_macro_attribute]
 pub fn project_replace(args: TokenStream, input: TokenStream) -> TokenStream {
     let input = syn::parse_macro_input!(input);
-    project::attribute(&args.into(), input, Owned).into()
+    project::attribute(&args.into(), input, ProjKind::Owned).into()
 }
 
 /// An internal helper macro.
