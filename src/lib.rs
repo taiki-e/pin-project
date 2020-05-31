@@ -2,7 +2,7 @@
 //!
 //! ## Examples
 //!
-//! [`pin_project`] attribute creates a projection type covering all the fields of struct or enum.
+//! [`#[pin_project]`][`pin_project`] attribute creates a projection type covering all the fields of struct or enum.
 //!
 //! ```rust
 //! use pin_project::pin_project;
@@ -16,7 +16,7 @@
 //! }
 //!
 //! impl<T, U> Struct<T, U> {
-//!     fn foo(self: Pin<&mut Self>) {
+//!     fn method(self: Pin<&mut Self>) {
 //!         let this = self.project();
 //!         let _: Pin<&mut T> = this.pinned; // Pinned reference to the field
 //!         let _: &mut U = this.unpinned; // Normal reference to the field
@@ -24,13 +24,15 @@
 //! }
 //! ```
 //!
-//! [Code like this will be generated](https://github.com/taiki-e/pin-project/blob/master/examples/struct-default-expanded.rs)
+//! [Code like this will be generated][struct-default-expanded]
 //!
-//! See [`pin_project`] attribute for more details.
+//! See [`#[pin_project]`][`pin_project`] attribute for more details.
 //!
-//! Also, there are examples and generated code of each feature in [examples](https://github.com/taiki-e/pin-project/blob/master/examples/README.md) directory.
+//! Also, there are examples and generated code of each feature in [examples] directory.
 //!
 //! [`pin_project`]: attr.pin_project.html
+//! [examples]: https://github.com/taiki-e/pin-project/blob/master/examples/README.md
+//! [struct-default-expanded]: https://github.com/taiki-e/pin-project/blob/master/examples/struct-default-expanded.rs
 
 #![no_std]
 #![recursion_limit = "256"]
@@ -62,7 +64,7 @@ pub use pin_project_internal::project_replace;
 
 /// A trait used for custom implementations of [`Unpin`].
 /// This trait is used in conjunction with the `UnsafeUnpin`
-/// argument to [`pin_project`]
+/// argument to [`#[pin_project]`][`pin_project`]
 ///
 /// The Rust [`Unpin`] trait is safe to implement - by itself,
 /// implementing it cannot lead to undefined behavior. Undefined

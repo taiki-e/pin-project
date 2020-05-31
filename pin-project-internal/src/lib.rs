@@ -35,9 +35,9 @@ use crate::utils::{Immutable, Mutable, Owned};
 /// * For the field that uses `#[pin]` attribute, makes the pinned reference to the field.
 /// * For the other fields, makes the unpinned reference to the field.
 ///
-/// And the following methods are implemented on the original `#[pin_project]` type:
+/// And the following methods are implemented on the original type:
 ///
-/// ```
+/// ```rust
 /// # #[rustversion::since(1.36)]
 /// # fn dox() {
 /// # use std::pin::Pin;
@@ -206,7 +206,7 @@ use crate::utils::{Immutable, Mutable, Owned};
 /// [Enums](https://doc.rust-lang.org/reference/items/enumerations.html):
 ///
 /// `#[pin_project]` supports enums, but to use it, you need to name the
-/// projection type returned from the method or to use with the [`project`] attribute.
+/// projection type returned from the method.
 ///
 /// ```rust
 /// use pin_project::pin_project;
@@ -233,8 +233,6 @@ use crate::utils::{Immutable, Mutable, Owned};
 ///     }
 /// }
 /// ```
-///
-/// See also [`project`] and [`project_ref`] attributes.
 ///
 /// ## `!Unpin`
 ///
@@ -352,7 +350,7 @@ use crate::utils::{Immutable, Mutable, Owned};
 /// }
 /// ```
 ///
-/// See also [`pinned_drop`] attribute.
+/// See also [`#[pinned_drop]`][`pinned_drop`] attribute.
 ///
 /// ## `project_replace()`
 ///
@@ -362,14 +360,11 @@ use crate::utils::{Immutable, Mutable, Owned};
 /// to [`Pin::set`], except that the unpinned fields are moved and returned,
 /// instead of being dropped in-place.
 ///
-/// ```
-/// # #[rustversion::since(1.36)]
-/// # fn dox() {
+/// ```rust
 /// # use std::pin::Pin;
 /// # type ProjectionOwned = ();
 /// # trait Dox {
 /// fn project_replace(self: Pin<&mut Self>, other: Self) -> ProjectionOwned;
-/// # }
 /// # }
 /// ```
 ///
@@ -383,10 +378,10 @@ use crate::utils::{Immutable, Mutable, Owned};
 /// For example:
 ///
 /// ```rust
-/// use pin_project::{pin_project, project_replace};
+/// use pin_project::pin_project;
 ///
-/// #[pin_project(Replace)]
-/// enum Struct<T> {
+/// #[pin_project(Replace, project_replace = EnumProjOwn)]
+/// enum Enum<T> {
 ///     A {
 ///         #[pin]
 ///         pinned_field: i32,
@@ -395,21 +390,17 @@ use crate::utils::{Immutable, Mutable, Owned};
 ///     B,
 /// }
 ///
-/// #[project_replace]
-/// fn main() {
-///     let mut x = Box::pin(Struct::A { pinned_field: 42, unpinned_field: "hello" });
+/// let mut x = Box::pin(Enum::A { pinned_field: 42, unpinned_field: "hello" });
 ///
-///     #[project_replace]
-///     match x.as_mut().project_replace(Struct::B) {
-///         Struct::A { unpinned_field, .. } => assert_eq!(unpinned_field, "hello"),
-///         Struct::B => unreachable!(),
-///     }
+/// match x.as_mut().project_replace(Enum::B) {
+///     EnumProjOwn::A { unpinned_field, .. } => assert_eq!(unpinned_field, "hello"),
+///     EnumProjOwn::B => unreachable!(),
 /// }
 /// ```
 ///
-/// The [`project_replace`] attributes are necessary whenever destructuring the return
-/// type of `project_replace()`, and work in exactly the same way as the
-/// [`project`] and [`project_ref`] attributes.
+/// The `project_replace` argument is necessary whenever destructuring
+/// the return type of `project_replace()`, and work in exactly the same way as
+/// the `project` and `project_ref` arguments.
 ///
 /// [`PhantomData`]: core::marker::PhantomData
 /// [`PhantomPinned`]: core::marker::PhantomPinned
@@ -418,13 +409,10 @@ use crate::utils::{Immutable, Mutable, Owned};
 /// [`Pin`]: core::pin::Pin
 /// [`UnsafeUnpin`]: https://docs.rs/pin-project/0.4/pin_project/trait.UnsafeUnpin.html
 /// [`pinned_drop`]: ./attr.pinned_drop.html
-/// [`project_ref`]: ./attr.project_ref.html
-/// [`project_replace`]: ./attr.project_replace.html
-/// [`project`]: ./attr.project.html
 /// [drop-guarantee]: https://doc.rust-lang.org/nightly/std/pin/index.html#drop-guarantee
+/// [pin-projection]: https://doc.rust-lang.org/nightly/std/pin/index.html#projections-and-structural-pinning
 /// [pinned-drop]: ./attr.pin_project.html#pinned_drop
 /// [repr-packed]: https://doc.rust-lang.org/nomicon/other-reprs.html#reprpacked
-/// [pin-projection]: https://doc.rust-lang.org/nightly/std/pin/index.html#projections-and-structural-pinning
 /// [undefined-behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html
 /// [unsafe-unpin]: ./attr.pin_project.html#unsafeunpin
 #[proc_macro_attribute]
@@ -450,7 +438,7 @@ pub fn pin_project(args: TokenStream, input: TokenStream) -> TokenStream {
 /// }
 /// ```
 ///
-/// `#[pin_project]` implements the actual [`Drop`] trait via `PinnedDrop` you
+/// [`#[pin_project]`][`pin_project`] implements the actual [`Drop`] trait via `PinnedDrop` you
 /// implemented. To drop a type that implements `PinnedDrop`, use the [`drop`]
 /// function just like dropping a type that directly implements [`Drop`].
 ///
@@ -505,6 +493,7 @@ pub fn pin_project(args: TokenStream, input: TokenStream) -> TokenStream {
 /// can drop safely a type that implements `PinnedDrop`.
 ///
 /// [`Pin`]: core::pin::Pin
+/// [`pin_project`]: ./attr.pin_project.html
 /// [pinned-drop]: ./attr.pin_project.html#pinned_drop
 #[proc_macro_attribute]
 pub fn pinned_drop(args: TokenStream, input: TokenStream) -> TokenStream {
@@ -559,25 +548,25 @@ pub fn pinned_drop(args: TokenStream, input: TokenStream) -> TokenStream {
 /// use std::pin::Pin;
 ///
 /// #[pin_project]
-/// enum Foo<A, B, C> {
+/// enum Enum<A, B, C> {
 ///     Tuple(#[pin] A, B),
 ///     Struct { field: C },
 ///     Unit,
 /// }
 ///
-/// impl<A, B, C> Foo<A, B, C> {
+/// impl<A, B, C> Enum<A, B, C> {
 ///     #[project] // Nightly does not need a dummy attribute to the function.
 ///     fn baz(self: Pin<&mut Self>) {
 ///         #[project]
 ///         match self.project() {
-///             Foo::Tuple(x, y) => {
+///             Enum::Tuple(x, y) => {
 ///                 let _: Pin<&mut A> = x;
 ///                 let _: &mut B = y;
 ///             }
-///             Foo::Struct { field } => {
+///             Enum::Struct { field } => {
 ///                 let _: &mut C = field;
 ///             }
-///             Foo::Unit => {}
+///             Enum::Unit => {}
 ///         }
 ///     }
 /// }
@@ -664,10 +653,10 @@ pub fn project(args: TokenStream, input: TokenStream) -> TokenStream {
 /// An attribute to provide way to refer to the projected type returned by
 /// `project_ref` method.
 ///
-/// This is the same as [`project`] attribute except it refers to the projected
+/// This is the same as [`#[project]`][`project`] attribute except it refers to the projected
 /// type returned by the `project_ref` method.
 ///
-/// See [`project`] attribute for more details.
+/// See [`#[project]`][`project`] attribute for more details.
 ///
 /// [`project`]: ./attr.project.html
 #[proc_macro_attribute]
@@ -679,10 +668,10 @@ pub fn project_ref(args: TokenStream, input: TokenStream) -> TokenStream {
 /// An attribute to provide way to refer to the projected type returned by
 /// `project_replace` method.
 ///
-/// This is the same as [`project`] attribute except it refers to the projected
+/// This is the same as [`#[project]`][`project`] attribute except it refers to the projected
 /// type returned by the `project_replace` method.
 ///
-/// See [`project`] attribute for more details.
+/// See [`#[project]`][`project`] attribute for more details.
 ///
 /// [`project`]: ./attr.project.html
 #[proc_macro_attribute]
