@@ -6,25 +6,22 @@ use syn::{
 };
 
 use crate::utils::{
-    determine_lifetime_name, insert_lifetime, parse_as_empty, Immutable, Mutability, Mutable,
-    Owned, SliceExt, VecExt,
+    determine_lifetime_name, insert_lifetime, parse_as_empty, ProjKind, SliceExt, VecExt,
 };
 
-pub(crate) fn attribute(args: &TokenStream, input: Stmt, mutability: Mutability) -> TokenStream {
-    parse_as_empty(args)
-        .and_then(|()| parse(input, mutability))
-        .unwrap_or_else(|e| e.to_compile_error())
+pub(crate) fn attribute(args: &TokenStream, input: Stmt, kind: ProjKind) -> TokenStream {
+    parse_as_empty(args).and_then(|()| parse(input, kind)).unwrap_or_else(|e| e.to_compile_error())
 }
 
-fn replace_expr(expr: &mut Expr, mutability: Mutability) {
+fn replace_expr(expr: &mut Expr, kind: ProjKind) {
     match expr {
         Expr::Match(expr) => {
-            Context::new(mutability).replace_expr_match(expr);
+            Context::new(kind).replace_expr_match(expr);
         }
         Expr::If(expr_if) => {
             let mut expr_if = expr_if;
             while let Expr::Let(ref mut expr) = &mut *expr_if.cond {
-                Context::new(mutability).replace_expr_let(expr);
+                Context::new(kind).replace_expr_let(expr);
                 if let Some((_, ref mut expr)) = expr_if.else_branch {
                     if let Expr::If(new_expr_if) = &mut **expr {
                         expr_if = new_expr_if;
@@ -38,13 +35,13 @@ fn replace_expr(expr: &mut Expr, mutability: Mutability) {
     }
 }
 
-fn parse(mut stmt: Stmt, mutability: Mutability) -> Result<TokenStream> {
+fn parse(mut stmt: Stmt, kind: ProjKind) -> Result<TokenStream> {
     match &mut stmt {
-        Stmt::Expr(expr) | Stmt::Semi(expr, _) => replace_expr(expr, mutability),
-        Stmt::Local(local) => Context::new(mutability).replace_local(local)?,
-        Stmt::Item(Item::Fn(item)) => replace_item_fn(item, mutability)?,
-        Stmt::Item(Item::Impl(item)) => replace_item_impl(item, mutability)?,
-        Stmt::Item(Item::Use(item)) => replace_item_use(item, mutability)?,
+        Stmt::Expr(expr) | Stmt::Semi(expr, _) => replace_expr(expr, kind),
+        Stmt::Local(local) => Context::new(kind).replace_local(local)?,
+        Stmt::Item(Item::Fn(item)) => replace_item_fn(item, kind)?,
+        Stmt::Item(Item::Impl(item)) => replace_item_impl(item, kind)?,
+        Stmt::Item(Item::Use(item)) => replace_item_use(item, kind)?,
         _ => {}
     }
 
@@ -54,12 +51,12 @@ fn parse(mut stmt: Stmt, mutability: Mutability) -> Result<TokenStream> {
 struct Context {
     register: Option<(Ident, usize)>,
     replaced: bool,
-    mutability: Mutability,
+    kind: ProjKind,
 }
 
 impl Context {
-    fn new(mutability: Mutability) -> Self {
-        Self { register: None, replaced: false, mutability }
+    fn new(kind: ProjKind) -> Self {
+        Self { register: None, replaced: false, kind }
     }
 
     fn update(&mut self, ident: &Ident, len: usize) {
@@ -74,8 +71,8 @@ impl Context {
     }
 
     fn replace_local(&mut self, local: &mut Local) -> Result<()> {
-        if let Some(attr) = local.attrs.find(self.mutability.method_name()) {
-            return Err(error!(attr, "duplicate #[{}] attribute", self.mutability.method_name()));
+        if let Some(attr) = local.attrs.find(self.kind.method_name()) {
+            return Err(error!(attr, "duplicate #[{}] attribute", self.kind.method_name()));
         }
 
         if let Some(Expr::Match(expr)) = local.init.as_mut().map(|(_, expr)| &mut **expr) {
@@ -139,7 +136,7 @@ impl Context {
         if self.register.is_none() || self.compare_paths(&path.segments[0].ident, len) {
             self.update(&path.segments[0].ident, len);
             self.replaced = true;
-            replace_ident(&mut path.segments[0].ident, self.mutability);
+            replace_ident(&mut path.segments[0].ident, self.kind);
         }
     }
 }
@@ -159,13 +156,13 @@ fn is_replaceable(pat: &Pat, allow_pat_path: bool) -> bool {
     }
 }
 
-fn replace_ident(ident: &mut Ident, mutability: Mutability) {
-    *ident = mutability.proj_ident(ident);
+fn replace_ident(ident: &mut Ident, kind: ProjKind) {
+    *ident = kind.proj_ident(ident);
 }
 
-fn replace_item_impl(item: &mut ItemImpl, mutability: Mutability) -> Result<()> {
-    if let Some(attr) = item.attrs.find(mutability.method_name()) {
-        return Err(error!(attr, "duplicate #[{}] attribute", mutability.method_name()));
+fn replace_item_impl(item: &mut ItemImpl, kind: ProjKind) -> Result<()> {
+    if let Some(attr) = item.attrs.find(kind.method_name()) {
+        return Err(error!(attr, "duplicate #[{}] attribute", kind.method_name()));
     }
 
     let PathSegment { ident, arguments } = match &mut *item.self_ty {
@@ -173,7 +170,7 @@ fn replace_item_impl(item: &mut ItemImpl, mutability: Mutability) -> Result<()> 
         _ => return Ok(()),
     };
 
-    replace_ident(ident, mutability);
+    replace_ident(ident, kind);
 
     let mut lifetime_name = String::from("'pin");
     determine_lifetime_name(&mut lifetime_name, &mut item.generics);
@@ -197,7 +194,7 @@ fn replace_item_impl(item: &mut ItemImpl, mutability: Mutability) -> Result<()> 
     Ok(())
 }
 
-fn replace_item_fn(item: &mut ItemFn, mutability: Mutability) -> Result<()> {
+fn replace_item_fn(item: &mut ItemFn, kind: ProjKind) -> Result<()> {
     struct FnVisitor(Result<()>);
 
     impl FnVisitor {
@@ -208,17 +205,17 @@ fn replace_item_fn(item: &mut ItemFn, mutability: Mutability) -> Result<()> {
                     visit_mut::visit_local_mut(self, local);
 
                     let mut prev = None;
-                    for &mutability in &[Immutable, Mutable, Owned] {
-                        if let Some(attr) = local.attrs.find_remove(mutability.method_name())? {
-                            if let Some(prev) = prev.replace(mutability) {
+                    for &kind in &ProjKind::ALL {
+                        if let Some(attr) = local.attrs.find_remove(kind.method_name())? {
+                            if let Some(prev) = prev.replace(kind) {
                                 return Err(error!(
                                     attr,
                                     "attributes `{}` and `{}` are mutually exclusive",
                                     prev.method_name(),
-                                    mutability.method_name(),
+                                    kind.method_name(),
                                 ));
                             }
-                            Context::new(mutability).replace_local(local)?;
+                            Context::new(kind).replace_local(local)?;
                         }
                     }
 
@@ -234,41 +231,39 @@ fn replace_item_fn(item: &mut ItemFn, mutability: Mutability) -> Result<()> {
             match node {
                 Expr::Match(expr) => {
                     let mut prev = None;
-                    for &mutability in &[Immutable, Mutable, Owned] {
-                        if let Some(attr) = expr.attrs.find_remove(mutability.method_name())? {
-                            if let Some(prev) = prev.replace(mutability) {
+                    for &kind in &ProjKind::ALL {
+                        if let Some(attr) = expr.attrs.find_remove(kind.method_name())? {
+                            if let Some(prev) = prev.replace(kind) {
                                 return Err(error!(
                                     attr,
                                     "attributes `{}` and `{}` are mutually exclusive",
                                     prev.method_name(),
-                                    mutability.method_name(),
+                                    kind.method_name(),
                                 ));
                             }
                         }
                     }
-                    if let Some(mutability) = prev {
-                        replace_expr(node, mutability);
+                    if let Some(kind) = prev {
+                        replace_expr(node, kind);
                     }
                 }
                 Expr::If(expr_if) => {
                     if let Expr::Let(_) = &*expr_if.cond {
                         let mut prev = None;
-                        for &mutability in &[Immutable, Mutable, Owned] {
-                            if let Some(attr) =
-                                expr_if.attrs.find_remove(mutability.method_name())?
-                            {
-                                if let Some(prev) = prev.replace(mutability) {
+                        for &kind in &ProjKind::ALL {
+                            if let Some(attr) = expr_if.attrs.find_remove(kind.method_name())? {
+                                if let Some(prev) = prev.replace(kind) {
                                     return Err(error!(
                                         attr,
                                         "attributes `{}` and `{}` are mutually exclusive",
                                         prev.method_name(),
-                                        mutability.method_name(),
+                                        kind.method_name(),
                                     ));
                                 }
                             }
                         }
-                        if let Some(mutability) = prev {
-                            replace_expr(node, mutability);
+                        if let Some(kind) = prev {
+                            replace_expr(node, kind);
                         }
                     }
                 }
@@ -302,8 +297,8 @@ fn replace_item_fn(item: &mut ItemFn, mutability: Mutability) -> Result<()> {
         }
     }
 
-    if let Some(attr) = item.attrs.find(mutability.method_name()) {
-        return Err(error!(attr, "duplicate #[{}] attribute", mutability.method_name()));
+    if let Some(attr) = item.attrs.find(kind.method_name()) {
+        return Err(error!(attr, "duplicate #[{}] attribute", kind.method_name()));
     }
 
     let mut visitor = FnVisitor(Ok(()));
@@ -311,10 +306,10 @@ fn replace_item_fn(item: &mut ItemFn, mutability: Mutability) -> Result<()> {
     visitor.0
 }
 
-fn replace_item_use(item: &mut ItemUse, mutability: Mutability) -> Result<()> {
+fn replace_item_use(item: &mut ItemUse, kind: ProjKind) -> Result<()> {
     struct UseTreeVisitor {
         res: Result<()>,
-        mutability: Mutability,
+        kind: ProjKind,
     }
 
     impl VisitMut for UseTreeVisitor {
@@ -325,19 +320,19 @@ fn replace_item_use(item: &mut ItemUse, mutability: Mutability) -> Result<()> {
 
             match node {
                 // Desugar `use tree::<name>` into `tree::__<name>Projection`.
-                UseTree::Name(name) => replace_ident(&mut name.ident, self.mutability),
+                UseTree::Name(name) => replace_ident(&mut name.ident, self.kind),
                 UseTree::Glob(glob) => {
                     self.res = Err(error!(
                         glob,
                         "#[{}] attribute may not be used on glob imports",
-                        self.mutability.method_name()
+                        self.kind.method_name()
                     ));
                 }
                 UseTree::Rename(rename) => {
                     self.res = Err(error!(
                         rename,
                         "#[{}] attribute may not be used on renamed imports",
-                        self.mutability.method_name()
+                        self.kind.method_name()
                     ));
                 }
                 UseTree::Path(_) | UseTree::Group(_) => visit_mut::visit_use_tree_mut(self, node),
@@ -345,11 +340,11 @@ fn replace_item_use(item: &mut ItemUse, mutability: Mutability) -> Result<()> {
         }
     }
 
-    if let Some(attr) = item.attrs.find(mutability.method_name()) {
-        return Err(error!(attr, "duplicate #[{}] attribute", mutability.method_name()));
+    if let Some(attr) = item.attrs.find(kind.method_name()) {
+        return Err(error!(attr, "duplicate #[{}] attribute", kind.method_name()));
     }
 
-    let mut visitor = UseTreeVisitor { res: Ok(()), mutability };
+    let mut visitor = UseTreeVisitor { res: Ok(()), kind };
     visitor.visit_item_use_mut(item);
     visitor.res
 }

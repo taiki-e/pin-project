@@ -10,8 +10,6 @@ use syn::{
 
 pub(crate) type Variants = Punctuated<Variant, token::Comma>;
 
-pub(crate) use Mutability::{Immutable, Mutable, Owned};
-
 macro_rules! error {
     ($span:expr, $msg:expr) => {
         syn::Error::new_spanned(&$span, $msg)
@@ -28,28 +26,30 @@ macro_rules! parse_quote_spanned {
 }
 
 #[derive(Clone, Copy, Eq, PartialEq)]
-pub(crate) enum Mutability {
+pub(crate) enum ProjKind {
     Mutable,
     Immutable,
     Owned,
 }
 
-impl Mutability {
-    /// Returns the name of method and attribute.
+impl ProjKind {
+    pub(crate) const ALL: [Self; 3] = [ProjKind::Mutable, ProjKind::Immutable, ProjKind::Owned];
+
+    /// Returns the name of the projection method.
     pub(crate) fn method_name(self) -> &'static str {
         match self {
-            Mutable => "project",
-            Immutable => "project_ref",
-            Owned => "project_replace",
+            ProjKind::Mutable => "project",
+            ProjKind::Immutable => "project_ref",
+            ProjKind::Owned => "project_replace",
         }
     }
 
     /// Creates the ident of the projected type from the ident of the original type.
     pub(crate) fn proj_ident(self, ident: &Ident) -> Ident {
         match self {
-            Mutable => format_ident!("__{}Projection", ident),
-            Immutable => format_ident!("__{}ProjectionRef", ident),
-            Owned => format_ident!("__{}ProjectionOwned", ident),
+            ProjKind::Mutable => format_ident!("__{}Projection", ident),
+            ProjKind::Immutable => format_ident!("__{}ProjectionRef", ident),
+            ProjKind::Owned => format_ident!("__{}ProjectionOwned", ident),
         }
     }
 }
