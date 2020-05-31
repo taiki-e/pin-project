@@ -63,9 +63,7 @@ impl Context {
     }
 
     fn update(&mut self, ident: &Ident, len: usize) {
-        if self.register.is_none() {
-            self.register = Some((ident.clone(), len));
-        }
+        self.register.get_or_insert_with(|| (ident.clone(), len));
     }
 
     fn compare_paths(&self, ident: &Ident, len: usize) -> bool {
