@@ -1,5 +1,5 @@
 use proc_macro2::{Group, TokenStream, TokenTree};
-use quote::format_ident;
+use quote::{format_ident, quote};
 use std::{iter::FromIterator, mem};
 use syn::{
     parse::{ParseBuffer, ParseStream},
@@ -183,7 +183,7 @@ impl<'a> ParseBufferExt<'a> for ParseBuffer<'a> {
 // visitors
 
 // Replace `self`/`Self` with `__self`/`self_ty`.
-// Based on https://github.com/dtolnay/async-trait/blob/0.1.30/src/receiver.rs
+// Based on https://github.com/dtolnay/async-trait/blob/0.1.30/src/receiver.rs + https://github.com/dtolnay/async-trait/pull/100
 
 pub(crate) struct ReplaceReceiver<'a>(pub(crate) &'a Type);
 
@@ -249,6 +249,50 @@ impl ReplaceReceiver<'_> {
             let error = Error::new(span, msg).to_compile_error();
             *path = parse_quote!(::pin_project::__reexport::marker::PhantomData::<#error>);
         }
+    }
+
+    fn visit_token_stream(&self, tokens: &mut TokenStream) -> bool {
+        let mut out = Vec::new();
+        let mut modified = false;
+        let mut iter = tokens.clone().into_iter().peekable();
+        while let Some(tt) = iter.next() {
+            match tt {
+                TokenTree::Ident(mut ident) => {
+                    modified |= prepend_underscore_to_self(&mut ident);
+                    if ident == "Self" {
+                        modified = true;
+                        let self_ty = self.0;
+                        match iter.peek() {
+                            Some(TokenTree::Punct(p)) if p.as_char() == ':' => {
+                                let next = iter.next().unwrap();
+                                match iter.peek() {
+                                    Some(TokenTree::Punct(p)) if p.as_char() == ':' => {
+                                        out.extend(quote!(<#self_ty>))
+                                    }
+                                    _ => out.extend(quote!(#self_ty)),
+                                }
+                                out.push(next);
+                            }
+                            _ => out.extend(quote!(#self_ty)),
+                        }
+                    } else {
+                        out.push(TokenTree::Ident(ident));
+                    }
+                }
+                TokenTree::Group(group) => {
+                    let mut content = group.stream();
+                    modified |= self.visit_token_stream(&mut content);
+                    let mut new = Group::new(group.delimiter(), content);
+                    new.set_span(group.span());
+                    out.push(TokenTree::Group(new));
+                }
+                other => out.push(other),
+            }
+        }
+        if modified {
+            *tokens = TokenStream::from_iter(out);
+        }
+        modified
     }
 }
 
@@ -323,7 +367,7 @@ impl VisitMut for ReplaceReceiver<'_> {
         // `fn`, then `self` is more likely to refer to something other than the
         // outer function's self argument.
         if !contains_fn(node.tokens.clone()) {
-            visit_token_stream(&mut node.tokens);
+            self.visit_token_stream(&mut node.tokens);
         }
     }
 }
@@ -334,31 +378,6 @@ fn contains_fn(tokens: TokenStream) -> bool {
         TokenTree::Group(group) => contains_fn(group.stream()),
         _ => false,
     })
-}
-
-fn visit_token_stream(tokens: &mut TokenStream) -> bool {
-    let mut out = Vec::new();
-    let mut modified = false;
-    for tt in tokens.clone() {
-        match tt {
-            TokenTree::Ident(mut ident) => {
-                modified |= prepend_underscore_to_self(&mut ident);
-                out.push(TokenTree::Ident(ident));
-            }
-            TokenTree::Group(group) => {
-                let mut content = group.stream();
-                modified |= visit_token_stream(&mut content);
-                let mut new = Group::new(group.delimiter(), content);
-                new.set_span(group.span());
-                out.push(TokenTree::Group(new));
-            }
-            other => out.push(other),
-        }
-    }
-    if modified {
-        *tokens = TokenStream::from_iter(out);
-    }
-    modified
 }
 
 pub(crate) fn prepend_underscore_to_self(ident: &mut Ident) -> bool {
