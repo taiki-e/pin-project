@@ -224,12 +224,71 @@ fn self_in_macro_def() {
     #[pinned_drop]
     impl PinnedDrop for Struct {
         fn drop(self: Pin<&mut Self>) {
-            macro_rules! t {
+            macro_rules! mac {
                 () => {{
                     let _ = self;
                 }};
             }
-            t!();
+            mac!();
+        }
+    }
+}
+
+#[test]
+fn self_inside_macro_invocations() {
+    macro_rules! mac {
+        ($($tt:tt)*) => {
+            $($tt)*
+        };
+    }
+
+    #[pin_project(PinnedDrop)]
+    pub struct Struct<T: Send>
+    where
+        mac!(Self): Send,
+    {
+        _x: T,
+    }
+
+    impl<T: Send> Struct<T> {
+        const ASSOCIATED1: &'static str = "1";
+        fn associated1() {}
+    }
+
+    trait Trait {
+        type Associated2;
+        const ASSOCIATED2: &'static str;
+        fn associated2();
+    }
+
+    impl<T: Send> Trait for Struct<T> {
+        type Associated2 = ();
+        const ASSOCIATED2: &'static str = "2";
+        fn associated2() {}
+    }
+
+    #[pinned_drop]
+    impl<T: Send> PinnedDrop for Struct<T>
+    where
+        mac!(Self): Send,
+    {
+        #[allow(path_statements)]
+        #[allow(clippy::no_effect)]
+        fn drop(self: Pin<&mut Self>) {
+            // inherent items
+            mac!(Self::ASSOCIATED1;);
+            mac!(<Self>::ASSOCIATED1;);
+            mac!(Self::associated1(););
+            mac!(<Self>::associated1(););
+
+            // trait items
+            mac!(let _: <Self as Trait>::Associated2;);
+            mac!(Self::ASSOCIATED2;);
+            mac!(<Self>::ASSOCIATED2;);
+            mac!(<Self as Trait>::ASSOCIATED2;);
+            mac!(Self::associated2(););
+            mac!(<Self>::associated2(););
+            mac!(<Self as Trait>::associated2(););
         }
     }
 }
