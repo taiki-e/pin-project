@@ -84,36 +84,47 @@ jobs:
         run: |
           cargo test --all-features --manifest-path tests/expand/Cargo.toml
 
-  style:
-    name: style
-    strategy:
-      fail-fast: false
-      matrix:
-        component:
-          - clippy
-          - rustfmt
-          - rustdoc
+  clippy:
+    name: clippy
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - name: Install Rust
         run: |
           . ./ci/install-rust.sh
-      - name: Install component
+      - name: Install clippy
         run: |
-          . ./ci/install-component.sh ${{ matrix.component }}
+          . ./ci/install-component.sh clippy
       - name: cargo clippy
-        if: matrix.component == 'clippy'
         run: |
           cargo clippy --all --all-features --all-targets
-      - name: cargo fmt -- --check
-        if: matrix.component == 'rustfmt'
+
+  rustfmt:
+    name: rustfmt
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Rust
+        run: |
+          . ./ci/install-rust.sh
+      - name: Install rustfmt
+        run: |
+          . ./ci/install-component.sh rustfmt
+      - name: cargo fmt --check
         run: |
           cargo fmt --all -- --check
+
+  rustdoc:
+    name: rustdoc
+    env:
+      RUSTDOCFLAGS: -Dwarnings
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Rust
+        run: |
+          . ./ci/install-rust.sh
       - name: cargo doc
-        if: matrix.component == 'rustdoc'
-        env:
-          RUSTDOCFLAGS: -Dwarnings
         run: |
           cargo doc --no-deps --all --all-features
 
@@ -127,8 +138,10 @@ jobs:
     name: ci
     if: github.event_name == 'push' && success()
     needs:
-      - style
       - test
+      - clippy
+      - rustfmt
+      - rustdoc
       - expandtest
     runs-on: ubuntu-latest
     steps:
@@ -138,8 +151,10 @@ jobs:
     name: ci
     if: github.event_name == 'push' && !success()
     needs:
-      - style
       - test
+      - clippy
+      - rustfmt
+      - rustdoc
       - expandtest
     runs-on: ubuntu-latest
     steps:
