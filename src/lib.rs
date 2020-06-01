@@ -1,4 +1,4 @@
-//! A crate for safe and ergonomic pin-projection.
+//! A crate for safe and ergonomic [pin-projection].
 //!
 //! ## Examples
 //!
@@ -32,6 +32,7 @@
 //!
 //! [`pin_project`]: attr.pin_project.html
 //! [examples]: https://github.com/taiki-e/pin-project/blob/master/examples/README.md
+//! [pin-projection]: https://doc.rust-lang.org/nightly/std/pin/index.html#projections-and-structural-pinning
 //! [struct-default-expanded]: https://github.com/taiki-e/pin-project/blob/master/examples/struct-default-expanded.rs
 
 #![no_std]
@@ -76,8 +77,7 @@ pub use pin_project_internal::project_replace;
 /// you to violate any of the guarantees required by pin projection.
 ///
 /// However, things change if you want to provide a custom [`Unpin`] impl
-/// for your `#[pin_project]` type. As stated in [the Rust
-/// documentation](https://doc.rust-lang.org/nightly/std/pin/index.html#projections-and-structural-pinning),
+/// for your `#[pin_project]` type. As stated in [the Rust documentation][pin-projection],
 /// you must be sure to only implement [`Unpin`] when all of your `#[pin]` fields (i.e. structurally
 /// pinned fields) are also [`Unpin`].
 ///
@@ -116,6 +116,7 @@ pub use pin_project_internal::project_replace;
 ///
 /// [`PhantomPinned`]: core::marker::PhantomPinned
 /// [`pin_project`]: attr.pin_project.html
+/// [pin-projection]: https://doc.rust-lang.org/nightly/std/pin/index.html#projections-and-structural-pinning
 pub unsafe trait UnsafeUnpin {}
 
 // Not public API.

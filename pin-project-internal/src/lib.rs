@@ -163,7 +163,7 @@ use crate::utils::ProjKind;
 ///
 /// `#[pin_project]` can be used on structs and enums.
 ///
-/// [Structs](https://doc.rust-lang.org/reference/items/structs.html):
+/// Structs:
 ///
 /// ```rust
 /// use pin_project::pin_project;
@@ -185,7 +185,7 @@ use crate::utils::ProjKind;
 /// }
 /// ```
 ///
-/// [Tuple structs](https://doc.rust-lang.org/reference/items/structs.html):
+/// Tuple structs:
 ///
 /// ```rust
 /// use pin_project::pin_project;
@@ -203,7 +203,7 @@ use crate::utils::ProjKind;
 /// }
 /// ```
 ///
-/// [Enums](https://doc.rust-lang.org/reference/items/enumerations.html):
+/// Enums:
 ///
 /// `#[pin_project]` supports enums, but to use it, you need to name the
 /// projection type returned from the method.
