@@ -1,4 +1,4 @@
-use proc_macro2::{Group, TokenStream, TokenTree};
+use proc_macro2::{Group, Spacing, TokenStream, TokenTree};
 use quote::{format_ident, quote};
 use std::{iter::FromIterator, mem};
 use syn::{
@@ -183,7 +183,7 @@ impl<'a> ParseBufferExt<'a> for ParseBuffer<'a> {
 // visitors
 
 // Replace `self`/`Self` with `__self`/`self_ty`.
-// Based on https://github.com/dtolnay/async-trait/blob/0.1.30/src/receiver.rs + https://github.com/dtolnay/async-trait/pull/100
+// Based on https://github.com/dtolnay/async-trait/blob/0.1.32/src/receiver.rs
 
 pub(crate) struct ReplaceReceiver<'a>(pub(crate) &'a Type);
 
@@ -263,7 +263,9 @@ impl ReplaceReceiver<'_> {
                         modified = true;
                         let self_ty = self.0;
                         match iter.peek() {
-                            Some(TokenTree::Punct(p)) if p.as_char() == ':' => {
+                            Some(TokenTree::Punct(p))
+                                if p.as_char() == ':' && p.spacing() == Spacing::Joint =>
+                            {
                                 let next = iter.next().unwrap();
                                 match iter.peek() {
                                     Some(TokenTree::Punct(p)) if p.as_char() == ':' => {
