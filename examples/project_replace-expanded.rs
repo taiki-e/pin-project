@@ -34,7 +34,7 @@ struct __StructProjection<'pin, T, U>
 where
     Struct<T, U>: 'pin,
 {
-    pinned: ::pin_project::__reexport::pin::Pin<&'pin mut (T)>,
+    pinned: ::pin_project::__private::Pin<&'pin mut (T)>,
     unpinned: &'pin mut (U),
 }
 #[doc(hidden)]
@@ -44,7 +44,7 @@ struct __StructProjectionRef<'pin, T, U>
 where
     Struct<T, U>: 'pin,
 {
-    pinned: ::pin_project::__reexport::pin::Pin<&'pin (T)>,
+    pinned: ::pin_project::__private::Pin<&'pin (T)>,
     unpinned: &'pin (U),
 }
 
@@ -52,7 +52,7 @@ where
 #[allow(dead_code)] // This lint warns unused fields/variants.
 #[allow(single_use_lifetimes)]
 struct __StructProjectionOwned<T, U> {
-    pinned: ::pin_project::__reexport::marker::PhantomData<T>,
+    pinned: ::pin_project::__private::PhantomData<T>,
     unpinned: U,
 }
 
@@ -62,29 +62,29 @@ struct __StructProjectionOwned<T, U> {
 const __SCOPE_Struct: () = {
     impl<T, U> Struct<T, U> {
         fn project<'pin>(
-            self: ::pin_project::__reexport::pin::Pin<&'pin mut Self>,
+            self: ::pin_project::__private::Pin<&'pin mut Self>,
         ) -> __StructProjection<'pin, T, U> {
             unsafe {
                 let Self { pinned, unpinned } = self.get_unchecked_mut();
                 __StructProjection {
-                    pinned: ::pin_project::__reexport::pin::Pin::new_unchecked(pinned),
+                    pinned: ::pin_project::__private::Pin::new_unchecked(pinned),
                     unpinned,
                 }
             }
         }
         fn project_ref<'pin>(
-            self: ::pin_project::__reexport::pin::Pin<&'pin Self>,
+            self: ::pin_project::__private::Pin<&'pin Self>,
         ) -> __StructProjectionRef<'pin, T, U> {
             unsafe {
                 let Self { pinned, unpinned } = self.get_ref();
                 __StructProjectionRef {
-                    pinned: ::pin_project::__reexport::pin::Pin::new_unchecked(pinned),
+                    pinned: ::pin_project::__private::Pin::new_unchecked(pinned),
                     unpinned,
                 }
             }
         }
         fn project_replace(
-            self: ::pin_project::__reexport::pin::Pin<&mut Self>,
+            self: ::pin_project::__private::Pin<&mut Self>,
             __replacement: Self,
         ) -> __StructProjectionOwned<T, U> {
             unsafe {
@@ -93,15 +93,15 @@ const __SCOPE_Struct: () = {
 
                 // First, extract all the unpinned fields
                 let __result = __StructProjectionOwned {
-                    pinned: ::pin_project::__reexport::marker::PhantomData,
-                    unpinned: ::pin_project::__reexport::ptr::read(unpinned),
+                    pinned: ::pin_project::__private::PhantomData,
+                    unpinned: ::pin_project::__private::ptr::read(unpinned),
                 };
 
                 // Destructors will run in reverse order, so next create a guard to overwrite
                 // `self` with the replacement value without calling destructors.
                 let __guard = ::pin_project::__private::UnsafeOverwriteGuard {
                     target: __self_ptr,
-                    value: ::pin_project::__reexport::mem::ManuallyDrop::new(__replacement),
+                    value: ::pin_project::__private::ManuallyDrop::new(__replacement),
                 };
 
                 // Now create guards to drop all the pinned fields
@@ -127,8 +127,8 @@ const __SCOPE_Struct: () = {
         __pin_project_use_generics: ::pin_project::__private::AlwaysUnpin<'pin, (T, U)>,
         __field0: T,
     }
-    impl<'pin, T, U> ::pin_project::__reexport::marker::Unpin for Struct<T, U> where
-        __Struct<'pin, T, U>: ::pin_project::__reexport::marker::Unpin
+    impl<'pin, T, U> ::pin_project::__private::Unpin for Struct<T, U> where
+        __Struct<'pin, T, U>: ::pin_project::__private::Unpin
     {
     }
     unsafe impl<T, U> ::pin_project::UnsafeUnpin for Struct<T, U> {}
@@ -138,10 +138,10 @@ const __SCOPE_Struct: () = {
     // See ./struct-default-expanded.rs for details.
     trait StructMustNotImplDrop {}
     #[allow(clippy::drop_bounds)]
-    impl<T: ::pin_project::__reexport::ops::Drop> StructMustNotImplDrop for T {}
+    impl<T: ::pin_project::__private::Drop> StructMustNotImplDrop for T {}
     impl<T, U> StructMustNotImplDrop for Struct<T, U> {}
     impl<T, U> ::pin_project::__private::PinnedDrop for Struct<T, U> {
-        unsafe fn drop(self: ::pin_project::__reexport::pin::Pin<&mut Self>) {}
+        unsafe fn drop(self: ::pin_project::__private::Pin<&mut Self>) {}
     }
 
     // Ensure that it's impossible to use pin projections on a #[repr(packed)] struct.

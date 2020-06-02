@@ -31,7 +31,7 @@ enum EnumProj<'pin, T, U>
 where
     Enum<T, U>: 'pin,
 {
-    Pinned(::pin_project::__reexport::pin::Pin<&'pin mut (T)>),
+    Pinned(::pin_project::__private::Pin<&'pin mut (T)>),
     Unpinned(&'pin mut (U)),
 }
 #[doc(hidden)]
@@ -41,7 +41,7 @@ enum __EnumProjectionRef<'pin, T, U>
 where
     Enum<T, U>: 'pin,
 {
-    Pinned(::pin_project::__reexport::pin::Pin<&'pin (T)>),
+    Pinned(::pin_project::__private::Pin<&'pin (T)>),
     Unpinned(&'pin (U)),
 }
 
@@ -51,24 +51,24 @@ where
 const __SCOPE_Enum: () = {
     impl<T, U> Enum<T, U> {
         fn project<'pin>(
-            self: ::pin_project::__reexport::pin::Pin<&'pin mut Self>,
+            self: ::pin_project::__private::Pin<&'pin mut Self>,
         ) -> EnumProj<'pin, T, U> {
             unsafe {
                 match self.get_unchecked_mut() {
                     Enum::Pinned(_0) => {
-                        EnumProj::Pinned(::pin_project::__reexport::pin::Pin::new_unchecked(_0))
+                        EnumProj::Pinned(::pin_project::__private::Pin::new_unchecked(_0))
                     }
                     Enum::Unpinned(_0) => EnumProj::Unpinned(_0),
                 }
             }
         }
         fn project_ref<'pin>(
-            self: ::pin_project::__reexport::pin::Pin<&'pin Self>,
+            self: ::pin_project::__private::Pin<&'pin Self>,
         ) -> __EnumProjectionRef<'pin, T, U> {
             unsafe {
                 match self.get_ref() {
                     Enum::Pinned(_0) => __EnumProjectionRef::Pinned(
-                        ::pin_project::__reexport::pin::Pin::new_unchecked(_0),
+                        ::pin_project::__private::Pin::new_unchecked(_0),
                     ),
                     Enum::Unpinned(_0) => __EnumProjectionRef::Unpinned(_0),
                 }
@@ -84,8 +84,8 @@ const __SCOPE_Enum: () = {
         __pin_project_use_generics: ::pin_project::__private::AlwaysUnpin<'pin, (T, U)>,
         __field0: T,
     }
-    impl<'pin, T, U> ::pin_project::__reexport::marker::Unpin for Enum<T, U> where
-        __Enum<'pin, T, U>: ::pin_project::__reexport::marker::Unpin
+    impl<'pin, T, U> ::pin_project::__private::Unpin for Enum<T, U> where
+        __Enum<'pin, T, U>: ::pin_project::__private::Unpin
     {
     }
     unsafe impl<T, U> ::pin_project::UnsafeUnpin for Enum<T, U> {}
@@ -95,10 +95,10 @@ const __SCOPE_Enum: () = {
     // See ./struct-default-expanded.rs for details.
     trait EnumMustNotImplDrop {}
     #[allow(clippy::drop_bounds)]
-    impl<T: ::pin_project::__reexport::ops::Drop> EnumMustNotImplDrop for T {}
+    impl<T: ::pin_project::__private::Drop> EnumMustNotImplDrop for T {}
     impl<T, U> EnumMustNotImplDrop for Enum<T, U> {}
     impl<T, U> ::pin_project::__private::PinnedDrop for Enum<T, U> {
-        unsafe fn drop(self: ::pin_project::__reexport::pin::Pin<&mut Self>) {}
+        unsafe fn drop(self: ::pin_project::__private::Pin<&mut Self>) {}
     }
 
     // We don't need to check for `#[repr(packed)]`,

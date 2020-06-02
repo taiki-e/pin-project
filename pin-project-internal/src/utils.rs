@@ -59,8 +59,8 @@ pub(crate) fn determine_lifetime_name(lifetime_name: &mut String, generics: &mut
     struct CollectLifetimes(Vec<String>);
 
     impl VisitMut for CollectLifetimes {
-        fn visit_lifetime_def_mut(&mut self, node: &mut LifetimeDef) {
-            self.0.push(node.lifetime.to_string())
+        fn visit_lifetime_def_mut(&mut self, def: &mut LifetimeDef) {
+            self.0.push(def.lifetime.to_string())
         }
     }
 
@@ -247,7 +247,7 @@ impl ReplaceReceiver<'_> {
             let span = path.segments[0].ident.span();
             let msg = "Self type of this impl is unsupported in expression position";
             let error = Error::new(span, msg).to_compile_error();
-            *path = parse_quote!(::pin_project::__reexport::marker::PhantomData::<#error>);
+            *path = parse_quote!(::pin_project::__private::PhantomData::<#error>);
         }
     }
 
