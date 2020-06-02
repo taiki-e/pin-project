@@ -13,7 +13,7 @@ struct __StructProjection<'pin, T, U>
 where
     Struct<T, U>: 'pin,
 {
-    pinned: ::pin_project::__reexport::pin::Pin<&'pin mut (T)>,
+    pinned: ::pin_project::__private::Pin<&'pin mut (T)>,
     unpinned: &'pin mut (U),
 }
 #[doc(hidden)]
@@ -23,7 +23,7 @@ struct __StructProjectionRef<'pin, T, U>
 where
     Struct<T, U>: 'pin,
 {
-    pinned: ::pin_project::__reexport::pin::Pin<&'pin (T)>,
+    pinned: ::pin_project::__private::Pin<&'pin (T)>,
     unpinned: &'pin (U),
 }
 #[doc(hidden)]
@@ -32,38 +32,38 @@ where
 const __SCOPE_Struct: () = {
     impl<T, U> Struct<T, U> {
         fn project<'pin>(
-            self: ::pin_project::__reexport::pin::Pin<&'pin mut Self>,
+            self: ::pin_project::__private::Pin<&'pin mut Self>,
         ) -> __StructProjection<'pin, T, U> {
             unsafe {
                 let Self { pinned, unpinned } = self.get_unchecked_mut();
                 __StructProjection {
-                    pinned: ::pin_project::__reexport::pin::Pin::new_unchecked(pinned),
+                    pinned: ::pin_project::__private::Pin::new_unchecked(pinned),
                     unpinned,
                 }
             }
         }
         fn project_ref<'pin>(
-            self: ::pin_project::__reexport::pin::Pin<&'pin Self>,
+            self: ::pin_project::__private::Pin<&'pin Self>,
         ) -> __StructProjectionRef<'pin, T, U> {
             unsafe {
                 let Self { pinned, unpinned } = self.get_ref();
                 __StructProjectionRef {
-                    pinned: ::pin_project::__reexport::pin::Pin::new_unchecked(pinned),
+                    pinned: ::pin_project::__private::Pin::new_unchecked(pinned),
                     unpinned,
                 }
             }
         }
     }
-    impl<'pin, T, U> ::pin_project::__reexport::marker::Unpin for Struct<T, U> where
+    impl<'pin, T, U> ::pin_project::__private::Unpin for Struct<T, U> where
         ::pin_project::__private::Wrapper<'pin, Self>: ::pin_project::UnsafeUnpin
     {
     }
     trait StructMustNotImplDrop {}
     #[allow(clippy::drop_bounds)]
-    impl<T: ::pin_project::__reexport::ops::Drop> StructMustNotImplDrop for T {}
+    impl<T: ::pin_project::__private::Drop> StructMustNotImplDrop for T {}
     impl<T, U> StructMustNotImplDrop for Struct<T, U> {}
     impl<T, U> ::pin_project::__private::PinnedDrop for Struct<T, U> {
-        unsafe fn drop(self: ::pin_project::__reexport::pin::Pin<&mut Self>) {}
+        unsafe fn drop(self: ::pin_project::__private::Pin<&mut Self>) {}
     }
     #[deny(safe_packed_borrows)]
     fn __assert_not_repr_packed<T, U>(val: &Struct<T, U>) {

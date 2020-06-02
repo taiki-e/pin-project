@@ -122,8 +122,16 @@ pub unsafe trait UnsafeUnpin {}
 // Not public API.
 #[doc(hidden)]
 pub mod __private {
+    #[doc(hidden)]
+    pub use core::{
+        marker::{PhantomData, PhantomPinned, Unpin},
+        mem::ManuallyDrop,
+        ops::Drop,
+        pin::Pin,
+        ptr,
+    };
+
     use super::UnsafeUnpin;
-    use core::{marker::PhantomData, mem::ManuallyDrop, pin::Pin, ptr};
 
     #[doc(hidden)]
     pub use pin_project_internal::__PinProjectInternalDerive;
@@ -231,12 +239,4 @@ pub mod __private {
             }
         }
     }
-}
-
-// Not public API.
-// See tests/overwriting_core_crate.rs for more.
-#[doc(hidden)]
-pub mod __reexport {
-    #[doc(hidden)]
-    pub use core::{marker, mem, ops, pin, ptr};
 }

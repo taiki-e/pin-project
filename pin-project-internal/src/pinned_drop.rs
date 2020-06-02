@@ -20,7 +20,7 @@ pub(crate) fn attribute(args: &TokenStream, mut input: ItemImpl) -> TokenStream 
         // accidentally compile successfully.
         tokens.extend(quote! {
             impl #impl_generics ::pin_project::__private::PinnedDrop for #self_ty #where_clause {
-                unsafe fn drop(self: ::pin_project::__reexport::pin::Pin<&mut Self>) {}
+                unsafe fn drop(self: ::pin_project::__private::Pin<&mut Self>) {}
             }
         });
         tokens
