@@ -64,6 +64,7 @@ jobs:
         if: matrix.rust == 'nightly'
         run: |
           cargo check --target thumbv7m-none-eabi --manifest-path tests/no-std/Cargo.toml
+          cargo check --target thumbv7m-none-eabi --manifest-path tests/rust-2015/Cargo.toml
       - name: cargo check (minimal versions)
         if: matrix.rust == 'nightly'
         run: |

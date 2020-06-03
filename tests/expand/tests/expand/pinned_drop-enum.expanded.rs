@@ -11,9 +11,10 @@ enum Enum<T, U> {
     Unit,
 }
 #[doc(hidden)]
-#[allow(clippy::mut_mut)]
 #[allow(dead_code)]
 #[allow(single_use_lifetimes)]
+#[allow(clippy::mut_mut)]
+#[allow(clippy::type_repetition_in_bounds)]
 enum __EnumProjection<'pin, T, U>
 where
     Enum<T, U>: 'pin,
@@ -28,6 +29,7 @@ where
 #[doc(hidden)]
 #[allow(dead_code)]
 #[allow(single_use_lifetimes)]
+#[allow(clippy::type_repetition_in_bounds)]
 enum __EnumProjectionRef<'pin, T, U>
 where
     Enum<T, U>: 'pin,
@@ -42,6 +44,7 @@ where
 #[doc(hidden)]
 #[allow(non_upper_case_globals)]
 #[allow(single_use_lifetimes)]
+#[allow(clippy::used_underscore_binding)]
 const __SCOPE_Enum: () = {
     impl<T, U> Enum<T, U> {
         fn project<'pin>(

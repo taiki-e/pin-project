@@ -59,6 +59,7 @@ pub(super) fn parse_derive(input: TokenStream) -> Result<TokenStream> {
         #[doc(hidden)]
         #[allow(non_upper_case_globals)]
         #[allow(single_use_lifetimes)] // https://github.com/rust-lang/rust/issues/55058
+        #[allow(clippy::used_underscore_binding)]
         const #dummy_const: () = {
             #scoped_items
             #unpin_impl
@@ -451,13 +452,15 @@ impl<'a> Context<'a> {
         let doc_proj_own = if self.project_replace { None } else { Some(&doc_attr) };
         let mut proj_items = quote! {
             #doc_proj
-            #[allow(clippy::mut_mut)] // This lint warns `&mut &mut <ty>`.
             #[allow(dead_code)] // This lint warns unused fields/variants.
             #[allow(single_use_lifetimes)] // https://github.com/rust-lang/rust/issues/55058
+            #[allow(clippy::mut_mut)] // This lint warns `&mut &mut <ty>`.
+            #[allow(clippy::type_repetition_in_bounds)] // https://github.com/rust-lang/rust-clippy/issues/4326
             #vis struct #proj_ident #proj_generics #where_clause_fields
             #doc_proj_ref
             #[allow(dead_code)] // This lint warns unused fields/variants.
             #[allow(single_use_lifetimes)] // https://github.com/rust-lang/rust/issues/55058
+            #[allow(clippy::type_repetition_in_bounds)] // https://github.com/rust-lang/rust-clippy/issues/4326
             #vis struct #proj_ref_ident #proj_generics #where_clause_ref_fields
         };
         if self.replace.is_some() {
@@ -540,15 +543,17 @@ impl<'a> Context<'a> {
         let doc_proj_own = if self.project_replace { None } else { Some(&doc_attr) };
         let mut proj_items = quote! {
             #doc_proj
-            #[allow(clippy::mut_mut)] // This lint warns `&mut &mut <ty>`.
             #[allow(dead_code)] // This lint warns unused fields/variants.
             #[allow(single_use_lifetimes)] // https://github.com/rust-lang/rust/issues/55058
+            #[allow(clippy::mut_mut)] // This lint warns `&mut &mut <ty>`.
+            #[allow(clippy::type_repetition_in_bounds)] // https://github.com/rust-lang/rust-clippy/issues/4326
             #vis enum #proj_ident #proj_generics #where_clause {
                 #proj_variants
             }
             #doc_proj_ref
             #[allow(dead_code)] // This lint warns unused fields/variants.
             #[allow(single_use_lifetimes)] // https://github.com/rust-lang/rust/issues/55058
+            #[allow(clippy::type_repetition_in_bounds)] // https://github.com/rust-lang/rust-clippy/issues/4326
             #vis enum #proj_ref_ident #proj_generics #where_clause {
                 #proj_ref_variants
             }

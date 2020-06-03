@@ -2,9 +2,10 @@ use pin_project::pin_project;
 #[pin(__private())]
 pub struct TupleStruct<T, U>(#[pin] pub T, pub U);
 #[doc(hidden)]
-#[allow(clippy::mut_mut)]
 #[allow(dead_code)]
 #[allow(single_use_lifetimes)]
+#[allow(clippy::mut_mut)]
+#[allow(clippy::type_repetition_in_bounds)]
 pub(crate) struct __TupleStructProjection<'pin, T, U>(
     pub ::pin_project::__private::Pin<&'pin mut (T)>,
     pub &'pin mut (U),
@@ -14,6 +15,7 @@ where
 #[doc(hidden)]
 #[allow(dead_code)]
 #[allow(single_use_lifetimes)]
+#[allow(clippy::type_repetition_in_bounds)]
 pub(crate) struct __TupleStructProjectionRef<'pin, T, U>(
     pub ::pin_project::__private::Pin<&'pin (T)>,
     pub &'pin (U),
@@ -23,6 +25,7 @@ where
 #[doc(hidden)]
 #[allow(non_upper_case_globals)]
 #[allow(single_use_lifetimes)]
+#[allow(clippy::used_underscore_binding)]
 const __SCOPE_TupleStruct: () = {
     impl<T, U> TupleStruct<T, U> {
         pub(crate) fn project<'pin>(

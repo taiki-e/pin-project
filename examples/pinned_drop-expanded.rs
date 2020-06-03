@@ -34,9 +34,10 @@ pub struct Struct<'a, T> {
 }
 
 #[doc(hidden)]
-#[allow(clippy::mut_mut)] // This lint warns `&mut &mut <ty>`.
-#[allow(dead_code)] // This lint warns unused fields/variants.
+#[allow(dead_code)]
 #[allow(single_use_lifetimes)]
+#[allow(clippy::mut_mut)]
+#[allow(clippy::type_repetition_in_bounds)]
 pub(crate) struct __StructProjection<'pin, 'a, T>
 where
     Struct<'a, T>: 'pin,
@@ -45,8 +46,9 @@ where
     field: ::pin_project::__private::Pin<&'pin mut (T)>,
 }
 #[doc(hidden)]
-#[allow(dead_code)] // This lint warns unused fields/variants.
+#[allow(dead_code)]
 #[allow(single_use_lifetimes)]
+#[allow(clippy::type_repetition_in_bounds)]
 pub(crate) struct __StructProjectionRef<'pin, 'a, T>
 where
     Struct<'a, T>: 'pin,
@@ -58,6 +60,7 @@ where
 #[doc(hidden)]
 #[allow(non_upper_case_globals)]
 #[allow(single_use_lifetimes)]
+#[allow(clippy::used_underscore_binding)]
 const __SCOPE_Struct: () = {
     impl<'a, T> Struct<'a, T> {
         pub(crate) fn project<'pin>(

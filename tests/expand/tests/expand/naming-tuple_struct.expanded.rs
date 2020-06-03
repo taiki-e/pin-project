@@ -1,14 +1,16 @@
 use pin_project::pin_project;
 # [ pin ( __private ( Replace , project = Proj , project_ref = ProjRef , project_replace = ProjOwn ) ) ]
 struct TupleStruct<T, U>(#[pin] T, U);
-#[allow(clippy::mut_mut)]
 #[allow(dead_code)]
 #[allow(single_use_lifetimes)]
+#[allow(clippy::mut_mut)]
+#[allow(clippy::type_repetition_in_bounds)]
 struct Proj<'pin, T, U>(::pin_project::__private::Pin<&'pin mut (T)>, &'pin mut (U))
 where
     TupleStruct<T, U>: 'pin;
 #[allow(dead_code)]
 #[allow(single_use_lifetimes)]
+#[allow(clippy::type_repetition_in_bounds)]
 struct ProjRef<'pin, T, U>(::pin_project::__private::Pin<&'pin (T)>, &'pin (U))
 where
     TupleStruct<T, U>: 'pin;
@@ -18,6 +20,7 @@ struct ProjOwn<T, U>(::pin_project::__private::PhantomData<T>, U);
 #[doc(hidden)]
 #[allow(non_upper_case_globals)]
 #[allow(single_use_lifetimes)]
+#[allow(clippy::used_underscore_binding)]
 const __SCOPE_TupleStruct: () = {
     impl<T, U> TupleStruct<T, U> {
         fn project<'pin>(self: ::pin_project::__private::Pin<&'pin mut Self>) -> Proj<'pin, T, U> {

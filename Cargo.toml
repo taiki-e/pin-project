@@ -23,7 +23,8 @@ members = [
     "tests/ui/auxiliary",
     "tests/doc",
     "tests/expand",
-    "tests/rust-2015"
+    "tests/no-std",
+    "tests/rust-2015",
 ]
 
 [dependencies]

@@ -24,9 +24,10 @@ enum Enum<T, U> {
     Unpinned(U),
 }
 
-#[allow(clippy::mut_mut)] // This lint warns `&mut &mut <ty>`.
-#[allow(dead_code)] // This lint warns unused fields/variants.
+#[allow(dead_code)]
 #[allow(single_use_lifetimes)]
+#[allow(clippy::mut_mut)]
+#[allow(clippy::type_repetition_in_bounds)]
 enum EnumProj<'pin, T, U>
 where
     Enum<T, U>: 'pin,
@@ -35,8 +36,9 @@ where
     Unpinned(&'pin mut (U)),
 }
 #[doc(hidden)]
-#[allow(dead_code)] // This lint warns unused fields/variants.
+#[allow(dead_code)]
 #[allow(single_use_lifetimes)]
+#[allow(clippy::type_repetition_in_bounds)]
 enum __EnumProjectionRef<'pin, T, U>
 where
     Enum<T, U>: 'pin,
@@ -48,6 +50,7 @@ where
 #[doc(hidden)]
 #[allow(non_upper_case_globals)]
 #[allow(single_use_lifetimes)]
+#[allow(clippy::used_underscore_binding)]
 const __SCOPE_Enum: () = {
     impl<T, U> Enum<T, U> {
         fn project<'pin>(
