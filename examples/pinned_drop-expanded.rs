@@ -116,7 +116,8 @@ const __SCOPE_Struct: () = {
     }
     unsafe impl<'a, T> ::pin_project::UnsafeUnpin for Struct<'a, T> {}
 
-    // Ensure that it's impossible to use pin projections on a #[repr(packed)] struct.
+    // Ensure that it's impossible to use pin projections on a #[repr(packed)]
+    // struct.
     //
     // See ./struct-default-expanded.rs and https://github.com/taiki-e/pin-project/pull/34
     // for details.

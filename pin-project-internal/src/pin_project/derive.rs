@@ -464,7 +464,8 @@ impl<'a> Context<'a> {
             #vis struct #proj_ref_ident #proj_generics #where_clause_ref_fields
         };
         if self.replace.is_some() {
-            // Currently, using quote_spanned here does not seem to have any effect on the diagnostics.
+            // Currently, using quote_spanned here does not seem to have any effect on the
+            // diagnostics.
             proj_items.extend(quote! {
                 #doc_proj_own
                 #[allow(dead_code)] // This lint warns unused fields/variants.
@@ -559,7 +560,8 @@ impl<'a> Context<'a> {
             }
         };
         if self.replace.is_some() {
-            // Currently, using quote_spanned here does not seem to have any effect on the diagnostics.
+            // Currently, using quote_spanned here does not seem to have any effect on the
+            // diagnostics.
             proj_items.extend(quote! {
                 #doc_proj_own
                 #[allow(dead_code)] // This lint warns unused fields/variants.
@@ -825,7 +827,8 @@ impl<'a> Context<'a> {
                 let (impl_generics, ty_generics, orig_where_clause) =
                     self.orig.generics.split_for_impl();
 
-                // For interoperability with `forbid(unsafe_code)`, `unsafe` token should be call-site span.
+                // For interoperability with `forbid(unsafe_code)`, `unsafe` token should be
+                // call-site span.
                 let unsafety = token::Unsafe::default();
                 quote_spanned! { span =>
                     impl #proj_impl_generics ::pin_project::__private::Unpin
@@ -837,9 +840,9 @@ impl<'a> Context<'a> {
                     // A dummy impl of `UnsafeUnpin`, to ensure that the user cannot implement it.
                     //
                     // To ensure that users don't accidentally write a non-functional `UnsafeUnpin`
-                    // impls, we emit one ourselves. If the user ends up writing a `UnsafeUnpin` impl,
-                    // they'll get a "conflicting implementations of trait" error when coherence
-                    // checks are run.
+                    // impls, we emit one ourselves. If the user ends up writing an `UnsafeUnpin`
+                    // impl, they'll get a "conflicting implementations of trait" error when
+                    // coherence checks are run.
                     #unsafety impl #impl_generics ::pin_project::UnsafeUnpin
                         for #orig_ident #ty_generics
                     #orig_where_clause
@@ -929,9 +932,9 @@ impl<'a> Context<'a> {
                     // A dummy impl of `UnsafeUnpin`, to ensure that the user cannot implement it.
                     //
                     // To ensure that users don't accidentally write a non-functional `UnsafeUnpin`
-                    // impls, we emit one ourselves. If the user ends up writing a `UnsafeUnpin` impl,
-                    // they'll get a "conflicting implementations of trait" error when coherence
-                    // checks are run.
+                    // impls, we emit one ourselves. If the user ends up writing an `UnsafeUnpin`
+                    // impl, they'll get a "conflicting implementations of trait" error when
+                    // coherence checks are run.
                     unsafe impl #impl_generics ::pin_project::UnsafeUnpin
                         for #orig_ident #ty_generics
                     #where_clause
@@ -948,7 +951,8 @@ impl<'a> Context<'a> {
         let (impl_generics, ty_generics, where_clause) = self.orig.generics.split_for_impl();
 
         if let Some(pinned_drop) = self.pinned_drop {
-            // For interoperability with `forbid(unsafe_code)`, `unsafe` token should be call-site span.
+            // For interoperability with `forbid(unsafe_code)`, `unsafe` token should be
+            // call-site span.
             let unsafety = token::Unsafe::default();
             quote_spanned! { pinned_drop =>
                 impl #impl_generics ::pin_project::__private::Drop for #ident #ty_generics
@@ -1037,7 +1041,8 @@ impl<'a> Context<'a> {
         let (impl_generics, ty_generics, where_clause) = self.orig.generics.split_for_impl();
 
         let replace_impl = self.replace.map(|_| {
-            // Currently, using quote_spanned here does not seem to have any effect on the diagnostics.
+            // Currently, using quote_spanned here does not seem to have any effect on the
+            // diagnostics.
             quote! {
                 #vis fn project_replace(
                     self: ::pin_project::__private::Pin<&mut Self>,
@@ -1124,8 +1129,9 @@ impl<'a> Context<'a> {
         //
         // There is one exception: If the type of a struct field has an alignment of 1
         // (e.g. u8), it is always safe to take a reference to it, even if the struct
-        // is `#[repr(packed)]`. If the struct is composed entirely of types of alignment 1,
-        // our generated method will not trigger an error if the struct is `#[repr(packed)]`.
+        // is `#[repr(packed)]`. If the struct is composed entirely of types of
+        // alignment 1, our generated method will not trigger an error if the
+        // struct is `#[repr(packed)]`.
         //
         // Fortunately, this should have no observable consequence - `#[repr(packed)]`
         // is essentially a no-op on such a type. Nevertheless, we include a test

@@ -95,9 +95,9 @@ const __SCOPE_Struct: () = {
     // A dummy impl of `UnsafeUnpin`, to ensure that the user cannot implement it.
     //
     // To ensure that users don't accidentally write a non-functional `UnsafeUnpin`
-    // impls, we emit one ourselves. If the user ends up writing a `UnsafeUnpin` impl,
-    // they'll get a "conflicting implementations of trait" error when coherence
-    // checks are run.
+    // impls, we emit one ourselves. If the user ends up writing an `UnsafeUnpin`
+    // impl, they'll get a "conflicting implementations of trait" error when
+    // coherence checks are run.
     unsafe impl<T, U> ::pin_project::UnsafeUnpin for Struct<T, U> {}
 
     // Ensure that struct does not implement `Drop`.
@@ -111,7 +111,8 @@ const __SCOPE_Struct: () = {
         unsafe fn drop(self: ::pin_project::__private::Pin<&mut Self>) {}
     }
 
-    // Ensure that it's impossible to use pin projections on a #[repr(packed)] struct.
+    // Ensure that it's impossible to use pin projections on a #[repr(packed)]
+    // struct.
     //
     // See ./struct-default-expanded.rs and https://github.com/taiki-e/pin-project/pull/34
     // for details.
