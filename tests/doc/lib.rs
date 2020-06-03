@@ -6,7 +6,8 @@
 #![cfg_attr(doctest, feature(external_doc))]
 
 // As `feature(external_doc)` and `doc-comment` do not work with `cfg(test)`,
-// and cfg(doctest) requires 1.40, these tests are split into this crate until MSRV increases.
+// and `cfg(doctest)` requires 1.40, these tests are split into this crate until
+// MSRV increases.
 
 #[cfg(doctest)]
 #[doc(include = "../../README.md")]

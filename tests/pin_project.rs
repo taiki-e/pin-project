@@ -787,7 +787,8 @@ fn project_replace_panic() {
         let mut x = S { pinned: D(&mut a, true), unpinned: D(&mut b, false) };
         let _y = Pin::new(&mut x)
             .project_replace(S { pinned: D(&mut c, false), unpinned: D(&mut d, false) });
-        // Previous `x.pinned` was dropped and panicked when `project_replace` is called, so this is unreachable.
+        // Previous `x.pinned` was dropped and panicked when `project_replace` is
+        // called, so this is unreachable.
         unreachable!();
     }));
     assert!(res.is_err());
@@ -802,7 +803,8 @@ fn project_replace_panic() {
         {
             let _y = Pin::new(&mut x)
                 .project_replace(S { pinned: D(&mut c, false), unpinned: D(&mut d, false) });
-            // `_y` (previous `x.unpinned`) live to the end of this scope, so this is not unreachable,
+            // `_y` (previous `x.unpinned`) live to the end of this scope, so
+            // this is not unreachable.
             // unreachable!();
         }
         unreachable!();

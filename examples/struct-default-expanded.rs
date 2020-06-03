@@ -94,9 +94,9 @@ const __SCOPE_Struct: () = {
     // When RFC 2145 is implemented (rust-lang/rust#48054),
     // this will become a lint, rather then a hard error.
     //
-    // As a workaround for this, we generate a new struct, containing all of the pinned
-    // fields from our #[pin_project] type. This struct is declared within
-    // a function, which makes it impossible to be named by user code.
+    // As a workaround for this, we generate a new struct, containing all of
+    // the pinned fields from our #[pin_project] type. This struct is declared
+    // within a function, which makes it impossible to be named by user code.
     // This guarantees that it will use the default auto-trait impl for Unpin -
     // that is, it will implement Unpin iff all of its fields implement Unpin.
     // This type can be safely declared as 'public', satisfying the privacy
@@ -117,9 +117,9 @@ const __SCOPE_Struct: () = {
     // A dummy impl of `UnsafeUnpin`, to ensure that the user cannot implement it.
     //
     // To ensure that users don't accidentally write a non-functional `UnsafeUnpin`
-    // impls, we emit one ourselves. If the user ends up writing a `UnsafeUnpin` impl,
-    // they'll get a "conflicting implementations of trait" error when coherence
-    // checks are run.
+    // impls, we emit one ourselves. If the user ends up writing an `UnsafeUnpin`
+    // impl, they'll get a "conflicting implementations of trait" error when
+    // coherence checks are run.
     unsafe impl<T, U> ::pin_project::UnsafeUnpin for Struct<T, U> {}
 
     // Ensure that struct does not implement `Drop`.
@@ -137,7 +137,8 @@ const __SCOPE_Struct: () = {
         unsafe fn drop(self: ::pin_project::__private::Pin<&mut Self>) {}
     }
 
-    // Ensure that it's impossible to use pin projections on a #[repr(packed)] struct.
+    // Ensure that it's impossible to use pin projections on a #[repr(packed)]
+    // struct.
     //
     // Taking a reference to a packed field is unsafe, and applying
     // #[deny(safe_packed_borrows)] makes sure that doing this without

@@ -28,11 +28,13 @@ use proc_macro::TokenStream;
 
 use crate::utils::ProjKind;
 
-/// An attribute that creates a projection type covering all the fields of struct or enum.
+/// An attribute that creates a projection type covering all the fields of
+/// struct or enum.
 ///
 /// This attribute creates a projection type according to the following rules:
 ///
-/// * For the field that uses `#[pin]` attribute, makes the pinned reference to the field.
+/// * For the field that uses `#[pin]` attribute, makes the pinned reference to
+///   the field.
 /// * For the other fields, makes the unpinned reference to the field.
 ///
 /// And the following methods are implemented on the original type:
@@ -71,26 +73,36 @@ use crate::utils::ProjKind;
 /// }
 /// ```
 ///
-/// The visibility of the projected type and projection method is based on the original type.
-/// However, if the visibility of the original type is `pub`, the visibility of the projected type
-/// and the projection method is downgraded to `pub(crate)`.
+/// The visibility of the projected type and projection method is based on the
+/// original type. However, if the visibility of the original type is `pub`, the
+/// visibility of the projected type and the projection method is downgraded to
+/// `pub(crate)`.
 ///
 /// # Safety
 ///
-/// This attribute is completely safe. In the absence of other `unsafe` code *that you write*,
-/// it is impossible to cause [undefined behavior][undefined-behavior] with this attribute.
+/// This attribute is completely safe. In the absence of other `unsafe` code
+/// *that you write*, it is impossible to cause [undefined
+/// behavior][undefined-behavior] with this attribute.
 ///
 /// This is accomplished by enforcing the four requirements for pin projection
 /// stated in [the Rust documentation][pin-projection]:
 ///
-/// 1. The struct must only be [`Unpin`] if all the structural fields are [`Unpin`].
+/// 1. The struct must only be [`Unpin`] if all the structural fields are
+///    [`Unpin`].
 ///
-///    To enforce this, this attribute will automatically generate an [`Unpin`] implementation
-///    for you, which will require that all structurally pinned fields be [`Unpin`]
-///    If you wish to provide an manual [`Unpin`] impl, you can do so via the
+///    To enforce this, this attribute will automatically generate an [`Unpin`]
+///    implementation for you, which will require that all structurally pinned
+///    fields be [`Unpin`].
+///
+///    If you attempt to provide an [`Unpin`] impl, the blanket impl will then
+///    apply to your type, causing a compile-time error due to the conflict with
+///    the second impl.
+///
+///    If you wish to provide a manual [`Unpin`] impl, you can do so via the
 ///    [`UnsafeUnpin`][unsafe-unpin] argument.
 ///
-/// 2. The destructor of the struct must not move structural fields out of its argument.
+/// 2. The destructor of the struct must not move structural fields out of its
+///    argument.
 ///
 ///    To enforce this, this attribute will generate code like this:
 ///
@@ -101,34 +113,43 @@ use crate::utils::ProjKind;
 ///    impl MyStructMustNotImplDrop for MyStruct {}
 ///    ```
 ///
-///    If you attempt to provide an [`Drop`] impl, the blanket impl will
-///    then apply to your type, causing a compile-time error due to
-///    the conflict with the second impl.
+///    If you attempt to provide an [`Drop`] impl, the blanket impl will then
+///    apply to your type, causing a compile-time error due to the conflict with
+///    the second impl.
 ///
 ///    If you wish to provide a custom [`Drop`] impl, you can annotate an impl
-///    with [`#[pinned_drop]`][pinned-drop]. This impl takes a pinned version of your struct -
-///    that is, [`Pin`]`<&mut MyStruct>` where `MyStruct` is the type of your struct.
+///    with [`#[pinned_drop]`][pinned-drop]. This impl takes a pinned version of
+///    your struct - that is, [`Pin`]`<&mut MyStruct>` where `MyStruct` is the
+///    type of your struct.
 ///
 ///    You can call `project()` on this type as usual, along with any other
 ///    methods you have defined. Because your code is never provided with
 ///    a `&mut MyStruct`, it is impossible to move out of pin-projectable
 ///    fields in safe code in your destructor.
 ///
-/// 3. You must make sure that you uphold the [`Drop` guarantee][drop-guarantee]: once your struct is pinned,
-///    the memory that contains the content is not overwritten or deallocated without calling the content's destructors.
+/// 3. You must make sure that you uphold the [`Drop`
+///    guarantee][drop-guarantee]: once your struct is pinned, the memory that
+///    contains the content is not overwritten or deallocated without calling
+///    the content's destructors.
 ///
-///    Safe code doesn't need to worry about this - the only wait to violate this requirement
-///    is to manually deallocate memory (which is `unsafe`), or to overwrite a field with something else.
-///    Because your custom destructor takes [`Pin`]`<&mut MyStruct>`, it's impossible to obtain
-///    a mutable reference to a pin-projected field in safe code.
+///    Safe code doesn't need to worry about this - the only wait to violate
+///    this requirement is to manually deallocate memory (which is `unsafe`),
+///    or to overwrite a field with something else.
+///    Because your custom destructor takes [`Pin`]`<&mut MyStruct>`, it's
+///    impossible to obtain a mutable reference to a pin-projected field in safe
+///    code.
 ///
-/// 4. You must not offer any other operations that could lead to data being moved out of the structural fields when your type is pinned.
+/// 4. You must not offer any other operations that could lead to data being
+///    moved out of the structural fields when your type is pinned.
 ///
-///    As with requirement 3, it is impossible for safe code to violate this. This crate ensures that safe code can never
-///    obtain a mutable reference to `#[pin]` fields, which prevents you from ever moving out of them in safe code.
+///    As with requirement 3, it is impossible for safe code to violate this.
+///    This crate ensures that safe code can never obtain a mutable reference to
+///    `#[pin]` fields, which prevents you from ever moving out of them in safe
+///    code.
 ///
-/// Pin projections are also incompatible with [`#[repr(packed)]`][repr-packed] structs. Attempting to use this attribute
-/// on a [`#[repr(packed)]`][repr-packed] struct results in a compile-time error.
+/// Pin projections are also incompatible with [`#[repr(packed)]`][repr-packed]
+/// structs. Attempting to use this attribute on a
+/// [`#[repr(packed)]`][repr-packed] struct results in a compile-time error.
 ///
 /// # Examples
 ///
@@ -243,24 +264,21 @@ use crate::utils::ProjKind;
 /// use pin_project::pin_project;
 ///
 /// #[pin_project(!Unpin)]
-/// struct Struct<T, U> {
-///     #[pin]
-///     pinned: T,
-///     unpinned: U,
+/// struct Struct<T> {
+///     field: T,
 /// }
 /// ```
 ///
-/// You can also ensure `!Unpin` by using `#[pin]` attribute for [`PhantomPinned`] field.
+/// You can also ensure `!Unpin` by using `#[pin]` attribute for
+/// a [`PhantomPinned`] field.
 ///
 /// ```rust
 /// use pin_project::pin_project;
 /// use std::marker::PhantomPinned;
 ///
 /// #[pin_project]
-/// struct Struct<T, U> {
-///     #[pin]
-///     pinned: T,
-///     unpinned: U,
+/// struct Struct<T> {
+///     field: T,
 ///     #[pin]
 ///     _pin: PhantomPinned,
 /// }
@@ -287,23 +305,24 @@ use crate::utils::ProjKind;
 /// ```
 ///
 /// Note the usage of the unsafe [`UnsafeUnpin`] trait, instead of the usual
-/// [`Unpin`] trait. [`UnsafeUnpin`] behaves exactly like [`Unpin`], except that is
-/// unsafe to implement. This unsafety comes from the fact that pin projections
-/// are being used. If you implement [`UnsafeUnpin`], you must ensure that it is
-/// only implemented when all pin-projected fields implement [`Unpin`].
+/// [`Unpin`] trait. [`UnsafeUnpin`] behaves exactly like [`Unpin`], except that
+/// is unsafe to implement. This unsafety comes from the fact that pin
+/// projections are being used. If you implement [`UnsafeUnpin`], you must
+/// ensure that it is only implemented when all pin-projected fields implement
+/// [`Unpin`].
 ///
 /// See [`UnsafeUnpin`] trait for more details.
 ///
 /// ## `#[pinned_drop]`
 ///
 /// In order to correctly implement pin projections, a type's [`Drop`] impl must
-/// not move out of any structurally pinned fields. Unfortunately, [`Drop::drop`]
-/// takes `&mut Self`, not [`Pin`]`<&mut Self>`.
+/// not move out of any structurally pinned fields. Unfortunately,
+/// [`Drop::drop`] takes `&mut Self`, not [`Pin`]`<&mut Self>`.
 ///
-/// To ensure that this requirement is upheld, the `#[pin_project]` attribute will
-/// provide a [`Drop`] impl for you. This [`Drop`] impl will delegate to an impl
-/// block annotated with `#[pinned_drop]` if you use the `PinnedDrop` argument
-/// to `#[pin_project]`.
+/// To ensure that this requirement is upheld, the `#[pin_project]` attribute
+/// will provide a [`Drop`] impl for you. This [`Drop`] impl will delegate to
+/// an impl block annotated with `#[pinned_drop]` if you use the `PinnedDrop`
+/// argument to `#[pin_project]`.
 ///
 /// This impl block acts just like a normal [`Drop`] impl,
 /// except for the following two:
@@ -322,7 +341,8 @@ use crate::utils::ProjKind;
 /// implemented. To drop a type that implements `PinnedDrop`, use the [`drop`]
 /// function just like dropping a type that directly implements [`Drop`].
 ///
-/// In particular, it will never be called more than once, just like [`Drop::drop`].
+/// In particular, it will never be called more than once, just like
+/// [`Drop::drop`].
 ///
 /// For example:
 ///
@@ -355,10 +375,10 @@ use crate::utils::ProjKind;
 /// ## `project_replace()`
 ///
 /// In addition to the `project()` and `project_ref()` methods which are always
-/// provided when you use the `#[pin_project]` attribute, there is a third method,
-/// `project_replace()` which can be useful in some situations. It is equivalent
-/// to [`Pin::set`], except that the unpinned fields are moved and returned,
-/// instead of being dropped in-place.
+/// provided when you use the `#[pin_project]` attribute, there is a third
+/// method, `project_replace()` which can be useful in some situations. It is
+/// equivalent to [`Pin::set`], except that the unpinned fields are moved and
+/// returned, instead of being dropped in-place.
 ///
 /// ```rust
 /// # use std::pin::Pin;
@@ -372,8 +392,9 @@ use crate::utils::ProjKind;
 /// all pinned fields have been replaced by equivalent [`PhantomData`] types.
 ///
 /// This method is opt-in, because it is only supported for [`Sized`] types, and
-/// because it is incompatible with the [`#[pinned_drop]`][pinned-drop] attribute described
-/// above. It can be enabled by using `#[pin_project(Replace)]`.
+/// because it is incompatible with the [`#[pinned_drop]`][pinned-drop]
+/// attribute described above. It can be enabled by using
+/// `#[pin_project(Replace)]`.
 ///
 /// For example:
 ///
@@ -381,11 +402,11 @@ use crate::utils::ProjKind;
 /// use pin_project::pin_project;
 ///
 /// #[pin_project(Replace, project_replace = EnumProjOwn)]
-/// enum Enum<T> {
+/// enum Enum<T, U> {
 ///     A {
 ///         #[pin]
-///         pinned_field: i32,
-///         unpinned_field: T,
+///         pinned_field: T,
+///         unpinned_field: U,
 ///     },
 ///     B,
 /// }
@@ -438,11 +459,12 @@ pub fn pin_project(args: TokenStream, input: TokenStream) -> TokenStream {
 /// }
 /// ```
 ///
-/// [`#[pin_project]`][`pin_project`] implements the actual [`Drop`] trait via `PinnedDrop` you
+/// `#[pin_project]` implements the actual [`Drop`] trait via `PinnedDrop` you
 /// implemented. To drop a type that implements `PinnedDrop`, use the [`drop`]
 /// function just like dropping a type that directly implements [`Drop`].
 ///
-/// In particular, it will never be called more than once, just like [`Drop::drop`].
+/// In particular, it will never be called more than once, just like
+/// [`Drop::drop`].
 ///
 /// ## Example
 ///
@@ -478,8 +500,8 @@ pub fn pin_project(args: TokenStream, input: TokenStream) -> TokenStream {
 ///
 /// Ideally, it would be desirable to be able to forbid manual calls in
 /// the same way as [`Drop::drop`], but the library cannot do it. So, by using
-/// macros and replacing them with private traits like the following, we prevent users from
-/// calling `PinnedDrop::drop` in safe code.
+/// macros and replacing them with private traits like the following, we prevent
+/// users from calling `PinnedDrop::drop` in safe code.
 ///
 /// ```rust
 /// # use std::pin::Pin;
@@ -489,11 +511,10 @@ pub fn pin_project(args: TokenStream, input: TokenStream) -> TokenStream {
 /// ```
 ///
 /// This allows implementing [`Drop`] safely using `#[pinned_drop]`.
-/// Also by using the [`drop`] function just like dropping a type that directly implements [`Drop`],
-/// can drop safely a type that implements `PinnedDrop`.
+/// Also by using the [`drop`] function just like dropping a type that directly
+/// implements [`Drop`], can drop safely a type that implements `PinnedDrop`.
 ///
 /// [`Pin`]: core::pin::Pin
-/// [`pin_project`]: ./attr.pin_project.html
 /// [pinned-drop]: ./attr.pin_project.html#pinned_drop
 #[proc_macro_attribute]
 pub fn pinned_drop(args: TokenStream, input: TokenStream) -> TokenStream {
@@ -653,8 +674,8 @@ pub fn project(args: TokenStream, input: TokenStream) -> TokenStream {
 /// An attribute to provide way to refer to the projected type returned by
 /// `project_ref` method.
 ///
-/// This is the same as [`#[project]`][`project`] attribute except it refers to the projected
-/// type returned by the `project_ref` method.
+/// This is the same as [`#[project]`][`project`] attribute except it refers to
+/// the projected type returned by the `project_ref` method.
 ///
 /// See [`#[project]`][`project`] attribute for more details.
 ///
@@ -668,8 +689,8 @@ pub fn project_ref(args: TokenStream, input: TokenStream) -> TokenStream {
 /// An attribute to provide way to refer to the projected type returned by
 /// `project_replace` method.
 ///
-/// This is the same as [`#[project]`][`project`] attribute except it refers to the projected
-/// type returned by the `project_replace` method.
+/// This is the same as [`#[project]`][`project`] attribute except it refers to
+/// the projected type returned by the `project_replace` method.
 ///
 /// See [`#[project]`][`project`] attribute for more details.
 ///

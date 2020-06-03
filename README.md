@@ -33,7 +33,8 @@ The current pin-project requires Rust 1.34 or later.
 
 ## Examples
 
-[`#[pin_project]`][`pin_project`] attribute creates a projection type covering all the fields of struct or enum.
+[`#[pin_project]`][`pin_project`] attribute creates a projection type
+covering all the fields of struct or enum.
 
 ```rust
 use pin_project::pin_project;
@@ -59,7 +60,8 @@ impl<T, U> Struct<T, U> {
 
 See [API documentation][docs-url] for more details.
 
-Also, there are examples and generated code of each feature in [examples] directory.
+Also, there are examples and generated code of each feature in [examples]
+directory.
 
 [`pin_project`]: https://docs.rs/pin-project/0.4/pin_project/attr.pin_project.html
 [examples]: examples/README.md

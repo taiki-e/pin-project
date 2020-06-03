@@ -44,7 +44,8 @@ impl ProjKind {
         }
     }
 
-    /// Creates the ident of the projected type from the ident of the original type.
+    /// Creates the ident of the projected type from the ident of the original
+    /// type.
     pub(crate) fn proj_ident(self, ident: &Ident) -> Ident {
         match self {
             ProjKind::Mutable => format_ident!("__{}Projection", ident),
@@ -54,7 +55,8 @@ impl ProjKind {
     }
 }
 
-/// Determines the lifetime names. Ensure it doesn't overlap with any existing lifetime names.
+/// Determines the lifetime names. Ensure it doesn't overlap with any existing
+/// lifetime names.
 pub(crate) fn determine_lifetime_name(lifetime_name: &mut String, generics: &mut Generics) {
     struct CollectLifetimes(Vec<String>);
 
@@ -115,8 +117,8 @@ pub(crate) fn determine_visibility(vis: &Visibility) -> Visibility {
 }
 
 /// Check if `tokens` is an empty `TokenStream`.
-/// This is almost equivalent to `syn::parse2::<Nothing>()`,
-/// but produces a better error message and does not require ownership of `tokens`.
+/// This is almost equivalent to `syn::parse2::<Nothing>()`, but produces
+/// a better error message and does not require ownership of `tokens`.
 pub(crate) fn parse_as_empty(tokens: &TokenStream) -> Result<()> {
     if tokens.is_empty() { Ok(()) } else { Err(error!(tokens, "unexpected token: {}", tokens)) }
 }
