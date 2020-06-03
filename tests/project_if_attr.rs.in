@@ -6,8 +6,9 @@ fn project_if_let() {
         Variant1(#[pin] A),
         Variant2(u8),
         Variant3 {
-            #[pin] field: B
-        }
+            #[pin]
+            field: B,
+        },
     }
 
     let mut x: Foo<bool, f32> = Foo::Variant1(true);

@@ -5,5 +5,8 @@ authors = ["Taiki Endo <te316e89@gmail.com>"]
 edition = "2015"
 publish = false
 
+[lib]
+path = "lib.rs"
+
 [dependencies]
 pin-project = { path = "../.." }

@@ -9,4 +9,3 @@
 # ```
 
 TRYBUILD=overwrite cargo +nightly test -p pin-project --all-features --test compiletest -- --ignored
-# cargo +nightly test -p pin-project --all-features --test compiletest -- --ignored

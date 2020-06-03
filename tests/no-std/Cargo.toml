@@ -8,7 +8,5 @@ publish = false
 [lib]
 path = "lib.rs"
 
-[workspace]
-
 [dependencies]
 pin-project = { path = "../.." }

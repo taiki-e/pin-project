@@ -9,9 +9,10 @@ enum Enum<T, U> {
     Tuple(#[pin] T, U),
     Unit,
 }
-#[allow(clippy::mut_mut)]
 #[allow(dead_code)]
 #[allow(single_use_lifetimes)]
+#[allow(clippy::mut_mut)]
+#[allow(clippy::type_repetition_in_bounds)]
 enum Proj<'pin, T, U>
 where
     Enum<T, U>: 'pin,
@@ -25,6 +26,7 @@ where
 }
 #[allow(dead_code)]
 #[allow(single_use_lifetimes)]
+#[allow(clippy::type_repetition_in_bounds)]
 enum ProjRef<'pin, T, U>
 where
     Enum<T, U>: 'pin,
@@ -49,6 +51,7 @@ enum ProjOwn<T, U> {
 #[doc(hidden)]
 #[allow(non_upper_case_globals)]
 #[allow(single_use_lifetimes)]
+#[allow(clippy::used_underscore_binding)]
 const __SCOPE_Enum: () = {
     impl<T, U> Enum<T, U> {
         fn project<'pin>(self: ::pin_project::__private::Pin<&'pin mut Self>) -> Proj<'pin, T, U> {
