@@ -1,5 +1,5 @@
 #![warn(rust_2018_idioms, single_use_lifetimes)]
-#![warn(unused, future_incompatible)]
+#![warn(unused, unused_results, future_incompatible)]
 #![warn(clippy::all, clippy::pedantic, clippy::nursery)]
 
 pub mod basic {
