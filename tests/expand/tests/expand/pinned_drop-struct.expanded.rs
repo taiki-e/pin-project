@@ -75,6 +75,7 @@ const __SCOPE_Struct: () = {
             }
         }
     }
+    #[allow(clippy::no_effect)]
     #[deny(safe_packed_borrows)]
     fn __assert_not_repr_packed<T, U>(val: &Struct<T, U>) {
         &val.pinned;

@@ -39,13 +39,22 @@ pub fn add_pinned_field(_: TokenStream, input: TokenStream) -> TokenStream {
 pub fn remove_attr(args: TokenStream, input: TokenStream) -> TokenStream {
     let mut item: ItemStruct = syn::parse_macro_input!(input);
     match &*args.to_string() {
-        "field" => {
+        "field_all" => {
             if let Fields::Named(fields) = &mut item.fields { fields } else { unreachable!() }
                 .named
                 .iter_mut()
                 .for_each(|field| field.attrs.clear())
         }
-        "struct" => item.attrs.clear(),
+        "struct_all" => item.attrs.clear(),
+        "struct_pin" => {
+            while item
+                .attrs
+                .iter()
+                .position(|a| a.path.is_ident("pin"))
+                .map(|i| item.attrs.remove(i))
+                .is_some()
+            {}
+        }
         _ => unreachable!(),
     }
 

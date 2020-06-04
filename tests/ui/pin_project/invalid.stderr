@@ -122,179 +122,171 @@ error: duplicate `project` argument
    --> $DIR/invalid.rs:121:32
     |
 121 |     #[pin_project(project = A, project = B)] //~ ERROR duplicate `project` argument
-    |                                ^^^^^^^
+    |                                ^^^^^^^^^^^
+
+error: duplicate `project` argument
+   --> $DIR/invalid.rs:124:49
+    |
+124 |     #[pin_project(project = A, project_ref = A, project = B)] //~ ERROR duplicate `project` argument
+    |                                                 ^^^^^^^^^^^
 
 error: duplicate `project_ref` argument
-   --> $DIR/invalid.rs:124:36
+   --> $DIR/invalid.rs:127:36
     |
-124 |     #[pin_project(project_ref = A, project_ref = B)] //~ ERROR duplicate `project_ref` argument
-    |                                    ^^^^^^^^^^^
+127 |     #[pin_project(project_ref = A, project_ref = B)] //~ ERROR duplicate `project_ref` argument
+    |                                    ^^^^^^^^^^^^^^^
 
 error: duplicate `project_replace` argument
-   --> $DIR/invalid.rs:127:40
+   --> $DIR/invalid.rs:130:40
     |
-127 |     #[pin_project(project_replace = A, project_replace = B)] //~ ERROR duplicate `project_replace` argument
-    |                                        ^^^^^^^^^^^^^^^
+130 |     #[pin_project(project_replace = A, project_replace = B)] //~ ERROR duplicate `project_replace` argument
+    |                                        ^^^^^^^^^^^^^^^^^^^
 
 error: `project_replace` argument can only be used together with `Replace` argument
-   --> $DIR/invalid.rs:130:19
-    |
-130 |     #[pin_project(project_replace = A)] //~ ERROR `project_replace` argument can only be used together with `Replace` argument
-    |                   ^^^^^^^^^^^^^^^
-
-error: arguments `PinnedDrop` and `Replace` are mutually exclusive
    --> $DIR/invalid.rs:133:19
     |
-133 |     #[pin_project(PinnedDrop, Replace)] //~ ERROR arguments `PinnedDrop` and `Replace` are mutually exclusive
+133 |     #[pin_project(project_replace = A)] //~ ERROR `project_replace` argument can only be used together with `Replace` argument
+    |                   ^^^^^^^^^^^^^^^^^^^
+
+error: arguments `PinnedDrop` and `Replace` are mutually exclusive
+   --> $DIR/invalid.rs:136:19
+    |
+136 |     #[pin_project(PinnedDrop, Replace)] //~ ERROR arguments `PinnedDrop` and `Replace` are mutually exclusive
     |                   ^^^^^^^^^^
 
 error: arguments `PinnedDrop` and `Replace` are mutually exclusive
-   --> $DIR/invalid.rs:136:41
+   --> $DIR/invalid.rs:139:41
     |
-136 |     #[pin_project(Replace, UnsafeUnpin, PinnedDrop)] //~ ERROR arguments `PinnedDrop` and `Replace` are mutually exclusive
+139 |     #[pin_project(Replace, UnsafeUnpin, PinnedDrop)] //~ ERROR arguments `PinnedDrop` and `Replace` are mutually exclusive
     |                                         ^^^^^^^^^^
 
 error: arguments `UnsafeUnpin` and `!Unpin` are mutually exclusive
-   --> $DIR/invalid.rs:139:19
+   --> $DIR/invalid.rs:142:19
     |
-139 |     #[pin_project(UnsafeUnpin, !Unpin)] //~ ERROR arguments `UnsafeUnpin` and `!Unpin` are mutually exclusive
+142 |     #[pin_project(UnsafeUnpin, !Unpin)] //~ ERROR arguments `UnsafeUnpin` and `!Unpin` are mutually exclusive
     |                   ^^^^^^^^^^^
 
 error: arguments `UnsafeUnpin` and `!Unpin` are mutually exclusive
-   --> $DIR/invalid.rs:142:39
+   --> $DIR/invalid.rs:145:39
     |
-142 |     #[pin_project(!Unpin, PinnedDrop, UnsafeUnpin)] //~ ERROR arguments `UnsafeUnpin` and `!Unpin` are mutually exclusive
+145 |     #[pin_project(!Unpin, PinnedDrop, UnsafeUnpin)] //~ ERROR arguments `UnsafeUnpin` and `!Unpin` are mutually exclusive
     |                                       ^^^^^^^^^^^
 
-error: unexpected end of input, expected `Unpin`
-   --> $DIR/invalid.rs:145:5
-    |
-145 |     #[pin_project(!)] //~ ERROR unexpected end of input, expected `Unpin`
-    |     ^^^^^^^^^^^^^^^^^
-    |
-    = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
-
-error: unexpected argument: Unpin
+error: expected `!Unpin`, found `!`
    --> $DIR/invalid.rs:148:19
     |
-148 |     #[pin_project(Unpin)] //~ ERROR unexpected argument
+148 |     #[pin_project(!)] //~ ERROR expected `!Unpin`, found `!`
+    |                   ^
+
+error: unexpected argument: Unpin
+   --> $DIR/invalid.rs:151:19
+    |
+151 |     #[pin_project(Unpin)] //~ ERROR unexpected argument
     |                   ^^^^^
 
-error: expected `=`
-   --> $DIR/invalid.rs:151:5
+error: expected `project = <identifier>`, found `project`
+   --> $DIR/invalid.rs:154:19
     |
-151 |     #[pin_project(project)] //~ ERROR expected `=`
-    |     ^^^^^^^^^^^^^^^^^^^^^^^
-    |
-    = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
+154 |     #[pin_project(project)] //~ ERROR expected `project = <identifier>`, found `project`
+    |                   ^^^^^^^
 
-error: unexpected end of input, expected identifier
-   --> $DIR/invalid.rs:154:5
+error: expected `project = <identifier>`, found `project =`
+   --> $DIR/invalid.rs:157:19
     |
-154 |     #[pin_project(project = )] //~ ERROR unexpected end of input, expected identifier
-    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^
-    |
-    = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
+157 |     #[pin_project(project = )] //~ ERROR expected `project = <identifier>`, found `project =`
+    |                   ^^^^^^^^^
 
-error: expected `=`
-   --> $DIR/invalid.rs:157:5
+error: expected `project_ref = <identifier>`, found `project_ref`
+   --> $DIR/invalid.rs:160:19
     |
-157 |     #[pin_project(project_ref)] //~ ERROR expected `=`
-    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    |
-    = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
+160 |     #[pin_project(project_ref)] //~ ERROR expected `project_ref = <identifier>`, found `project_ref`
+    |                   ^^^^^^^^^^^
 
-error: unexpected end of input, expected identifier
-   --> $DIR/invalid.rs:160:5
+error: expected `project_ref = <identifier>`, found `project_ref =`
+   --> $DIR/invalid.rs:163:19
     |
-160 |     #[pin_project(project_ref = )] //~ ERROR unexpected end of input, expected identifier
-    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    |
-    = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
+163 |     #[pin_project(project_ref = )] //~ ERROR expected `project_ref = <identifier>`, found `project_ref =`
+    |                   ^^^^^^^^^^^^^
 
-error: expected `=`
-   --> $DIR/invalid.rs:163:5
+error: expected `project_replace = <identifier>`, found `project_replace`
+   --> $DIR/invalid.rs:166:19
     |
-163 |     #[pin_project(project_replace)] //~ ERROR expected `=`
-    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    |
-    = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
+166 |     #[pin_project(project_replace)] //~ ERROR expected `project_replace = <identifier>`, found `project_replace`
+    |                   ^^^^^^^^^^^^^^^
 
-error: unexpected end of input, expected identifier
-   --> $DIR/invalid.rs:166:5
+error: expected `project_replace = <identifier>`, found `project_replace =`
+   --> $DIR/invalid.rs:169:19
     |
-166 |     #[pin_project(project_replace = )] //~ ERROR unexpected end of input, expected identifier
-    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    |
-    = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
+169 |     #[pin_project(project_replace = )] //~ ERROR expected `project_replace = <identifier>`, found `project_replace =`
+    |                   ^^^^^^^^^^^^^^^^^
 
 error: duplicate #[pin_project] attribute
-   --> $DIR/invalid.rs:174:5
+   --> $DIR/invalid.rs:177:5
     |
-174 |     #[pin_project] //~ ERROR duplicate #[pin_project] attribute
+177 |     #[pin_project] //~ ERROR duplicate #[pin_project] attribute
     |     ^^^^^^^^^^^^^^
 
 error: #[pin_project] attribute may not be used on structs with zero fields
-   --> $DIR/invalid.rs:182:19
+   --> $DIR/invalid.rs:185:19
     |
-182 |     struct Struct {} //~ ERROR may not be used on structs with zero fields
+185 |     struct Struct {} //~ ERROR may not be used on structs with zero fields
     |                   ^^
 
 error: #[pin_project] attribute may not be used on structs with zero fields
-   --> $DIR/invalid.rs:185:23
+   --> $DIR/invalid.rs:188:23
     |
-185 |     struct TupleStruct(); //~ ERROR may not be used on structs with zero fields
+188 |     struct TupleStruct(); //~ ERROR may not be used on structs with zero fields
     |                       ^^
 
 error: #[pin_project] attribute may not be used on structs with zero fields
-   --> $DIR/invalid.rs:188:12
+   --> $DIR/invalid.rs:191:12
     |
-188 |     struct UnitStruct; //~ ERROR may not be used on structs with zero fields
+191 |     struct UnitStruct; //~ ERROR may not be used on structs with zero fields
     |            ^^^^^^^^^^
 
 error: #[pin_project] attribute may not be used on enums without variants
-   --> $DIR/invalid.rs:191:20
+   --> $DIR/invalid.rs:194:20
     |
-191 |     enum EnumEmpty {} //~ ERROR may not be used on enums without variants
+194 |     enum EnumEmpty {} //~ ERROR may not be used on enums without variants
     |                    ^^
 
 error: #[pin_project] attribute may not be used on enums with discriminants
-   --> $DIR/invalid.rs:195:13
+   --> $DIR/invalid.rs:198:13
     |
-195 |         V = 2, //~ ERROR may not be used on enums with discriminants
+198 |         V = 2, //~ ERROR may not be used on enums with discriminants
     |             ^
 
 error: #[pin_project] attribute may not be used on enums with zero fields
-   --> $DIR/invalid.rs:200:9
+   --> $DIR/invalid.rs:203:9
     |
-200 | /         Unit, //~ ERROR may not be used on enums with zero fields
-201 | |         Tuple(),
-202 | |         Struct {},
+203 | /         Unit, //~ ERROR may not be used on enums with zero fields
+204 | |         Tuple(),
+205 | |         Struct {},
     | |__________________^
 
 error: #[pin_project] attribute may only be used on structs or enums
-   --> $DIR/invalid.rs:206:5
+   --> $DIR/invalid.rs:209:5
     |
-206 | /     union Union {
-207 | |         //~^ ERROR may only be used on structs or enums
-208 | |         f: (),
-209 | |     }
+209 | /     union Union {
+210 | |         //~^ ERROR may only be used on structs or enums
+211 | |         f: (),
+212 | |     }
     | |_____^
 
 error: #[pin_project] attribute may not be used on #[repr(packed)] types
-   --> $DIR/invalid.rs:217:12
+   --> $DIR/invalid.rs:220:12
     |
-217 |     #[repr(packed)]
+220 |     #[repr(packed)]
     |            ^^^^^^
 
 error: #[pin_project] attribute may not be used on #[repr(packed)] types
-   --> $DIR/invalid.rs:221:12
+   --> $DIR/invalid.rs:224:12
     |
-221 |     #[repr(packed)]
+224 |     #[repr(packed)]
     |            ^^^^^^
 
 error: #[pin_project] attribute may not be used on #[repr(packed)] types
-   --> $DIR/invalid.rs:225:12
+   --> $DIR/invalid.rs:228:12
     |
-225 |     #[repr(packed)]
+228 |     #[repr(packed)]
     |            ^^^^^^
