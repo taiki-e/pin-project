@@ -500,6 +500,7 @@ impl<'a> Context<'a> {
             proj_items.extend(quote! {
                 #doc_proj_own
                 #[allow(dead_code)] // This lint warns unused fields/variants.
+                #[allow(unreachable_pub)] // This lint warns `pub` field in private struct.
                 #[allow(single_use_lifetimes)] // https://github.com/rust-lang/rust/issues/55058
                 #vis struct #proj_own_ident #orig_generics #where_clause_own_fields
             });

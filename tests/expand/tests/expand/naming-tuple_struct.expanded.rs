@@ -15,6 +15,7 @@ struct ProjRef<'pin, T, U>(::pin_project::__private::Pin<&'pin (T)>, &'pin (U))
 where
     TupleStruct<T, U>: 'pin;
 #[allow(dead_code)]
+#[allow(unreachable_pub)]
 #[allow(single_use_lifetimes)]
 struct ProjOwn<T, U>(::pin_project::__private::PhantomData<T>, U);
 #[doc(hidden)]

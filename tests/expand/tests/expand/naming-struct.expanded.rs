@@ -27,6 +27,7 @@ where
     unpinned: &'pin (U),
 }
 #[allow(dead_code)]
+#[allow(unreachable_pub)]
 #[allow(single_use_lifetimes)]
 struct ProjOwn<T, U> {
     pinned: ::pin_project::__private::PhantomData<T>,

@@ -6,9 +6,11 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 ## [Unreleased]
 
+* Suppress `unreachable_pub` lint in generated code.
+
 ## [0.4.19] - 2020-06-04
 
-* [Fix unused_results lint in generated code.][239]
+* [Fix `unused_results` lint in generated code.][239]
 
 [239]: https://github.com/taiki-e/pin-project/pull/239
 
