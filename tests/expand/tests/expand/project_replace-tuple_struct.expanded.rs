@@ -21,6 +21,7 @@ where
     TupleStruct<T, U>: 'pin;
 #[doc(hidden)]
 #[allow(dead_code)]
+#[allow(unreachable_pub)]
 #[allow(single_use_lifetimes)]
 struct __TupleStructProjectionOwned<T, U>(::pin_project::__private::PhantomData<T>, U);
 #[doc(hidden)]

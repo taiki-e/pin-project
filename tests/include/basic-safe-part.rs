@@ -1,6 +1,7 @@
 // default #[pin_project], PinnedDrop, Replace, !Unpin, and UnsafeUnpin without UnsafeUnpin impl are completely safe.
 
 #[::pin_project::pin_project]
+#[derive(Debug)]
 pub struct DefaultStruct<T, U> {
     #[pin]
     pub pinned: T,
@@ -8,9 +9,11 @@ pub struct DefaultStruct<T, U> {
 }
 
 #[::pin_project::pin_project]
+#[derive(Debug)]
 pub struct DefaultTupleStruct<T, U>(#[pin] pub T, pub U);
 
 #[::pin_project::pin_project]
+#[derive(Debug)]
 pub enum DefaultEnum<T, U> {
     Struct {
         #[pin]
@@ -22,6 +25,7 @@ pub enum DefaultEnum<T, U> {
 }
 
 #[::pin_project::pin_project(PinnedDrop)]
+#[derive(Debug)]
 pub struct PinnedDropStruct<T, U> {
     #[pin]
     pub pinned: T,
@@ -34,6 +38,7 @@ impl<T, U> PinnedDrop for PinnedDropStruct<T, U> {
 }
 
 #[::pin_project::pin_project(PinnedDrop)]
+#[derive(Debug)]
 pub struct PinnedDropTupleStruct<T, U>(#[pin] pub T, pub U);
 
 #[::pin_project::pinned_drop]
@@ -42,6 +47,7 @@ impl<T, U> PinnedDrop for PinnedDropTupleStruct<T, U> {
 }
 
 #[::pin_project::pin_project(PinnedDrop)]
+#[derive(Debug)]
 pub enum PinnedDropEnum<T, U> {
     Struct {
         #[pin]
@@ -58,6 +64,7 @@ impl<T, U> PinnedDrop for PinnedDropEnum<T, U> {
 }
 
 #[::pin_project::pin_project(Replace)]
+#[derive(Debug)]
 pub struct ReplaceStruct<T, U> {
     #[pin]
     pub pinned: T,
@@ -65,9 +72,11 @@ pub struct ReplaceStruct<T, U> {
 }
 
 #[::pin_project::pin_project(Replace)]
+#[derive(Debug)]
 pub struct ReplaceTupleStruct<T, U>(#[pin] pub T, pub U);
 
 #[::pin_project::pin_project(Replace)]
+#[derive(Debug)]
 pub enum ReplaceEnum<T, U> {
     Struct {
         #[pin]
@@ -79,6 +88,7 @@ pub enum ReplaceEnum<T, U> {
 }
 
 #[::pin_project::pin_project(UnsafeUnpin)]
+#[derive(Debug)]
 pub struct UnsafeUnpinStruct<T, U> {
     #[pin]
     pub pinned: T,
@@ -86,9 +96,11 @@ pub struct UnsafeUnpinStruct<T, U> {
 }
 
 #[::pin_project::pin_project(UnsafeUnpin)]
+#[derive(Debug)]
 pub struct UnsafeUnpinTupleStruct<T, U>(#[pin] pub T, pub U);
 
 #[::pin_project::pin_project(UnsafeUnpin)]
+#[derive(Debug)]
 pub enum UnsafeUnpinEnum<T, U> {
     Struct {
         #[pin]
@@ -100,6 +112,7 @@ pub enum UnsafeUnpinEnum<T, U> {
 }
 
 #[::pin_project::pin_project(!Unpin)]
+#[derive(Debug)]
 pub struct NotUnpinStruct<T, U> {
     #[pin]
     pub pinned: T,
@@ -107,9 +120,11 @@ pub struct NotUnpinStruct<T, U> {
 }
 
 #[::pin_project::pin_project(!Unpin)]
+#[derive(Debug)]
 pub struct NotUnpinTupleStruct<T, U>(#[pin] pub T, pub U);
 
 #[::pin_project::pin_project(!Unpin)]
+#[derive(Debug)]
 pub enum NotUnpinEnum<T, U> {
     Struct {
         #[pin]
