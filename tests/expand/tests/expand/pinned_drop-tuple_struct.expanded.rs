@@ -60,7 +60,6 @@ const __SCOPE_TupleStruct: () = {
             }
         }
     }
-    #[allow(clippy::no_effect)]
     #[deny(safe_packed_borrows)]
     fn __assert_not_repr_packed<T, U>(val: &TupleStruct<T, U>) {
         &val.0;

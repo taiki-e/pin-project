@@ -1175,15 +1175,14 @@ impl<'a> Context<'a> {
         let mut field_refs = vec![];
         match fields {
             Fields::Named(FieldsNamed { named, .. }) => {
-                for f in named {
-                    let ident = &f.ident;
-                    field_refs.push(quote_spanned!(f.span() => &val.#ident;));
+                for Field { ident, .. } in named {
+                    field_refs.push(quote!(&val.#ident;));
                 }
             }
             Fields::Unnamed(FieldsUnnamed { unnamed, .. }) => {
-                for (index, f) in unnamed.iter().enumerate() {
+                for (index, _) in unnamed.iter().enumerate() {
                     let index = Index::from(index);
-                    field_refs.push(quote_spanned!(f.span() => &val.#index;));
+                    field_refs.push(quote!(&val.#index;));
                 }
             }
             Fields::Unit => {}
@@ -1192,7 +1191,6 @@ impl<'a> Context<'a> {
         let (impl_generics, ty_generics, where_clause) = self.orig.generics.split_for_impl();
         let ident = self.orig.ident;
         Ok(quote! {
-            #[allow(clippy::no_effect)]
             #[deny(safe_packed_borrows)]
             fn __assert_not_repr_packed #impl_generics (val: &#ident #ty_generics) #where_clause {
                 #(#field_refs)*

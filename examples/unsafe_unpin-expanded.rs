@@ -18,6 +18,7 @@
 // ```
 
 #![allow(dead_code, unused_imports, unused_parens)]
+#![allow(clippy::no_effect)]
 
 use pin_project::{pin_project, UnsafeUnpin};
 
@@ -102,7 +103,6 @@ const __SCOPE_Struct: () = {
     //
     // See ./struct-default-expanded.rs and https://github.com/taiki-e/pin-project/pull/34
     // for details.
-    #[allow(clippy::no_effect)]
     #[deny(safe_packed_borrows)]
     fn __assert_not_repr_packed<T, U>(val: &Struct<T, U>) {
         &val.pinned;
