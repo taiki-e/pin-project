@@ -6,6 +6,8 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 ## [Unreleased]
 
+## [0.4.18] - 2020-06-04
+
 * [Support `Self` in more syntax positions inside `#[pinned_drop]` impl.][230]
 
 * [Suppress `clippy::type_repetition_in_bounds` and `clippy::used_underscore_binding` lints in generated code.][233]
@@ -470,7 +472,8 @@ See also [tracking issue for 0.4 release][21].
 
 Initial release
 
-[Unreleased]: https://github.com/taiki-e/pin-project/compare/v0.4.17...HEAD
+[Unreleased]: https://github.com/taiki-e/pin-project/compare/v0.4.18...HEAD
+[0.4.18]: https://github.com/taiki-e/pin-project/compare/v0.4.17...v0.4.18
 [0.4.17]: https://github.com/taiki-e/pin-project/compare/v0.4.16...v0.4.17
 [0.4.16]: https://github.com/taiki-e/pin-project/compare/v0.4.15...v0.4.16
 [0.4.15]: https://github.com/taiki-e/pin-project/compare/v0.4.14...v0.4.15
