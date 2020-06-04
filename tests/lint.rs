@@ -3,17 +3,11 @@
 #![warn(clippy::all, clippy::pedantic, clippy::nursery)]
 
 pub mod basic {
-    use pin_project::{pin_project, pinned_drop, UnsafeUnpin};
-    use std::pin::Pin;
-
     include!("include/basic.rs");
 }
 
 pub mod forbid_unsafe {
     #![forbid(unsafe_code)]
-
-    use pin_project::{pin_project, pinned_drop};
-    use std::pin::Pin;
 
     include!("include/basic-safe-part.rs");
 }

@@ -14,7 +14,4 @@ extern crate pin_project;
 // #[allow(unused_imports)]
 // use pin_project as pin;
 
-use core::pin::Pin;
-use pin_project::{pin_project, pinned_drop, UnsafeUnpin};
-
 include!("../include/basic.rs");
