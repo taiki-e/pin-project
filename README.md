@@ -68,6 +68,12 @@ directory.
 [pin-projection]: https://doc.rust-lang.org/nightly/std/pin/index.html#projections-and-structural-pinning
 [struct-default-expanded]: examples/struct-default-expanded.rs
 
+## Related Projects
+
+* [pin-project-lite]: A lightweight version of pin-project written with declarative macros.
+
+[pin-project-lite]: https://github.com/taiki-e/pin-project-lite
+
 ## License
 
 Licensed under either of
