@@ -1,11 +1,11 @@
 #![warn(rust_2018_idioms, single_use_lifetimes)]
 #![allow(dead_code)]
 
-use core::{
+use pin_project::{pin_project, pinned_drop, UnsafeUnpin};
+use std::{
     marker::{PhantomData, PhantomPinned},
     pin::Pin,
 };
-use pin_project::{pin_project, pinned_drop, UnsafeUnpin};
 
 #[test]
 fn projection() {
@@ -349,39 +349,39 @@ fn overlapping_lifetime_names() {
 #[test]
 fn combine() {
     #[pin_project(PinnedDrop, UnsafeUnpin)]
-    pub struct Struct1<T> {
+    pub struct PinnedDropWithUnsafeUnpin<T> {
         #[pin]
         field: T,
     }
 
     #[pinned_drop]
-    impl<T> PinnedDrop for Struct1<T> {
+    impl<T> PinnedDrop for PinnedDropWithUnsafeUnpin<T> {
         fn drop(self: Pin<&mut Self>) {}
     }
 
-    unsafe impl<T: Unpin> UnsafeUnpin for Struct1<T> {}
-
-    #[pin_project(UnsafeUnpin, Replace)]
-    pub struct Struct2<T> {
-        #[pin]
-        field: T,
-    }
-
-    unsafe impl<T: Unpin> UnsafeUnpin for Struct2<T> {}
+    unsafe impl<T: Unpin> UnsafeUnpin for PinnedDropWithUnsafeUnpin<T> {}
 
     #[pin_project(PinnedDrop, !Unpin)]
-    pub struct Struct3<T> {
+    pub struct PinnedDropWithNotUnpin<T> {
         #[pin]
         field: T,
     }
 
     #[pinned_drop]
-    impl<T> PinnedDrop for Struct3<T> {
+    impl<T> PinnedDrop for PinnedDropWithNotUnpin<T> {
         fn drop(self: Pin<&mut Self>) {}
     }
 
+    #[pin_project(UnsafeUnpin, Replace)]
+    pub struct UnsafeUnpinWithReplace<T> {
+        #[pin]
+        field: T,
+    }
+
+    unsafe impl<T: Unpin> UnsafeUnpin for UnsafeUnpinWithReplace<T> {}
+
     #[pin_project(!Unpin, Replace)]
-    pub struct Struct4<T> {
+    pub struct NotUnpinWithReplace<T> {
         #[pin]
         field: T,
     }

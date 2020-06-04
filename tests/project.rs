@@ -160,8 +160,8 @@ struct A {
 
 mod project_use_1 {
     use crate::A;
-    use core::pin::Pin;
     use pin_project::project;
+    use std::pin::Pin;
 
     #[project]
     use crate::A;

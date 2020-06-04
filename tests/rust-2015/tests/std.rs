@@ -12,7 +12,4 @@ extern crate pin_project;
 // #[allow(unused_imports)]
 // use pin_project as pin;
 
-use pin_project::{pin_project, pinned_drop, UnsafeUnpin};
-use std::pin::Pin;
-
 include!("../../include/basic.rs");
