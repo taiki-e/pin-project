@@ -20,9 +20,6 @@ cargo +nightly test --all --all-features --exclude expandtest
 echo "Running 'cargo doc'"
 cargo +nightly doc --no-deps --all --all-features
 
-echo "Running 'compiletest'"
-. ./compiletest.sh
-
 echo "Running 'expandtest'"
 # See also https://docs.rs/macrotest/1/macrotest/#updating-expandedrs
 # rm **/*.expanded.rs

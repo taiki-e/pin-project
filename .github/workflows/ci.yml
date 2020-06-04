@@ -56,10 +56,6 @@ jobs:
       - name: cargo test
         run: |
           cargo test --all --all-features --exclude expandtest
-      - name: cargo test (compiletest)
-        if: matrix.rust == 'nightly'
-        run: |
-          cargo test -p pin-project --all-features --test compiletest -- --ignored
       - name: cargo check (no-std)
         if: matrix.rust == 'nightly'
         run: |
