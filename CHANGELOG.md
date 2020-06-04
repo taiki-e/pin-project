@@ -6,6 +6,17 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 ## [Unreleased]
 
+* [Support `Self` in more syntax positions inside `#[pinned_drop]` impl.][230]
+
+* [Suppress `clippy::type_repetition_in_bounds` and `clippy::used_underscore_binding` lints in generated code.][233]
+
+* Documentation improvements.
+
+* Diagnostic improvements.
+
+[230]: https://github.com/taiki-e/pin-project/pull/230
+[233]: https://github.com/taiki-e/pin-project/pull/233
+
 ## [0.4.17] - 2020-05-18
 
 * [Support naming the projection types.][202]
@@ -73,11 +84,13 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 * [Fixed an issue where duplicate `#[project]` attributes were ignored.][218]
 
-* [Fixed compile error and warnings with HRTB.][217]
+* [Suppress `single_use_lifetimes` lint in generated code.][217]
 
-* [Hide generated items from --document-private-items.][211] See [#211][211] for more details.
+* [Support overlapping lifetime names in HRTB.][217]
 
-* Improve documentation
+* [Hide generated items from --document-private-items.][211] See [#211][211] for details.
+
+* Documentation improvements.
 
 [211]: https://github.com/taiki-e/pin-project/pull/211
 [217]: https://github.com/taiki-e/pin-project/pull/217
@@ -94,7 +107,11 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
   * [Support overwriting the name of core crate.][199]
 
-  * Improve documentation
+  * [Suppress `clippy::needless_pass_by_value` lint in generated code of `#[pinned_drop]`.][200]
+
+  * Documentation improvements.
+
+  * Diagnostic improvements.
 
 [207]: https://github.com/taiki-e/pin-project/pull/207
 
@@ -110,10 +127,15 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 * [Support overwriting the name of core crate.][199]
 
-* Improve documentation
+* [Suppress `clippy::needless_pass_by_value` lint in generated code of `#[pinned_drop]`.][200]
+
+* Documentation improvements.
+
+* Diagnostic improvements.
 
 [197]: https://github.com/taiki-e/pin-project/pull/197
 [199]: https://github.com/taiki-e/pin-project/pull/199
+[200]: https://github.com/taiki-e/pin-project/pull/200
 
 ## [0.4.10] - 2020-05-04
 
@@ -121,6 +143,12 @@ This project adheres to [Semantic Versioning](https://semver.org).
   `project_replace` method is optional and can be enabled by passing the `Replace` argument to `#[pin_project]` attribute.
   See [the documentation](https://docs.rs/pin-project/0.4/pin_project/attr.pin_project.html#project_replace) for more details.
 
+* [Support `Self` and `self` in more syntax positions inside `#[pinned_drop]` impl.][190]
+
+* [Hided all generated items except for projected types from calling code.][192] See [#192][192] for details.
+
+[190]: https://github.com/taiki-e/pin-project/pull/190
+[192]: https://github.com/taiki-e/pin-project/pull/192
 [194]: https://github.com/taiki-e/pin-project/pull/194
 
 ## [0.4.9] - 2020-04-14
@@ -139,6 +167,9 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 * [Ensured that users cannot implement `PinnedDrop` without proper attribute argument.][180]
 
+* [Fixed use of `Self` in expression position inside `#[pinned_drop]` impl.][177]
+
+[177]: https://github.com/taiki-e/pin-project/pull/180
 [180]: https://github.com/taiki-e/pin-project/pull/180
 
 ## [0.4.7] - 2020-01-20
@@ -172,6 +203,8 @@ This project adheres to [Semantic Versioning](https://semver.org).
 * [`#[pin_project]` can now interoperate with `#[cfg()]` on tuple structs and tuple variants.][135]
 
 * [Fixed support for DSTs(Dynamically Sized Types) on `#[pin_project(UnsafeUnpin)]`][120]
+
+* Diagnostic improvements.
 
 [120]: https://github.com/taiki-e/pin-project/pull/120
 [135]: https://github.com/taiki-e/pin-project/pull/135
@@ -262,7 +295,7 @@ Changes since the 0.4.0-beta.1 release:
 
 * Added some examples and generated code.
 
-* Improve error messages.
+* Diagnostic improvements.
 
 [86]: https://github.com/taiki-e/pin-project/pull/86
 
@@ -270,7 +303,7 @@ Changes since the 0.4.0-beta.1 release:
 
 * [`#[pin_project]` can now interoperate with `#[cfg()]`.][77]
 
-* Improved documentation.
+* Documentation improvements.
 
 [77]: https://github.com/taiki-e/pin-project/pull/77
 
@@ -292,14 +325,14 @@ Changes since the 0.4.0-beta.1 release:
 
 * [Improved document of generated code.][62]. Also added an option to control the document of generated code. See [#62][62] for more details.
 
-* [Improved error messages][61]
+* [Diagnostic improvements.][61]
 
 [61]: https://github.com/taiki-e/pin-project/pull/61
 [62]: https://github.com/taiki-e/pin-project/pull/62
 
 ## [0.4.0-alpha.7] - 2019-09-02
 
-* [Applied `#[allow(dead_code)]` to generated types.][57]
+* [Suppress `dead_code` lint in generated types.][57]
 
 [57]: https://github.com/taiki-e/pin-project/pull/57
 
@@ -317,7 +350,7 @@ Changes since the 0.4.0-beta.1 release:
 
 ## [0.4.0-alpha.4] - 2019-08-23
 
-* Avoided clippy::drop_bounds lint in generated code.
+* Suppress `clippy::drop_bounds` lint in generated code.
 
 ## [0.4.0-alpha.3] - 2019-08-23
 
@@ -359,11 +392,11 @@ See also [tracking issue for 0.4 release][21].
 
 ## [0.3.4] - 2019-07-21
 
-* Improved error messages.
+* Diagnostic improvements.
 
 ## [0.3.3] - 2019-07-15 - YANKED
 
-* Improved error messages.
+* Diagnostic improvements.
 
 ## [0.3.2] - 2019-03-30
 
@@ -371,7 +404,7 @@ See also [tracking issue for 0.4 release][21].
 
 ## [0.3.1] - 2019-03-02
 
-* Improved documentation.
+* Documentation improvements.
 
 * Updated minimum `syn` version to 0.15.22.
 
@@ -393,7 +426,7 @@ See also [tracking issue for 0.4 release][21].
 
 * Made `unsafe_fields` optional.
 
-* Improved documentation.
+* Documentation improvements.
 
 ## [0.1.8] - 2019-02-02
 
@@ -427,7 +460,7 @@ See also [tracking issue for 0.4 release][21].
 
 ## [0.1.2] - 2019-01-09
 
-* Improved documentation.
+* Documentation improvements.
 
 ## [0.1.1] - 2019-01-08
 
