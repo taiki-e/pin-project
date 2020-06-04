@@ -121,6 +121,9 @@ mod pin_project_argument {
     #[pin_project(project = A, project = B)] //~ ERROR duplicate `project` argument
     struct DuplicateProject(#[pin] ());
 
+    #[pin_project(project = A, project_ref = A, project = B)] //~ ERROR duplicate `project` argument
+    struct DuplicateProject2(#[pin] ());
+
     #[pin_project(project_ref = A, project_ref = B)] //~ ERROR duplicate `project_ref` argument
     struct DuplicateProjectRef(#[pin] ());
 
@@ -142,28 +145,28 @@ mod pin_project_argument {
     #[pin_project(!Unpin, PinnedDrop, UnsafeUnpin)] //~ ERROR arguments `UnsafeUnpin` and `!Unpin` are mutually exclusive
     struct UnsafeUnpinWithNotUnpin2(#[pin] ());
 
-    #[pin_project(!)] //~ ERROR unexpected end of input, expected `Unpin`
+    #[pin_project(!)] //~ ERROR expected `!Unpin`, found `!`
     struct NotUnpin1(#[pin] ());
 
     #[pin_project(Unpin)] //~ ERROR unexpected argument
     struct NotUnpin2(#[pin] ());
 
-    #[pin_project(project)] //~ ERROR expected `=`
+    #[pin_project(project)] //~ ERROR expected `project = <identifier>`, found `project`
     struct Project1(#[pin] ());
 
-    #[pin_project(project = )] //~ ERROR unexpected end of input, expected identifier
+    #[pin_project(project = )] //~ ERROR expected `project = <identifier>`, found `project =`
     struct Project2(#[pin] ());
 
-    #[pin_project(project_ref)] //~ ERROR expected `=`
+    #[pin_project(project_ref)] //~ ERROR expected `project_ref = <identifier>`, found `project_ref`
     struct ProjectRef1(#[pin] ());
 
-    #[pin_project(project_ref = )] //~ ERROR unexpected end of input, expected identifier
+    #[pin_project(project_ref = )] //~ ERROR expected `project_ref = <identifier>`, found `project_ref =`
     struct ProjectRef2(#[pin] ());
 
-    #[pin_project(project_replace)] //~ ERROR expected `=`
+    #[pin_project(project_replace)] //~ ERROR expected `project_replace = <identifier>`, found `project_replace`
     struct ProjectReplace1(#[pin] ());
 
-    #[pin_project(project_replace = )] //~ ERROR unexpected end of input, expected identifier
+    #[pin_project(project_replace = )] //~ ERROR expected `project_replace = <identifier>`, found `project_replace =`
     struct ProjectReplace2(#[pin] ());
 }
 

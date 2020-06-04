@@ -27,12 +27,12 @@ pub mod self_span {
     use std::pin::Pin;
 
     #[pin_project(PinnedDrop)]
-    pub struct Struct {
+    pub struct S {
         x: (),
     }
 
     #[pinned_drop]
-    impl PinnedDrop for Struct {
+    impl PinnedDrop for S {
         fn drop(self: Pin<&mut Self>) {
             let _: () = self; //~ ERROR E0308
             let _: Self = Self; //~ ERROR E0423

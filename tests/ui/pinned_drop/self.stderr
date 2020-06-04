@@ -22,16 +22,16 @@ error[E0434]: can't capture dynamic environment in a fn item
    = help: use the `|| { ... }` closure form instead
    = note: this error originates in a macro (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error[E0423]: expected value, found struct `Struct`
+error[E0423]: expected value, found struct `S`
   --> $DIR/self.rs:38:27
    |
-30 | /     pub struct Struct {
+30 | /     pub struct S {
 31 | |         x: (),
 32 | |     }
-   | |_____- `Struct` defined here
+   | |_____- `S` defined here
 ...
 38 |               let _: Self = Self; //~ ERROR E0423
-   |                             ^^^^ did you mean `Struct { /* fields */ }`?
+   |                             ^^^^ did you mean `S { /* fields */ }`?
 
 error[E0308]: mismatched types
   --> $DIR/self.rs:37:25
@@ -42,4 +42,4 @@ error[E0308]: mismatched types
    |                    expected due to this
    |
    = note: expected unit type `()`
-                 found struct `std::pin::Pin<&mut self_span::Struct>`
+                 found struct `std::pin::Pin<&mut self_span::S>`

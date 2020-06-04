@@ -62,7 +62,7 @@ pub(crate) fn determine_lifetime_name(lifetime_name: &mut String, generics: &mut
 
     impl VisitMut for CollectLifetimes {
         fn visit_lifetime_def_mut(&mut self, def: &mut LifetimeDef) {
-            self.0.push(def.lifetime.to_string())
+            self.0.push(def.lifetime.to_string());
         }
     }
 

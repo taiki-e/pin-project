@@ -1,5 +1,5 @@
 error: duplicate #[pin] attribute
- --> $DIR/add-pin-attr-to-struct.rs:6:1
+ --> $DIR/add-attr-to-struct.rs:6:1
   |
 6 | #[add_pin_attr(struct)] //~ ERROR duplicate #[pin] attribute
   | ^^^^^^^^^^^^^^^^^^^^^^^
@@ -7,7 +7,7 @@ error: duplicate #[pin] attribute
   = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: #[pin] attribute may only be used on fields of structs or variants
-  --> $DIR/add-pin-attr-to-struct.rs:12:1
+  --> $DIR/add-attr-to-struct.rs:12:1
    |
 12 | #[add_pin_attr(struct)] //~ ERROR #[pin] attribute may only be used on fields of structs or variants
    | ^^^^^^^^^^^^^^^^^^^^^^^
