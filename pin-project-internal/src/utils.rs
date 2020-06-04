@@ -1,5 +1,5 @@
-use proc_macro2::{Group, Spacing, TokenStream, TokenTree};
-use quote::{format_ident, quote};
+use proc_macro2::{Group, Spacing, Span, TokenStream, TokenTree};
+use quote::{format_ident, quote, ToTokens};
 use std::{iter::FromIterator, mem};
 use syn::{
     parse::{ParseBuffer, ParseStream},
@@ -103,8 +103,7 @@ pub(crate) fn insert_lifetime_and_bound(
 pub(crate) fn insert_lifetime(generics: &mut Generics, lifetime: Lifetime) {
     generics.lt_token.get_or_insert_with(token::Lt::default);
     generics.gt_token.get_or_insert_with(token::Gt::default);
-
-    generics.params.insert(0, GenericParam::Lifetime(LifetimeDef::new(lifetime)));
+    generics.params.insert(0, LifetimeDef::new(lifetime).into());
 }
 
 /// Determines the visibility of the projected type and projection method.
@@ -190,6 +189,14 @@ impl<'a> ParseBufferExt<'a> for ParseBuffer<'a> {
 pub(crate) struct ReplaceReceiver<'a>(pub(crate) &'a Type);
 
 impl ReplaceReceiver<'_> {
+    fn self_ty(&self, span: Span) -> Type {
+        let mut tokens = self.0.to_token_stream().into_iter().collect::<Vec<_>>();
+        for token in tokens.iter_mut() {
+            token.set_span(span);
+        }
+        syn::parse2(tokens.into_iter().collect()).unwrap()
+    }
+
     fn self_to_qself(&self, qself: &mut Option<QSelf>, path: &mut Path) {
         if path.leading_colon.is_some() {
             return;
@@ -207,7 +214,7 @@ impl ReplaceReceiver<'_> {
 
         *qself = Some(QSelf {
             lt_token: token::Lt::default(),
-            ty: Box::new(self.0.clone()),
+            ty: Box::new(self.self_ty(first.ident.span())),
             position: 0,
             as_token: None,
             gt_token: token::Gt::default(),
@@ -232,8 +239,8 @@ impl ReplaceReceiver<'_> {
             return;
         }
 
-        if let Type::Path(self_ty) = &self.0 {
-            let variant = mem::replace(path, self_ty.path.clone());
+        if let Type::Path(self_ty) = self.self_ty(first.ident.span()) {
+            let variant = mem::replace(path, self_ty.path);
             for segment in &mut path.segments {
                 if let PathArguments::AngleBracketed(bracketed) = &mut segment.arguments {
                     if bracketed.colon2_token.is_none() && !bracketed.args.is_empty() {
@@ -263,7 +270,7 @@ impl ReplaceReceiver<'_> {
                     modified |= prepend_underscore_to_self(&mut ident);
                     if ident == "Self" {
                         modified = true;
-                        let self_ty = self.0;
+                        let self_ty = self.self_ty(ident.span());
                         match iter.peek() {
                             Some(TokenTree::Punct(p))
                                 if p.as_char() == ':' && p.spacing() == Spacing::Joint =>
@@ -305,7 +312,7 @@ impl VisitMut for ReplaceReceiver<'_> {
     fn visit_type_mut(&mut self, ty: &mut Type) {
         if let Type::Path(node) = ty {
             if node.qself.is_none() && node.path.is_ident("Self") {
-                *ty = self.0.clone();
+                *ty = self.self_ty(node.path.segments[0].ident.span());
             } else {
                 self.visit_type_path_mut(node);
             }

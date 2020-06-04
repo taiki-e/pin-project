@@ -1,10 +1,10 @@
-use pin_project::{pin_project, pinned_drop};
-use std::pin::Pin;
+pub mod self_in_macro_def {
+    use pin_project::{pin_project, pinned_drop};
+    use std::pin::Pin;
 
-fn self_in_macro_def() {
     #[pin_project(PinnedDrop)]
     pub struct Struct {
-        x: usize,
+        x: (),
     }
 
     #[pinned_drop]
@@ -12,15 +12,30 @@ fn self_in_macro_def() {
         fn drop(self: Pin<&mut Self>) {
             macro_rules! t {
                 () => {{
-                    let _ = self; //~ ERROR can't capture dynamic environment in a fn item
+                    let _ = self; //~ ERROR E0434
 
-                    fn f(self: ()) {
-                        //~^ ERROR `self` parameter is only allowed in associated functions
-                        let _ = self;
-                    }
+                    fn f(self: ()) {} //~ ERROR `self` parameter is only allowed in associated functions
                 }};
             }
             t!();
+        }
+    }
+}
+
+pub mod self_span {
+    use pin_project::{pin_project, pinned_drop};
+    use std::pin::Pin;
+
+    #[pin_project(PinnedDrop)]
+    pub struct Struct {
+        x: (),
+    }
+
+    #[pinned_drop]
+    impl PinnedDrop for Struct {
+        fn drop(self: Pin<&mut Self>) {
+            let _: () = self; //~ ERROR E0308
+            let _: Self = Self; //~ ERROR E0423
         }
     }
 }
