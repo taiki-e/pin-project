@@ -2,7 +2,7 @@ use proc_macro2::{Group, Spacing, Span, TokenStream, TokenTree};
 use quote::{format_ident, quote, ToTokens};
 use std::{iter::FromIterator, mem};
 use syn::{
-    parse::{ParseBuffer, ParseStream},
+    parse::{Parse, ParseBuffer, ParseStream},
     punctuated::Punctuated,
     visit_mut::{self, VisitMut},
     *,
@@ -122,6 +122,25 @@ pub(crate) fn parse_as_empty(tokens: &TokenStream) -> Result<()> {
     if tokens.is_empty() { Ok(()) } else { Err(error!(tokens, "unexpected token: {}", tokens)) }
 }
 
+pub(crate) fn respan<T>(node: &T, span: Span) -> T
+where
+    T: ToTokens + Parse,
+{
+    let tokens = node.to_token_stream();
+    let respanned = respan_tokens(tokens, span);
+    syn::parse2(respanned).unwrap()
+}
+
+fn respan_tokens(tokens: TokenStream, span: Span) -> TokenStream {
+    tokens
+        .into_iter()
+        .map(|mut token| {
+            token.set_span(span);
+            token
+        })
+        .collect()
+}
+
 // =================================================================================================
 // extension traits
 
@@ -190,11 +209,7 @@ pub(crate) struct ReplaceReceiver<'a>(pub(crate) &'a Type);
 
 impl ReplaceReceiver<'_> {
     fn self_ty(&self, span: Span) -> Type {
-        let mut tokens = self.0.to_token_stream().into_iter().collect::<Vec<_>>();
-        for token in tokens.iter_mut() {
-            token.set_span(span);
-        }
-        syn::parse2(tokens.into_iter().collect()).unwrap()
+        respan(self.0, span)
     }
 
     fn self_to_qself(&self, qself: &mut Option<QSelf>, path: &mut Path) {
