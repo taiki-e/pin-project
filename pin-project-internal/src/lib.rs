@@ -65,8 +65,8 @@ use crate::utils::ProjKind;
 ///     field: T,
 /// }
 ///
-/// impl Struct<T> {
-///     fn method<T>(self: Pin<&mut Self>) {
+/// impl<T> Struct<T> {
+///     fn method(self: Pin<&mut Self>) {
 ///         let this: StructProj<'_, T> = self.project();
 ///         let StructProj { field } = this;
 ///         let _: Pin<&mut T> = field;
