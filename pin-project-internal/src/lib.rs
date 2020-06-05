@@ -28,14 +28,14 @@ use proc_macro::TokenStream;
 
 use crate::utils::ProjKind;
 
-/// An attribute that creates a projection type covering all the fields of
+/// An attribute that creates projection types covering all the fields of
 /// struct or enum.
 ///
-/// This attribute creates a projection type according to the following rules:
+/// This attribute creates projection types according to the following rules:
 ///
-/// * For the field that uses `#[pin]` attribute, makes the pinned reference to
+/// * For the fields that use `#[pin]` attribute, create the pinned reference to
 ///   the field.
-/// * For the other fields, makes the unpinned reference to the field.
+/// * For the other fields, create a normal reference to the field.
 ///
 /// And the following methods are implemented on the original type:
 ///
@@ -59,19 +59,23 @@ use crate::utils::ProjKind;
 /// use pin_project::pin_project;
 /// use std::pin::Pin;
 ///
-/// #[pin_project(project = EnumProj)]
-/// enum Enum<T> {
-///     Variant(#[pin] T),
+/// #[pin_project(project = StructProj)]
+/// struct Struct<T> {
+///     #[pin]
+///     field: T,
 /// }
 ///
-/// fn func<T>(x: Pin<&mut Enum<T>>) {
-///     match x.project() {
-///         EnumProj::Variant(y) => {
-///             let _: Pin<&mut T> = y;
-///         }
+/// impl Struct<T> {
+///     fn method<T>(self: Pin<&mut Self>) {
+///         let this: StructProj<'_, T> = self.project();
+///         let StructProj { field } = this;
+///         let _: Pin<&mut T> = field;
 ///     }
 /// }
 /// ```
+///
+/// Note that the projection types returned by `project` and `project_ref` have
+/// an additional lifetime at the beginning of generics.
 ///
 /// The visibility of the projected type and projection method is based on the
 /// original type. However, if the visibility of the original type is `pub`, the
@@ -153,38 +157,7 @@ use crate::utils::ProjKind;
 ///
 /// # Examples
 ///
-/// Using `#[pin_project]` will automatically create the appropriate
-/// conditional [`Unpin`] implementation:
-///
-/// ```rust
-/// use pin_project::pin_project;
-/// use std::pin::Pin;
-///
-/// #[pin_project]
-/// struct Struct<T, U> {
-///     #[pin]
-///     pinned: T,
-///     unpinned: U,
-/// }
-///
-/// impl<T, U> Struct<T, U> {
-///     fn method(self: Pin<&mut Self>) {
-///         let this = self.project();
-///         let _: Pin<&mut T> = this.pinned; // Pinned reference to the field
-///         let _: &mut U = this.unpinned; // Normal reference to the field
-///     }
-/// }
-/// ```
-///
-/// If you want to call the `project()` method multiple times or later use the
-/// original [`Pin`] type, it needs to use [`.as_mut()`][`Pin::as_mut`] to avoid
-/// consuming the [`Pin`].
-///
-/// ## Supported Items
-///
 /// `#[pin_project]` can be used on structs and enums.
-///
-/// Structs:
 ///
 /// ```rust
 /// use pin_project::pin_project;
@@ -206,8 +179,6 @@ use crate::utils::ProjKind;
 /// }
 /// ```
 ///
-/// Tuple structs:
-///
 /// ```rust
 /// use pin_project::pin_project;
 /// use std::pin::Pin;
@@ -224,10 +195,8 @@ use crate::utils::ProjKind;
 /// }
 /// ```
 ///
-/// Enums:
-///
-/// `#[pin_project]` supports enums, but to use it, you need to name the
-/// projection type returned from the method.
+/// To use `#[pin_project]` on enums, you need to name the projection type
+/// returned from the method.
 ///
 /// ```rust
 /// use pin_project::pin_project;
@@ -255,7 +224,30 @@ use crate::utils::ProjKind;
 /// }
 /// ```
 ///
-/// ## `!Unpin`
+/// If you want to call the `project()` method multiple times or later use the
+/// original [`Pin`] type, it needs to use [`.as_mut()`][`Pin::as_mut`] to avoid
+/// consuming the [`Pin`].
+///
+/// ```rust
+/// use pin_project::pin_project;
+/// use std::pin::Pin;
+///
+/// #[pin_project]
+/// struct Struct<T> {
+///     #[pin]
+///     field: T,
+/// }
+///
+/// impl<T> Struct<T> {
+///     fn call_project_twice(mut self: Pin<&mut Self>) {
+///         // `project` consumes `self`, so reborrow the `Pin<&mut Self>` via `as_mut`.
+///         self.as_mut().project();
+///         self.as_mut().project();
+///     }
+/// }
+/// ```
+///
+/// # `!Unpin`
 ///
 /// If you want to ensure that [`Unpin`] is not implemented, use the `!Unpin`
 /// argument to `#[pin_project]`.
@@ -269,8 +261,8 @@ use crate::utils::ProjKind;
 /// }
 /// ```
 ///
-/// You can also ensure `!Unpin` by using `#[pin]` attribute for
-/// a [`PhantomPinned`] field.
+/// This is equivalent to using `#[pin]` attribute for the [`PhantomPinned`]
+/// field.
 ///
 /// ```rust
 /// use pin_project::pin_project;
@@ -286,7 +278,7 @@ use crate::utils::ProjKind;
 ///
 /// Note that using [`PhantomPinned`] without `#[pin]` attribute has no effect.
 ///
-/// ## `UnsafeUnpin`
+/// # `UnsafeUnpin`
 ///
 /// If you want to implement [`Unpin`] manually, you must use the `UnsafeUnpin`
 /// argument to `#[pin_project]`.
@@ -313,7 +305,7 @@ use crate::utils::ProjKind;
 ///
 /// See [`UnsafeUnpin`] trait for more details.
 ///
-/// ## `#[pinned_drop]`
+/// # `#[pinned_drop]`
 ///
 /// In order to correctly implement pin projections, a type's [`Drop`] impl must
 /// not move out of any structurally pinned fields. Unfortunately,
@@ -372,7 +364,7 @@ use crate::utils::ProjKind;
 ///
 /// See also [`#[pinned_drop]`][`pinned_drop`] attribute.
 ///
-/// ## `project_replace()`
+/// # `project_replace()`
 ///
 /// In addition to the `project()` and `project_ref()` methods which are always
 /// provided when you use the `#[pin_project]` attribute, there is a third
@@ -466,7 +458,7 @@ pub fn pin_project(args: TokenStream, input: TokenStream) -> TokenStream {
 /// In particular, it will never be called more than once, just like
 /// [`Drop::drop`].
 ///
-/// ## Example
+/// # Example
 ///
 /// ```rust
 /// use pin_project::{pin_project, pinned_drop};
@@ -492,7 +484,7 @@ pub fn pin_project(args: TokenStream, input: TokenStream) -> TokenStream {
 ///
 /// See also ["pinned-drop" section of `#[pin_project]` attribute][pinned-drop].
 ///
-/// ## Why `#[pinned_drop]` attribute is needed?
+/// # Why `#[pinned_drop]` attribute is needed?
 ///
 /// Implementing `PinnedDrop::drop` is safe, but calling it is not safe.
 // This is because destructors can be called multiple times in safe code and
@@ -527,12 +519,12 @@ pub fn pinned_drop(args: TokenStream, input: TokenStream) -> TokenStream {
 ///
 /// The following syntaxes are supported.
 ///
-/// ## `let` bindings
+/// # `let` bindings
 ///
 /// *The attribute at the expression position is not stable, so you need to use
 /// a dummy `#[project]` attribute for the function.*
 ///
-/// ### Examples
+/// ## Examples
 ///
 /// ```rust
 /// use pin_project::{pin_project, project};
@@ -557,12 +549,12 @@ pub fn pinned_drop(args: TokenStream, input: TokenStream) -> TokenStream {
 /// }
 /// ```
 ///
-/// ## `match` expressions
+/// # `match` expressions
 ///
 /// *The attribute at the expression position is not stable, so you need to use
 /// a dummy `#[project]` attribute for the function.*
 ///
-/// ### Examples
+/// ## Examples
 ///
 /// ```rust
 /// use pin_project::{pin_project, project};
@@ -593,7 +585,7 @@ pub fn pinned_drop(args: TokenStream, input: TokenStream) -> TokenStream {
 /// }
 /// ```
 ///
-/// ## `impl` blocks
+/// # `impl` blocks
 ///
 /// All methods and associated functions in `#[project] impl` block become
 /// methods of the projected type. If you want to implement methods on the
@@ -602,7 +594,7 @@ pub fn pinned_drop(args: TokenStream, input: TokenStream) -> TokenStream {
 /// To call a method implemented in `#[project] impl` block, you need to first
 /// get the projected-type with `let this = self.project();`.
 ///
-/// ### Examples
+/// ## Examples
 ///
 /// ```rust
 /// use pin_project::{pin_project, project};
@@ -634,9 +626,9 @@ pub fn pinned_drop(args: TokenStream, input: TokenStream) -> TokenStream {
 /// }
 /// ```
 ///
-/// ## `use` statements
+/// # `use` statements
 ///
-/// ### Examples
+/// ## Examples
 ///
 /// ```rust
 /// # mod dox {
@@ -701,7 +693,7 @@ pub fn project_replace(args: TokenStream, input: TokenStream) -> TokenStream {
     project::attribute(&args.into(), input, ProjKind::Owned).into()
 }
 
-/// An internal helper macro.
+// An internal helper macro. Not public API.
 #[doc(hidden)]
 #[proc_macro_derive(__PinProjectInternalDerive, attributes(pin))]
 pub fn __pin_project_internal_derive(input: TokenStream) -> TokenStream {

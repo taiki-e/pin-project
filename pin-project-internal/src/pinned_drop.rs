@@ -10,7 +10,7 @@ pub(crate) fn attribute(args: &TokenStream, mut input: ItemImpl) -> TokenStream 
         let (impl_generics, _, where_clause) = input.generics.split_for_impl();
 
         let mut tokens = e.to_compile_error();
-        // Generate a dummy `PinnedDrop` implementation.
+        // A dummy impl of `PinnedDrop`.
         // In many cases, `#[pinned_drop] impl` is declared after `#[pin_project]`.
         // Therefore, if `pinned_drop` compile fails, you will also get an error
         // about `PinnedDrop` not being implemented.

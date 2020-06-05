@@ -1,8 +1,8 @@
 //! A crate for safe and ergonomic [pin-projection].
 //!
-//! ## Examples
+//! # Examples
 //!
-//! [`#[pin_project]`][`pin_project`] attribute creates a projection type
+//! [`#[pin_project]`][`pin_project`] attribute creates projection types
 //! covering all the fields of struct or enum.
 //!
 //! ```rust
@@ -25,12 +25,10 @@
 //! }
 //! ```
 //!
-//! [Code like this will be generated][struct-default-expanded]
+//! [*code like this will be generated*][struct-default-expanded]
 //!
-//! See [`#[pin_project]`][`pin_project`] attribute for more details.
-//!
-//! Also, there are examples and generated code of each feature in [examples]
-//! directory.
+//! See [`#[pin_project]`][`pin_project`] attribute for more details, and
+//! see [examples] directory for more examples and generated code.
 //!
 //! [`pin_project`]: attr.pin_project.html
 //! [examples]: https://github.com/taiki-e/pin-project/blob/master/examples/README.md
@@ -100,7 +98,7 @@ pub use pin_project_internal::project_replace;
 /// Since this trait is `unsafe`, impls of it will be detected by the
 /// `unsafe_code` lint, and by tools like [`cargo geiger`][cargo-geiger].
 ///
-/// ## Examples
+/// # Examples
 ///
 /// An `UnsafeUnpin` impl which, in addition to requiring that structurally
 /// pinned fields be [`Unpin`], imposes an additional requirement:

@@ -16,10 +16,6 @@
 
 A crate for safe and ergonomic [pin-projection].
 
-[Documentation][docs-url]
-
-[Examples][examples]
-
 ## Usage
 
 Add this to your `Cargo.toml`:
@@ -33,7 +29,7 @@ The current pin-project requires Rust 1.34 or later.
 
 ## Examples
 
-[`#[pin_project]`][`pin_project`] attribute creates a projection type
+[`#[pin_project]`][`pin_project`] attribute creates projection types
 covering all the fields of struct or enum.
 
 ```rust
@@ -56,12 +52,10 @@ impl<T, U> Struct<T, U> {
 }
 ```
 
-[Code like this will be generated][struct-default-expanded]
+[*code like this will be generated*][struct-default-expanded]
 
-See [API documentation][docs-url] for more details.
-
-Also, there are examples and generated code of each feature in [examples]
-directory.
+See [documentation][docs-url] for more details, and
+see [examples] directory for more examples and generated code.
 
 [`pin_project`]: https://docs.rs/pin-project/0.4/pin_project/attr.pin_project.html
 [examples]: examples/README.md
