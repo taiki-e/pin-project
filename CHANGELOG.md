@@ -6,7 +6,33 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 ## [Unreleased]
 
+## [0.4.20] - 2020-06-07
+
+* [You can now use project_replace argument without Replace argument.][243]
+  This used to require you to specify both.
+
+  ```diff
+  - #[pin_project(Replace, project_replace = EnumProjOwn)]
+  + #[pin_project(project_replace = EnumProjOwn)]
+    enum Enum<T> {
+        Variant(#[pin] T)
+    }
+  ```
+
+* [Makes `project_replace` argument an alias for `Replace` argument so that it can be used without a value.][243]
+
+  ```rust
+  #[pin_project(project_replace)]
+  enum Enum<T> {
+      Variant(#[pin] T)
+  }
+  ```
+
+  *The `Replace` argument will be deprecated in the future.*
+
 * Suppress `unreachable_pub` lint in generated code.
+
+[243]: https://github.com/taiki-e/pin-project/pull/243
 
 ## [0.4.19] - 2020-06-04
 
@@ -480,7 +506,8 @@ See also [tracking issue for 0.4 release][21].
 
 Initial release
 
-[Unreleased]: https://github.com/taiki-e/pin-project/compare/v0.4.19...HEAD
+[Unreleased]: https://github.com/taiki-e/pin-project/compare/v0.4.20...HEAD
+[0.4.20]: https://github.com/taiki-e/pin-project/compare/v0.4.19...v0.4.20
 [0.4.19]: https://github.com/taiki-e/pin-project/compare/v0.4.18...v0.4.19
 [0.4.18]: https://github.com/taiki-e/pin-project/compare/v0.4.17...v0.4.18
 [0.4.17]: https://github.com/taiki-e/pin-project/compare/v0.4.16...v0.4.17
