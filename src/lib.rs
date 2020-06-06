@@ -36,7 +36,6 @@
 //! [struct-default-expanded]: https://github.com/taiki-e/pin-project/blob/master/examples/struct-default-expanded.rs
 
 #![no_std]
-#![recursion_limit = "256"]
 #![doc(html_root_url = "https://docs.rs/pin-project/0.4.19")]
 #![doc(test(
     no_crate_inject,

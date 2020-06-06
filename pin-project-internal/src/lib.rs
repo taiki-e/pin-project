@@ -1,6 +1,5 @@
 //! An internal crate to support pin_project - **do not use directly**
 
-#![recursion_limit = "256"]
 #![doc(html_root_url = "https://docs.rs/pin-project-internal/0.4.19")]
 #![doc(test(
     no_crate_inject,
