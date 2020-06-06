@@ -242,7 +242,7 @@ fn issue_206() {
 #[project]
 #[test]
 fn combine() {
-    #[pin_project(Replace)]
+    #[pin_project(project_replace)]
     enum Enum<A> {
         V1(#[pin] A),
         V2,
@@ -272,7 +272,7 @@ fn combine() {
 #[project_replace]
 #[test]
 fn combine_compat() {
-    #[pin_project(Replace)]
+    #[pin_project(project_replace)]
     enum Enum<A> {
         V1(#[pin] A),
         V2,

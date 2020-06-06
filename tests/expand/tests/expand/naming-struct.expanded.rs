@@ -1,5 +1,5 @@
 use pin_project::pin_project;
-# [ pin ( __private ( Replace , project = Proj , project_ref = ProjRef , project_replace = ProjOwn ) ) ]
+# [ pin ( __private ( project = Proj , project_ref = ProjRef , project_replace = ProjOwn ) ) ]
 struct Struct<T, U> {
     #[pin]
     pinned: T,

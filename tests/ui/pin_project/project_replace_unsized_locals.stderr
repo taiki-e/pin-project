@@ -26,8 +26,8 @@ error[E0277]: the size for values of type `T` cannot be known at compilation tim
 error[E0277]: the size for values of type `T` cannot be known at compilation time
  --> $DIR/project_replace_unsized_locals.rs:5:1
   |
-5 | #[pin_project(Replace)] //~ ERROR E0277
-  | ^^^^^^^^^^^^^^^^^^^^^^^ doesn't have a size known at compile-time
+5 | #[pin_project(project_replace)] //~ ERROR E0277
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ doesn't have a size known at compile-time
 6 | struct Struct<T: ?Sized> {
   |               - this type parameter needs to be `std::marker::Sized`
   |
@@ -54,8 +54,8 @@ error[E0277]: the size for values of type `T` cannot be known at compilation tim
 error[E0277]: the size for values of type `T` cannot be known at compilation time
    --> $DIR/project_replace_unsized_locals.rs:10:1
     |
-10  | #[pin_project(Replace)] //~ ERROR E0277
-    | ^^^^^^^^^^^^^^^^^^^^^^^ doesn't have a size known at compile-time
+10  | #[pin_project(project_replace)] //~ ERROR E0277
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ doesn't have a size known at compile-time
 11  | struct TupleStruct<T: ?Sized>(T);
     |                    - this type parameter needs to be `std::marker::Sized`
     |

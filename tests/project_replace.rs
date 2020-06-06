@@ -7,7 +7,7 @@ use std::{marker::PhantomData, pin::Pin};
 #[project_replace] // Nightly does not need a dummy attribute to the function.
 #[test]
 fn project_replace_stmt_expr() {
-    #[pin_project(Replace)]
+    #[pin_project(project_replace)]
     struct Struct<T, U> {
         #[pin]
         field1: T,
@@ -27,7 +27,7 @@ fn project_replace_stmt_expr() {
 
     // tuple struct
 
-    #[pin_project(Replace)]
+    #[pin_project(project_replace)]
     struct TupleStruct<T, U>(#[pin] T, U);
 
     let mut s = TupleStruct(1, 2);
@@ -39,7 +39,7 @@ fn project_replace_stmt_expr() {
     let y: i32 = y;
     assert_eq!(y, 2);
 
-    #[pin_project(Replace)]
+    #[pin_project(project_replace)]
     enum Enum<A, B, C, D> {
         Variant1(#[pin] A, B),
         Variant2 {
@@ -73,7 +73,7 @@ fn project_replace_stmt_expr() {
 #[project_replace]
 #[test]
 fn combine() {
-    #[pin_project(Replace)]
+    #[pin_project(project_replace)]
     enum Enum<A> {
         V1(#[pin] A),
         V2,

@@ -149,7 +149,7 @@ fn project_impl() {
 #[project_ref]
 #[test]
 fn combine() {
-    #[pin_project(Replace)]
+    #[pin_project(project_replace)]
     enum Enum<A> {
         V1(#[pin] A),
         V2,

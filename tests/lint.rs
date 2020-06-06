@@ -51,17 +51,17 @@ pub mod forbid_unsafe {
 pub mod clippy {
     use pin_project::pin_project;
 
-    #[pin_project(Replace)]
+    #[pin_project(project_replace)]
     pub struct MutMutStruct<'a, T, U> {
         #[pin]
         pub pinned: &'a mut T,
         pub unpinned: &'a mut U,
     }
 
-    #[pin_project(Replace)]
+    #[pin_project(project_replace)]
     pub struct MutMutTupleStruct<'a, T, U>(#[pin] &'a mut T, &'a mut U);
 
-    #[pin_project(Replace)]
+    #[pin_project(project_replace)]
     pub enum MutMutEnum<'a, T, U> {
         Struct {
             #[pin]
@@ -72,7 +72,7 @@ pub mod clippy {
         Unit,
     }
 
-    #[pin_project(Replace)]
+    #[pin_project(project_replace)]
     pub struct TypeRepetitionInBoundsStruct<T, U>
     where
         Self: Sized,
@@ -82,12 +82,12 @@ pub mod clippy {
         pub unpinned: U,
     }
 
-    #[pin_project(Replace)]
+    #[pin_project(project_replace)]
     pub struct TypeRepetitionInBoundsTupleStruct<T, U>(#[pin] T, U)
     where
         Self: Sized;
 
-    #[pin_project(Replace)]
+    #[pin_project(project_replace)]
     pub enum TypeRepetitionInBoundsEnum<T, U>
     where
         Self: Sized,
@@ -101,14 +101,14 @@ pub mod clippy {
         Unit,
     }
 
-    #[pin_project(Replace)]
+    #[pin_project(project_replace)]
     pub struct UsedUnderscoreBindingStruct<T, U> {
         #[pin]
         pub _pinned: T,
         pub _unpinned: U,
     }
 
-    #[pin_project(Replace)]
+    #[pin_project(project_replace)]
     pub enum UsedUnderscoreBindingEnum<T, U> {
         Struct {
             #[pin]

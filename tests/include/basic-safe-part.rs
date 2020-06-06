@@ -63,7 +63,7 @@ impl<T, U> PinnedDrop for PinnedDropEnum<T, U> {
     fn drop(self: ::pin_project::__private::Pin<&mut Self>) {}
 }
 
-#[::pin_project::pin_project(Replace)]
+#[::pin_project::pin_project(project_replace)]
 #[derive(Debug)]
 pub struct ReplaceStruct<T, U> {
     #[pin]
@@ -71,11 +71,11 @@ pub struct ReplaceStruct<T, U> {
     pub unpinned: U,
 }
 
-#[::pin_project::pin_project(Replace)]
+#[::pin_project::pin_project(project_replace)]
 #[derive(Debug)]
 pub struct ReplaceTupleStruct<T, U>(#[pin] pub T, pub U);
 
-#[::pin_project::pin_project(Replace)]
+#[::pin_project::pin_project(project_replace)]
 #[derive(Debug)]
 pub enum ReplaceEnum<T, U> {
     Struct {

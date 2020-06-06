@@ -385,14 +385,39 @@ use crate::utils::ProjKind;
 /// This method is opt-in, because it is only supported for [`Sized`] types, and
 /// because it is incompatible with the [`#[pinned_drop]`][pinned-drop]
 /// attribute described above. It can be enabled by using
-/// `#[pin_project(Replace)]`.
+/// `#[pin_project(project_replace)]`.
 ///
 /// For example:
 ///
 /// ```rust
 /// use pin_project::pin_project;
+/// use std::{marker::PhantomData, pin::Pin};
 ///
-/// #[pin_project(Replace, project_replace = EnumProjOwn)]
+/// #[pin_project(project_replace)]
+/// struct Struct<T, U> {
+///     #[pin]
+///     pinned_field: T,
+///     unpinned_field: U,
+/// }
+///
+/// impl<T, U> Struct<T, U> {
+///     fn method(self: Pin<&mut Self>, other: Self) {
+///         let this = self.project_replace(other);
+///         let _: U = this.unpinned_field;
+///         let _: PhantomData<T> = this.pinned_field;
+///     }
+/// }
+/// ```
+///
+/// By passing the value to the `project_replace` argument, you can name the
+/// returned type of `project_replace()`. This is necessary whenever
+/// destructuring the return type of `project_replace()`, and work in exactly
+/// the same way as the `project` and `project_ref` arguments.
+///
+/// ```rust
+/// use pin_project::pin_project;
+///
+/// #[pin_project(project_replace = EnumProjOwn)]
 /// enum Enum<T, U> {
 ///     A {
 ///         #[pin]
@@ -409,10 +434,6 @@ use crate::utils::ProjKind;
 ///     EnumProjOwn::B => unreachable!(),
 /// }
 /// ```
-///
-/// The `project_replace` argument is necessary whenever destructuring
-/// the return type of `project_replace()`, and work in exactly the same way as
-/// the `project` and `project_ref` arguments.
 ///
 /// [`PhantomData`]: core::marker::PhantomData
 /// [`PhantomPinned`]: core::marker::PhantomPinned
