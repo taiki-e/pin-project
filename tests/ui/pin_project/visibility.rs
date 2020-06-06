@@ -4,7 +4,7 @@ mod pub_ {
     #[pin_project]
     pub struct Default(());
 
-    #[pin_project(Replace)]
+    #[pin_project(project_replace)]
     pub struct Replace(());
 }
 pub mod pub_use {
@@ -37,7 +37,7 @@ mod pub_crate {
     #[pin_project]
     pub(crate) struct Default(());
 
-    #[pin_project(Replace)]
+    #[pin_project(project_replace)]
     pub(crate) struct Replace(());
 }
 pub mod pub_crate_use {
@@ -55,7 +55,7 @@ mod pub_renamed {
     #[pin_project(project = DProj, project_ref = DProjRef)]
     pub struct Default(());
 
-    #[pin_project(Replace, project = RProj, project_ref = RProjRef, project_replace = RProjOwn)]
+    #[pin_project(project = RProj, project_ref = RProjRef, project_replace = RProjOwn)]
     pub struct Replace(());
 }
 pub mod pub_renamed_use {

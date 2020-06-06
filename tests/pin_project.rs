@@ -53,7 +53,7 @@ fn projection() {
     assert_eq!(s.field1, 3);
     assert_eq!(s.field2, 4);
 
-    #[pin_project(Replace)]
+    #[pin_project(project_replace)]
     struct TupleStruct<T, U>(#[pin] T, U);
 
     let mut s = TupleStruct(1, 2);
@@ -65,7 +65,7 @@ fn projection() {
     let y: &mut i32 = s.1;
     assert_eq!(*y, 2);
 
-    #[pin_project(Replace, project = EnumProj)]
+    #[pin_project(project_replace, project = EnumProj)]
     #[derive(Eq, PartialEq, Debug)]
     enum Enum<A, B, C, D> {
         Variant1(#[pin] A, B),
@@ -127,7 +127,7 @@ fn projection() {
 
 #[test]
 fn enum_project_set() {
-    #[pin_project(Replace, project = EnumProj)]
+    #[pin_project(project_replace, project = EnumProj)]
     #[derive(Eq, PartialEq, Debug)]
     enum Enum {
         Variant1(#[pin] u8),
@@ -175,7 +175,7 @@ fn where_clause() {
 
 #[test]
 fn where_clause_and_associated_type_field() {
-    #[pin_project(Replace)]
+    #[pin_project(project_replace)]
     struct Struct1<I>
     where
         I: Iterator,
@@ -185,7 +185,7 @@ fn where_clause_and_associated_type_field() {
         field2: I::Item,
     }
 
-    #[pin_project(Replace)]
+    #[pin_project(project_replace)]
     struct Struct2<I, J>
     where
         I: Iterator<Item = J>,
@@ -195,7 +195,7 @@ fn where_clause_and_associated_type_field() {
         field2: J,
     }
 
-    #[pin_project(Replace)]
+    #[pin_project(project_replace)]
     struct Struct3<T>
     where
         T: 'static,
@@ -207,12 +207,12 @@ fn where_clause_and_associated_type_field() {
 
     impl<T> Static for Struct3<T> {}
 
-    #[pin_project(Replace)]
+    #[pin_project(project_replace)]
     struct TupleStruct<I>(#[pin] I, I::Item)
     where
         I: Iterator;
 
-    #[pin_project(Replace)]
+    #[pin_project(project_replace)]
     enum Enum<I>
     where
         I: Iterator,
@@ -224,7 +224,7 @@ fn where_clause_and_associated_type_field() {
 
 #[test]
 fn derive_copy() {
-    #[pin_project(Replace)]
+    #[pin_project(project_replace)]
     #[derive(Clone, Copy)]
     struct Struct<T> {
         val: T,
@@ -239,7 +239,7 @@ fn derive_copy() {
 fn move_out() {
     struct NotCopy;
 
-    #[pin_project(Replace)]
+    #[pin_project(project_replace)]
     struct Struct {
         val: NotCopy,
     }
@@ -247,7 +247,7 @@ fn move_out() {
     let x = Struct { val: NotCopy };
     let _val: NotCopy = x.val;
 
-    #[pin_project(Replace)]
+    #[pin_project(project_replace)]
     enum Enum {
         Variant(NotCopy),
     }
@@ -261,39 +261,39 @@ fn move_out() {
 
 #[test]
 fn trait_bounds_on_type_generics() {
-    #[pin_project(Replace)]
+    #[pin_project(project_replace)]
     pub struct Struct1<'a, T: ?Sized> {
         field: &'a mut T,
     }
 
-    #[pin_project(Replace)]
+    #[pin_project(project_replace)]
     pub struct Struct2<'a, T: ::core::fmt::Debug> {
         field: &'a mut T,
     }
 
-    #[pin_project(Replace)]
+    #[pin_project(project_replace)]
     pub struct Struct3<'a, T: core::fmt::Debug> {
         field: &'a mut T,
     }
 
-    #[pin_project(Replace)]
+    #[pin_project(project_replace)]
     pub struct Struct4<'a, T: core::fmt::Debug + core::fmt::Display> {
         field: &'a mut T,
     }
 
-    #[pin_project(Replace)]
+    #[pin_project(project_replace)]
     pub struct Struct5<'a, T: core::fmt::Debug + ?Sized> {
         field: &'a mut T,
     }
 
-    #[pin_project(Replace)]
+    #[pin_project(project_replace)]
     pub struct Struct6<'a, T: core::fmt::Debug = [u8; 16]> {
         field: &'a mut T,
     }
 
     let _: Struct6<'_> = Struct6 { field: &mut [0u8; 16] };
 
-    #[pin_project(Replace)]
+    #[pin_project(project_replace)]
     pub struct Struct7<T: 'static> {
         field: T,
     }
@@ -302,16 +302,16 @@ fn trait_bounds_on_type_generics() {
 
     impl<T> Static for Struct7<T> {}
 
-    #[pin_project(Replace)]
+    #[pin_project(project_replace)]
     pub struct Struct8<'a, 'b: 'a> {
         field1: &'a u8,
         field2: &'b u8,
     }
 
-    #[pin_project(Replace)]
+    #[pin_project(project_replace)]
     pub struct TupleStruct<'a, T: ?Sized>(&'a mut T);
 
-    #[pin_project(Replace)]
+    #[pin_project(project_replace)]
     enum Enum<'a, T: ?Sized> {
         Variant(&'a mut T),
     }
@@ -319,13 +319,13 @@ fn trait_bounds_on_type_generics() {
 
 #[test]
 fn overlapping_lifetime_names() {
-    #[pin_project(Replace)]
+    #[pin_project(project_replace)]
     pub struct Struct1<'pin, T> {
         #[pin]
         field: &'pin mut T,
     }
 
-    #[pin_project(Replace)]
+    #[pin_project(project_replace)]
     pub struct Struct2<'pin, 'pin_, 'pin__> {
         #[pin]
         field: &'pin &'pin_ &'pin__ (),
@@ -334,7 +334,7 @@ fn overlapping_lifetime_names() {
     pub trait A<'a> {}
 
     #[allow(single_use_lifetimes)] // https://github.com/rust-lang/rust/issues/55058
-    #[pin_project(Replace)]
+    #[pin_project(project_replace)]
     pub struct HRTB<'pin___, T>
     where
         for<'pin> &'pin T: Unpin,
@@ -389,7 +389,7 @@ fn combine() {
 
 #[test]
 fn private_type_in_public_type() {
-    #[pin_project(Replace)]
+    #[pin_project(project_replace)]
     pub struct PublicStruct<T> {
         #[pin]
         inner: PrivateStruct<T>,
@@ -400,21 +400,21 @@ fn private_type_in_public_type() {
 
 #[test]
 fn lifetime_project() {
-    #[pin_project(Replace)]
+    #[pin_project(project_replace)]
     struct Struct1<T, U> {
         #[pin]
         pinned: T,
         unpinned: U,
     }
 
-    #[pin_project(Replace)]
+    #[pin_project(project_replace)]
     struct Struct2<'a, T, U> {
         #[pin]
         pinned: &'a mut T,
         unpinned: U,
     }
 
-    #[pin_project(Replace, project = EnumProj, project_ref = EnumProjRef)]
+    #[pin_project(project_replace, project = EnumProj, project_ref = EnumProjRef)]
     enum Enum<T, U> {
         Variant {
             #[pin]
@@ -458,21 +458,21 @@ fn lifetime_project() {
 #[rustversion::since(1.36)] // https://github.com/rust-lang/rust/pull/61207
 #[test]
 fn lifetime_project_elided() {
-    #[pin_project(Replace)]
+    #[pin_project(project_replace)]
     struct Struct1<T, U> {
         #[pin]
         pinned: T,
         unpinned: U,
     }
 
-    #[pin_project(Replace)]
+    #[pin_project(project_replace)]
     struct Struct2<'a, T, U> {
         #[pin]
         pinned: &'a mut T,
         unpinned: U,
     }
 
-    #[pin_project(Replace, project = EnumProj, project_ref = EnumProjRef)]
+    #[pin_project(project_replace, project = EnumProj, project_ref = EnumProjRef)]
     enum Enum<T, U> {
         Variant {
             #[pin]
@@ -516,7 +516,7 @@ fn lifetime_project_elided() {
 mod visibility {
     use pin_project::pin_project;
 
-    #[pin_project(Replace)]
+    #[pin_project(project_replace)]
     pub(crate) struct A {
         pub b: u8,
     }
@@ -534,7 +534,7 @@ fn visibility() {
 
 #[test]
 fn trivial_bounds() {
-    #[pin_project(Replace)]
+    #[pin_project(project_replace)]
     pub struct NoGenerics {
         #[pin]
         field: PhantomPinned,
@@ -712,7 +712,7 @@ fn dyn_type() {
 fn self_in_where_clause() {
     pub trait Trait1 {}
 
-    #[pin_project(Replace)]
+    #[pin_project(project_replace)]
     pub struct Struct1<T>
     where
         Self: Trait1,
@@ -726,7 +726,7 @@ fn self_in_where_clause() {
         type Assoc;
     }
 
-    #[pin_project(Replace)]
+    #[pin_project(project_replace)]
     pub struct Struct2<T>
     where
         Self: Trait2<Assoc = Struct1<T>>,
@@ -752,7 +752,7 @@ fn no_infer_outlives() {
         type Y = Option<T>;
     }
 
-    #[pin_project(Replace)]
+    #[pin_project(project_replace)]
     struct Foo<A, B> {
         _x: <Example<A> as Bar<B>>::Y,
     }
@@ -765,7 +765,7 @@ fn no_infer_outlives() {
 fn project_replace_panic() {
     use std::panic;
 
-    #[pin_project(Replace)]
+    #[pin_project(project_replace)]
     struct S<T, U> {
         #[pin]
         pinned: T,

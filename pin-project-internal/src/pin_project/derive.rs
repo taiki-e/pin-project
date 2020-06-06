@@ -1,6 +1,5 @@
 use proc_macro2::{Delimiter, Group, Span, TokenStream};
 use quote::{format_ident, quote, quote_spanned, ToTokens};
-use std::fmt;
 use syn::{
     parse::{Parse, ParseStream},
     spanned::Spanned,
@@ -109,16 +108,40 @@ fn validate_enum(brace_token: token::Brace, variants: &Variants) -> Result<()> {
 struct Args {
     /// `PinnedDrop` argument.
     pinned_drop: Option<Span>,
-    /// `Replace` argument.
-    replace: Option<Span>,
     /// `UnsafeUnpin` or `!Unpin` argument.
     unpin_impl: UnpinImpl,
     /// `project = <ident>` argument.
     project: Option<Ident>,
     /// `project_ref = <ident>` argument.
     project_ref: Option<Ident>,
-    /// `project_replace = <ident>` argument.
-    project_replace: Option<Ident>,
+    /// `project_replace [= <ident>]` or `Replace` argument.
+    project_replace: ProjReplace,
+}
+
+enum ProjReplace {
+    None,
+    /// `project_replace` or `Replace`.
+    Unnamed {
+        span: Span,
+    },
+    /// `project_replace = <ident>`.
+    Named {
+        span: Span,
+        ident: Ident,
+    },
+}
+
+impl ProjReplace {
+    fn span(&self) -> Option<Span> {
+        match self {
+            ProjReplace::None => None,
+            ProjReplace::Named { span, .. } | ProjReplace::Unnamed { span, .. } => Some(*span),
+        }
+    }
+
+    fn ident(&self) -> Option<&Ident> {
+        if let ProjReplace::Named { ident, .. } = self { Some(ident) } else { None }
+    }
 }
 
 const DUPLICATE_PIN: &str = "duplicate #[pin] attribute";
@@ -203,26 +226,15 @@ impl Parse for Args {
             }
         }
 
-        // Replace `prev` with `new`. Returns `Err` if `prev` is `Some`.
-        fn update_value<T>(
-            prev: &mut Option<T>,
-            new: T,
-            token: &(impl ToTokens + fmt::Display),
-        ) -> Result<()> {
-            if prev.replace(new).is_some() {
-                Err(error!(token, "duplicate `{}` argument", token.to_string().replace(' ', "")))
-            } else {
-                Ok(())
-            }
-        }
-
         let mut pinned_drop = None;
-        let mut replace = None;
         let mut unsafe_unpin = None;
         let mut not_unpin = None;
         let mut project = None;
         let mut project_ref = None;
-        let mut project_replace = None;
+
+        let mut replace = None;
+        let mut project_replace: Option<(Option<Ident>, Span)> = None;
+
         while !input.is_empty() {
             if input.peek(token::Bang) {
                 let bang: token::Bang = input.parse()?;
@@ -231,18 +243,21 @@ impl Parse for Args {
                 }
                 let unpin: kw::Unpin = input.parse()?;
                 let span = quote!(#bang #unpin);
-                update_value(&mut not_unpin, span.span(), &span)?;
+                if not_unpin.replace(span.span()).is_some() {
+                    return Err(error!(span, "duplicate `!Unpin` argument"));
+                }
             } else {
                 let token = input.parse::<Ident>()?;
                 match &*token.to_string() {
                     "PinnedDrop" => {
-                        update_value(&mut pinned_drop, token.span(), &token)?;
-                    }
-                    "Replace" => {
-                        update_value(&mut replace, token.span(), &token)?;
+                        if pinned_drop.replace(token.span()).is_some() {
+                            return Err(error!(token, "duplicate `PinnedDrop` argument"));
+                        }
                     }
                     "UnsafeUnpin" => {
-                        update_value(&mut unsafe_unpin, token.span(), &token)?;
+                        if unsafe_unpin.replace(token.span()).is_some() {
+                            return Err(error!(token, "duplicate `UnsafeUnpin` argument"));
+                        }
                     }
                     "project" => {
                         project = Some(parse_value(input, &token, project.is_some())?.0);
@@ -251,8 +266,20 @@ impl Parse for Args {
                         project_ref = Some(parse_value(input, &token, project_ref.is_some())?.0);
                     }
                     "project_replace" => {
-                        project_replace =
-                            Some(parse_value(input, &token, project_replace.is_some())?);
+                        if input.peek(token::Eq) {
+                            let (value, span) =
+                                parse_value(input, &token, project_replace.is_some())?;
+                            project_replace = Some((Some(value), span.span()));
+                        } else if project_replace.is_some() {
+                            return Err(error!(token, "duplicate `project_replace` argument"));
+                        } else {
+                            project_replace = Some((None, token.span()));
+                        }
+                    }
+                    "Replace" => {
+                        if replace.replace(token.span()).is_some() {
+                            return Err(error!(token, "duplicate `Replace` argument"));
+                        }
                     }
                     _ => return Err(error!(token, "unexpected argument: {}", token)),
                 }
@@ -264,18 +291,26 @@ impl Parse for Args {
             let _: token::Comma = input.parse()?;
         }
 
-        if let (Some((_, span)), None) = (&project_replace, replace) {
-            return Err(error!(
-                span,
-                "`project_replace` argument can only be used together with `Replace` argument",
-            ));
+        if let Some(span) = pinned_drop {
+            if project_replace.is_some() {
+                return Err(Error::new(
+                    span,
+                    "arguments `PinnedDrop` and `project_replace` are mutually exclusive",
+                ));
+            } else if replace.is_some() {
+                return Err(Error::new(
+                    span,
+                    "arguments `PinnedDrop` and `Replace` are mutually exclusive",
+                ));
+            }
         }
-        if let (Some(span), Some(_)) = (pinned_drop, replace) {
-            return Err(Error::new(
-                span,
-                "arguments `PinnedDrop` and `Replace` are mutually exclusive",
-            ));
-        }
+        let project_replace = match (project_replace, replace) {
+            (None, None) => ProjReplace::None,
+            // If both `project_replace` and `Replace` are specified,
+            // We always prefer `project_replace`'s span,
+            (Some((Some(ident), span)), _) => ProjReplace::Named { ident, span },
+            (Some((_, span)), _) | (None, Some(span)) => ProjReplace::Unnamed { span },
+        };
         let unpin_impl = match (unsafe_unpin, not_unpin) {
             (None, None) => UnpinImpl::Default,
             (Some(span), None) => UnpinImpl::Unsafe(span),
@@ -288,14 +323,7 @@ impl Parse for Args {
             }
         };
 
-        Ok(Self {
-            pinned_drop,
-            replace,
-            unpin_impl,
-            project,
-            project_ref,
-            project_replace: project_replace.map(|(i, _)| i),
-        })
+        Ok(Self { pinned_drop, unpin_impl, project, project_ref, project_replace })
     }
 }
 
@@ -357,16 +385,14 @@ struct Context<'a> {
 
     /// `PinnedDrop` argument.
     pinned_drop: Option<Span>,
-    /// `Replace` argument (requires Sized bound)
-    replace: Option<Span>,
     /// `UnsafeUnpin` or `!Unpin` argument.
     unpin_impl: UnpinImpl,
     /// `project` argument.
     project: bool,
     /// `project_ref` argument.
     project_ref: bool,
-    /// `project_replace` argument.
-    project_replace: bool,
+    /// `project_replace [= <ident>]` or `Replace` argument.
+    project_replace: ProjReplace,
 }
 
 #[derive(Clone, Copy)]
@@ -385,7 +411,7 @@ impl<'a> Context<'a> {
         ident: &'a Ident,
         generics: &'a mut Generics,
     ) -> Result<Self> {
-        let Args { pinned_drop, unpin_impl, replace, project, project_ref, project_replace } =
+        let Args { pinned_drop, unpin_impl, project, project_ref, project_replace } =
             Args::get(attrs)?;
 
         let ty_generics = generics.split_for_impl().1;
@@ -409,18 +435,20 @@ impl<'a> Context<'a> {
         let mut where_clause = generics.clone().make_where_clause().clone();
         where_clause.predicates.push(pred);
 
+        let own_ident =
+            project_replace.ident().cloned().unwrap_or_else(|| ProjKind::Owned.proj_ident(ident));
+
         Ok(Self {
             pinned_drop,
-            replace,
             unpin_impl,
             project: project.is_some(),
             project_ref: project_ref.is_some(),
-            project_replace: project_replace.is_some(),
+            project_replace,
             proj: ProjectedType {
                 vis: determine_visibility(vis),
                 mut_ident: project.unwrap_or_else(|| ProjKind::Mutable.proj_ident(ident)),
                 ref_ident: project_ref.unwrap_or_else(|| ProjKind::Immutable.proj_ident(ident)),
-                own_ident: project_replace.unwrap_or_else(|| ProjKind::Owned.proj_ident(ident)),
+                own_ident,
                 lifetime,
                 generics: proj_generics,
                 where_clause,
@@ -436,7 +464,8 @@ impl<'a> Context<'a> {
         let doc_attr = quote!(#[doc(hidden)]);
         let doc_proj = if self.project { None } else { Some(&doc_attr) };
         let doc_proj_ref = if self.project_ref { None } else { Some(&doc_attr) };
-        let doc_proj_own = if self.project_replace { None } else { Some(&doc_attr) };
+        let doc_proj_own =
+            if self.project_replace.ident().is_some() { None } else { Some(&doc_attr) };
 
         let proj_mut = quote! {
             #doc_proj
@@ -511,9 +540,7 @@ impl<'a> Context<'a> {
             #proj_ref_attrs
             #vis struct #proj_ref_ident #proj_generics #where_clause_ref_fields
         };
-        if self.replace.is_some() {
-            // Currently, using quote_spanned here does not seem to have any effect on the
-            // diagnostics.
+        if self.project_replace.span().is_some() {
             proj_items.extend(quote! {
                 #proj_own_attrs
                 #vis struct #proj_own_ident #orig_generics #where_clause_own_fields
@@ -573,9 +600,7 @@ impl<'a> Context<'a> {
                 #proj_ref_variants
             }
         };
-        if self.replace.is_some() {
-            // Currently, using quote_spanned here does not seem to have any effect on the
-            // diagnostics.
+        if self.project_replace.span().is_some() {
             proj_items.extend(quote! {
                 #proj_own_attrs
                 #vis enum #proj_own_ident #orig_generics #orig_where_clause {
@@ -1042,7 +1067,7 @@ impl<'a> Context<'a> {
         let proj_ty_generics = self.proj.generics.split_for_impl().1;
         let (impl_generics, ty_generics, where_clause) = self.orig.generics.split_for_impl();
 
-        let replace_impl = self.replace.map(|span| {
+        let replace_impl = self.project_replace.span().map(|span| {
             // For interoperability with `forbid(unsafe_code)`, `unsafe` token should be
             // call-site span.
             let unsafety = token::Unsafe::default();
