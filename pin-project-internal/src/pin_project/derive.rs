@@ -1,4 +1,4 @@
-use proc_macro2::{Span, TokenStream};
+use proc_macro2::{Delimiter, Group, Span, TokenStream};
 use quote::{format_ident, quote, quote_spanned, ToTokens};
 use std::fmt;
 use syn::{
@@ -113,11 +113,11 @@ struct Args {
     replace: Option<Span>,
     /// `UnsafeUnpin` or `!Unpin` argument.
     unpin_impl: UnpinImpl,
-    /// `project = <ident>`.
+    /// `project = <ident>` argument.
     project: Option<Ident>,
-    /// `project_ref = <ident>`.
+    /// `project_ref = <ident>` argument.
     project_ref: Option<Ident>,
-    /// `project_replace = <ident>`.
+    /// `project_replace = <ident>` argument.
     project_replace: Option<Ident>,
 }
 
@@ -341,11 +341,10 @@ struct ProjectedVariants {
 struct ProjectedFields {
     proj_pat: TokenStream,
     proj_body: TokenStream,
+    proj_own_body: TokenStream,
     proj_fields: TokenStream,
     proj_ref_fields: TokenStream,
     proj_own_fields: TokenStream,
-    proj_move: TokenStream,
-    proj_drop: Vec<Ident>,
 }
 
 struct Context<'a> {
@@ -431,6 +430,36 @@ impl<'a> Context<'a> {
         })
     }
 
+    /// Returns attributes used on projected types.
+    fn proj_attrs(&self) -> (TokenStream, TokenStream, TokenStream) {
+        // If the user gave it a name, it should appear in the document.
+        let doc_attr = quote!(#[doc(hidden)]);
+        let doc_proj = if self.project { None } else { Some(&doc_attr) };
+        let doc_proj_ref = if self.project_ref { None } else { Some(&doc_attr) };
+        let doc_proj_own = if self.project_replace { None } else { Some(&doc_attr) };
+
+        let proj_mut = quote! {
+            #doc_proj
+            #[allow(dead_code)] // This lint warns unused fields/variants.
+            #[allow(single_use_lifetimes)] // https://github.com/rust-lang/rust/issues/55058
+            #[allow(clippy::mut_mut)] // This lint warns `&mut &mut <ty>`.
+            #[allow(clippy::type_repetition_in_bounds)] // https://github.com/rust-lang/rust-clippy/issues/4326}
+        };
+        let proj_ref = quote! {
+            #doc_proj_ref
+            #[allow(dead_code)] // This lint warns unused fields/variants.
+            #[allow(single_use_lifetimes)] // https://github.com/rust-lang/rust/issues/55058
+            #[allow(clippy::type_repetition_in_bounds)] // https://github.com/rust-lang/rust-clippy/issues/4326
+        };
+        let proj_own = quote! {
+            #doc_proj_own
+            #[allow(dead_code)] // This lint warns unused fields/variants.
+            #[allow(single_use_lifetimes)] // https://github.com/rust-lang/rust/issues/55058
+            #[allow(unreachable_pub)] // This lint warns `pub` field in private struct.
+        };
+        (proj_mut, proj_ref, proj_own)
+    }
+
     fn parse_struct(
         &mut self,
         DataStruct { fields, .. }: &DataStruct,
@@ -443,11 +472,10 @@ impl<'a> Context<'a> {
             proj_fields,
             proj_ref_fields,
             proj_own_fields,
-            proj_move,
-            proj_drop,
+            proj_own_body,
         } = match fields {
-            Fields::Named(fields) => self.visit_named(fields)?,
-            Fields::Unnamed(fields) => self.visit_unnamed(fields)?,
+            Fields::Named(_) => self.visit_fields(None, fields, Delimiter::Brace)?,
+            Fields::Unnamed(_) => self.visit_fields(None, fields, Delimiter::Parenthesis)?,
             Fields::Unit => unreachable!(),
         };
 
@@ -458,50 +486,36 @@ impl<'a> Context<'a> {
         let mut orig_generics = self.orig.generics.clone();
         let orig_where_clause = orig_generics.where_clause.take();
         let proj_generics = &self.proj.generics;
-        let where_clause = &self.proj.where_clause;
+        let proj_where_clause = &self.proj.where_clause;
 
         // For tuple structs, we need to generate `(T1, T2) where Foo: Bar`
         // For non-tuple structs, we need to generate `where Foo: Bar { field1: T }`
         let (where_clause_fields, where_clause_ref_fields, where_clause_own_fields) = match fields {
             Fields::Named(_) => (
-                quote!(#where_clause #proj_fields),
-                quote!(#where_clause #proj_ref_fields),
+                quote!(#proj_where_clause #proj_fields),
+                quote!(#proj_where_clause #proj_ref_fields),
                 quote!(#orig_where_clause #proj_own_fields),
             ),
             Fields::Unnamed(_) => (
-                quote!(#proj_fields #where_clause;),
-                quote!(#proj_ref_fields #where_clause;),
+                quote!(#proj_fields #proj_where_clause;),
+                quote!(#proj_ref_fields #proj_where_clause;),
                 quote!(#proj_own_fields #orig_where_clause;),
             ),
             Fields::Unit => unreachable!(),
         };
 
-        // If the user gave it a name, it should appear in the document.
-        let doc_attr = quote!(#[doc(hidden)]);
-        let doc_proj = if self.project { None } else { Some(&doc_attr) };
-        let doc_proj_ref = if self.project_ref { None } else { Some(&doc_attr) };
-        let doc_proj_own = if self.project_replace { None } else { Some(&doc_attr) };
+        let (proj_attrs, proj_ref_attrs, proj_own_attrs) = self.proj_attrs();
         let mut proj_items = quote! {
-            #doc_proj
-            #[allow(dead_code)] // This lint warns unused fields/variants.
-            #[allow(single_use_lifetimes)] // https://github.com/rust-lang/rust/issues/55058
-            #[allow(clippy::mut_mut)] // This lint warns `&mut &mut <ty>`.
-            #[allow(clippy::type_repetition_in_bounds)] // https://github.com/rust-lang/rust-clippy/issues/4326
+            #proj_attrs
             #vis struct #proj_ident #proj_generics #where_clause_fields
-            #doc_proj_ref
-            #[allow(dead_code)] // This lint warns unused fields/variants.
-            #[allow(single_use_lifetimes)] // https://github.com/rust-lang/rust/issues/55058
-            #[allow(clippy::type_repetition_in_bounds)] // https://github.com/rust-lang/rust-clippy/issues/4326
+            #proj_ref_attrs
             #vis struct #proj_ref_ident #proj_generics #where_clause_ref_fields
         };
         if self.replace.is_some() {
             // Currently, using quote_spanned here does not seem to have any effect on the
             // diagnostics.
             proj_items.extend(quote! {
-                #doc_proj_own
-                #[allow(dead_code)] // This lint warns unused fields/variants.
-                #[allow(unreachable_pub)] // This lint warns `pub` field in private struct.
-                #[allow(single_use_lifetimes)] // https://github.com/rust-lang/rust/issues/55058
+                #proj_own_attrs
                 #vis struct #proj_own_ident #orig_generics #where_clause_own_fields
             });
         }
@@ -517,28 +531,7 @@ impl<'a> Context<'a> {
         let proj_own_body = quote! {
             let __self_ptr: *mut Self = self.get_unchecked_mut();
             let Self #proj_pat = &mut *__self_ptr;
-
-            // First, extract all the unpinned fields
-            let __result = #proj_own_ident #proj_move;
-
-            // Destructors will run in reverse order, so next create a guard to overwrite
-            // `self` with the replacement value without calling destructors.
-            let __guard = ::pin_project::__private::UnsafeOverwriteGuard {
-                target: __self_ptr,
-                value: ::pin_project::__private::ManuallyDrop::new(__replacement),
-            };
-
-            // Now create guards to drop all the pinned fields
-            //
-            // Due to a compiler bug (https://github.com/rust-lang/rust/issues/47949)
-            // this must be in its own scope, or else `__result` will not be dropped
-            // if any of the destructors panic.
-            {
-                #( let __guard = ::pin_project::__private::UnsafeDropInPlaceGuard(#proj_drop); )*
-            }
-
-            // Finally, return the result
-            __result
+            #proj_own_body
         };
         let proj_impl = self.make_proj_impl(&proj_mut_body, &proj_ref_body, &proj_own_body);
 
@@ -567,27 +560,16 @@ impl<'a> Context<'a> {
         let mut orig_generics = self.orig.generics.clone();
         let orig_where_clause = orig_generics.where_clause.take();
         let proj_generics = &self.proj.generics;
-        let where_clause = &self.proj.where_clause;
+        let proj_where_clause = &self.proj.where_clause;
 
-        // If the user gave it a name, it should appear in the document.
-        let doc_attr = quote!(#[doc(hidden)]);
-        let doc_proj = if self.project { None } else { Some(&doc_attr) };
-        let doc_proj_ref = if self.project_ref { None } else { Some(&doc_attr) };
-        let doc_proj_own = if self.project_replace { None } else { Some(&doc_attr) };
+        let (proj_attrs, proj_ref_attrs, proj_own_attrs) = self.proj_attrs();
         let mut proj_items = quote! {
-            #doc_proj
-            #[allow(dead_code)] // This lint warns unused fields/variants.
-            #[allow(single_use_lifetimes)] // https://github.com/rust-lang/rust/issues/55058
-            #[allow(clippy::mut_mut)] // This lint warns `&mut &mut <ty>`.
-            #[allow(clippy::type_repetition_in_bounds)] // https://github.com/rust-lang/rust-clippy/issues/4326
-            #vis enum #proj_ident #proj_generics #where_clause {
+            #proj_attrs
+            #vis enum #proj_ident #proj_generics #proj_where_clause {
                 #proj_variants
             }
-            #doc_proj_ref
-            #[allow(dead_code)] // This lint warns unused fields/variants.
-            #[allow(single_use_lifetimes)] // https://github.com/rust-lang/rust/issues/55058
-            #[allow(clippy::type_repetition_in_bounds)] // https://github.com/rust-lang/rust-clippy/issues/4326
-            #vis enum #proj_ref_ident #proj_generics #where_clause {
+            #proj_ref_attrs
+            #vis enum #proj_ref_ident #proj_generics #proj_where_clause {
                 #proj_ref_variants
             }
         };
@@ -595,9 +577,7 @@ impl<'a> Context<'a> {
             // Currently, using quote_spanned here does not seem to have any effect on the
             // diagnostics.
             proj_items.extend(quote! {
-                #doc_proj_own
-                #[allow(dead_code)] // This lint warns unused fields/variants.
-                #[allow(single_use_lifetimes)] // https://github.com/rust-lang/rust/issues/55058
+                #proj_own_attrs
                 #vis enum #proj_own_ident #orig_generics #orig_where_clause {
                     #proj_own_variants
                 }
@@ -640,18 +620,21 @@ impl<'a> Context<'a> {
                 proj_fields,
                 proj_ref_fields,
                 proj_own_fields,
-                proj_move,
-                proj_drop,
+                proj_own_body,
             } = match fields {
-                Fields::Named(fields) => self.visit_named(fields)?,
-                Fields::Unnamed(fields) => self.visit_unnamed(fields)?,
-                Fields::Unit => ProjectedFields::default(),
+                Fields::Named(_) => self.visit_fields(Some(ident), fields, Delimiter::Brace)?,
+                Fields::Unnamed(_) => {
+                    self.visit_fields(Some(ident), fields, Delimiter::Parenthesis)?
+                }
+                Fields::Unit => ProjectedFields {
+                    proj_own_body: self.proj_own_body(Some(ident), None, &[]),
+                    ..ProjectedFields::default()
+                },
             };
 
             let orig_ident = self.orig.ident;
             let proj_ident = &self.proj.mut_ident;
             let proj_ref_ident = &self.proj.ref_ident;
-            let proj_own_ident = &self.proj.own_ident;
             proj_variants.extend(quote! {
                 #ident #proj_fields,
             });
@@ -673,31 +656,7 @@ impl<'a> Context<'a> {
             });
             proj_own_arms.extend(quote! {
                 #orig_ident::#ident #proj_pat => {
-                    // First, extract all the unpinned fields
-                    let __result = #proj_own_ident::#ident #proj_move;
-
-                    // Destructors will run in reverse order, so next create a guard to overwrite
-                    // `self` with the replacement value without calling destructors.
-                    let __guard = ::pin_project::__private::UnsafeOverwriteGuard {
-                        target: __self_ptr,
-                        value: ::pin_project::__private::ManuallyDrop::new(__replacement),
-                    };
-
-                    // Now create guards to drop all the pinned fields
-                    //
-                    // Due to a compiler bug (https://github.com/rust-lang/rust/issues/47949)
-                    // this must be in its own scope, or else `__result` will not be dropped
-                    // if any of the destructors panic.
-                    {
-                        #(
-                            let __guard = ::pin_project::__private::UnsafeDropInPlaceGuard(
-                                #proj_drop,
-                            );
-                        )*
-                    }
-
-                    // Finally, return the result
-                    __result
+                    #proj_own_body
                 }
             });
         }
@@ -712,113 +671,124 @@ impl<'a> Context<'a> {
         })
     }
 
-    fn visit_named(
+    fn visit_fields(
         &mut self,
-        FieldsNamed { named: fields, .. }: &FieldsNamed,
+        variant_ident: Option<&Ident>,
+        fields: &Fields,
+        delim: Delimiter,
     ) -> Result<ProjectedFields> {
-        let mut proj_pat = Vec::with_capacity(fields.len());
-        let mut proj_body = Vec::with_capacity(fields.len());
-        let mut proj_fields = Vec::with_capacity(fields.len());
-        let mut proj_ref_fields = Vec::with_capacity(fields.len());
-        let mut proj_own_fields = Vec::with_capacity(fields.len());
-        let mut proj_move = Vec::with_capacity(fields.len());
-        let mut proj_drop = Vec::with_capacity(fields.len());
+        let mut proj_pat = TokenStream::new();
+        let mut proj_body = TokenStream::new();
+        let mut proj_fields = TokenStream::new();
+        let mut proj_ref_fields = TokenStream::new();
+        let mut proj_own_fields = TokenStream::new();
+        let mut proj_move = TokenStream::new();
+        let mut pinned_bindings = Vec::with_capacity(fields.len());
 
-        for Field { attrs, vis, ident, ty, .. } in fields {
+        for (i, Field { attrs, vis, ident, colon_token, ty, .. }) in fields.iter().enumerate() {
+            let binding = ident.clone().unwrap_or_else(|| format_ident!("_{}", i));
+            proj_pat.extend(quote!(#binding,));
             if attrs.position_exact(PIN)?.is_some() {
-                self.pinned_fields.push(ty.clone());
-                proj_drop.push(ident.as_ref().cloned().unwrap());
-
                 let lifetime = &self.proj.lifetime;
-                proj_fields
-                    .push(quote!(#vis #ident: ::pin_project::__private::Pin<&#lifetime mut (#ty)>));
-                proj_ref_fields
-                    .push(quote!(#vis #ident: ::pin_project::__private::Pin<&#lifetime (#ty)>));
-                proj_own_fields
-                    .push(quote!(#vis #ident: ::pin_project::__private::PhantomData<#ty>));
-                proj_body
-                    .push(quote!(#ident: ::pin_project::__private::Pin::new_unchecked(#ident)));
-                proj_move.push(quote!(#ident: ::pin_project::__private::PhantomData));
+                proj_fields.extend(quote! {
+                    #vis #ident #colon_token ::pin_project::__private::Pin<&#lifetime mut (#ty)>,
+                });
+                proj_ref_fields.extend(quote! {
+                    #vis #ident #colon_token ::pin_project::__private::Pin<&#lifetime (#ty)>,
+                });
+                proj_own_fields.extend(quote! {
+                    #vis #ident #colon_token ::pin_project::__private::PhantomData<#ty>,
+                });
+                proj_body.extend(quote! {
+                    #ident #colon_token ::pin_project::__private::Pin::new_unchecked(#binding),
+                });
+                proj_move.extend(quote! {
+                    #ident #colon_token ::pin_project::__private::PhantomData,
+                });
+
+                self.pinned_fields.push(ty.clone());
+                pinned_bindings.push(binding);
             } else {
                 let lifetime = &self.proj.lifetime;
-                proj_fields.push(quote!(#vis #ident: &#lifetime mut (#ty)));
-                proj_ref_fields.push(quote!(#vis #ident: &#lifetime (#ty)));
-                proj_own_fields.push(quote!(#vis #ident: #ty));
-                proj_body.push(quote!(#ident));
-                proj_move.push(quote!(#ident: ::pin_project::__private::ptr::read(#ident)));
+                proj_fields.extend(quote! {
+                    #vis #ident #colon_token &#lifetime mut (#ty),
+                });
+                proj_ref_fields.extend(quote! {
+                    #vis #ident #colon_token &#lifetime (#ty),
+                });
+                proj_own_fields.extend(quote! {
+                    #vis #ident #colon_token #ty,
+                });
+                proj_body.extend(quote! {
+                    #binding,
+                });
+                proj_move.extend(quote! {
+                    #ident #colon_token ::pin_project::__private::ptr::read(#binding),
+                });
             }
-            proj_pat.push(ident);
         }
 
-        let proj_pat = quote!({ #(#proj_pat),* });
-        let proj_body = quote!({ #(#proj_body),* });
-        let proj_fields = quote!({ #(#proj_fields),* });
-        let proj_ref_fields = quote!({ #(#proj_ref_fields),* });
-        let proj_own_fields = quote!({ #(#proj_own_fields),* });
-        let proj_move = quote!({ #(#proj_move),* });
+        fn surround(delim: Delimiter, tokens: TokenStream) -> TokenStream {
+            Group::new(delim, tokens).into_token_stream()
+        }
+
+        let proj_pat = surround(delim, proj_pat);
+        let proj_body = surround(delim, proj_body);
+        let proj_fields = surround(delim, proj_fields);
+        let proj_ref_fields = surround(delim, proj_ref_fields);
+        let proj_own_fields = surround(delim, proj_own_fields);
+
+        let proj_move = Group::new(delim, proj_move);
+        let proj_own_body = self.proj_own_body(variant_ident, Some(proj_move), &pinned_bindings);
 
         Ok(ProjectedFields {
             proj_pat,
             proj_body,
+            proj_own_body,
             proj_fields,
             proj_ref_fields,
             proj_own_fields,
-            proj_move,
-            proj_drop,
         })
     }
 
-    fn visit_unnamed(
-        &mut self,
-        FieldsUnnamed { unnamed: fields, .. }: &FieldsUnnamed,
-    ) -> Result<ProjectedFields> {
-        let mut proj_pat = Vec::with_capacity(fields.len());
-        let mut proj_body = Vec::with_capacity(fields.len());
-        let mut proj_fields = Vec::with_capacity(fields.len());
-        let mut proj_ref_fields = Vec::with_capacity(fields.len());
-        let mut proj_own_fields = Vec::with_capacity(fields.len());
-        let mut proj_move = Vec::with_capacity(fields.len());
-        let mut proj_drop = Vec::with_capacity(fields.len());
+    /// Generates the processing that `project_replace` does for the struct or each variant.
+    fn proj_own_body(
+        &self,
+        variant_ident: Option<&'a Ident>,
+        proj_move: Option<Group>,
+        pinned_fields: &[Ident],
+    ) -> TokenStream {
+        let ident = &self.proj.own_ident;
+        let proj_own = match variant_ident {
+            Some(variant_ident) => quote!(#ident::#variant_ident),
+            None => quote!(#ident),
+        };
 
-        for (i, Field { attrs, vis, ty, .. }) in fields.iter().enumerate() {
-            let id = format_ident!("_{}", i);
-            if attrs.position_exact(PIN)?.is_some() {
-                self.pinned_fields.push(ty.clone());
-                proj_drop.push(id.clone());
+        quote! {
+            // First, extract all the unpinned fields
+            let __result = #proj_own #proj_move;
 
-                let lifetime = &self.proj.lifetime;
-                proj_fields.push(quote!(#vis ::pin_project::__private::Pin<&#lifetime mut (#ty)>));
-                proj_ref_fields.push(quote!(#vis ::pin_project::__private::Pin<&#lifetime (#ty)>));
-                proj_own_fields.push(quote!(#vis ::pin_project::__private::PhantomData<#ty>));
-                proj_body.push(quote!(::pin_project::__private::Pin::new_unchecked(#id)));
-                proj_move.push(quote!(::pin_project::__private::PhantomData));
-            } else {
-                let lifetime = &self.proj.lifetime;
-                proj_fields.push(quote!(#vis &#lifetime mut (#ty)));
-                proj_ref_fields.push(quote!(#vis &#lifetime (#ty)));
-                proj_own_fields.push(quote!(#vis #ty));
-                proj_body.push(quote!(#id));
-                proj_move.push(quote!(::pin_project::__private::ptr::read(#id)));
+            // Destructors will run in reverse order, so next create a guard to overwrite
+            // `self` with the replacement value without calling destructors.
+            let __guard = ::pin_project::__private::UnsafeOverwriteGuard {
+                target: __self_ptr,
+                value: ::pin_project::__private::ManuallyDrop::new(__replacement),
+            };
+
+            // Now create guards to drop all the pinned fields
+            //
+            // Due to a compiler bug (https://github.com/rust-lang/rust/issues/47949)
+            // this must be in its own scope, or else `__result` will not be dropped
+            // if any of the destructors panic.
+            {
+                #(
+                    let __guard = ::pin_project::__private::UnsafeDropInPlaceGuard(#pinned_fields);
+                )*
             }
-            proj_pat.push(id);
+
+            // Finally, return the result
+            __result
         }
-
-        let proj_pat = quote!((#(#proj_pat),*));
-        let proj_body = quote!((#(#proj_body),*));
-        let proj_fields = quote!((#(#proj_fields),*));
-        let proj_ref_fields = quote!((#(#proj_ref_fields),*));
-        let proj_own_fields = quote!((#(#proj_own_fields),*));
-        let proj_move = quote!((#(#proj_move),*));
-
-        Ok(ProjectedFields {
-            proj_pat,
-            proj_body,
-            proj_fields,
-            proj_ref_fields,
-            proj_own_fields,
-            proj_move,
-            proj_drop,
-        })
     }
 
     /// Creates `Unpin` implementation for original type.
