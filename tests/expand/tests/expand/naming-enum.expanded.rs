@@ -40,6 +40,7 @@ where
 }
 #[allow(dead_code)]
 #[allow(single_use_lifetimes)]
+#[allow(unreachable_pub)]
 enum ProjOwn<T, U> {
     Struct {
         pinned: ::pin_project::__private::PhantomData<T>,

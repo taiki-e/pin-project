@@ -30,8 +30,8 @@ where
 }
 #[doc(hidden)]
 #[allow(dead_code)]
-#[allow(unreachable_pub)]
 #[allow(single_use_lifetimes)]
+#[allow(unreachable_pub)]
 struct __StructProjectionOwned<T, U> {
     pinned: ::pin_project::__private::PhantomData<T>,
     unpinned: U,

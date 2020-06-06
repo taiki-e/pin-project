@@ -43,6 +43,7 @@ where
 #[doc(hidden)]
 #[allow(dead_code)]
 #[allow(single_use_lifetimes)]
+#[allow(unreachable_pub)]
 enum __EnumProjectionOwned<T, U> {
     Struct {
         pinned: ::pin_project::__private::PhantomData<T>,
