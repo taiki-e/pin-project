@@ -719,53 +719,89 @@ fn parse_self() {
         type Assoc;
     }
 
-    #[pin_project(project_replace)]
-    pub struct Struct<T: Trait<Assoc = Self>>
+    pub struct Generics<T: Trait<Assoc = Self>>
     where
         Self: Trait<Assoc = Self>,
         <Self as Trait>::Assoc: Sized,
         mac!(Self): Trait<Assoc = mac!(Self)>,
     {
-        _f1: T,
-        _f2: Box<Self>,
-        _f3: Box<<Self as Trait>::Assoc>,
-        _f4: Box<mac!(Self)>,
+        _f: T,
     }
 
-    impl<T: Trait<Assoc = Self>> Trait for Struct<T> {
+    impl<T: Trait<Assoc = Self>> Trait for Generics<T> {
+        type Assoc = Self;
+    }
+
+    #[pin_project(project_replace)]
+    pub struct Struct {
+        _f1: Box<Self>,
+        _f2: Box<<Self as Trait>::Assoc>,
+        _f3: Box<mac!(Self)>,
+        _f4: [(); Self::ASSOC],
+        _f5: [(); Self::assoc()],
+        _f6: [(); mac!(Self::assoc())],
+    }
+
+    impl Struct {
+        const ASSOC: usize = 1;
+        const fn assoc() -> usize {
+            0
+        }
+    }
+
+    impl Trait for Struct {
         type Assoc = Self;
     }
 
     #[pin_project]
-    struct Tuple<T: Trait<Assoc = Self>>(
-        T,
+    struct Tuple(
         Box<Self>,
         Box<<Self as Trait>::Assoc>,
         Box<mac!(Self)>,
-    )
-    where
-        Self: Trait<Assoc = Self>,
-        <Self as Trait>::Assoc: Sized,
-        mac!(Self): Trait<Assoc = mac!(Self)>;
+        [(); Self::ASSOC],
+        [(); Self::assoc()],
+        [(); mac!(Self::assoc())],
+    );
 
-    impl<T: Trait<Assoc = Self>> Trait for Tuple<T> {
+    impl Tuple {
+        const ASSOC: usize = 1;
+        const fn assoc() -> usize {
+            0
+        }
+    }
+
+    impl Trait for Tuple {
         type Assoc = Self;
     }
 
     #[pin_project]
-    enum Enum<T: Trait<Assoc = Self>>
-    where
-        Self: Trait<Assoc = Self>,
-        <Self as Trait>::Assoc: Sized,
-        mac!(Self): Trait<Assoc = mac!(Self)>,
-    {
-        V1(T),
-        V2(Box<Self>),
-        V3(Box<<Self as Trait>::Assoc>),
-        V4(Box<mac!(Self)>),
+    enum Enum {
+        Struct {
+            _f1: Box<Self>,
+            _f2: Box<<Self as Trait>::Assoc>,
+            _f3: Box<mac!(Self)>,
+            _f4: [(); Self::ASSOC],
+            _f5: [(); Self::assoc()],
+            _f6: [(); mac!(Self::assoc())],
+        },
+        Tuple(
+            Box<Self>,
+            Box<<Self as Trait>::Assoc>,
+            Box<mac!(Self)>,
+            [(); Self::ASSOC],
+            [(); Self::assoc()],
+            [(); mac!(Self::assoc())],
+        ),
     }
 
-    impl<T: Trait<Assoc = Self>> Trait for Enum<T> {
+    impl Enum {
+        const ASSOC: usize = 1;
+        const fn assoc() -> usize {
+            0
+        }
+    }
+
+    impl Trait for Enum {
         type Assoc = Self;
     }
 }
