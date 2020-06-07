@@ -48,7 +48,11 @@ pub(super) fn parse_derive(input: TokenStream) -> Result<TokenStream> {
 
     let unpin_impl = cx.make_unpin_impl();
     let drop_impl = cx.make_drop_impl();
-    let dummy_const = format_ident!("__SCOPE_{}", ident);
+    let dummy_const = if cfg!(underscore_consts) {
+        format_ident!("_")
+    } else {
+        format_ident!("__SCOPE_{}", ident)
+    };
     items.extend(quote! {
         // All items except projected types are generated inside a `const` scope.
         // This makes it impossible for user code to refer to these types.

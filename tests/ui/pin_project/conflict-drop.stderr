@@ -1,4 +1,4 @@
-error[E0119]: conflicting implementations of trait `__SCOPE_Foo::FooMustNotImplDrop` for type `Foo<_, _>`:
+error[E0119]: conflicting implementations of trait `_::FooMustNotImplDrop` for type `Foo<_, _>`:
  --> $DIR/conflict-drop.rs:4:1
   |
 4 | #[pin_project] //~ ERROR E0119
