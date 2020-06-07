@@ -204,4 +204,26 @@ mod method {
     }
 }
 
+mod self_ty {
+    use pin_project::pinned_drop;
+
+    #[pinned_drop]
+    impl PinnedDrop for () {
+        //~^ ERROR implementing the trait `PinnedDrop` on this type is unsupported
+        fn drop(self: Pin<&mut Self>) {}
+    }
+
+    #[pinned_drop]
+    impl PinnedDrop for &mut A {
+        //~^ ERROR implementing the trait `PinnedDrop` on this type is unsupported
+        fn drop(self: Pin<&mut Self>) {}
+    }
+
+    #[pinned_drop]
+    impl PinnedDrop for [A] {
+        //~^ ERROR implementing the trait `PinnedDrop` on this type is unsupported
+        fn drop(self: Pin<&mut Self>) {}
+    }
+}
+
 fn main() {}

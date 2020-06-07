@@ -6,23 +6,29 @@ use crate::utils::{parse_as_empty, prepend_underscore_to_self, ReplaceReceiver, 
 
 pub(crate) fn attribute(args: &TokenStream, mut input: ItemImpl) -> TokenStream {
     if let Err(e) = parse_as_empty(args).and_then(|()| parse(&mut input)) {
-        let self_ty = &input.self_ty;
-        let (impl_generics, _, where_clause) = input.generics.split_for_impl();
-
         let mut tokens = e.to_compile_error();
-        // A dummy impl of `PinnedDrop`.
-        // In many cases, `#[pinned_drop] impl` is declared after `#[pin_project]`.
-        // Therefore, if `pinned_drop` compile fails, you will also get an error
-        // about `PinnedDrop` not being implemented.
-        // This can be prevented to some extent by generating a dummy
-        // `PinnedDrop` implementation.
-        // We already know that we will get a compile error, so this won't
-        // accidentally compile successfully.
-        tokens.extend(quote! {
-            impl #impl_generics ::pin_project::__private::PinnedDrop for #self_ty #where_clause {
-                unsafe fn drop(self: ::pin_project::__private::Pin<&mut Self>) {}
-            }
-        });
+        if let Type::Path(self_ty) = &*input.self_ty {
+            let (impl_generics, _, where_clause) = input.generics.split_for_impl();
+
+            // A dummy impl of `PinnedDrop`.
+            // In many cases, `#[pinned_drop] impl` is declared after `#[pin_project]`.
+            // Therefore, if `pinned_drop` compile fails, you will also get an error
+            // about `PinnedDrop` not being implemented.
+            // This can be prevented to some extent by generating a dummy
+            // `PinnedDrop` implementation.
+            // We already know that we will get a compile error, so this won't
+            // accidentally compile successfully.
+            //
+            // However, if `input.self_ty` is not Type::Path, there is a high possibility that
+            // the type does not exist, so do not generate a dummy impl.
+            tokens.extend(quote! {
+                impl #impl_generics ::pin_project::__private::PinnedDrop for #self_ty
+                #where_clause
+                {
+                    unsafe fn drop(self: ::pin_project::__private::Pin<&mut Self>) {}
+                }
+            });
+        }
         tokens
     } else {
         input.into_token_stream()
@@ -116,6 +122,16 @@ fn parse(item: &mut ItemImpl) -> Result<()> {
         return Err(error!(item, "not all trait items implemented, missing: `drop`"));
     }
 
+    match &*item.self_ty {
+        Type::Path(_) => {}
+        ty => {
+            return Err(error!(
+                ty,
+                "implementing the trait `PinnedDrop` on this type is unsupported"
+            ));
+        }
+    }
+
     item.items
         .iter()
         .enumerate()
@@ -171,7 +187,8 @@ fn expand_item(item: &mut ItemImpl) {
             prepend_underscore_to_self(&mut ident.ident);
         }
     }
-    let mut visitor = ReplaceReceiver(&item.self_ty);
+    let self_ty = if let Type::Path(ty) = &*item.self_ty { ty } else { unreachable!() };
+    let mut visitor = ReplaceReceiver(self_ty);
     visitor.visit_signature_mut(&mut drop_inner.sig);
     visitor.visit_block_mut(&mut drop_inner.block);
 
