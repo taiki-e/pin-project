@@ -371,7 +371,7 @@ fn combine() {
         fn drop(self: Pin<&mut Self>) {}
     }
 
-    #[pin_project(UnsafeUnpin, Replace)]
+    #[pin_project(UnsafeUnpin, project_replace)]
     pub struct UnsafeUnpinWithReplace<T> {
         #[pin]
         field: T,
@@ -379,7 +379,7 @@ fn combine() {
 
     unsafe impl<T: Unpin> UnsafeUnpin for UnsafeUnpinWithReplace<T> {}
 
-    #[pin_project(!Unpin, Replace)]
+    #[pin_project(!Unpin, project_replace)]
     pub struct NotUnpinWithReplace<T> {
         #[pin]
         field: T,
@@ -719,6 +719,7 @@ fn parse_self() {
         type Assoc;
     }
 
+    #[pin_project(project_replace)]
     pub struct Generics<T: Trait<Assoc = Self>>
     where
         Self: Trait<Assoc = Self>,
@@ -753,7 +754,7 @@ fn parse_self() {
         type Assoc = Self;
     }
 
-    #[pin_project]
+    #[pin_project(project_replace)]
     struct Tuple(
         Box<Self>,
         Box<<Self as Trait>::Assoc>,
@@ -774,7 +775,7 @@ fn parse_self() {
         type Assoc = Self;
     }
 
-    #[pin_project]
+    #[pin_project(project_replace)]
     enum Enum {
         Struct {
             _f1: Box<Self>,

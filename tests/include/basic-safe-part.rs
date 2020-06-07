@@ -1,4 +1,4 @@
-// default #[pin_project], PinnedDrop, Replace, !Unpin, and UnsafeUnpin without UnsafeUnpin impl are completely safe.
+// default #[pin_project], PinnedDrop, project_replace, !Unpin, and UnsafeUnpin without UnsafeUnpin impl are completely safe.
 
 #[::pin_project::pin_project]
 #[derive(Debug)]
