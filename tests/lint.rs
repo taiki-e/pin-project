@@ -121,13 +121,14 @@ pub mod clippy {
 #[rustversion::attr(not(nightly), ignore)]
 #[test]
 fn check_lint_list() {
-    use std::{env, process::Command};
+    use std::{env, process::Command, str};
 
     (|| -> Result<(), Box<dyn std::error::Error>> {
         let current = include_str!("lint.txt");
         let rustc = env::var_os("RUSTC").unwrap_or_else(|| "rustc".into());
-        let new = String::from_utf8(Command::new(rustc).args(&["-W", "help"]).output()?.stdout)?;
-        assert_eq!(current, &new);
+        let output = Command::new(rustc).args(&["-W", "help"]).output()?;
+        let new = str::from_utf8(&output.stdout)?;
+        assert_eq!(current, new);
         Ok(())
     })()
     .unwrap_or_else(|e| panic!("{}", e));

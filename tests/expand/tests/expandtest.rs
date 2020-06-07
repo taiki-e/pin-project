@@ -1,6 +1,6 @@
 #![warn(rust_2018_idioms, single_use_lifetimes)]
 
-#[cfg_attr(not(all(cargo_expand, nightly)), ignore)]
+#[cfg_attr(not(expandtest), ignore)]
 #[test]
 fn expandtest() {
     #[cfg(ci)]

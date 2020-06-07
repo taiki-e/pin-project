@@ -1,22 +1,27 @@
 #![warn(rust_2018_idioms, single_use_lifetimes)]
 
-// Based on https://github.com/serde-rs/serde/blob/v1.0.106/test_suite/build.rs
-
 use std::{
     env,
     process::{Command, ExitStatus, Stdio},
 };
 
-#[cfg(not(windows))]
-const CARGO_EXPAND: &str = "cargo-expand";
-
-#[cfg(windows)]
-const CARGO_EXPAND: &str = "cargo-expand.exe";
-
 fn main() {
-    println!("cargo:rerun-if-changed=build.rs");
+    if !is_nightly() {
+        return;
+    }
 
-    if Command::new(CARGO_EXPAND)
+    let cargo_expand = if cfg!(windows) { "cargo-expand.exe" } else { "cargo-expand" };
+    if has_command(cargo_expand) && has_command("rustfmt") {
+        println!("cargo:rustc-cfg=expandtest");
+    }
+
+    if env::var_os("CI").map_or(false, |v| v == "true") {
+        println!("cargo:rustc-cfg=ci");
+    }
+}
+
+fn has_command(command: &str) -> bool {
+    Command::new(command)
         .arg("--version")
         .stdin(Stdio::null())
         .stdout(Stdio::null())
@@ -25,17 +30,6 @@ fn main() {
         .as_ref()
         .map(ExitStatus::success)
         .unwrap_or(false)
-    {
-        println!("cargo:rustc-cfg=cargo_expand");
-    }
-
-    if env::var_os("CI").map_or(false, |v| v == "true") {
-        println!("cargo:rustc-cfg=ci");
-    }
-
-    if is_nightly() {
-        println!("cargo:rustc-cfg=nightly");
-    }
 }
 
 fn is_nightly() -> bool {

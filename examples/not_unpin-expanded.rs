@@ -57,7 +57,7 @@ where
 #[allow(non_upper_case_globals)]
 #[allow(single_use_lifetimes)]
 #[allow(clippy::used_underscore_binding)]
-const __SCOPE_Struct: () = {
+const _: () = {
     impl<T, U> Struct<T, U> {
         pub(crate) fn project<'pin>(
             self: ::pin_project::__private::Pin<&'pin mut Self>,
