@@ -709,6 +709,12 @@ fn dyn_type() {
 
 #[test]
 fn parse_self() {
+    macro_rules! mac {
+        ($($tt:tt)*) => {
+            $($tt)*
+        };
+    }
+
     pub trait Trait {
         type Assoc;
     }
@@ -718,10 +724,12 @@ fn parse_self() {
     where
         Self: Trait<Assoc = Self>,
         <Self as Trait>::Assoc: Sized,
+        mac!(Self): Trait<Assoc = mac!(Self)>,
     {
         _f1: T,
         _f2: Box<Self>,
         _f3: Box<<Self as Trait>::Assoc>,
+        _f4: Box<mac!(Self)>,
     }
 
     impl<T: Trait<Assoc = Self>> Trait for Struct<T> {
@@ -729,10 +737,16 @@ fn parse_self() {
     }
 
     #[pin_project]
-    struct Tuple<T: Trait<Assoc = Self>>(T, Box<Self>, Box<<Self as Trait>::Assoc>)
+    struct Tuple<T: Trait<Assoc = Self>>(
+        T,
+        Box<Self>,
+        Box<<Self as Trait>::Assoc>,
+        Box<mac!(Self)>,
+    )
     where
         Self: Trait<Assoc = Self>,
-        <Self as Trait>::Assoc: Sized;
+        <Self as Trait>::Assoc: Sized,
+        mac!(Self): Trait<Assoc = mac!(Self)>;
 
     impl<T: Trait<Assoc = Self>> Trait for Tuple<T> {
         type Assoc = Self;
@@ -743,10 +757,12 @@ fn parse_self() {
     where
         Self: Trait<Assoc = Self>,
         <Self as Trait>::Assoc: Sized,
+        mac!(Self): Trait<Assoc = mac!(Self)>,
     {
         V1(T),
         V2(Box<Self>),
         V3(Box<<Self as Trait>::Assoc>),
+        V4(Box<mac!(Self)>),
     }
 
     impl<T: Trait<Assoc = Self>> Trait for Enum<T> {
