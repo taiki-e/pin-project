@@ -123,3 +123,21 @@ error: method `pinned_drop` is not a member of trait `PinnedDrop
     |
 203 |         fn pinned_drop(&mut self) {} //~ ERROR method `pinned_drop` is not a member of trait `PinnedDrop
     |            ^^^^^^^^^^^
+
+error: implementing the trait `PinnedDrop` on this type is unsupported
+   --> $DIR/invalid.rs:211:25
+    |
+211 |     impl PinnedDrop for () {
+    |                         ^^
+
+error: implementing the trait `PinnedDrop` on this type is unsupported
+   --> $DIR/invalid.rs:217:25
+    |
+217 |     impl PinnedDrop for &mut A {
+    |                         ^^^^^^
+
+error: implementing the trait `PinnedDrop` on this type is unsupported
+   --> $DIR/invalid.rs:223:25
+    |
+223 |     impl PinnedDrop for [A] {
+    |                         ^^^
