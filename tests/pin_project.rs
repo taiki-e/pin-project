@@ -10,7 +10,6 @@ use std::{
 #[test]
 fn projection() {
     #[pin_project(
-        Replace,
         project = StructProj,
         project_ref = StructProjRef,
         project_replace = StructProjOwn,
@@ -709,34 +708,49 @@ fn dyn_type() {
 }
 
 #[test]
-fn self_in_where_clause() {
-    pub trait Trait1 {}
-
-    #[pin_project(project_replace)]
-    pub struct Struct1<T>
-    where
-        Self: Trait1,
-    {
-        x: T,
-    }
-
-    impl<T> Trait1 for Struct1<T> {}
-
-    pub trait Trait2 {
+fn parse_self() {
+    pub trait Trait {
         type Assoc;
     }
 
     #[pin_project(project_replace)]
-    pub struct Struct2<T>
+    pub struct Struct<T: Trait<Assoc = Self>>
     where
-        Self: Trait2<Assoc = Struct1<T>>,
-        <Self as Trait2>::Assoc: Trait1,
+        Self: Trait<Assoc = Self>,
+        <Self as Trait>::Assoc: Sized,
     {
-        x: T,
+        _f1: T,
+        _f2: Box<Self>,
+        _f3: Box<<Self as Trait>::Assoc>,
     }
 
-    impl<T> Trait2 for Struct2<T> {
-        type Assoc = Struct1<T>;
+    impl<T: Trait<Assoc = Self>> Trait for Struct<T> {
+        type Assoc = Self;
+    }
+
+    #[pin_project]
+    struct Tuple<T: Trait<Assoc = Self>>(T, Box<Self>, Box<<Self as Trait>::Assoc>)
+    where
+        Self: Trait<Assoc = Self>,
+        <Self as Trait>::Assoc: Sized;
+
+    impl<T: Trait<Assoc = Self>> Trait for Tuple<T> {
+        type Assoc = Self;
+    }
+
+    #[pin_project]
+    enum Enum<T: Trait<Assoc = Self>>
+    where
+        Self: Trait<Assoc = Self>,
+        <Self as Trait>::Assoc: Sized,
+    {
+        V1(T),
+        V2(Box<Self>),
+        V3(Box<<Self as Trait>::Assoc>),
+    }
+
+    impl<T: Trait<Assoc = Self>> Trait for Enum<T> {
+        type Assoc = Self;
     }
 }
 
