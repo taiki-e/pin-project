@@ -43,3 +43,20 @@ error[E0308]: mismatched types
    |
    = note: expected unit type `()`
                  found struct `std::pin::Pin<&mut self_span::S>`
+
+error[E0308]: mismatched types
+  --> $DIR/self.rs:50:25
+   |
+50 |             let _: () = self; //~ ERROR E0308
+   |                    --   ^^^^ expected `()`, found struct `std::pin::Pin`
+   |                    |
+   |                    expected due to this
+   |
+   = note: expected unit type `()`
+                 found struct `std::pin::Pin<&mut self_span::E>`
+
+error[E0533]: expected unit struct, unit variant or constant, found struct variant `Self::V`
+  --> $DIR/self.rs:51:27
+   |
+51 |             let _: Self = Self::V; //~ ERROR E0533
+   |                           ^^^^^^^

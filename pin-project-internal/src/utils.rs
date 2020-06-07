@@ -1,5 +1,5 @@
 use proc_macro2::{Group, Spacing, Span, TokenStream, TokenTree};
-use quote::{format_ident, quote, ToTokens};
+use quote::{format_ident, quote, quote_spanned, ToTokens};
 use std::{iter::FromIterator, mem};
 use syn::{
     parse::{Parse, ParseBuffer, ParseStream},
@@ -227,12 +227,13 @@ impl ReplaceReceiver<'_> {
             return;
         }
 
+        let span = first.ident.span();
         *qself = Some(QSelf {
-            lt_token: token::Lt::default(),
-            ty: Box::new(self.self_ty(first.ident.span()).into()),
+            lt_token: token::Lt(span),
+            ty: Box::new(self.self_ty(span).into()),
             position: 0,
             as_token: None,
-            gt_token: token::Gt::default(),
+            gt_token: token::Gt(span),
         });
 
         path.leading_colon = Some(**path.segments.pairs().next().unwrap().punct().unwrap());
@@ -284,7 +285,8 @@ impl ReplaceReceiver<'_> {
                                 let next = iter.next().unwrap();
                                 match iter.peek() {
                                     Some(TokenTree::Punct(p)) if p.as_char() == ':' => {
-                                        out.extend(quote!(<#self_ty>))
+                                        let span = ident.span();
+                                        out.extend(quote_spanned!(span=> <#self_ty>))
                                     }
                                     _ => out.extend(quote!(#self_ty)),
                                 }

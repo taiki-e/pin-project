@@ -38,6 +38,19 @@ pub mod self_span {
             let _: Self = Self; //~ ERROR E0423
         }
     }
+
+    #[pin_project(PinnedDrop)]
+    pub enum E {
+        V { x: () },
+    }
+
+    #[pinned_drop]
+    impl PinnedDrop for E {
+        fn drop(self: Pin<&mut Self>) {
+            let _: () = self; //~ ERROR E0308
+            let _: Self = Self::V; //~ ERROR E0533
+        }
+    }
 }
 
 fn main() {}
