@@ -10,16 +10,23 @@ use syn::{
 use super::PIN;
 use crate::utils::{
     determine_lifetime_name, determine_visibility, insert_lifetime_and_bound, ParseBufferExt,
-    ProjKind, ReplaceReceiver, SliceExt, Variants,
+    ProjKind, ReplaceSelf, SliceExt, Variants,
 };
 
 pub(super) fn parse_derive(input: TokenStream) -> Result<TokenStream> {
-    let mut input = syn::parse2(input)?;
-    let DeriveInput { attrs, vis, ident, generics, data } = &mut input;
-    let mut cx = Context::new(attrs, vis, ident, generics)?;
+    let mut input: DeriveInput = syn::parse2(input)?;
+
+    let ident = &input.ident;
+    let ty_generics = input.generics.split_for_impl().1;
+    let self_ty = syn::parse_quote!(#ident #ty_generics);
+    let mut visitor = ReplaceSelf(&self_ty);
+    visitor.visit_generics_mut(&mut input.generics);
+    visitor.visit_data_mut(&mut input.data);
+
+    let mut cx = Context::new(&input.attrs, &input.vis, &input.ident, &mut input.generics)?;
     let packed_check;
 
-    let (mut items, scoped_items) = match data {
+    let (mut items, scoped_items) = match &input.data {
         Data::Struct(data) => {
             // Do this first for a better error message.
             packed_check = Some(cx.ensure_not_packed(&data.fields)?);
@@ -414,25 +421,20 @@ impl<'a> Context<'a> {
         let Args { pinned_drop, unpin_impl, project, project_ref, project_replace } =
             Args::get(attrs)?;
 
-        let ty_generics = generics.split_for_impl().1;
-        let self_ty = syn::parse_quote!(#ident #ty_generics);
-        let mut visitor = ReplaceReceiver(&self_ty);
-        visitor.visit_where_clause_mut(generics.make_where_clause());
-
         let mut lifetime_name = String::from("'pin");
         determine_lifetime_name(&mut lifetime_name, generics);
         let lifetime = Lifetime::new(&lifetime_name, Span::call_site());
 
-        let mut proj_generics = generics.clone();
         let ty_generics = generics.split_for_impl().1;
         let ty_generics_as_generics = syn::parse_quote!(#ty_generics);
+        let mut proj_generics = generics.clone();
         let pred = insert_lifetime_and_bound(
             &mut proj_generics,
             lifetime.clone(),
             &ty_generics_as_generics,
             ident,
         );
-        let mut where_clause = generics.clone().make_where_clause().clone();
+        let mut where_clause = generics.make_where_clause().clone();
         where_clause.predicates.push(pred);
 
         let own_ident =

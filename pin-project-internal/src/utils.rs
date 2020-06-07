@@ -203,11 +203,11 @@ impl<'a> ParseBufferExt<'a> for ParseBuffer<'a> {
 // visitors
 
 // Replace `self`/`Self` with `__self`/`self_ty`.
-// Based on https://github.com/dtolnay/async-trait/blob/0.1.32/src/receiver.rs
+// Based on https://github.com/dtolnay/async-trait/blob/0.1.33/src/receiver.rs
 
-pub(crate) struct ReplaceReceiver<'a>(pub(crate) &'a Type);
+pub(crate) struct ReplaceSelf<'a>(pub(crate) &'a Type);
 
-impl ReplaceReceiver<'_> {
+impl ReplaceSelf<'_> {
     fn self_ty(&self, span: Span) -> Type {
         respan(self.0, span)
     }
@@ -322,7 +322,7 @@ impl ReplaceReceiver<'_> {
     }
 }
 
-impl VisitMut for ReplaceReceiver<'_> {
+impl VisitMut for ReplaceSelf<'_> {
     // `Self` -> `Receiver`
     fn visit_type_mut(&mut self, ty: &mut Type) {
         if let Type::Path(node) = ty {
