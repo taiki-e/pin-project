@@ -2,7 +2,7 @@ use proc_macro2::TokenStream;
 use quote::{quote, ToTokens};
 use syn::{spanned::Spanned, visit_mut::VisitMut, *};
 
-use crate::utils::{parse_as_empty, prepend_underscore_to_self, ReplaceSelf, SliceExt};
+use crate::utils::{parse_as_empty, prepend_underscore_to_self, ReplaceReceiver, SliceExt};
 
 pub(crate) fn attribute(args: &TokenStream, mut input: ItemImpl) -> TokenStream {
     if let Err(e) = parse_as_empty(args).and_then(|()| parse(&mut input)) {
@@ -171,7 +171,7 @@ fn expand_item(item: &mut ItemImpl) {
             prepend_underscore_to_self(&mut ident.ident);
         }
     }
-    let mut visitor = ReplaceSelf(&item.self_ty);
+    let mut visitor = ReplaceReceiver(&item.self_ty);
     visitor.visit_signature_mut(&mut drop_inner.sig);
     visitor.visit_block_mut(&mut drop_inner.block);
 

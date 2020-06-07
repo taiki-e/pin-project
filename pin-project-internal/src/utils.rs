@@ -205,9 +205,9 @@ impl<'a> ParseBufferExt<'a> for ParseBuffer<'a> {
 // Replace `self`/`Self` with `__self`/`self_ty`.
 // Based on https://github.com/dtolnay/async-trait/blob/0.1.33/src/receiver.rs
 
-pub(crate) struct ReplaceSelf<'a>(pub(crate) &'a Type);
+pub(crate) struct ReplaceReceiver<'a>(pub(crate) &'a Type);
 
-impl ReplaceSelf<'_> {
+impl ReplaceReceiver<'_> {
     fn self_ty(&self, span: Span) -> Type {
         respan(self.0, span)
     }
@@ -235,10 +235,7 @@ impl ReplaceSelf<'_> {
             gt_token: token::Gt::default(),
         });
 
-        match path.segments.pairs().next().unwrap().punct() {
-            Some(&&colon) => path.leading_colon = Some(colon),
-            None => return,
-        }
+        path.leading_colon = Some(**path.segments.pairs().next().unwrap().punct().unwrap());
 
         let segments = mem::replace(&mut path.segments, Punctuated::new());
         path.segments = segments.into_pairs().skip(1).collect();
@@ -322,7 +319,7 @@ impl ReplaceSelf<'_> {
     }
 }
 
-impl VisitMut for ReplaceSelf<'_> {
+impl VisitMut for ReplaceReceiver<'_> {
     // `Self` -> `Receiver`
     fn visit_type_mut(&mut self, ty: &mut Type) {
         if let Type::Path(node) = ty {
@@ -375,25 +372,25 @@ impl VisitMut for ReplaceSelf<'_> {
         visit_mut::visit_pat_tuple_struct_mut(self, pat);
     }
 
-    fn visit_item_mut(&mut self, node: &mut Item) {
-        match node {
+    fn visit_item_mut(&mut self, item: &mut Item) {
+        match item {
             // Visit `macro_rules!` because locally defined macros can refer to `self`.
-            Item::Macro(node) if node.mac.path.is_ident("macro_rules") => {
-                self.visit_macro_mut(&mut node.mac)
+            Item::Macro(item) if item.mac.path.is_ident("macro_rules") => {
+                self.visit_macro_mut(&mut item.mac)
             }
             // Otherwise, do not recurse into nested items.
             _ => {}
         }
     }
 
-    fn visit_macro_mut(&mut self, node: &mut Macro) {
+    fn visit_macro_mut(&mut self, mac: &mut Macro) {
         // We can't tell in general whether `self` inside a macro invocation
         // refers to the self in the argument list or a different self
         // introduced within the macro. Heuristic: if the macro input contains
         // `fn`, then `self` is more likely to refer to something other than the
         // outer function's self argument.
-        if !contains_fn(node.tokens.clone()) {
-            self.visit_token_stream(&mut node.tokens);
+        if !contains_fn(mac.tokens.clone()) {
+            self.visit_token_stream(&mut mac.tokens);
         }
     }
 }

@@ -10,7 +10,7 @@ use syn::{
 use super::PIN;
 use crate::utils::{
     determine_lifetime_name, determine_visibility, insert_lifetime_and_bound, ParseBufferExt,
-    ProjKind, ReplaceSelf, SliceExt, Variants,
+    ProjKind, ReplaceReceiver, SliceExt, Variants,
 };
 
 pub(super) fn parse_derive(input: TokenStream) -> Result<TokenStream> {
@@ -19,7 +19,7 @@ pub(super) fn parse_derive(input: TokenStream) -> Result<TokenStream> {
     let ident = &input.ident;
     let ty_generics = input.generics.split_for_impl().1;
     let self_ty = syn::parse_quote!(#ident #ty_generics);
-    let mut visitor = ReplaceSelf(&self_ty);
+    let mut visitor = ReplaceReceiver(&self_ty);
     visitor.visit_generics_mut(&mut input.generics);
     visitor.visit_data_mut(&mut input.data);
 
