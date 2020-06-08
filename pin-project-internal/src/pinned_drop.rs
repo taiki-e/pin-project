@@ -194,15 +194,18 @@ fn expand_item(item: &mut ItemImpl) {
 
     // `fn drop(mut self: Pin<&mut Self>)` -> `unsafe fn drop(self: Pin<&mut Self>)`
     method.sig.unsafety = Some(token::Unsafe::default());
+    let mut self_token = None;
     if let FnArg::Typed(arg) = &mut method.sig.inputs[0] {
         if let Pat::Ident(ident) = &mut *arg.pat {
             ident.mutability = None;
+            self_token = Some(&ident.ident);
         }
     }
+    assert!(self_token.is_some());
 
     method.block.stmts = syn::parse_quote! {
         #[allow(clippy::needless_pass_by_value)] // This lint does not warn the receiver.
         #drop_inner
-        __drop_inner(self);
+        __drop_inner(#self_token);
     };
 }
