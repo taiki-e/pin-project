@@ -268,3 +268,26 @@ fn self_inside_macro() {
         }
     }
 }
+
+#[test]
+fn inside_macro() {
+    use pin_project::{pin_project, pinned_drop};
+    use std::pin::Pin;
+
+    #[pin_project(PinnedDrop)]
+    struct Struct(());
+
+    macro_rules! mac {
+        ($expr:expr) => {
+            #[pinned_drop]
+            impl PinnedDrop for Struct {
+                #[allow(clippy::no_effect)]
+                fn drop(self: Pin<&mut Self>) {
+                    $expr;
+                }
+            }
+        };
+    }
+
+    mac!(1);
+}
