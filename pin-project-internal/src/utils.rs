@@ -87,7 +87,7 @@ pub(crate) fn insert_lifetime_and_bound(
 ) -> WherePredicate {
     insert_lifetime(generics, lifetime.clone());
 
-    let orig_type: Type = syn::parse_quote!(#orig_ident #orig_generics);
+    let orig_type: Type = parse_quote!(#orig_ident #orig_generics);
     let mut punct = Punctuated::new();
     punct.push(TypeParamBound::Lifetime(lifetime));
 

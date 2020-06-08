@@ -200,6 +200,19 @@ mod pin_project_argument {
     struct ProjectReplace3(#[pin] ());
 }
 
+mod pin_project_conflict_naming {
+    use pin_project::pin_project;
+
+    #[pin_project(project = A, project_ref = A)] //~ ERROR name `A` is already specified by `project` argument
+    struct ProjAndProjRef(#[pin] ());
+
+    #[pin_project(project = A, project_replace = A)] //~ ERROR name `A` is already specified by `project` argument
+    struct ProjAndProjOwn(#[pin] ());
+
+    #[pin_project(project_ref = A, project_replace = A)] //~ ERROR name `A` is already specified by `project_ref` argument
+    struct ProjRefAndProjOwn(#[pin] ());
+}
+
 mod pin_project_attribute {
     use pin_project::pin_project;
 

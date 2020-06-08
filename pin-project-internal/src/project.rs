@@ -184,10 +184,10 @@ fn replace_item_impl(item: &mut ItemImpl, kind: ProjKind) -> Result<()> {
 
     match arguments {
         PathArguments::None => {
-            *arguments = PathArguments::AngleBracketed(syn::parse_quote!(<#lifetime>));
+            *arguments = PathArguments::AngleBracketed(parse_quote!(<#lifetime>));
         }
         PathArguments::AngleBracketed(args) => {
-            args.args.insert(0, syn::parse_quote!(#lifetime));
+            args.args.insert(0, parse_quote!(#lifetime));
         }
         PathArguments::Parenthesized(_) => unreachable!(),
     }

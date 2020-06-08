@@ -18,7 +18,7 @@ pub(super) fn parse_derive(input: TokenStream) -> Result<TokenStream> {
 
     let ident = &input.ident;
     let ty_generics = input.generics.split_for_impl().1;
-    let self_ty = syn::parse_quote!(#ident #ty_generics);
+    let self_ty = parse_quote!(#ident #ty_generics);
     let mut visitor = ReplaceReceiver(&self_ty);
     visitor.visit_generics_mut(&mut input.generics);
     visitor.visit_data_mut(&mut input.data);
@@ -202,7 +202,7 @@ impl Args {
             };
             Err(error!(span, DUPLICATE_PIN))
         } else {
-            // This only fails if another macro removes `#[pin]` and inserts own `#[pin]`.
+            // This `unwrap` only fails if another macro removes `#[pin]` and inserts own `#[pin]`.
             syn::parse2(prev.1.unwrap())
         }
     }
@@ -244,7 +244,8 @@ impl Parse for Args {
         let mut project_ref = None;
 
         let mut replace = None;
-        let mut project_replace: Option<(Option<Ident>, Span)> = None;
+        let mut project_replace_value = None;
+        let mut project_replace_span = None;
 
         while !input.is_empty() {
             if input.peek(token::Bang) {
@@ -279,12 +280,13 @@ impl Parse for Args {
                     "project_replace" => {
                         if input.peek(token::Eq) {
                             let (value, span) =
-                                parse_value(input, &token, project_replace.is_some())?;
-                            project_replace = Some((Some(value), span.span()));
-                        } else if project_replace.is_some() {
+                                parse_value(input, &token, project_replace_span.is_some())?;
+                            project_replace_value = Some(value);
+                            project_replace_span = Some(span.span());
+                        } else if project_replace_span.is_some() {
                             return Err(error!(token, "duplicate `project_replace` argument"));
                         } else {
-                            project_replace = Some((None, token.span()));
+                            project_replace_span = Some(token.span());
                         }
                     }
                     "Replace" => {
@@ -302,8 +304,31 @@ impl Parse for Args {
             let _: token::Comma = input.parse()?;
         }
 
+        if project.is_some() || project_ref.is_some() {
+            if project == project_ref {
+                return Err(error!(
+                    project_ref,
+                    "name `{}` is already specified by `project` argument",
+                    project_ref.as_ref().unwrap()
+                ));
+            }
+            if let Some(ident) = &project_replace_value {
+                if project == project_replace_value {
+                    return Err(error!(
+                        ident,
+                        "name `{}` is already specified by `project` argument", ident
+                    ));
+                } else if project_ref == project_replace_value {
+                    return Err(error!(
+                        ident,
+                        "name `{}` is already specified by `project_ref` argument", ident
+                    ));
+                }
+            }
+        }
+
         if let Some(span) = pinned_drop {
-            if project_replace.is_some() {
+            if project_replace_span.is_some() {
                 return Err(Error::new(
                     span,
                     "arguments `PinnedDrop` and `project_replace` are mutually exclusive",
@@ -315,12 +340,12 @@ impl Parse for Args {
                 ));
             }
         }
-        let project_replace = match (project_replace, replace) {
-            (None, None) => ProjReplace::None,
+        let project_replace = match (project_replace_span, project_replace_value, replace) {
+            (None, _, None) => ProjReplace::None,
             // If both `project_replace` and `Replace` are specified,
             // We always prefer `project_replace`'s span,
-            (Some((Some(ident), span)), _) => ProjReplace::Named { ident, span },
-            (Some((_, span)), _) | (None, Some(span)) => ProjReplace::Unnamed { span },
+            (Some(span), Some(ident), _) => ProjReplace::Named { ident, span },
+            (Some(span), ..) | (None, _, Some(span)) => ProjReplace::Unnamed { span },
         };
         let unpin_impl = match (unsafe_unpin, not_unpin) {
             (None, None) => UnpinImpl::Default,
@@ -430,7 +455,7 @@ impl<'a> Context<'a> {
         let lifetime = Lifetime::new(&lifetime_name, Span::call_site());
 
         let ty_generics = generics.split_for_impl().1;
-        let ty_generics_as_generics = syn::parse_quote!(#ty_generics);
+        let ty_generics_as_generics = parse_quote!(#ty_generics);
         let mut proj_generics = generics.clone();
         let pred = insert_lifetime_and_bound(
             &mut proj_generics,
@@ -838,7 +863,7 @@ impl<'a> Context<'a> {
                 let (impl_generics, _, where_clause) = proj_generics.split_for_impl();
                 let ty_generics = self.orig.generics.split_for_impl().1;
 
-                quote! {
+                quote_spanned! { span =>
                     impl #impl_generics ::pin_project::__private::Unpin for #orig_ident #ty_generics
                     #where_clause
                     {
@@ -932,7 +957,7 @@ impl<'a> Context<'a> {
                 let (impl_generics, ty_generics, where_clause) =
                     self.orig.generics.split_for_impl();
 
-                full_where_clause.predicates.push(syn::parse_quote! {
+                full_where_clause.predicates.push(parse_quote! {
                     #struct_ident #proj_ty_generics: ::pin_project::__private::Unpin
                 });
 
