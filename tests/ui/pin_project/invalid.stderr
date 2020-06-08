@@ -256,73 +256,91 @@ error: expected identifier
 199 |     #[pin_project(project_replace = !)] //~ ERROR expected identifier
     |                                     ^
 
-error: duplicate #[pin_project] attribute
-   --> $DIR/invalid.rs:207:5
+error: name `A` is already specified by `project` argument
+   --> $DIR/invalid.rs:206:46
     |
-207 |     #[pin_project] //~ ERROR duplicate #[pin_project] attribute
+206 |     #[pin_project(project = A, project_ref = A)] //~ ERROR name `A` is already specified by `project` argument
+    |                                              ^
+
+error: name `A` is already specified by `project` argument
+   --> $DIR/invalid.rs:209:50
+    |
+209 |     #[pin_project(project = A, project_replace = A)] //~ ERROR name `A` is already specified by `project` argument
+    |                                                  ^
+
+error: name `A` is already specified by `project_ref` argument
+   --> $DIR/invalid.rs:212:54
+    |
+212 |     #[pin_project(project_ref = A, project_replace = A)] //~ ERROR name `A` is already specified by `project_ref` argument
+    |                                                      ^
+
+error: duplicate #[pin_project] attribute
+   --> $DIR/invalid.rs:220:5
+    |
+220 |     #[pin_project] //~ ERROR duplicate #[pin_project] attribute
     |     ^^^^^^^^^^^^^^
 
 error: #[pin_project] attribute may not be used on structs with zero fields
-   --> $DIR/invalid.rs:215:19
+   --> $DIR/invalid.rs:228:19
     |
-215 |     struct Struct {} //~ ERROR may not be used on structs with zero fields
+228 |     struct Struct {} //~ ERROR may not be used on structs with zero fields
     |                   ^^
 
 error: #[pin_project] attribute may not be used on structs with zero fields
-   --> $DIR/invalid.rs:218:23
+   --> $DIR/invalid.rs:231:23
     |
-218 |     struct TupleStruct(); //~ ERROR may not be used on structs with zero fields
+231 |     struct TupleStruct(); //~ ERROR may not be used on structs with zero fields
     |                       ^^
 
 error: #[pin_project] attribute may not be used on structs with zero fields
-   --> $DIR/invalid.rs:221:12
+   --> $DIR/invalid.rs:234:12
     |
-221 |     struct UnitStruct; //~ ERROR may not be used on structs with zero fields
+234 |     struct UnitStruct; //~ ERROR may not be used on structs with zero fields
     |            ^^^^^^^^^^
 
 error: #[pin_project] attribute may not be used on enums without variants
-   --> $DIR/invalid.rs:224:20
+   --> $DIR/invalid.rs:237:20
     |
-224 |     enum EnumEmpty {} //~ ERROR may not be used on enums without variants
+237 |     enum EnumEmpty {} //~ ERROR may not be used on enums without variants
     |                    ^^
 
 error: #[pin_project] attribute may not be used on enums with discriminants
-   --> $DIR/invalid.rs:228:13
+   --> $DIR/invalid.rs:241:13
     |
-228 |         V = 2, //~ ERROR may not be used on enums with discriminants
+241 |         V = 2, //~ ERROR may not be used on enums with discriminants
     |             ^
 
 error: #[pin_project] attribute may not be used on enums with zero fields
-   --> $DIR/invalid.rs:233:9
+   --> $DIR/invalid.rs:246:9
     |
-233 | /         Unit, //~ ERROR may not be used on enums with zero fields
-234 | |         Tuple(),
-235 | |         Struct {},
+246 | /         Unit, //~ ERROR may not be used on enums with zero fields
+247 | |         Tuple(),
+248 | |         Struct {},
     | |__________________^
 
 error: #[pin_project] attribute may only be used on structs or enums
-   --> $DIR/invalid.rs:239:5
+   --> $DIR/invalid.rs:252:5
     |
-239 | /     union Union {
-240 | |         //~^ ERROR may only be used on structs or enums
-241 | |         f: (),
-242 | |     }
+252 | /     union Union {
+253 | |         //~^ ERROR may only be used on structs or enums
+254 | |         f: (),
+255 | |     }
     | |_____^
 
 error: #[pin_project] attribute may not be used on #[repr(packed)] types
-   --> $DIR/invalid.rs:250:12
+   --> $DIR/invalid.rs:263:12
     |
-250 |     #[repr(packed)]
+263 |     #[repr(packed)]
     |            ^^^^^^
 
 error: #[pin_project] attribute may not be used on #[repr(packed)] types
-   --> $DIR/invalid.rs:254:12
+   --> $DIR/invalid.rs:267:12
     |
-254 |     #[repr(packed)]
+267 |     #[repr(packed)]
     |            ^^^^^^
 
 error: #[pin_project] attribute may not be used on #[repr(packed)] types
-   --> $DIR/invalid.rs:258:12
+   --> $DIR/invalid.rs:271:12
     |
-258 |     #[repr(packed)]
+271 |     #[repr(packed)]
     |            ^^^^^^

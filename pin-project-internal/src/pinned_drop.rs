@@ -203,7 +203,7 @@ fn expand_item(item: &mut ItemImpl) {
     }
     assert!(self_token.is_some());
 
-    method.block.stmts = syn::parse_quote! {
+    method.block.stmts = parse_quote! {
         #[allow(clippy::needless_pass_by_value)] // This lint does not warn the receiver.
         #drop_inner
         __drop_inner(#self_token);
