@@ -193,7 +193,7 @@ fn expand_item(item: &mut ItemImpl) {
     visitor.visit_block_mut(&mut drop_inner.block);
 
     // `fn drop(mut self: Pin<&mut Self>)` -> `unsafe fn drop(self: Pin<&mut Self>)`
-    method.sig.unsafety = Some(token::Unsafe::default());
+    method.sig.unsafety = Some(<Token![unsafe]>::default());
     let mut self_token = None;
     if let FnArg::Typed(arg) = &mut method.sig.inputs[0] {
         if let Pat::Ident(ident) = &mut *arg.pat {

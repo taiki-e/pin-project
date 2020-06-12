@@ -223,7 +223,7 @@ impl Parse for Args {
             if input.is_empty() {
                 return Err(error!(name, "expected `{0} = <identifier>`, found `{0}`", name));
             }
-            let eq_token: token::Eq = input.parse()?;
+            let eq_token: Token![=] = input.parse()?;
             if input.is_empty() {
                 let span = quote!(#name #eq_token);
                 return Err(error!(span, "expected `{0} = <identifier>`, found `{0} =`", name));
@@ -248,8 +248,8 @@ impl Parse for Args {
         let mut project_replace_span = None;
 
         while !input.is_empty() {
-            if input.peek(token::Bang) {
-                let bang: token::Bang = input.parse()?;
+            if input.peek(Token![!]) {
+                let bang: Token![!] = input.parse()?;
                 if input.is_empty() {
                     return Err(error!(bang, "expected `!Unpin`, found `!`"));
                 }
@@ -278,7 +278,7 @@ impl Parse for Args {
                         project_ref = Some(parse_value(input, &token, project_ref.is_some())?.0);
                     }
                     "project_replace" => {
-                        if input.peek(token::Eq) {
+                        if input.peek(Token![=]) {
                             let (value, span) =
                                 parse_value(input, &token, project_replace_span.is_some())?;
                             project_replace_value = Some(value);
@@ -301,7 +301,7 @@ impl Parse for Args {
             if input.is_empty() {
                 break;
             }
-            let _: token::Comma = input.parse()?;
+            let _: Token![,] = input.parse()?;
         }
 
         if project.is_some() || project_ref.is_some() {
@@ -887,7 +887,7 @@ impl<'a> Context<'a> {
 
                 // For interoperability with `forbid(unsafe_code)`, `unsafe` token should be
                 // call-site span.
-                let unsafety = token::Unsafe::default();
+                let unsafety = <Token![unsafe]>::default();
                 quote_spanned! { span =>
                     impl #proj_impl_generics ::pin_project::__private::Unpin
                         for #orig_ident #ty_generics
@@ -1011,7 +1011,7 @@ impl<'a> Context<'a> {
         if let Some(span) = self.pinned_drop {
             // For interoperability with `forbid(unsafe_code)`, `unsafe` token should be
             // call-site span.
-            let unsafety = token::Unsafe::default();
+            let unsafety = <Token![unsafe]>::default();
             quote_spanned! { span =>
                 impl #impl_generics ::pin_project::__private::Drop for #ident #ty_generics
                 #where_clause
@@ -1101,7 +1101,7 @@ impl<'a> Context<'a> {
         let replace_impl = self.project_replace.span().map(|span| {
             // For interoperability with `forbid(unsafe_code)`, `unsafe` token should be
             // call-site span.
-            let unsafety = token::Unsafe::default();
+            let unsafety = <Token![unsafe]>::default();
             quote_spanned! { span =>
                 #vis fn project_replace(
                     self: ::pin_project::__private::Pin<&mut Self>,

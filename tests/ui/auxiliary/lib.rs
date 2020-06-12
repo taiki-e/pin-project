@@ -3,7 +3,7 @@
 
 use proc_macro::TokenStream;
 use quote::{format_ident, ToTokens};
-use syn::{parse_quote, token, Field, Fields, ItemStruct, Visibility};
+use syn::{parse_quote, Field, Fields, ItemStruct, Token, Visibility};
 
 #[proc_macro_attribute]
 pub fn hidden_repr(args: TokenStream, input: TokenStream) -> TokenStream {
@@ -28,7 +28,7 @@ pub fn add_pinned_field(_: TokenStream, input: TokenStream) -> TokenStream {
         attrs: vec![parse_quote!(#[pin])],
         vis: Visibility::Inherited,
         ident: Some(format_ident!("__field")),
-        colon_token: Some(token::Colon::default()),
+        colon_token: Some(<Token![:]>::default()),
         ty: parse_quote!(::std::marker::PhantomPinned),
     });
 
