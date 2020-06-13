@@ -8,7 +8,7 @@ use syn::{
     *,
 };
 
-pub(crate) type Variants = Punctuated<Variant, token::Comma>;
+pub(crate) type Variants = Punctuated<Variant, Token![,]>;
 
 macro_rules! error {
     ($span:expr, $msg:expr) => {
@@ -94,15 +94,15 @@ pub(crate) fn insert_lifetime_and_bound(
     WherePredicate::Type(PredicateType {
         lifetimes: None,
         bounded_ty: orig_type,
-        colon_token: token::Colon::default(),
+        colon_token: <Token![:]>::default(),
         bounds: punct,
     })
 }
 
 /// Inserts a `lifetime` at position `0` of `generics.params`.
 pub(crate) fn insert_lifetime(generics: &mut Generics, lifetime: Lifetime) {
-    generics.lt_token.get_or_insert_with(token::Lt::default);
-    generics.gt_token.get_or_insert_with(token::Gt::default);
+    generics.lt_token.get_or_insert_with(<Token![<]>::default);
+    generics.gt_token.get_or_insert_with(<Token![>]>::default);
     generics.params.insert(0, LifetimeDef::new(lifetime).into());
 }
 
@@ -203,7 +203,7 @@ impl<'a> ParseBufferExt<'a> for ParseBuffer<'a> {
 // visitors
 
 // Replace `self`/`Self` with `__self`/`self_ty`.
-// Based on https://github.com/dtolnay/async-trait/blob/0.1.33/src/receiver.rs
+// Based on https://github.com/dtolnay/async-trait/blob/0.1.35/src/receiver.rs
 
 pub(crate) struct ReplaceReceiver<'a>(pub(crate) &'a TypePath);
 
@@ -229,11 +229,11 @@ impl ReplaceReceiver<'_> {
 
         let span = first.ident.span();
         *qself = Some(QSelf {
-            lt_token: token::Lt(span),
+            lt_token: Token![<](span),
             ty: Box::new(self.self_ty(span).into()),
             position: 0,
             as_token: None,
-            gt_token: token::Gt(span),
+            gt_token: Token![>](span),
         });
 
         path.leading_colon = Some(**path.segments.pairs().next().unwrap().punct().unwrap());
@@ -257,12 +257,12 @@ impl ReplaceReceiver<'_> {
         for segment in &mut path.segments {
             if let PathArguments::AngleBracketed(bracketed) = &mut segment.arguments {
                 if bracketed.colon2_token.is_none() && !bracketed.args.is_empty() {
-                    bracketed.colon2_token = Some(token::Colon2::default());
+                    bracketed.colon2_token = Some(<Token![::]>::default());
                 }
             }
         }
         if variant.segments.len() > 1 {
-            path.segments.push_punct(token::Colon2::default());
+            path.segments.push_punct(<Token![::]>::default());
             path.segments.extend(variant.segments.into_pairs().skip(1));
         }
     }
