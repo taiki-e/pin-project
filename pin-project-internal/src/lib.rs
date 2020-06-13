@@ -546,6 +546,7 @@ pub fn pinned_drop(args: TokenStream, input: TokenStream) -> TokenStream {
 /// ## Examples
 ///
 /// ```rust
+/// # #![allow(deprecated)]
 /// use pin_project::{pin_project, project};
 /// use std::pin::Pin;
 ///
@@ -576,6 +577,7 @@ pub fn pinned_drop(args: TokenStream, input: TokenStream) -> TokenStream {
 /// ## Examples
 ///
 /// ```rust
+/// # #![allow(deprecated)]
 /// use pin_project::{pin_project, project};
 /// use std::pin::Pin;
 ///
@@ -616,6 +618,7 @@ pub fn pinned_drop(args: TokenStream, input: TokenStream) -> TokenStream {
 /// ## Examples
 ///
 /// ```rust
+/// # #![allow(deprecated)]
 /// use pin_project::{pin_project, project};
 /// use std::pin::Pin;
 ///
@@ -650,6 +653,7 @@ pub fn pinned_drop(args: TokenStream, input: TokenStream) -> TokenStream {
 /// ## Examples
 ///
 /// ```rust
+/// # #![allow(deprecated)]
 /// # mod dox {
 /// use pin_project::pin_project;
 ///
@@ -676,6 +680,16 @@ pub fn pinned_drop(args: TokenStream, input: TokenStream) -> TokenStream {
 /// }
 /// # }
 /// ```
+#[cfg_attr(
+    deprecated_proc_macro,
+    deprecated(
+        since = "0.4.21",
+        note = "consider naming projected type by passing `project` \
+                argument to #[pin_project] attribute instead, see release note \
+                <https://github.com/taiki-e/pin-project/releases/tag/v0.4.21> \
+                for details"
+    )
+)]
 #[proc_macro_attribute]
 pub fn project(args: TokenStream, input: TokenStream) -> TokenStream {
     let input = syn::parse_macro_input!(input);
@@ -691,6 +705,16 @@ pub fn project(args: TokenStream, input: TokenStream) -> TokenStream {
 /// See [`#[project]`][`project`] attribute for more details.
 ///
 /// [`project`]: ./attr.project.html
+#[cfg_attr(
+    deprecated_proc_macro,
+    deprecated(
+        since = "0.4.21",
+        note = "consider naming projected type by passing `project_ref` \
+                argument to #[pin_project] attribute instead, see release note \
+                <https://github.com/taiki-e/pin-project/releases/tag/v0.4.21> \
+                for details"
+    )
+)]
 #[proc_macro_attribute]
 pub fn project_ref(args: TokenStream, input: TokenStream) -> TokenStream {
     let input = syn::parse_macro_input!(input);
@@ -706,6 +730,16 @@ pub fn project_ref(args: TokenStream, input: TokenStream) -> TokenStream {
 /// See [`#[project]`][`project`] attribute for more details.
 ///
 /// [`project`]: ./attr.project.html
+#[cfg_attr(
+    deprecated_proc_macro,
+    deprecated(
+        since = "0.4.21",
+        note = "consider naming projected type by passing `project_replace` \
+                argument to #[pin_project] attribute instead, see release note \
+                <https://github.com/taiki-e/pin-project/releases/tag/v0.4.21> \
+                for details"
+    )
+)]
 #[proc_macro_attribute]
 pub fn project_replace(args: TokenStream, input: TokenStream) -> TokenStream {
     let input = syn::parse_macro_input!(input);

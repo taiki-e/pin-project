@@ -1,5 +1,6 @@
 #![warn(rust_2018_idioms, single_use_lifetimes)]
 #![allow(dead_code)]
+#![allow(deprecated)]
 
 use pin_project::{pin_project, project_ref};
 use std::pin::Pin;

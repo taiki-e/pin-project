@@ -55,12 +55,15 @@ pub use pin_project_internal::pin_project;
 #[doc(inline)]
 pub use pin_project_internal::pinned_drop;
 
+#[allow(deprecated)]
 #[doc(inline)]
 pub use pin_project_internal::project;
 
+#[allow(deprecated)]
 #[doc(inline)]
 pub use pin_project_internal::project_ref;
 
+#[allow(deprecated)]
 #[doc(inline)]
 pub use pin_project_internal::project_replace;
 
