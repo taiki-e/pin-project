@@ -9,10 +9,16 @@ fn main() {
         None => return,
     };
 
-    // Underscore const names stabilized in Rust 1.37:
-    // https://github.com/rust-lang/rust/pull/61347/
+    // Underscore const names requires Rust 1.37:
+    // https://github.com/rust-lang/rust/pull/61347
     if minor >= 37 {
         println!("cargo:rustc-cfg=underscore_consts");
+    }
+
+    // #[deprecated] on proc-macro requires Rust 1.40:
+    // https://github.com/rust-lang/rust/pull/65666
+    if minor >= 40 {
+        println!("cargo:rustc-cfg=deprecated_proc_macro");
     }
 }
 

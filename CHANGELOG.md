@@ -6,6 +6,33 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 ## [Unreleased]
 
+* [Deprecated `#[project]`, `#[project_ref]`, and `#[project_replace]` attributes due to some unfixable limitations.][244]
+
+  Consider naming the projected type by passing an argument with the same name as the method to the #[pin_project] attribute instead.
+
+  ```rust
+  use pin_project::pin_project;
+  use std::pin::Pin;
+
+  #[pin_project(project = EnumProj)]
+  enum Enum<T> {
+      Variant(#[pin] T),
+  }
+
+  fn func<T>(x: Pin<&mut Enum<T>>) {
+      match x.project() {
+          EnumProj::Variant(y) => {
+              let _: Pin<&mut T> = y;
+          }
+      }
+  }
+  ```
+
+  See [#225][225] for more details.
+
+[225]: https://github.com/taiki-e/pin-project/pull/225
+[244]: https://github.com/taiki-e/pin-project/pull/244
+
 ## [0.4.20] - 2020-06-07
 
 * [You can now use project_replace argument without Replace argument.][243]

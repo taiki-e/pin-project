@@ -1,5 +1,6 @@
 #![warn(rust_2018_idioms, single_use_lifetimes)]
 #![allow(dead_code)]
+#![allow(deprecated)]
 
 // Ceurrently, `#[attr] if true {}` doesn't even *parse* on MSRV,
 // which means that it will error even behind a `#[rustversion::since(..)]`

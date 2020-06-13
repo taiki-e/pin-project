@@ -1,3 +1,5 @@
+#![allow(deprecated)]
+
 mod argument {
     use pin_project::{pin_project, project};
 
