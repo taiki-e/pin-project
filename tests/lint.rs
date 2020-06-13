@@ -118,7 +118,7 @@ pub mod clippy {
     }
 }
 
-#[rustversion::attr(not(nightly), ignore)]
+#[rustversion::attr(not(since(2020-06-12)), ignore)]
 #[test]
 fn check_lint_list() {
     use std::{env, process::Command, str};

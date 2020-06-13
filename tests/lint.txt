@@ -108,6 +108,7 @@ Lint checks provided by rustc:
                                      conflicting-repr-hints  deny     conflicts between `#[repr(..)]` hints that were previously accepted and used in practice
                                                   const-err  deny     constant evaluation detected erroneous expression
                                  ill-formed-attribute-input  deny     ill-formed attribute inputs that were previously accepted and used in practice
+                                         incomplete-include  deny     trailing content in included file
                                  invalid-type-param-default  deny     type parameter default erroneously allowed in invalid location
     macro-expanded-macro-exports-accessed-by-absolute-paths  deny     macro-expanded `macro_export` macros from the current crate cannot be referred to by absolute paths
                                  missing-fragment-specifier  deny     detects missing fragment specifiers in unused `macro_rules!` patterns
