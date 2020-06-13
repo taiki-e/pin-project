@@ -32,7 +32,7 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
   See [#225][225] for more details.
 
-* [Support `Self` in fields and generics in type definitions.][230]
+* [Support `Self` in fields and generics in type definitions.][245]
 
 * [Fix errors involving *"`self` value is a keyword only available in methods with `self` parameter"* in apparently correct code.][250]
 
@@ -40,6 +40,8 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 [225]: https://github.com/taiki-e/pin-project/pull/225
 [244]: https://github.com/taiki-e/pin-project/pull/244
+[245]: https://github.com/taiki-e/pin-project/pull/245
+[250]: https://github.com/taiki-e/pin-project/pull/250
 
 ## [0.4.20] - 2020-06-07
 
@@ -541,7 +543,8 @@ See also [tracking issue for 0.4 release][21].
 
 Initial release
 
-[Unreleased]: https://github.com/taiki-e/pin-project/compare/v0.4.20...HEAD
+[Unreleased]: https://github.com/taiki-e/pin-project/compare/v0.4.21...HEAD
+[0.4.21]: https://github.com/taiki-e/pin-project/compare/v0.4.20...v0.4.21
 [0.4.20]: https://github.com/taiki-e/pin-project/compare/v0.4.19...v0.4.20
 [0.4.19]: https://github.com/taiki-e/pin-project/compare/v0.4.18...v0.4.19
 [0.4.18]: https://github.com/taiki-e/pin-project/compare/v0.4.17...v0.4.18
