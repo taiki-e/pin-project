@@ -20,11 +20,6 @@ error[E0277]: the size for values of type `T` cannot be known at compilation tim
 7   |     x: T,
     |     ^ doesn't have a size known at compile-time
     |
-   ::: $RUST/src/libcore/ptr/mod.rs:653:20
-    |
-653 | pub unsafe fn read<T>(src: *const T) -> T {
-    |                    - required by this bound in `std::ptr::read`
-    |
     = help: the trait `std::marker::Sized` is not implemented for `T`
     = note: to learn more, visit <https://doc.rust-lang.org/book/ch19-04-advanced-types.html#dynamically-sized-types-and-the-sized-trait>
 
@@ -63,11 +58,6 @@ error[E0277]: the size for values of type `T` cannot be known at compilation tim
     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ doesn't have a size known at compile-time
 11  | struct TupleStruct<T: ?Sized>(T);
     |                    - this type parameter needs to be `std::marker::Sized`
-    |
-   ::: $RUST/src/libcore/ptr/mod.rs:653:20
-    |
-653 | pub unsafe fn read<T>(src: *const T) -> T {
-    |                    - required by this bound in `std::ptr::read`
     |
     = help: the trait `std::marker::Sized` is not implemented for `T`
     = note: to learn more, visit <https://doc.rust-lang.org/book/ch19-04-advanced-types.html#dynamically-sized-types-and-the-sized-trait>
