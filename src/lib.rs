@@ -36,7 +36,7 @@
 //! [struct-default-expanded]: https://github.com/taiki-e/pin-project/blob/master/examples/struct-default-expanded.rs
 
 #![no_std]
-#![doc(html_root_url = "https://docs.rs/pin-project/0.4.20")]
+#![doc(html_root_url = "https://docs.rs/pin-project/0.4.21")]
 #![doc(test(
     no_crate_inject,
     attr(deny(warnings, rust_2018_idioms, single_use_lifetimes), allow(dead_code))

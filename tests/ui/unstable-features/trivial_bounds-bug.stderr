@@ -3,3 +3,8 @@ error[E0277]: `std::marker::PhantomPinned` cannot be unpinned
     |
 13  |     impl Unpin for A where PhantomPinned: Unpin {} //~ ERROR E0277
     |                                           ^^^^^ the trait `std::marker::Unpin` is not implemented for `std::marker::PhantomPinned`
+    |
+   ::: $RUST/src/libcore/marker.rs:763:1
+    |
+763 | pub auto trait Unpin {}
+    | -------------------- required by this bound in `std::marker::Unpin`

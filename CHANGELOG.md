@@ -6,6 +6,8 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 ## [Unreleased]
 
+## [0.4.21] - 2020-06-13
+
 * [Deprecated `#[project]`, `#[project_ref]`, and `#[project_replace]` attributes due to some unfixable limitations.][244]
 
   Consider naming the projected type by passing an argument with the same name as the method to the #[pin_project] attribute instead.
@@ -29,6 +31,12 @@ This project adheres to [Semantic Versioning](https://semver.org).
   ```
 
   See [#225][225] for more details.
+
+* [Support `Self` in fields and generics in type definitions.][230]
+
+* [Fix errors involving *"`self` value is a keyword only available in methods with `self` parameter"* in apparently correct code.][250]
+
+* Diagnostic improvements.
 
 [225]: https://github.com/taiki-e/pin-project/pull/225
 [244]: https://github.com/taiki-e/pin-project/pull/244
