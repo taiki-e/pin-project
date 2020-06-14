@@ -533,8 +533,12 @@ pub fn pinned_drop(args: TokenStream, input: TokenStream) -> TokenStream {
     pinned_drop::attribute(&args.into(), input).into()
 }
 
-/// An attribute to provide way to refer to the projected type returned by
+/// (deprecated) An attribute to provide way to refer to the projected type returned by
 /// `project` method.
+///
+/// **This attribute is deprecated. Consider naming projected type by passing
+/// `project` argument to `#[pin_project]` attribute instead, see [release note]
+/// for details**
 ///
 /// The following syntaxes are supported.
 ///
@@ -680,6 +684,8 @@ pub fn pinned_drop(args: TokenStream, input: TokenStream) -> TokenStream {
 /// }
 /// # }
 /// ```
+///
+/// [release note]: https://github.com/taiki-e/pin-project/releases/tag/v0.4.21
 #[cfg_attr(
     deprecated_proc_macro,
     deprecated(
@@ -696,14 +702,19 @@ pub fn project(args: TokenStream, input: TokenStream) -> TokenStream {
     project::attribute(&args.into(), input, ProjKind::Mutable).into()
 }
 
-/// An attribute to provide way to refer to the projected type returned by
+/// (deprecated) An attribute to provide way to refer to the projected type returned by
 /// `project_ref` method.
+///
+/// **This attribute is deprecated. Consider naming projected type by passing
+/// `project_ref` argument to `#[pin_project]` attribute instead, see [release note]
+/// for details**
 ///
 /// This is the same as [`#[project]`][`project`] attribute except it refers to
 /// the projected type returned by the `project_ref` method.
 ///
 /// See [`#[project]`][`project`] attribute for more details.
 ///
+/// [release note]: https://github.com/taiki-e/pin-project/releases/tag/v0.4.21
 /// [`project`]: ./attr.project.html
 #[cfg_attr(
     deprecated_proc_macro,
@@ -721,14 +732,19 @@ pub fn project_ref(args: TokenStream, input: TokenStream) -> TokenStream {
     project::attribute(&args.into(), input, ProjKind::Immutable).into()
 }
 
-/// An attribute to provide way to refer to the projected type returned by
+/// (deprecated) An attribute to provide way to refer to the projected type returned by
 /// `project_replace` method.
+///
+/// **This attribute is deprecated. Consider naming projected type by passing
+/// `project_replace` argument to `#[pin_project]` attribute instead, see [release note]
+/// for details**
 ///
 /// This is the same as [`#[project]`][`project`] attribute except it refers to
 /// the projected type returned by the `project_replace` method.
 ///
 /// See [`#[project]`][`project`] attribute for more details.
 ///
+/// [release note]: https://github.com/taiki-e/pin-project/releases/tag/v0.4.21
 /// [`project`]: ./attr.project.html
 #[cfg_attr(
     deprecated_proc_macro,
