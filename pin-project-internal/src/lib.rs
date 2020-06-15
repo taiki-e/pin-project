@@ -134,7 +134,7 @@ use crate::utils::ProjKind;
 ///    contains the content is not overwritten or deallocated without calling
 ///    the content's destructors.
 ///
-///    Safe code doesn't need to worry about this - the only wait to violate
+///    Safe code doesn't need to worry about this - the only way to violate
 ///    this requirement is to manually deallocate memory (which is `unsafe`),
 ///    or to overwrite a field with something else.
 ///    Because your custom destructor takes [`Pin`]`<&mut MyStruct>`, it's
