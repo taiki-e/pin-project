@@ -10,13 +10,14 @@ fn main() {
         return;
     }
 
-    let cargo_expand = if cfg!(windows) { "cargo-expand.exe" } else { "cargo-expand" };
-    if has_command(cargo_expand) && has_command("rustfmt") {
-        println!("cargo:rustc-cfg=expandtest");
+    let is_ci = env::var_os("CI").map_or(false, |v| v == "true");
+    if is_ci {
+        println!("cargo:rustc-cfg=ci");
     }
 
-    if env::var_os("CI").map_or(false, |v| v == "true") {
-        println!("cargo:rustc-cfg=ci");
+    let cargo_expand = if cfg!(windows) { "cargo-expand.exe" } else { "cargo-expand" };
+    if is_ci || has_command(cargo_expand) && has_command("rustfmt") {
+        println!("cargo:rustc-cfg=expandtest");
     }
 }
 

@@ -79,6 +79,9 @@ jobs:
       - name: Install Rust
         run: |
           . ./ci/install-rust.sh
+      - name: Install rustfmt
+        run: |
+          . ./ci/install-component.sh rustfmt
       - name: Install cargo-expand
         run: |
           cargo install cargo-expand
