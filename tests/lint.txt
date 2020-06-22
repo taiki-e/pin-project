@@ -48,6 +48,7 @@ Lint checks provided by rustc:
                                          bare-trait-objects  warn     suggest using `dyn Trait` for trait objects
                                  bindings-with-variant-name  warn     detects pattern bindings with the same name as one of the matched variants
                                        cenum-impl-drop-cast  warn     a C-like enum implementing Drop is cast
+                                       clashing-extern-decl  warn     detects when an extern fn has been declared with the same name but different types
                                        coherence-leak-check  warn     distinct impls distinguished only by the leak-check code
                                                   dead-code  warn     detect unused, unexported items
                                                  deprecated  warn     detects use of deprecated items
