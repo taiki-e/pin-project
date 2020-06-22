@@ -909,8 +909,7 @@ impl<'a> Context<'a> {
                 }
             }
             UnpinImpl::Default => {
-                let mut full_where_clause =
-                    self.orig.generics.where_clause.as_ref().cloned().unwrap();
+                let mut full_where_clause = self.orig.generics.where_clause.clone().unwrap();
 
                 // Generate a field in our new struct for every
                 // pinned field in the original type.
