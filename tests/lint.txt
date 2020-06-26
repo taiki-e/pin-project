@@ -56,6 +56,7 @@ Lint checks provided by rustc:
                               exported-private-dependencies  warn     public interface leaks type from a private dependency
                      illegal-floating-point-literal-pattern  warn     floating-point literals cannot be used in patterns
                                             improper-ctypes  warn     proper use of libc types in foreign modules
+                                improper-ctypes-definitions  warn     proper use of libc types in foreign item definitions
                                         incomplete-features  warn     incomplete features that may function improperly in some or all cases
                                          inline-no-sanitize  warn     detects incompatible use of `#[inline(always)]` and `#[no_sanitize(...)]`
                           intra-doc-link-resolution-failure  warn     failures in resolving intra-doc link targets
