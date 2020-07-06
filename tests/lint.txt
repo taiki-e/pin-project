@@ -13,7 +13,6 @@ Lint checks provided by rustc:
                      absolute-paths-not-starting-with-crate  allow    fully qualified paths that start with a module name instead of `crate`, `self`, or an extern crate name
                                        anonymous-parameters  allow    detects anonymous parameters
                                                box-pointers  allow    use of owned (Box type) heap memory
-                                          confusable-idents  allow    detects visually confusable pairs between identifiers
                                        deprecated-in-future  allow    detects use of items that will be deprecated in a future version
                                   elided-lifetimes-in-paths  allow    hidden lifetime parameters in types are deprecated
                              explicit-outlives-requirements  allow    outlives requirements can be inferred
@@ -48,8 +47,9 @@ Lint checks provided by rustc:
                                          bare-trait-objects  warn     suggest using `dyn Trait` for trait objects
                                  bindings-with-variant-name  warn     detects pattern bindings with the same name as one of the matched variants
                                        cenum-impl-drop-cast  warn     a C-like enum implementing Drop is cast
-                                       clashing-extern-decl  warn     detects when an extern fn has been declared with the same name but different types
+                               clashing-extern-declarations  warn     detects when an extern fn has been declared with the same name but different types
                                        coherence-leak-check  warn     distinct impls distinguished only by the leak-check code
+                                          confusable-idents  warn     detects visually confusable pairs between identifiers
                                                   dead-code  warn     detect unused, unexported items
                                                  deprecated  warn     detects use of deprecated items
                           ellipsis-inclusive-range-patterns  warn     `...` range patterns are deprecated
@@ -64,6 +64,7 @@ Lint checks provided by rustc:
                                               invalid-value  warn     an invalid value is being created (such as a NULL reference)
                                    irrefutable-let-patterns  warn     detects irrefutable patterns in if-let and while-let statements
                               late-bound-lifetime-arguments  warn     detects generic lifetime arguments in path segments with late bound lifetime parameters
+                                   mixed-script-confusables  warn     detects Unicode scripts whose mixed script confusables codepoints are solely used
                         mutable-borrow-reservation-conflict  warn     reservation of a two-phased borrow conflicts with other shared borrows
                                        non-camel-case-types  warn     types, variants, traits and type parameters should have camel case names
                                non-shorthand-field-patterns  warn     using `Struct { x: x }` instead of `Struct { x }` in a pattern

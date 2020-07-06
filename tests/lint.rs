@@ -6,7 +6,6 @@
     absolute_paths_not_starting_with_crate,
     anonymous_parameters,
     box_pointers,
-    confusable_idents,
     deprecated_in_future,
     elided_lifetimes_in_paths,
     explicit_outlives_requirements,
