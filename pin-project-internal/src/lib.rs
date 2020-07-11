@@ -11,8 +11,6 @@
 // mem::take and #[non_exhaustive] requires Rust 1.40
 #![allow(clippy::mem_replace_with_default, clippy::manual_non_exhaustive)]
 #![allow(clippy::needless_doctest_main)]
-// https://github.com/rust-lang/rust-clippy/issues/5704
-#![allow(clippy::unnested_or_patterns)]
 
 // older compilers require explicit `extern crate`.
 #[allow(unused_extern_crates)]
