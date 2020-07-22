@@ -31,7 +31,7 @@ error[E0423]: expected value, found struct `S`
    | |_____- `S` defined here
 ...
 38 |               let _: Self = Self; //~ ERROR E0423
-   |                             ^^^^ did you mean `S { /* fields */ }`?
+   |                             ^^^^ help: use struct literal syntax instead: `S { x: val }`
 
 error[E0308]: mismatched types
   --> $DIR/self.rs:37:25

@@ -7,8 +7,6 @@ error[E0277]: the size for values of type `T` cannot be known at compilation tim
   |        |      this type parameter needs to be `std::marker::Sized`
   |        doesn't have a size known at compile-time
   |
-  = help: within `__StructProjectionOwned<T>`, the trait `std::marker::Sized` is not implemented for `T`
-  = note: to learn more, visit <https://doc.rust-lang.org/book/ch19-04-advanced-types.html#dynamically-sized-types-and-the-sized-trait>
   = note: required because it appears within the type `__StructProjectionOwned<T>`
   = note: the return type of a function must have a statically known size
 
@@ -19,9 +17,6 @@ error[E0277]: the size for values of type `T` cannot be known at compilation tim
     |               - this type parameter needs to be `std::marker::Sized`
 7   |     x: T,
     |     ^ doesn't have a size known at compile-time
-    |
-    = help: the trait `std::marker::Sized` is not implemented for `T`
-    = note: to learn more, visit <https://doc.rust-lang.org/book/ch19-04-advanced-types.html#dynamically-sized-types-and-the-sized-trait>
 
 error[E0277]: the size for values of type `T` cannot be known at compilation time
  --> $DIR/project_replace_unsized_locals.rs:5:1
@@ -31,8 +26,6 @@ error[E0277]: the size for values of type `T` cannot be known at compilation tim
 6 | struct Struct<T: ?Sized> {
   |               - this type parameter needs to be `std::marker::Sized`
   |
-  = help: within `__StructProjectionOwned<T>`, the trait `std::marker::Sized` is not implemented for `T`
-  = note: to learn more, visit <https://doc.rust-lang.org/book/ch19-04-advanced-types.html#dynamically-sized-types-and-the-sized-trait>
   = note: required because it appears within the type `__StructProjectionOwned<T>`
   = note: structs must have a statically known size to be initialized
   = note: this error originates in a derive macro (in Nightly builds, run with -Z macro-backtrace for more info)
@@ -46,8 +39,6 @@ error[E0277]: the size for values of type `T` cannot be known at compilation tim
    |        |           this type parameter needs to be `std::marker::Sized`
    |        doesn't have a size known at compile-time
    |
-   = help: within `__TupleStructProjectionOwned<T>`, the trait `std::marker::Sized` is not implemented for `T`
-   = note: to learn more, visit <https://doc.rust-lang.org/book/ch19-04-advanced-types.html#dynamically-sized-types-and-the-sized-trait>
    = note: required because it appears within the type `__TupleStructProjectionOwned<T>`
    = note: the return type of a function must have a statically known size
 
@@ -59,6 +50,4 @@ error[E0277]: the size for values of type `T` cannot be known at compilation tim
 11  | struct TupleStruct<T: ?Sized>(T);
     |                    - this type parameter needs to be `std::marker::Sized`
     |
-    = help: the trait `std::marker::Sized` is not implemented for `T`
-    = note: to learn more, visit <https://doc.rust-lang.org/book/ch19-04-advanced-types.html#dynamically-sized-types-and-the-sized-trait>
     = note: this error originates in a derive macro (in Nightly builds, run with -Z macro-backtrace for more info)
