@@ -222,7 +222,7 @@ pub mod __private {
     #[doc(hidden)]
     pub struct AlwaysUnpin<'a, T: ?Sized>(PhantomData<&'a ()>, PhantomData<T>);
 
-    impl<T: ?Sized> Unpin for AlwaysUnpin<'_, T> {}
+    impl<T> Unpin for AlwaysUnpin<'_, T> {}
 
     // This is an internal helper used to ensure a value is dropped.
     #[doc(hidden)]

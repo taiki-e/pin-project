@@ -973,7 +973,7 @@ impl<'a> Context<'a> {
                     // this 'public' type by creating this type in the inside of `const`.
                     #vis struct #struct_ident #proj_generics #where_clause {
                         __pin_project_use_generics: ::pin_project::__private::AlwaysUnpin<
-                            #lifetime, (#(#type_params),*)
+                            #lifetime, (#(::pin_project::__private::PhantomData<#type_params>),*)
                         >,
 
                         #(#fields,)*

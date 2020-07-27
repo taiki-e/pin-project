@@ -46,7 +46,13 @@ const _: () = {
         }
     }
     pub struct __TupleStruct<'pin, T, U> {
-        __pin_project_use_generics: ::pin_project::__private::AlwaysUnpin<'pin, (T, U)>,
+        __pin_project_use_generics: ::pin_project::__private::AlwaysUnpin<
+            'pin,
+            (
+                ::pin_project::__private::PhantomData<T>,
+                ::pin_project::__private::PhantomData<U>,
+            ),
+        >,
         __field0: T,
     }
     impl<'pin, T, U> ::pin_project::__private::Unpin for TupleStruct<T, U> where
