@@ -1,6 +1,6 @@
 [package]
 name = "pin-project-internal"
-version = "0.4.22"
+version = "0.4.23"
 authors = ["Taiki Endo <te316e89@gmail.com>"]
 edition = "2018"
 license = "Apache-2.0 OR MIT"
@@ -25,5 +25,5 @@ quote = "1.0"
 syn = { version = "1.0.13", features = ["full", "visit-mut"] }
 
 [dev-dependencies]
-pin-project = { version = "0.4.22", path = ".." }
+pin-project = { version = "0.4.23", path = ".." }
 rustversion = "1.0"

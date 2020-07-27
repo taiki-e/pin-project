@@ -6,6 +6,12 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 ## [Unreleased]
 
+## [0.4.23] - 2020-07-27
+
+* [Fix compile error with `?Sized` type parameters.][262]
+
+[262]: https://github.com/taiki-e/pin-project/pull/262
+
 ## [0.4.22] - 2020-06-14
 
 * Documentation improvements.
@@ -547,7 +553,8 @@ See also [tracking issue for 0.4 release][21].
 
 Initial release
 
-[Unreleased]: https://github.com/taiki-e/pin-project/compare/v0.4.22...HEAD
+[Unreleased]: https://github.com/taiki-e/pin-project/compare/v0.4.23...HEAD
+[0.4.23]: https://github.com/taiki-e/pin-project/compare/v0.4.22...v0.4.23
 [0.4.22]: https://github.com/taiki-e/pin-project/compare/v0.4.21...v0.4.22
 [0.4.21]: https://github.com/taiki-e/pin-project/compare/v0.4.20...v0.4.21
 [0.4.20]: https://github.com/taiki-e/pin-project/compare/v0.4.19...v0.4.20
