@@ -82,7 +82,13 @@ const _: () = {
         }
     }
     pub struct __Enum<'pin, T, U> {
-        __pin_project_use_generics: ::pin_project::__private::AlwaysUnpin<'pin, (T, U)>,
+        __pin_project_use_generics: ::pin_project::__private::AlwaysUnpin<
+            'pin,
+            (
+                ::pin_project::__private::PhantomData<T>,
+                ::pin_project::__private::PhantomData<U>,
+            ),
+        >,
         __field0: T,
         __field1: T,
     }
