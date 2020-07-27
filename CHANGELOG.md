@@ -8,9 +8,9 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 ## [0.4.23] - 2020-07-27
 
-* [Fix compile error with `?Sized` type parameters.][262]
+* [Fix compile error with `?Sized` type parameters.][263]
 
-[262]: https://github.com/taiki-e/pin-project/pull/262
+[263]: https://github.com/taiki-e/pin-project/pull/263
 
 ## [0.4.22] - 2020-06-14
 
