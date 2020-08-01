@@ -220,7 +220,7 @@ pub mod __private {
     //
     // See https://github.com/taiki-e/pin-project/pull/53 for more details.
     #[doc(hidden)]
-    pub struct AlwaysUnpin<'a, T: ?Sized>(PhantomData<&'a ()>, PhantomData<T>);
+    pub struct AlwaysUnpin<'a, T>(PhantomData<&'a ()>, PhantomData<T>);
 
     impl<T> Unpin for AlwaysUnpin<'_, T> {}
 
