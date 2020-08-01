@@ -46,6 +46,7 @@ Lint checks provided by rustc:
                                            asm-sub-register  warn     using only a subset of a register for inline asm inputs
                                          bare-trait-objects  warn     suggest using `dyn Trait` for trait objects
                                  bindings-with-variant-name  warn     detects pattern bindings with the same name as one of the matched variants
+                                     broken-intra-doc-links  warn     failures in resolving intra-doc link targets
                                        cenum-impl-drop-cast  warn     a C-like enum implementing Drop is cast
                                clashing-extern-declarations  warn     detects when an extern fn has been declared with the same name but different types
                                        coherence-leak-check  warn     distinct impls distinguished only by the leak-check code
@@ -59,7 +60,6 @@ Lint checks provided by rustc:
                                 improper-ctypes-definitions  warn     proper use of libc types in foreign item definitions
                                         incomplete-features  warn     incomplete features that may function improperly in some or all cases
                                          inline-no-sanitize  warn     detects incompatible use of `#[inline(always)]` and `#[no_sanitize(...)]`
-                          intra-doc-link-resolution-failure  warn     failures in resolving intra-doc link targets
                                invalid-codeblock-attributes  warn     codeblock attribute looks a lot like a known one
                                               invalid-value  warn     an invalid value is being created (such as a NULL reference)
                                    irrefutable-let-patterns  warn     detects irrefutable patterns in if-let and while-let statements
@@ -136,7 +136,7 @@ Lint groups provided by rustc:
           nonstandard-style  non-camel-case-types, non-snake-case, non-upper-case-globals
     rust-2018-compatibility  keyword-idents, anonymous-parameters, tyvar-behind-raw-pointer, absolute-paths-not-starting-with-crate
            rust-2018-idioms  bare-trait-objects, unused-extern-crates, ellipsis-inclusive-range-patterns, elided-lifetimes-in-paths, explicit-outlives-requirements
-                    rustdoc  intra-doc-link-resolution-failure, invalid-codeblock-attributes, missing-doc-code-examples, private-doc-tests
+                    rustdoc  broken-intra-doc-links, invalid-codeblock-attributes, missing-doc-code-examples, private-doc-tests
                      unused  unused-imports, unused-variables, unused-assignments, dead-code, unused-mut, unreachable-code, unreachable-patterns, overlapping-patterns, unused-must-use, unused-unsafe, path-statements, unused-attributes, unused-macros, unused-allocation, unused-doc-comments, unused-extern-crates, unused-features, unused-labels, unused-parens, unused-braces, redundant-semicolons
 
 
