@@ -14,12 +14,6 @@ fn main() {
     if minor >= 37 {
         println!("cargo:rustc-cfg=underscore_consts");
     }
-
-    // #[deprecated] on proc-macro requires Rust 1.40:
-    // https://github.com/rust-lang/rust/pull/65666
-    if minor >= 40 {
-        println!("cargo:rustc-cfg=deprecated_proc_macro");
-    }
 }
 
 fn rustc_minor_version() -> Option<u32> {

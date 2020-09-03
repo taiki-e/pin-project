@@ -33,17 +33,6 @@ pub(crate) enum ProjKind {
 }
 
 impl ProjKind {
-    pub(crate) const ALL: [Self; 3] = [ProjKind::Mutable, ProjKind::Immutable, ProjKind::Owned];
-
-    /// Returns the name of the projection method.
-    pub(crate) fn method_name(self) -> &'static str {
-        match self {
-            ProjKind::Mutable => "project",
-            ProjKind::Immutable => "project_ref",
-            ProjKind::Owned => "project_replace",
-        }
-    }
-
     /// Creates the ident of the projected type from the ident of the original
     /// type.
     pub(crate) fn proj_ident(self, ident: &Ident) -> Ident {
