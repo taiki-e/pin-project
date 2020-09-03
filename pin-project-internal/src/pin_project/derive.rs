@@ -125,13 +125,13 @@ struct Args {
     project: Option<Ident>,
     /// `project_ref = <ident>` argument.
     project_ref: Option<Ident>,
-    /// `project_replace [= <ident>]` or `Replace` argument.
+    /// `project_replace [= <ident>]` argument.
     project_replace: ProjReplace,
 }
 
 enum ProjReplace {
     None,
-    /// `project_replace` or `Replace`.
+    /// `project_replace`.
     Unnamed {
         span: Span,
     },
@@ -242,8 +242,6 @@ impl Parse for Args {
         let mut not_unpin = None;
         let mut project = None;
         let mut project_ref = None;
-
-        let mut replace = None;
         let mut project_replace_value = None;
         let mut project_replace_span = None;
 
@@ -290,9 +288,10 @@ impl Parse for Args {
                         }
                     }
                     "Replace" => {
-                        if replace.replace(token.span()).is_some() {
-                            return Err(error!(token, "duplicate `Replace` argument"));
-                        }
+                        return Err(error!(
+                            token,
+                            "`Replace` argument was removed, use `project_replace` argument instead"
+                        ));
                     }
                     _ => return Err(error!(token, "unexpected argument: {}", token)),
                 }
@@ -333,19 +332,12 @@ impl Parse for Args {
                     span,
                     "arguments `PinnedDrop` and `project_replace` are mutually exclusive",
                 ));
-            } else if replace.is_some() {
-                return Err(Error::new(
-                    span,
-                    "arguments `PinnedDrop` and `Replace` are mutually exclusive",
-                ));
             }
         }
-        let project_replace = match (project_replace_span, project_replace_value, replace) {
-            (None, _, None) => ProjReplace::None,
-            // If both `project_replace` and `Replace` are specified,
-            // We always prefer `project_replace`'s span,
-            (Some(span), Some(ident), _) => ProjReplace::Named { ident, span },
-            (Some(span), ..) | (None, _, Some(span)) => ProjReplace::Unnamed { span },
+        let project_replace = match (project_replace_span, project_replace_value) {
+            (None, _) => ProjReplace::None,
+            (Some(span), Some(ident)) => ProjReplace::Named { ident, span },
+            (Some(span), None) => ProjReplace::Unnamed { span },
         };
         let unpin_impl = match (unsafe_unpin, not_unpin) {
             (None, None) => UnpinImpl::Default,
@@ -427,7 +419,7 @@ struct Context<'a> {
     project: bool,
     /// `project_ref` argument.
     project_ref: bool,
-    /// `project_replace [= <ident>]` or `Replace` argument.
+    /// `project_replace [= <ident>]` argument.
     project_replace: ProjReplace,
 }
 
