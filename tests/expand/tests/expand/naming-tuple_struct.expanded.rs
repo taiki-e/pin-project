@@ -1,5 +1,5 @@
 use pin_project::pin_project;
-# [ pin ( __private ( project = Proj , project_ref = ProjRef , project_replace = ProjOwn ) ) ]
+# [pin (__private (project = Proj , project_ref = ProjRef , project_replace = ProjOwn))]
 struct TupleStruct<T, U>(#[pin] T, U);
 #[allow(dead_code)]
 #[allow(single_use_lifetimes)]

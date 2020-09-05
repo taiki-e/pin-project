@@ -1,5 +1,5 @@
 use pin_project::pin_project;
-# [ pin ( __private ( ! Unpin ) ) ]
+# [pin (__private (! Unpin))]
 struct TupleStruct<T, U>(#[pin] T, U);
 #[doc(hidden)]
 #[allow(dead_code)]

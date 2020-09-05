@@ -1,5 +1,5 @@
 use pin_project::pin_project;
-# [ pin ( __private ( ! Unpin ) ) ]
+# [pin (__private (! Unpin))]
 enum Enum<T, U> {
     Struct {
         #[pin]
