@@ -32,7 +32,7 @@
 //!
 //! [`pin_project`]: attr.pin_project.html
 //! [examples]: https://github.com/taiki-e/pin-project/blob/master/examples/README.md
-//! [pin-projection]: https://doc.rust-lang.org/nightly/std/pin/index.html#projections-and-structural-pinning
+//! [pin-projection]: core::pin#projections-and-structural-pinning
 //! [struct-default-expanded]: https://github.com/taiki-e/pin-project/blob/master/examples/struct-default-expanded.rs
 
 #![no_std]
@@ -112,7 +112,7 @@ pub use pin_project_internal::pinned_drop;
 ///
 /// [`PhantomPinned`]: core::marker::PhantomPinned
 /// [`pin_project`]: attr.pin_project.html
-/// [pin-projection]: https://doc.rust-lang.org/nightly/std/pin/index.html#projections-and-structural-pinning
+/// [pin-projection]: core::pin#projections-and-structural-pinning
 /// [cargo-geiger]: https://github.com/rust-secure-code/cargo-geiger
 pub unsafe trait UnsafeUnpin {}
 

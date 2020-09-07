@@ -440,8 +440,8 @@ use proc_macro::TokenStream;
 /// [`Pin`]: core::pin::Pin
 /// [`UnsafeUnpin`]: https://docs.rs/pin-project/0.4/pin_project/trait.UnsafeUnpin.html
 /// [`pinned_drop`]: ./attr.pinned_drop.html
-/// [drop-guarantee]: https://doc.rust-lang.org/nightly/std/pin/index.html#drop-guarantee
-/// [pin-projection]: https://doc.rust-lang.org/nightly/std/pin/index.html#projections-and-structural-pinning
+/// [drop-guarantee]: core::pin#drop-guarantee
+/// [pin-projection]: core::pin#projections-and-structural-pinning
 /// [pinned-drop]: ./attr.pin_project.html#pinned_drop
 /// [repr-packed]: https://doc.rust-lang.org/nomicon/other-reprs.html#reprpacked
 /// [undefined-behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html
