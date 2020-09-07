@@ -6,33 +6,31 @@ pub struct Struct<T, U> {
     pub unpinned: U,
 }
 #[doc(hidden)]
-#[allow(dead_code)]
-#[allow(single_use_lifetimes)]
-#[allow(clippy::mut_mut)]
-#[allow(clippy::type_repetition_in_bounds)]
-pub(crate) struct __StructProjection<'pin, T, U>
-where
-    Struct<T, U>: 'pin,
-{
-    pub pinned: ::pin_project::__private::Pin<&'pin mut (T)>,
-    pub unpinned: &'pin mut (U),
-}
-#[doc(hidden)]
-#[allow(dead_code)]
-#[allow(single_use_lifetimes)]
-#[allow(clippy::type_repetition_in_bounds)]
-pub(crate) struct __StructProjectionRef<'pin, T, U>
-where
-    Struct<T, U>: 'pin,
-{
-    pub pinned: ::pin_project::__private::Pin<&'pin (T)>,
-    pub unpinned: &'pin (U),
-}
-#[doc(hidden)]
 #[allow(non_upper_case_globals)]
 #[allow(single_use_lifetimes)]
 #[allow(clippy::used_underscore_binding)]
 const _: () = {
+    #[allow(dead_code)]
+    #[allow(single_use_lifetimes)]
+    #[allow(clippy::mut_mut)]
+    #[allow(clippy::type_repetition_in_bounds)]
+    pub(crate) struct __StructProjection<'pin, T, U>
+    where
+        Struct<T, U>: 'pin,
+    {
+        pub pinned: ::pin_project::__private::Pin<&'pin mut (T)>,
+        pub unpinned: &'pin mut (U),
+    }
+    #[allow(dead_code)]
+    #[allow(single_use_lifetimes)]
+    #[allow(clippy::type_repetition_in_bounds)]
+    pub(crate) struct __StructProjectionRef<'pin, T, U>
+    where
+        Struct<T, U>: 'pin,
+    {
+        pub pinned: ::pin_project::__private::Pin<&'pin (T)>,
+        pub unpinned: &'pin (U),
+    }
     impl<T, U> Struct<T, U> {
         pub(crate) fn project<'pin>(
             self: ::pin_project::__private::Pin<&'pin mut Self>,

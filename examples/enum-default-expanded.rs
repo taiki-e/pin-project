@@ -35,23 +35,23 @@ where
     Pinned(::pin_project::__private::Pin<&'pin mut (T)>),
     Unpinned(&'pin mut (U)),
 }
-#[doc(hidden)]
-#[allow(dead_code)]
-#[allow(single_use_lifetimes)]
-#[allow(clippy::type_repetition_in_bounds)]
-enum __EnumProjectionRef<'pin, T, U>
-where
-    Enum<T, U>: 'pin,
-{
-    Pinned(::pin_project::__private::Pin<&'pin (T)>),
-    Unpinned(&'pin (U)),
-}
 
 #[doc(hidden)]
 #[allow(non_upper_case_globals)]
 #[allow(single_use_lifetimes)]
 #[allow(clippy::used_underscore_binding)]
 const _: () = {
+    #[allow(dead_code)]
+    #[allow(single_use_lifetimes)]
+    #[allow(clippy::type_repetition_in_bounds)]
+    enum __EnumProjectionRef<'pin, T, U>
+    where
+        Enum<T, U>: 'pin,
+    {
+        Pinned(::pin_project::__private::Pin<&'pin (T)>),
+        Unpinned(&'pin (U)),
+    }
+
     impl<T, U> Enum<T, U> {
         fn project<'pin>(
             self: ::pin_project::__private::Pin<&'pin mut Self>,
