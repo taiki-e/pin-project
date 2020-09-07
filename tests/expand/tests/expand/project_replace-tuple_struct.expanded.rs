@@ -2,33 +2,33 @@ use pin_project::pin_project;
 #[pin(__private(project_replace))]
 struct TupleStruct<T, U>(#[pin] T, U);
 #[doc(hidden)]
-#[allow(dead_code)]
-#[allow(single_use_lifetimes)]
-#[allow(clippy::mut_mut)]
-#[allow(clippy::type_repetition_in_bounds)]
-struct __TupleStructProjection<'pin, T, U>(
-    ::pin_project::__private::Pin<&'pin mut (T)>,
-    &'pin mut (U),
-)
-where
-    TupleStruct<T, U>: 'pin;
-#[doc(hidden)]
-#[allow(dead_code)]
-#[allow(single_use_lifetimes)]
-#[allow(clippy::type_repetition_in_bounds)]
-struct __TupleStructProjectionRef<'pin, T, U>(::pin_project::__private::Pin<&'pin (T)>, &'pin (U))
-where
-    TupleStruct<T, U>: 'pin;
-#[doc(hidden)]
-#[allow(dead_code)]
-#[allow(single_use_lifetimes)]
-#[allow(unreachable_pub)]
-struct __TupleStructProjectionOwned<T, U>(::pin_project::__private::PhantomData<T>, U);
-#[doc(hidden)]
 #[allow(non_upper_case_globals)]
 #[allow(single_use_lifetimes)]
 #[allow(clippy::used_underscore_binding)]
 const _: () = {
+    #[allow(dead_code)]
+    #[allow(single_use_lifetimes)]
+    #[allow(clippy::mut_mut)]
+    #[allow(clippy::type_repetition_in_bounds)]
+    struct __TupleStructProjection<'pin, T, U>(
+        ::pin_project::__private::Pin<&'pin mut (T)>,
+        &'pin mut (U),
+    )
+    where
+        TupleStruct<T, U>: 'pin;
+    #[allow(dead_code)]
+    #[allow(single_use_lifetimes)]
+    #[allow(clippy::type_repetition_in_bounds)]
+    struct __TupleStructProjectionRef<'pin, T, U>(
+        ::pin_project::__private::Pin<&'pin (T)>,
+        &'pin (U),
+    )
+    where
+        TupleStruct<T, U>: 'pin;
+    #[allow(dead_code)]
+    #[allow(single_use_lifetimes)]
+    #[allow(unreachable_pub)]
+    struct __TupleStructProjectionOwned<T, U>(::pin_project::__private::PhantomData<T>, U);
     impl<T, U> TupleStruct<T, U> {
         fn project<'pin>(
             self: ::pin_project::__private::Pin<&'pin mut Self>,

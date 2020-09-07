@@ -24,19 +24,20 @@ pub(super) fn parse_derive(input: TokenStream) -> Result<TokenStream> {
     visitor.visit_data_mut(&mut input.data);
 
     let mut cx = Context::new(&input.attrs, &input.vis, &input.ident, &mut input.generics)?;
+    let mut generate = GenerateTokens::default();
     let packed_check;
 
-    let (mut items, scoped_items) = match &input.data {
+    match &input.data {
         Data::Struct(data) => {
             // Do this first for a better error message.
             packed_check = Some(cx.ensure_not_packed(&data.fields)?);
-            cx.parse_struct(data)?
+            cx.parse_struct(data, &mut generate)?;
         }
         Data::Enum(data) => {
             // We don't need to check for `#[repr(packed)]`,
             // since it does not apply to enums.
             packed_check = None;
-            cx.parse_enum(data)?
+            cx.parse_enum(data, &mut generate)?;
         }
         Data::Union(_) => {
             return Err(error!(
@@ -44,42 +45,9 @@ pub(super) fn parse_derive(input: TokenStream) -> Result<TokenStream> {
                 "#[pin_project] attribute may only be used on structs or enums"
             ));
         }
-    };
+    }
 
-    let unpin_impl = cx.make_unpin_impl();
-    let drop_impl = cx.make_drop_impl();
-    let dummy_const = if cfg!(underscore_consts) {
-        format_ident!("_")
-    } else {
-        format_ident!("__SCOPE_{}", ident)
-    };
-    items.extend(quote! {
-        // All items except projected types are generated inside a `const` scope.
-        // This makes it impossible for user code to refer to these types.
-        // However, this prevents Rustdoc from displaying docs for any
-        // of our types. In particular, users cannot see the
-        // automatically generated `Unpin` impl for the '__UnpinStruct' types
-        //
-        // Previously, we provided a flag to correctly document the
-        // automatically generated `Unpin` impl by using def-site hygiene,
-        // but it is now removed.
-        //
-        // Refs:
-        // * https://github.com/rust-lang/rust/issues/63281
-        // * https://github.com/taiki-e/pin-project/pull/53#issuecomment-525906867
-        // * https://github.com/taiki-e/pin-project/pull/70
-        #[doc(hidden)]
-        #[allow(non_upper_case_globals)]
-        #[allow(single_use_lifetimes)] // https://github.com/rust-lang/rust/issues/55058
-        #[allow(clippy::used_underscore_binding)]
-        const #dummy_const: () = {
-            #scoped_items
-            #unpin_impl
-            #drop_impl
-            #packed_check
-        };
-    });
-    Ok(items)
+    Ok(generate.into_tokens(&cx, packed_check))
 }
 
 fn validate_struct(ident: &Ident, fields: &Fields) -> Result<()> {
@@ -113,6 +81,64 @@ fn validate_enum(brace_token: token::Brace, variants: &Variants) -> Result<()> {
         Ok(())
     } else {
         Err(error!(variants, "#[pin_project] attribute may not be used on enums with zero fields"))
+    }
+}
+
+#[derive(Default)]
+struct GenerateTokens {
+    exposed: TokenStream,
+    scoped: TokenStream,
+}
+
+impl GenerateTokens {
+    fn extend(&mut self, expose: bool, tokens: TokenStream) {
+        if expose {
+            self.exposed.extend(tokens);
+        } else {
+            self.scoped.extend(tokens);
+        }
+    }
+
+    fn into_tokens(self, cx: &Context<'_>, packed_check: Option<TokenStream>) -> TokenStream {
+        let mut tokens = self.exposed;
+        let scoped = self.scoped;
+
+        let unpin_impl = cx.make_unpin_impl();
+        let drop_impl = cx.make_drop_impl();
+
+        let dummy_const = if cfg!(underscore_consts) {
+            format_ident!("_")
+        } else {
+            format_ident!("__SCOPE_{}", cx.orig.ident)
+        };
+
+        tokens.extend(quote! {
+            // All items except projected types are generated inside a `const` scope.
+            // This makes it impossible for user code to refer to these types.
+            // However, this prevents Rustdoc from displaying docs for any
+            // of our types. In particular, users cannot see the
+            // automatically generated `Unpin` impl for the '__UnpinStruct' types
+            //
+            // Previously, we provided a flag to correctly document the
+            // automatically generated `Unpin` impl by using def-site hygiene,
+            // but it is now removed.
+            //
+            // Refs:
+            // * https://github.com/rust-lang/rust/issues/63281
+            // * https://github.com/taiki-e/pin-project/pull/53#issuecomment-525906867
+            // * https://github.com/taiki-e/pin-project/pull/70
+            #[doc(hidden)]
+            #[allow(non_upper_case_globals)]
+            #[allow(single_use_lifetimes)] // https://github.com/rust-lang/rust/issues/55058
+            #[allow(clippy::used_underscore_binding)]
+            const #dummy_const: () = {
+                #scoped
+                #unpin_impl
+                #drop_impl
+                #packed_check
+            };
+        });
+        tokens
     }
 }
 
@@ -483,28 +509,18 @@ impl<'a> Context<'a> {
 
     /// Returns attributes used on projected types.
     fn proj_attrs(&self) -> (TokenStream, TokenStream, TokenStream) {
-        // If the user gave it a name, it should appear in the document.
-        let doc_attr = quote!(#[doc(hidden)]);
-        let doc_proj = if self.project { None } else { Some(&doc_attr) };
-        let doc_proj_ref = if self.project_ref { None } else { Some(&doc_attr) };
-        let doc_proj_own =
-            if self.project_replace.ident().is_some() { None } else { Some(&doc_attr) };
-
         let proj_mut = quote! {
-            #doc_proj
             #[allow(dead_code)] // This lint warns unused fields/variants.
             #[allow(single_use_lifetimes)] // https://github.com/rust-lang/rust/issues/55058
             #[allow(clippy::mut_mut)] // This lint warns `&mut &mut <ty>`.
             #[allow(clippy::type_repetition_in_bounds)] // https://github.com/rust-lang/rust-clippy/issues/4326}
         };
         let proj_ref = quote! {
-            #doc_proj_ref
             #[allow(dead_code)] // This lint warns unused fields/variants.
             #[allow(single_use_lifetimes)] // https://github.com/rust-lang/rust/issues/55058
             #[allow(clippy::type_repetition_in_bounds)] // https://github.com/rust-lang/rust-clippy/issues/4326
         };
         let proj_own = quote! {
-            #doc_proj_own
             #[allow(dead_code)] // This lint warns unused fields/variants.
             #[allow(single_use_lifetimes)] // https://github.com/rust-lang/rust/issues/55058
             #[allow(unreachable_pub)] // This lint warns `pub` field in private struct.
@@ -515,7 +531,8 @@ impl<'a> Context<'a> {
     fn parse_struct(
         &mut self,
         DataStruct { fields, .. }: &DataStruct,
-    ) -> Result<(TokenStream, TokenStream)> {
+        generate: &mut GenerateTokens,
+    ) -> Result<()> {
         validate_struct(self.orig.ident, fields)?;
 
         let ProjectedFields {
@@ -557,14 +574,16 @@ impl<'a> Context<'a> {
         };
 
         let (proj_attrs, proj_ref_attrs, proj_own_attrs) = self.proj_attrs();
-        let mut proj_items = quote! {
+        generate.extend(self.project, quote! {
             #proj_attrs
             #vis struct #proj_ident #proj_generics #where_clause_fields
+        });
+        generate.extend(self.project_ref, quote! {
             #proj_ref_attrs
             #vis struct #proj_ref_ident #proj_generics #where_clause_ref_fields
-        };
+        });
         if self.project_replace.span().is_some() {
-            proj_items.extend(quote! {
+            generate.extend(self.project_replace.ident().is_some(), quote! {
                 #proj_own_attrs
                 #vis struct #proj_own_ident #orig_generics #where_clause_own_fields
             });
@@ -583,15 +602,16 @@ impl<'a> Context<'a> {
             let Self #proj_pat = &mut *__self_ptr;
             #proj_own_body
         };
-        let proj_impl = self.make_proj_impl(&proj_mut_body, &proj_ref_body, &proj_own_body);
+        generate.extend(false, self.make_proj_impl(&proj_mut_body, &proj_ref_body, &proj_own_body));
 
-        Ok((proj_items, proj_impl))
+        Ok(())
     }
 
     fn parse_enum(
         &mut self,
         DataEnum { brace_token, variants, .. }: &DataEnum,
-    ) -> Result<(TokenStream, TokenStream)> {
+        generate: &mut GenerateTokens,
+    ) -> Result<()> {
         validate_enum(*brace_token, variants)?;
 
         let ProjectedVariants {
@@ -613,18 +633,20 @@ impl<'a> Context<'a> {
         let proj_where_clause = &self.proj.where_clause;
 
         let (proj_attrs, proj_ref_attrs, proj_own_attrs) = self.proj_attrs();
-        let mut proj_items = quote! {
+        generate.extend(self.project, quote! {
             #proj_attrs
             #vis enum #proj_ident #proj_generics #proj_where_clause {
                 #proj_variants
             }
+        });
+        generate.extend(self.project_ref, quote! {
             #proj_ref_attrs
             #vis enum #proj_ref_ident #proj_generics #proj_where_clause {
                 #proj_ref_variants
             }
-        };
+        });
         if self.project_replace.span().is_some() {
-            proj_items.extend(quote! {
+            generate.extend(self.project_replace.ident().is_some(), quote! {
                 #proj_own_attrs
                 #vis enum #proj_own_ident #orig_generics #orig_where_clause {
                     #proj_own_variants
@@ -648,9 +670,9 @@ impl<'a> Context<'a> {
                 #proj_own_arms
             }
         };
-        let proj_impl = self.make_proj_impl(&proj_mut_body, &proj_ref_body, &proj_own_body);
+        generate.extend(false, self.make_proj_impl(&proj_mut_body, &proj_ref_body, &proj_own_body));
 
-        Ok((proj_items, proj_impl))
+        Ok(())
     }
 
     fn visit_variants(&mut self, variants: &Variants) -> Result<ProjectedVariants> {

@@ -34,34 +34,32 @@ pub struct Struct<'a, T> {
 }
 
 #[doc(hidden)]
-#[allow(dead_code)]
-#[allow(single_use_lifetimes)]
-#[allow(clippy::mut_mut)]
-#[allow(clippy::type_repetition_in_bounds)]
-pub(crate) struct __StructProjection<'pin, 'a, T>
-where
-    Struct<'a, T>: 'pin,
-{
-    was_dropped: &'pin mut (&'a mut bool),
-    field: ::pin_project::__private::Pin<&'pin mut (T)>,
-}
-#[doc(hidden)]
-#[allow(dead_code)]
-#[allow(single_use_lifetimes)]
-#[allow(clippy::type_repetition_in_bounds)]
-pub(crate) struct __StructProjectionRef<'pin, 'a, T>
-where
-    Struct<'a, T>: 'pin,
-{
-    was_dropped: &'pin (&'a mut bool),
-    field: ::pin_project::__private::Pin<&'pin (T)>,
-}
-
-#[doc(hidden)]
 #[allow(non_upper_case_globals)]
 #[allow(single_use_lifetimes)]
 #[allow(clippy::used_underscore_binding)]
 const _: () = {
+    #[allow(dead_code)]
+    #[allow(single_use_lifetimes)]
+    #[allow(clippy::mut_mut)]
+    #[allow(clippy::type_repetition_in_bounds)]
+    pub(crate) struct __StructProjection<'pin, 'a, T>
+    where
+        Struct<'a, T>: 'pin,
+    {
+        was_dropped: &'pin mut (&'a mut bool),
+        field: ::pin_project::__private::Pin<&'pin mut (T)>,
+    }
+    #[allow(dead_code)]
+    #[allow(single_use_lifetimes)]
+    #[allow(clippy::type_repetition_in_bounds)]
+    pub(crate) struct __StructProjectionRef<'pin, 'a, T>
+    where
+        Struct<'a, T>: 'pin,
+    {
+        was_dropped: &'pin (&'a mut bool),
+        field: ::pin_project::__private::Pin<&'pin (T)>,
+    }
+
     impl<'a, T> Struct<'a, T> {
         pub(crate) fn project<'pin>(
             self: ::pin_project::__private::Pin<&'pin mut Self>,
