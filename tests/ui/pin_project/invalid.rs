@@ -191,6 +191,15 @@ mod pin_project_argument {
 mod pin_project_conflict_naming {
     use pin_project::pin_project;
 
+    #[pin_project(project = OrigAndProj)] //~ ERROR name `OrigAndProj` is the same as the original type name
+    struct OrigAndProj(#[pin] ());
+
+    #[pin_project(project_ref = OrigAndProjRef)] //~ ERROR name `OrigAndProjRef` is the same as the original type name
+    struct OrigAndProjRef(#[pin] ());
+
+    #[pin_project(project_replace = OrigAndProjOwn)] //~ ERROR name `OrigAndProjOwn` is the same as the original type name
+    struct OrigAndProjOwn(#[pin] ());
+
     #[pin_project(project = A, project_ref = A)] //~ ERROR name `A` is already specified by `project` argument
     struct ProjAndProjRef(#[pin] ());
 
