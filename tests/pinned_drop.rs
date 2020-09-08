@@ -26,9 +26,6 @@ fn safe_project() {
 
 #[test]
 fn self_argument_in_macro() {
-    use pin_project::{pin_project, pinned_drop};
-    use std::pin::Pin;
-
     #[pin_project(PinnedDrop)]
     struct Struct {
         f: (),
@@ -44,9 +41,6 @@ fn self_argument_in_macro() {
 
 #[test]
 fn self_in_macro_containing_fn() {
-    use pin_project::{pin_project, pinned_drop};
-    use std::pin::Pin;
-
     macro_rules! mac {
         ($($tt:tt)*) => {
             $($tt)*
@@ -74,9 +68,6 @@ fn self_in_macro_containing_fn() {
 
 #[test]
 fn self_call() {
-    use pin_project::{pin_project, pinned_drop};
-    use std::pin::Pin;
-
     #[pin_project(PinnedDrop)]
     pub struct Struct<T> {
         _f: T,
@@ -107,9 +98,6 @@ fn self_call() {
 
 #[test]
 fn self_struct() {
-    use pin_project::{pin_project, pinned_drop};
-    use std::pin::Pin;
-
     #[pin_project(PinnedDrop)]
     pub struct Struct {
         pub f: (),
@@ -155,9 +143,6 @@ fn self_struct() {
 #[rustversion::since(1.37)] // type_alias_enum_variants requires Rust 1.37
 #[test]
 fn self_enum() {
-    use pin_project::{pin_project, pinned_drop};
-    use std::pin::Pin;
-
     #[pin_project(PinnedDrop)]
     pub enum Enum {
         Struct { f: () },
@@ -186,9 +171,6 @@ fn self_enum() {
 #[rustversion::since(1.40)] // https://github.com/rust-lang/rust/pull/64690
 #[test]
 fn self_in_macro_def() {
-    use pin_project::{pin_project, pinned_drop};
-    use std::pin::Pin;
-
     #[pin_project(PinnedDrop)]
     pub struct Struct {
         _f: (),
@@ -209,9 +191,6 @@ fn self_in_macro_def() {
 
 #[test]
 fn self_inside_macro() {
-    use pin_project::{pin_project, pinned_drop};
-    use std::pin::Pin;
-
     macro_rules! mac {
         ($($tt:tt)*) => {
             $($tt)*
@@ -271,9 +250,6 @@ fn self_inside_macro() {
 
 #[test]
 fn inside_macro() {
-    use pin_project::{pin_project, pinned_drop};
-    use std::pin::Pin;
-
     #[pin_project(PinnedDrop)]
     struct Struct(());
 
