@@ -1,8 +1,8 @@
 error[E0308]: mismatched types
   --> $DIR/remove-attr-from-field.rs:27:38
    |
-27 |     let _: Pin<&mut PhantomPinned> = x.field; //~ ERROR E0308
-   |            -----------------------   ^^^^^^^ expected struct `Pin`, found `&mut PhantomPinned`
+27 |     let _: Pin<&mut PhantomPinned> = x.f; //~ ERROR E0308
+   |            -----------------------   ^^^ expected struct `Pin`, found `&mut PhantomPinned`
    |            |
    |            expected due to this
    |
@@ -12,8 +12,8 @@ error[E0308]: mismatched types
 error[E0308]: mismatched types
   --> $DIR/remove-attr-from-field.rs:31:38
    |
-31 |     let _: Pin<&mut PhantomPinned> = x.field; //~ ERROR E0308
-   |            -----------------------   ^^^^^^^ expected struct `Pin`, found `&mut PhantomPinned`
+31 |     let _: Pin<&mut PhantomPinned> = x.f; //~ ERROR E0308
+   |            -----------------------   ^^^ expected struct `Pin`, found `&mut PhantomPinned`
    |            |
    |            expected due to this
    |

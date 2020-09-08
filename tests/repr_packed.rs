@@ -22,11 +22,11 @@ fn weird_repr_packed() {
     }
 
     #[repr(packed)]
-    struct Foo {
+    struct Struct {
         field: u8,
     }
 
-    impl Drop for Foo {
+    impl Drop for Struct {
         fn drop(&mut self) {
             FIELD_ADDR.with(|f| {
                 f.set(&self.field as *const u8 as usize);
@@ -41,7 +41,7 @@ fn weird_repr_packed() {
         // Calling drop(foo) causes 'foo' to be moved
         // into the 'drop' function, resulting in a different
         // address.
-        let x = Foo { field: 27 };
+        let x = Struct { field: 27 };
         let field_addr = &x.field as *const u8 as usize;
         field_addr
     };

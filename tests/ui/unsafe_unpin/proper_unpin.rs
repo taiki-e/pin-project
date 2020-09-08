@@ -5,9 +5,9 @@ fn is_unpin<T: Unpin>() {}
 
 #[pin_project(UnsafeUnpin)]
 struct Blah<T, U> {
-    field1: U,
+    f1: U,
     #[pin]
-    field2: T,
+    f2: T,
 }
 
 unsafe impl<T: Unpin, U> UnsafeUnpin for Blah<T, U> {}
@@ -15,16 +15,16 @@ unsafe impl<T: Unpin, U> UnsafeUnpin for Blah<T, U> {}
 #[pin_project(UnsafeUnpin)]
 struct TrivialBounds {
     #[pin]
-    field1: PhantomPinned,
+    f: PhantomPinned,
 }
 
 #[pin_project(UnsafeUnpin)]
 struct OverlappingLifetimeNames<'pin, T, U> {
     #[pin]
-    field1: U,
+    f1: U,
     #[pin]
-    field2: Option<T>,
-    field3: &'pin (),
+    f2: Option<T>,
+    f3: &'pin (),
 }
 
 unsafe impl<T: Unpin, U: Unpin> UnsafeUnpin for OverlappingLifetimeNames<'_, T, U> {}

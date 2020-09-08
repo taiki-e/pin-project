@@ -3,12 +3,12 @@ pub mod self_in_macro_def {
     use std::pin::Pin;
 
     #[pin_project(PinnedDrop)]
-    pub struct Struct {
-        x: (),
+    pub struct S {
+        f: (),
     }
 
     #[pinned_drop]
-    impl PinnedDrop for Struct {
+    impl PinnedDrop for S {
         fn drop(self: Pin<&mut Self>) {
             macro_rules! t {
                 () => {{
@@ -28,7 +28,7 @@ pub mod self_span {
 
     #[pin_project(PinnedDrop)]
     pub struct S {
-        x: (),
+        f: (),
     }
 
     #[pinned_drop]
@@ -41,7 +41,7 @@ pub mod self_span {
 
     #[pin_project(PinnedDrop)]
     pub enum E {
-        V { x: () },
+        V { f: () },
     }
 
     #[pinned_drop]

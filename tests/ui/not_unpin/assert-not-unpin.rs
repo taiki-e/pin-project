@@ -2,7 +2,7 @@ use pin_project::pin_project;
 use std::marker::PhantomPinned;
 
 struct Inner<T> {
-    val: T,
+    f: T,
 }
 
 #[pin_project(!Unpin)]
@@ -15,7 +15,7 @@ struct Foo<T, U> {
 #[pin_project(!Unpin)]
 struct TrivialBounds {
     #[pin]
-    field1: PhantomPinned,
+    f: PhantomPinned,
 }
 
 #[pin_project(!Unpin)]

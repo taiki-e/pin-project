@@ -4,18 +4,18 @@
 
 #[repr(packed)]
 struct A {
-    field: u32,
+    f: u32,
 }
 
 #[repr(packed(2))]
 struct B {
-    field: u32,
+    f: u32,
 }
 
 fn main() {
-    let a = A { field: 1 };
-    &a.field; //~ ERROR borrow of packed field is unsafe and requires unsafe function or block
+    let a = A { f: 1 };
+    &a.f; //~ ERROR borrow of packed field is unsafe and requires unsafe function or block
 
-    let b = B { field: 1 };
-    &b.field; //~ ERROR borrow of packed field is unsafe and requires unsafe function or block
+    let b = B { f: 1 };
+    &b.f; //~ ERROR borrow of packed field is unsafe and requires unsafe function or block
 }

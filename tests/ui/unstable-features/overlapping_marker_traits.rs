@@ -16,7 +16,7 @@ use std::marker::PhantomPinned;
 #[pin_project]
 struct Struct<T> {
     #[pin]
-    x: T,
+    f: T,
 }
 
 // unsound Unpin impl

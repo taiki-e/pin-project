@@ -8,7 +8,7 @@ note: the implementor must specify the same requirement
   --> $DIR/conditional-drop-impl.rs:6:1
    |
 6  | / struct DropImpl<T> {
-7  | |     field: T,
+7  | |     f: T,
 8  | | }
    | |_^
 

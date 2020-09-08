@@ -4,7 +4,7 @@ mod pin_argument {
     #[pin_project]
     struct Struct {
         #[pin()] //~ ERROR unexpected token
-        field: (),
+        f: (),
     }
 
     #[pin_project]
@@ -19,7 +19,7 @@ mod pin_argument {
     enum EnumStruct {
         V {
             #[pin(foo)] //~ ERROR unexpected token
-            field: (),
+            f: (),
         },
     }
 }
@@ -31,7 +31,7 @@ mod pin_attribute {
     struct DuplicateStruct {
         #[pin]
         #[pin] //~ ERROR duplicate #[pin] attribute
-        field: (),
+        f: (),
     }
 
     #[pin_project]
@@ -57,7 +57,7 @@ mod pin_attribute {
         V {
             #[pin]
             #[pin] //~ ERROR duplicate #[pin] attribute
-            field: (),
+            f: (),
         },
     }
 }
@@ -69,7 +69,7 @@ mod pin_item {
     #[pin] //~ ERROR may only be used on fields of structs or variants
     struct Struct {
         #[pin]
-        field: (),
+        f: (),
     }
 
     #[pin_project]
