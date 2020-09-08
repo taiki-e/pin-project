@@ -605,6 +605,12 @@ fn dst() {
     }
 
     #[pin_project]
+    struct Struct11<'a, T: ?Sized, U: ?Sized> {
+        f1: &'a mut T,
+        f2: U,
+    }
+
+    #[pin_project]
     struct TupleStruct1<T: ?Sized>(T);
 
     #[pin_project]
@@ -637,6 +643,9 @@ fn dst() {
 
     #[pin_project(!Unpin)]
     struct TupleStruct10<T: ?Sized>(#[pin] T);
+
+    #[pin_project]
+    struct TupleStruct11<'a, T: ?Sized, U: ?Sized>(&'a mut T, U);
 }
 
 #[allow(explicit_outlives_requirements)] // https://github.com/rust-lang/rust/issues/60993
