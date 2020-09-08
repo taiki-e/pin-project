@@ -4,6 +4,7 @@
 use pin_project::{pin_project, pinned_drop, UnsafeUnpin};
 use std::{
     marker::{PhantomData, PhantomPinned},
+    panic,
     pin::Pin,
 };
 
@@ -16,41 +17,39 @@ fn projection() {
     )]
     struct Struct<T, U> {
         #[pin]
-        field1: T,
-        field2: U,
+        f1: T,
+        f2: U,
     }
 
-    let mut s = Struct { field1: 1, field2: 2 };
+    let mut s = Struct { f1: 1, f2: 2 };
     let mut s_orig = Pin::new(&mut s);
     let s = s_orig.as_mut().project();
 
-    let x: Pin<&mut i32> = s.field1;
+    let x: Pin<&mut i32> = s.f1;
     assert_eq!(*x, 1);
-
-    let y: &mut i32 = s.field2;
+    let y: &mut i32 = s.f2;
     assert_eq!(*y, 2);
 
-    assert_eq!(s_orig.as_ref().field1, 1);
-    assert_eq!(s_orig.as_ref().field2, 2);
+    assert_eq!(s_orig.as_ref().f1, 1);
+    assert_eq!(s_orig.as_ref().f2, 2);
 
-    let mut s = Struct { field1: 1, field2: 2 };
+    let mut s = Struct { f1: 1, f2: 2 };
 
-    let StructProj { field1, field2 } = Pin::new(&mut s).project();
-    let _: Pin<&mut i32> = field1;
-    let _: &mut i32 = field2;
+    let StructProj { f1, f2 } = Pin::new(&mut s).project();
+    let _: Pin<&mut i32> = f1;
+    let _: &mut i32 = f2;
 
-    let StructProjRef { field1, field2 } = Pin::new(&s).project_ref();
-    let _: Pin<&i32> = field1;
-    let _: &i32 = field2;
+    let StructProjRef { f1, f2 } = Pin::new(&s).project_ref();
+    let _: Pin<&i32> = f1;
+    let _: &i32 = f2;
 
     let mut s = Pin::new(&mut s);
-    let StructProjOwn { field1, field2 } =
-        s.as_mut().project_replace(Struct { field1: 3, field2: 4 });
-    let _: PhantomData<i32> = field1;
-    let _: i32 = field2;
-    assert_eq!(field2, 2);
-    assert_eq!(s.field1, 3);
-    assert_eq!(s.field2, 4);
+    let StructProjOwn { f1, f2 } = s.as_mut().project_replace(Struct { f1: 3, f2: 4 });
+    let _: PhantomData<i32> = f1;
+    let _: i32 = f2;
+    assert_eq!(f2, 2);
+    assert_eq!(s.f1, 3);
+    assert_eq!(s.f2, 4);
 
     #[pin_project(project_replace)]
     struct TupleStruct<T, U>(#[pin] T, U);
@@ -60,66 +59,62 @@ fn projection() {
 
     let x: Pin<&mut i32> = s.0;
     assert_eq!(*x, 1);
-
     let y: &mut i32 = s.1;
     assert_eq!(*y, 2);
 
     #[pin_project(project_replace, project = EnumProj)]
     #[derive(Eq, PartialEq, Debug)]
     enum Enum<A, B, C, D> {
-        Variant1(#[pin] A, B),
-        Variant2 {
+        Tuple(#[pin] A, B),
+        Struct {
             #[pin]
-            field1: C,
-            field2: D,
+            f1: C,
+            f2: D,
         },
-        None,
+        Unit,
     }
 
-    let mut e = Enum::Variant1(1, 2);
+    let mut e = Enum::Tuple(1, 2);
     let mut e_orig = Pin::new(&mut e);
     let e = e_orig.as_mut().project();
 
     match e {
-        EnumProj::Variant1(x, y) => {
+        EnumProj::Tuple(x, y) => {
             let x: Pin<&mut i32> = x;
             assert_eq!(*x, 1);
-
             let y: &mut i32 = y;
             assert_eq!(*y, 2);
         }
-        EnumProj::Variant2 { field1, field2 } => {
-            let _x: Pin<&mut i32> = field1;
-            let _y: &mut i32 = field2;
+        EnumProj::Struct { f1, f2 } => {
+            let _: Pin<&mut i32> = f1;
+            let _: &mut i32 = f2;
         }
-        EnumProj::None => {}
+        EnumProj::Unit => {}
     }
 
-    assert_eq!(Pin::into_ref(e_orig).get_ref(), &Enum::Variant1(1, 2));
+    assert_eq!(Pin::into_ref(e_orig).get_ref(), &Enum::Tuple(1, 2));
 
-    let mut e = Enum::Variant2 { field1: 3, field2: 4 };
+    let mut e = Enum::Struct { f1: 3, f2: 4 };
     let mut e = Pin::new(&mut e).project();
 
     match &mut e {
-        EnumProj::Variant1(x, y) => {
-            let _x: &mut Pin<&mut i32> = x;
-            let _y: &mut &mut i32 = y;
+        EnumProj::Tuple(x, y) => {
+            let _: &mut Pin<&mut i32> = x;
+            let _: &mut &mut i32 = y;
         }
-        EnumProj::Variant2 { field1, field2 } => {
-            let x: &mut Pin<&mut i32> = field1;
+        EnumProj::Struct { f1, f2 } => {
+            let x: &mut Pin<&mut i32> = f1;
             assert_eq!(**x, 3);
-
-            let y: &mut &mut i32 = field2;
+            let y: &mut &mut i32 = f2;
             assert_eq!(**y, 4);
         }
-        EnumProj::None => {}
+        EnumProj::Unit => {}
     }
 
-    if let EnumProj::Variant2 { field1, field2 } = e {
-        let x: Pin<&mut i32> = field1;
+    if let EnumProj::Struct { f1, f2 } = e {
+        let x: Pin<&mut i32> = f1;
         assert_eq!(*x, 3);
-
-        let y: &mut i32 = field2;
+        let y: &mut i32 = f2;
         assert_eq!(*y, 4);
     }
 }
@@ -129,23 +124,23 @@ fn enum_project_set() {
     #[pin_project(project_replace, project = EnumProj)]
     #[derive(Eq, PartialEq, Debug)]
     enum Enum {
-        Variant1(#[pin] u8),
-        Variant2(bool),
+        V1(#[pin] u8),
+        V2(bool),
     }
 
-    let mut e = Enum::Variant1(25);
+    let mut e = Enum::V1(25);
     let mut e_orig = Pin::new(&mut e);
     let e_proj = e_orig.as_mut().project();
 
     match e_proj {
-        EnumProj::Variant1(val) => {
-            let new_e = Enum::Variant2(val.as_ref().get_ref() == &25);
+        EnumProj::V1(val) => {
+            let new_e = Enum::V2(val.as_ref().get_ref() == &25);
             e_orig.set(new_e);
         }
         _ => unreachable!(),
     }
 
-    assert_eq!(e, Enum::Variant2(true));
+    assert_eq!(e, Enum::V2(true));
 }
 
 #[test]
@@ -155,7 +150,7 @@ fn where_clause() {
     where
         T: Copy,
     {
-        field: T,
+        f: T,
     }
 
     #[pin_project]
@@ -168,7 +163,7 @@ fn where_clause() {
     where
         T: Copy,
     {
-        Variant(T),
+        V(T),
     }
 }
 
@@ -180,8 +175,8 @@ fn where_clause_and_associated_type_field() {
         I: Iterator,
     {
         #[pin]
-        field1: I,
-        field2: I::Item,
+        f1: I,
+        f2: I::Item,
     }
 
     #[pin_project(project_replace)]
@@ -190,8 +185,8 @@ fn where_clause_and_associated_type_field() {
         I: Iterator<Item = J>,
     {
         #[pin]
-        field1: I,
-        field2: J,
+        f1: I,
+        f2: J,
     }
 
     #[pin_project(project_replace)]
@@ -199,7 +194,7 @@ fn where_clause_and_associated_type_field() {
     where
         T: 'static,
     {
-        field: T,
+        f: T,
     }
 
     trait Static: 'static {}
@@ -216,8 +211,8 @@ fn where_clause_and_associated_type_field() {
     where
         I: Iterator,
     {
-        Variant1(#[pin] I),
-        Variant2(I::Item),
+        V1(#[pin] I),
+        V2(I::Item),
     }
 }
 
@@ -226,7 +221,7 @@ fn derive_copy() {
     #[pin_project(project_replace)]
     #[derive(Clone, Copy)]
     struct Struct<T> {
-        val: T,
+        f: T,
     }
 
     fn is_copy<T: Copy>() {}
@@ -240,21 +235,21 @@ fn move_out() {
 
     #[pin_project(project_replace)]
     struct Struct {
-        val: NotCopy,
+        f: NotCopy,
     }
 
-    let x = Struct { val: NotCopy };
-    let _val: NotCopy = x.val;
+    let x = Struct { f: NotCopy };
+    let _val: NotCopy = x.f;
 
     #[pin_project(project_replace)]
     enum Enum {
-        Variant(NotCopy),
+        V(NotCopy),
     }
 
-    let x = Enum::Variant(NotCopy);
+    let x = Enum::V(NotCopy);
     #[allow(clippy::infallible_destructuring_match)]
     let _val: NotCopy = match x {
-        Enum::Variant(val) => val,
+        Enum::V(val) => val,
     };
 }
 
@@ -262,39 +257,39 @@ fn move_out() {
 fn trait_bounds_on_type_generics() {
     #[pin_project(project_replace)]
     pub struct Struct1<'a, T: ?Sized> {
-        field: &'a mut T,
+        f: &'a mut T,
     }
 
     #[pin_project(project_replace)]
     pub struct Struct2<'a, T: ::core::fmt::Debug> {
-        field: &'a mut T,
+        f: &'a mut T,
     }
 
     #[pin_project(project_replace)]
     pub struct Struct3<'a, T: core::fmt::Debug> {
-        field: &'a mut T,
+        f: &'a mut T,
     }
 
     #[pin_project(project_replace)]
     pub struct Struct4<'a, T: core::fmt::Debug + core::fmt::Display> {
-        field: &'a mut T,
+        f: &'a mut T,
     }
 
     #[pin_project(project_replace)]
     pub struct Struct5<'a, T: core::fmt::Debug + ?Sized> {
-        field: &'a mut T,
+        f: &'a mut T,
     }
 
     #[pin_project(project_replace)]
     pub struct Struct6<'a, T: core::fmt::Debug = [u8; 16]> {
-        field: &'a mut T,
+        f: &'a mut T,
     }
 
-    let _: Struct6<'_> = Struct6 { field: &mut [0u8; 16] };
+    let _: Struct6<'_> = Struct6 { f: &mut [0u8; 16] };
 
     #[pin_project(project_replace)]
     pub struct Struct7<T: 'static> {
-        field: T,
+        f: T,
     }
 
     trait Static: 'static {}
@@ -303,8 +298,8 @@ fn trait_bounds_on_type_generics() {
 
     #[pin_project(project_replace)]
     pub struct Struct8<'a, 'b: 'a> {
-        field1: &'a u8,
-        field2: &'b u8,
+        f1: &'a u8,
+        f2: &'b u8,
     }
 
     #[pin_project(project_replace)]
@@ -312,7 +307,7 @@ fn trait_bounds_on_type_generics() {
 
     #[pin_project(project_replace)]
     enum Enum<'a, T: ?Sized> {
-        Variant(&'a mut T),
+        V(&'a mut T),
     }
 }
 
@@ -321,13 +316,13 @@ fn overlapping_lifetime_names() {
     #[pin_project(project_replace)]
     pub struct Struct1<'pin, T> {
         #[pin]
-        field: &'pin mut T,
+        f: &'pin mut T,
     }
 
     #[pin_project(project_replace)]
     pub struct Struct2<'pin, 'pin_, 'pin__> {
         #[pin]
-        field: &'pin &'pin_ &'pin__ (),
+        f: &'pin &'pin_ &'pin__ (),
     }
 
     pub trait A<'a> {}
@@ -341,7 +336,7 @@ fn overlapping_lifetime_names() {
         for<'pin, 'pin_, 'pin__> &'pin &'pin_ &'pin__ T: Unpin,
     {
         #[pin]
-        field: &'pin___ mut T,
+        f: &'pin___ mut T,
     }
 }
 
@@ -350,7 +345,7 @@ fn combine() {
     #[pin_project(PinnedDrop, UnsafeUnpin)]
     pub struct PinnedDropWithUnsafeUnpin<T> {
         #[pin]
-        field: T,
+        f: T,
     }
 
     #[pinned_drop]
@@ -363,7 +358,7 @@ fn combine() {
     #[pin_project(PinnedDrop, !Unpin)]
     pub struct PinnedDropWithNotUnpin<T> {
         #[pin]
-        field: T,
+        f: T,
     }
 
     #[pinned_drop]
@@ -374,7 +369,7 @@ fn combine() {
     #[pin_project(UnsafeUnpin, project_replace)]
     pub struct UnsafeUnpinWithReplace<T> {
         #[pin]
-        field: T,
+        f: T,
     }
 
     unsafe impl<T: Unpin> UnsafeUnpin for UnsafeUnpinWithReplace<T> {}
@@ -382,7 +377,7 @@ fn combine() {
     #[pin_project(!Unpin, project_replace)]
     pub struct NotUnpinWithReplace<T> {
         #[pin]
-        field: T,
+        f: T,
     }
 }
 
@@ -415,7 +410,7 @@ fn lifetime_project() {
 
     #[pin_project(project_replace, project = EnumProj, project_ref = EnumProjRef)]
     enum Enum<T, U> {
-        Variant {
+        V {
             #[pin]
             pinned: T,
             unpinned: U,
@@ -443,12 +438,12 @@ fn lifetime_project() {
     impl<T, U> Enum<T, U> {
         fn get_pin_ref<'a>(self: Pin<&'a Self>) -> Pin<&'a T> {
             match self.project_ref() {
-                EnumProjRef::Variant { pinned, .. } => pinned,
+                EnumProjRef::V { pinned, .. } => pinned,
             }
         }
         fn get_pin_mut<'a>(self: Pin<&'a mut Self>) -> Pin<&'a mut T> {
             match self.project() {
-                EnumProj::Variant { pinned, .. } => pinned,
+                EnumProj::V { pinned, .. } => pinned,
             }
         }
     }
@@ -473,7 +468,7 @@ fn lifetime_project_elided() {
 
     #[pin_project(project_replace, project = EnumProj, project_ref = EnumProjRef)]
     enum Enum<T, U> {
-        Variant {
+        V {
             #[pin]
             pinned: T,
             unpinned: U,
@@ -501,12 +496,12 @@ fn lifetime_project_elided() {
     impl<T, U> Enum<T, U> {
         fn get_pin_ref(self: Pin<&Self>) -> Pin<&T> {
             match self.project_ref() {
-                EnumProjRef::Variant { pinned, .. } => pinned,
+                EnumProjRef::V { pinned, .. } => pinned,
             }
         }
         fn get_pin_mut(self: Pin<&mut Self>) -> Pin<&mut T> {
             match self.project() {
-                EnumProj::Variant { pinned, .. } => pinned,
+                EnumProj::V { pinned, .. } => pinned,
             }
         }
     }
@@ -516,19 +511,19 @@ mod visibility {
     use pin_project::pin_project;
 
     #[pin_project(project_replace)]
-    pub(crate) struct A {
-        pub b: u8,
+    pub(crate) struct S {
+        pub f: u8,
     }
 }
 
 #[test]
 fn visibility() {
-    let mut x = visibility::A { b: 0 };
+    let mut x = visibility::S { f: 0 };
     let x = Pin::new(&mut x);
     let y = x.as_ref().project_ref();
-    let _: &u8 = y.b;
+    let _: &u8 = y.f;
     let y = x.project();
-    let _: &mut u8 = y.b;
+    let _: &mut u8 = y.f;
 }
 
 #[test]
@@ -536,7 +531,7 @@ fn trivial_bounds() {
     #[pin_project(project_replace)]
     pub struct NoGenerics {
         #[pin]
-        field: PhantomPinned,
+        f: PhantomPinned,
     }
 }
 
@@ -544,37 +539,37 @@ fn trivial_bounds() {
 fn dst() {
     #[pin_project]
     struct Struct1<T: ?Sized> {
-        x: T,
+        f: T,
     }
 
-    let mut x = Struct1 { x: 0_u8 };
+    let mut x = Struct1 { f: 0_u8 };
     let x: Pin<&mut Struct1<dyn core::fmt::Debug>> = Pin::new(&mut x as _);
-    let _y: &mut (dyn core::fmt::Debug) = x.project().x;
+    let _: &mut (dyn core::fmt::Debug) = x.project().f;
 
     #[pin_project]
     struct Struct2<T: ?Sized> {
         #[pin]
-        x: T,
+        f: T,
     }
 
-    let mut x = Struct2 { x: 0_u8 };
+    let mut x = Struct2 { f: 0_u8 };
     let x: Pin<&mut Struct2<dyn core::fmt::Debug + Unpin>> = Pin::new(&mut x as _);
-    let _y: Pin<&mut (dyn core::fmt::Debug + Unpin)> = x.project().x;
+    let _: Pin<&mut (dyn core::fmt::Debug + Unpin)> = x.project().f;
 
     #[pin_project(UnsafeUnpin)]
     struct Struct5<T: ?Sized> {
-        x: T,
+        f: T,
     }
 
     #[pin_project(UnsafeUnpin)]
     struct Struct6<T: ?Sized> {
         #[pin]
-        x: T,
+        f: T,
     }
 
     #[pin_project(PinnedDrop)]
     struct Struct7<T: ?Sized> {
-        x: T,
+        f: T,
     }
 
     #[pinned_drop]
@@ -585,7 +580,7 @@ fn dst() {
     #[pin_project(PinnedDrop)]
     struct Struct8<T: ?Sized> {
         #[pin]
-        x: T,
+        f: T,
     }
 
     #[pinned_drop]
@@ -595,13 +590,19 @@ fn dst() {
 
     #[pin_project(!Unpin)]
     struct Struct9<T: ?Sized> {
-        x: T,
+        f: T,
     }
 
     #[pin_project(!Unpin)]
     struct Struct10<T: ?Sized> {
         #[pin]
-        x: T,
+        f: T,
+    }
+
+    #[pin_project]
+    struct Struct11<'a, T: ?Sized, U: ?Sized> {
+        f1: &'a mut T,
+        f2: U,
     }
 
     #[pin_project]
@@ -637,6 +638,9 @@ fn dst() {
 
     #[pin_project(!Unpin)]
     struct TupleStruct10<T: ?Sized>(#[pin] T);
+
+    #[pin_project]
+    struct TupleStruct11<'a, T: ?Sized, U: ?Sized>(&'a mut T, U);
 }
 
 #[allow(explicit_outlives_requirements)] // https://github.com/rust-lang/rust/issues/60993
@@ -647,7 +651,7 @@ fn unsized_in_where_clause() {
     where
         T: ?Sized,
     {
-        x: T,
+        f: T,
     }
 
     #[pin_project]
@@ -656,7 +660,7 @@ fn unsized_in_where_clause() {
         T: ?Sized,
     {
         #[pin]
-        x: T,
+        f: T,
     }
 
     #[pin_project]
@@ -809,19 +813,19 @@ fn parse_self() {
 
 #[test]
 fn no_infer_outlives() {
-    trait Bar<X> {
+    trait Trait<X> {
         type Y;
     }
 
-    struct Example<A>(A);
+    struct Struct1<A>(A);
 
-    impl<X, T> Bar<X> for Example<T> {
+    impl<X, T> Trait<X> for Struct1<T> {
         type Y = Option<T>;
     }
 
     #[pin_project(project_replace)]
-    struct Foo<A, B> {
-        _x: <Example<A> as Bar<B>>::Y,
+    struct Struct2<A, B> {
+        _f: <Struct1<A> as Trait<B>>::Y,
     }
 }
 
@@ -830,8 +834,6 @@ fn no_infer_outlives() {
 #[allow(clippy::many_single_char_names)]
 #[test]
 fn project_replace_panic() {
-    use std::panic;
-
     #[pin_project(project_replace)]
     struct S<T, U> {
         #[pin]

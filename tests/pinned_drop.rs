@@ -31,13 +31,13 @@ fn self_argument_in_macro() {
 
     #[pin_project(PinnedDrop)]
     struct Struct {
-        x: (),
+        f: (),
     }
 
     #[pinned_drop]
     impl PinnedDrop for Struct {
         fn drop(self: Pin<&mut Self>) {
-            let _: Vec<_> = vec![self.x];
+            let _: Vec<_> = vec![self.f];
         }
     }
 }
@@ -55,7 +55,7 @@ fn self_in_macro_containing_fn() {
 
     #[pin_project(PinnedDrop)]
     pub struct Struct {
-        _x: (),
+        _f: (),
     }
 
     #[pinned_drop]
@@ -79,7 +79,7 @@ fn self_call() {
 
     #[pin_project(PinnedDrop)]
     pub struct Struct<T> {
-        _x: T,
+        _f: T,
     }
 
     trait Trait {
@@ -112,7 +112,7 @@ fn self_struct() {
 
     #[pin_project(PinnedDrop)]
     pub struct Struct {
-        pub x: (),
+        pub f: (),
     }
 
     #[pinned_drop]
@@ -121,14 +121,14 @@ fn self_struct() {
         #[allow(clippy::match_single_binding)]
         fn drop(mut self: Pin<&mut Self>) {
             // expr
-            let _: Self = Self { x: () };
+            let _: Self = Self { f: () };
 
             // pat
             match *self {
-                Self { x: _ } => {}
+                Self { f: _ } => {}
             }
-            if let Self { x: _ } = *self {}
-            let Self { x: _ } = *self;
+            if let Self { f: _ } = *self {}
+            let Self { f: _ } = *self;
         }
     }
 
@@ -160,7 +160,7 @@ fn self_enum() {
 
     #[pin_project(PinnedDrop)]
     pub enum Enum {
-        Struct { x: () },
+        Struct { f: () },
         Tuple(()),
     }
 
@@ -168,15 +168,15 @@ fn self_enum() {
     impl PinnedDrop for Enum {
         fn drop(mut self: Pin<&mut Self>) {
             // expr
-            let _: Self = Self::Struct { x: () };
+            let _: Self = Self::Struct { f: () };
             let _: Self = Self::Tuple(());
 
             // pat
             match *self {
-                Self::Struct { x: _ } => {}
+                Self::Struct { f: _ } => {}
                 Self::Tuple(_) => {}
             }
-            if let Self::Struct { x: _ } = *self {}
+            if let Self::Struct { f: _ } = *self {}
             if let Self::Tuple(_) = *self {}
         }
     }
@@ -191,7 +191,7 @@ fn self_in_macro_def() {
 
     #[pin_project(PinnedDrop)]
     pub struct Struct {
-        _x: (),
+        _f: (),
     }
 
     #[pinned_drop]
@@ -223,7 +223,7 @@ fn self_inside_macro() {
     where
         mac!(Self): Send,
     {
-        _x: T,
+        _f: T,
     }
 
     impl<T: Send> Struct<T> {

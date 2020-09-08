@@ -3,13 +3,13 @@ use std::marker::PhantomPinned;
 
 #[cfg_attr(any(), pin_project)]
 struct Foo<T> {
-    inner: T,
+    f: T,
 }
 
 #[cfg_attr(not(any()), pin_project)]
 struct Bar<T> {
     #[cfg_attr(not(any()), pin)]
-    inner: T,
+    f: T,
 }
 
 fn is_unpin<T: Unpin>() {}

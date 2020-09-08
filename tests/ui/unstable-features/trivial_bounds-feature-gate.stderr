@@ -24,9 +24,9 @@ error[E0277]: `PhantomPinned` cannot be unpinned
    = help: add `#![feature(trivial_bounds)]` to the crate attributes to enable
 
 error[E0277]: `PhantomPinned` cannot be unpinned
-  --> $DIR/trivial_bounds-feature-gate.rs:35:5
+  --> $DIR/trivial_bounds-feature-gate.rs:34:5
    |
-35 |     impl Unpin for A where Inner: Unpin {} //~ ERROR E0277
+34 |     impl Unpin for A where Inner: Unpin {} //~ ERROR E0277
    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ within `Inner`, the trait `Unpin` is not implemented for `PhantomPinned`
    |
    = note: required because it appears within the type `Inner`
@@ -34,9 +34,9 @@ error[E0277]: `PhantomPinned` cannot be unpinned
    = help: add `#![feature(trivial_bounds)]` to the crate attributes to enable
 
 error[E0277]: `PhantomPinned` cannot be unpinned
-  --> $DIR/trivial_bounds-feature-gate.rs:43:5
+  --> $DIR/trivial_bounds-feature-gate.rs:42:5
    |
-43 |     impl Unpin for B where Wrapper<Inner>: Unpin {} //~ ERROR E0277
+42 |     impl Unpin for B where Wrapper<Inner>: Unpin {} //~ ERROR E0277
    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ within `Inner`, the trait `Unpin` is not implemented for `PhantomPinned`
    |
    = note: required because it appears within the type `Inner`

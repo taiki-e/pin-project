@@ -2,27 +2,27 @@ use pin_project::pin_project;
 use std::marker::PhantomPinned;
 
 struct Inner<T> {
-    val: T,
+    f: T,
 }
 
 #[pin_project]
 struct Foo<T, U> {
     #[pin]
-    inner: Inner<T>,
-    other: U,
+    f1: Inner<T>,
+    f2: U,
 }
 
 #[pin_project]
 struct TrivialBounds {
     #[pin]
-    field1: PhantomPinned,
+    f: PhantomPinned,
 }
 
 #[pin_project]
 struct Bar<'a, T, U> {
     #[pin]
-    inner: &'a mut Inner<T>,
-    other: U,
+    f1: &'a mut Inner<T>,
+    f2: U,
 }
 
 fn is_unpin<T: Unpin>() {}

@@ -21,8 +21,7 @@ mod phantom_pinned {
 
     struct C(PhantomPinned);
 
-    impl<'a> Unpin for C where WrapperWithLifetime<'a, PhantomPinned>: Unpin {}
-    // Ok
+    impl<'a> Unpin for C where WrapperWithLifetime<'a, PhantomPinned>: Unpin {} // Ok
 }
 
 mod inner {

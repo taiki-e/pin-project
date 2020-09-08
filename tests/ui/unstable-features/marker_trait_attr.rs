@@ -12,7 +12,7 @@ use std::marker::PhantomPinned;
 #[pin_project] //~ ERROR E0119
 struct Struct<T> {
     #[pin]
-    x: T,
+    f: T,
 }
 
 // unsound Unpin impl

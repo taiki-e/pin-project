@@ -5,18 +5,18 @@ use std::marker::PhantomPinned;
 struct Foo<T> {
     #[cfg(any())]
     #[pin]
-    inner: T,
+    f: T,
     #[cfg(not(any()))]
-    inner: T,
+    f: T,
 }
 
 #[pin_project]
 struct Bar<T> {
     #[cfg(any())]
-    inner: T,
+    f: T,
     #[cfg(not(any()))]
     #[pin]
-    inner: T,
+    f: T,
 }
 
 fn is_unpin<T: Unpin>() {}

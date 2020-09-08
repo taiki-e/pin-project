@@ -237,6 +237,6 @@ fn cfg_attr_any_packed() {
     #[cfg_attr(any(), repr(packed))]
     struct Struct {
         #[pin]
-        field: u32,
+        f: u32,
     }
 }

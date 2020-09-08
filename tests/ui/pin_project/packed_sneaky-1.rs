@@ -6,14 +6,14 @@ use std::pin::Pin;
 #[hidden_repr(packed)]
 struct A {
     #[pin]
-    field: u32,
+    f: u32,
 }
 
 #[pin_project(UnsafeUnpin)] //~ ERROR may not be used on #[repr(packed)] types
 #[hidden_repr(packed)]
 struct C {
     #[pin]
-    field: u32,
+    f: u32,
 }
 
 unsafe impl UnsafeUnpin for C {}
@@ -22,7 +22,7 @@ unsafe impl UnsafeUnpin for C {}
 #[hidden_repr(packed)]
 struct D {
     #[pin]
-    field: u32,
+    f: u32,
 }
 
 #[pinned_drop]

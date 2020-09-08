@@ -3,7 +3,7 @@ use std::pin::Pin;
 
 #[pin_project(PinnedDrop)]
 struct Struct {
-    dropped: bool,
+    f: bool,
 }
 
 #[pinned_drop]

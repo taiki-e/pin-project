@@ -6,14 +6,14 @@ use std::marker::PhantomPinned;
 #[add_pin_attr(struct)] //~ ERROR duplicate #[pin] attribute
 struct Foo {
     #[pin]
-    field: PhantomPinned,
+    f: PhantomPinned,
 }
 
 #[add_pin_attr(struct)] //~ ERROR #[pin] attribute may only be used on fields of structs or variants
 #[pin_project]
 struct Bar {
     #[pin]
-    field: PhantomPinned,
+    f: PhantomPinned,
 }
 
 fn main() {}
