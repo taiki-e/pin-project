@@ -244,91 +244,109 @@ error: expected identifier
 187 |     #[pin_project(project_replace = !)] //~ ERROR expected identifier
     |                                     ^
 
-error: name `A` is already specified by `project` argument
-   --> $DIR/invalid.rs:194:46
+error: name `OrigAndProj` is the same as the original type name
+   --> $DIR/invalid.rs:194:29
     |
-194 |     #[pin_project(project = A, project_ref = A)] //~ ERROR name `A` is already specified by `project` argument
+194 |     #[pin_project(project = OrigAndProj)] //~ ERROR name `OrigAndProj` is the same as the original type name
+    |                             ^^^^^^^^^^^
+
+error: name `OrigAndProjRef` is the same as the original type name
+   --> $DIR/invalid.rs:197:33
+    |
+197 |     #[pin_project(project_ref = OrigAndProjRef)] //~ ERROR name `OrigAndProjRef` is the same as the original type name
+    |                                 ^^^^^^^^^^^^^^
+
+error: name `OrigAndProjOwn` is the same as the original type name
+   --> $DIR/invalid.rs:200:37
+    |
+200 |     #[pin_project(project_replace = OrigAndProjOwn)] //~ ERROR name `OrigAndProjOwn` is the same as the original type name
+    |                                     ^^^^^^^^^^^^^^
+
+error: name `A` is already specified by `project` argument
+   --> $DIR/invalid.rs:203:46
+    |
+203 |     #[pin_project(project = A, project_ref = A)] //~ ERROR name `A` is already specified by `project` argument
     |                                              ^
 
 error: name `A` is already specified by `project` argument
-   --> $DIR/invalid.rs:197:50
+   --> $DIR/invalid.rs:206:50
     |
-197 |     #[pin_project(project = A, project_replace = A)] //~ ERROR name `A` is already specified by `project` argument
+206 |     #[pin_project(project = A, project_replace = A)] //~ ERROR name `A` is already specified by `project` argument
     |                                                  ^
 
 error: name `A` is already specified by `project_ref` argument
-   --> $DIR/invalid.rs:200:54
+   --> $DIR/invalid.rs:209:54
     |
-200 |     #[pin_project(project_ref = A, project_replace = A)] //~ ERROR name `A` is already specified by `project_ref` argument
+209 |     #[pin_project(project_ref = A, project_replace = A)] //~ ERROR name `A` is already specified by `project_ref` argument
     |                                                      ^
 
 error: duplicate #[pin_project] attribute
-   --> $DIR/invalid.rs:208:5
+   --> $DIR/invalid.rs:217:5
     |
-208 |     #[pin_project] //~ ERROR duplicate #[pin_project] attribute
+217 |     #[pin_project] //~ ERROR duplicate #[pin_project] attribute
     |     ^^^^^^^^^^^^^^
 
 error: #[pin_project] attribute may not be used on structs with zero fields
-   --> $DIR/invalid.rs:216:19
+   --> $DIR/invalid.rs:225:19
     |
-216 |     struct Struct {} //~ ERROR may not be used on structs with zero fields
+225 |     struct Struct {} //~ ERROR may not be used on structs with zero fields
     |                   ^^
 
 error: #[pin_project] attribute may not be used on structs with zero fields
-   --> $DIR/invalid.rs:219:23
+   --> $DIR/invalid.rs:228:23
     |
-219 |     struct TupleStruct(); //~ ERROR may not be used on structs with zero fields
+228 |     struct TupleStruct(); //~ ERROR may not be used on structs with zero fields
     |                       ^^
 
 error: #[pin_project] attribute may not be used on structs with zero fields
-   --> $DIR/invalid.rs:222:12
+   --> $DIR/invalid.rs:231:12
     |
-222 |     struct UnitStruct; //~ ERROR may not be used on structs with zero fields
+231 |     struct UnitStruct; //~ ERROR may not be used on structs with zero fields
     |            ^^^^^^^^^^
 
 error: #[pin_project] attribute may not be used on enums without variants
-   --> $DIR/invalid.rs:225:20
+   --> $DIR/invalid.rs:234:20
     |
-225 |     enum EnumEmpty {} //~ ERROR may not be used on enums without variants
+234 |     enum EnumEmpty {} //~ ERROR may not be used on enums without variants
     |                    ^^
 
 error: #[pin_project] attribute may not be used on enums with discriminants
-   --> $DIR/invalid.rs:229:13
+   --> $DIR/invalid.rs:238:13
     |
-229 |         V = 2, //~ ERROR may not be used on enums with discriminants
+238 |         V = 2, //~ ERROR may not be used on enums with discriminants
     |             ^
 
 error: #[pin_project] attribute may not be used on enums with zero fields
-   --> $DIR/invalid.rs:234:9
+   --> $DIR/invalid.rs:243:9
     |
-234 | /         Unit, //~ ERROR may not be used on enums with zero fields
-235 | |         Tuple(),
-236 | |         Struct {},
+243 | /         Unit, //~ ERROR may not be used on enums with zero fields
+244 | |         Tuple(),
+245 | |         Struct {},
     | |__________________^
 
 error: #[pin_project] attribute may only be used on structs or enums
-   --> $DIR/invalid.rs:240:5
+   --> $DIR/invalid.rs:249:5
     |
-240 | /     union Union {
-241 | |         //~^ ERROR may only be used on structs or enums
-242 | |         f: (),
-243 | |     }
+249 | /     union Union {
+250 | |         //~^ ERROR may only be used on structs or enums
+251 | |         f: (),
+252 | |     }
     | |_____^
 
 error: #[pin_project] attribute may not be used on #[repr(packed)] types
-   --> $DIR/invalid.rs:251:12
+   --> $DIR/invalid.rs:260:12
     |
-251 |     #[repr(packed)]
+260 |     #[repr(packed)]
     |            ^^^^^^
 
 error: #[pin_project] attribute may not be used on #[repr(packed)] types
-   --> $DIR/invalid.rs:255:12
+   --> $DIR/invalid.rs:264:12
     |
-255 |     #[repr(packed)]
+264 |     #[repr(packed)]
     |            ^^^^^^
 
 error: #[pin_project] attribute may not be used on #[repr(packed)] types
-   --> $DIR/invalid.rs:259:12
+   --> $DIR/invalid.rs:268:12
     |
-259 |     #[repr(packed)]
+268 |     #[repr(packed)]
     |            ^^^^^^

@@ -468,6 +468,14 @@ impl<'a> Context<'a> {
         let Args { pinned_drop, unpin_impl, project, project_ref, project_replace } =
             Args::get(attrs)?;
 
+        if let Some(name) = [project.as_ref(), project_ref.as_ref(), project_replace.ident()]
+            .iter()
+            .filter_map(Option::as_ref)
+            .find(|name| **name == ident)
+        {
+            return Err(error!(name, "name `{}` is the same as the original type name", name));
+        }
+
         let mut lifetime_name = String::from("'pin");
         determine_lifetime_name(&mut lifetime_name, generics);
         let lifetime = Lifetime::new(&lifetime_name, Span::call_site());
