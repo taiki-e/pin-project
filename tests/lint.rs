@@ -67,7 +67,11 @@ pub mod clippy {
     pub struct MutMutTupleStruct<'a, T, U>(#[pin] &'a mut T, &'a mut U);
 
     #[rustversion::attr(before(1.37), allow(single_use_lifetimes))] // https://github.com/rust-lang/rust/issues/53738
-    #[pin_project(project_replace)]
+    #[pin_project(
+        project = MutMutProjEnum,
+        project_ref = MutMutEnumProjRef,
+        project_replace = MutMutEnumProjOwn,
+    )]
     #[derive(Debug)]
     pub enum MutMutEnum<'a, T, U> {
         Struct {
@@ -96,7 +100,11 @@ pub mod clippy {
     where
         Self: Sized;
 
-    #[pin_project(project_replace)]
+    #[pin_project(
+        project = TypeRepetitionInBoundsProjEnum,
+        project_ref = TypeRepetitionInBoundsEnumProjRef,
+        project_replace = TypeRepetitionInBoundsEnumProjOwn,
+    )]
     #[derive(Debug)]
     pub enum TypeRepetitionInBoundsEnum<T, U>
     where
@@ -111,7 +119,11 @@ pub mod clippy {
         Unit,
     }
 
-    #[pin_project(project_replace)]
+    #[pin_project(
+        project = UsedUnderscoreBindingStructProj,
+        project_ref = UsedUnderscoreBindingStructProjRef,
+        project_replace = UsedUnderscoreBindingStructProjOwn,
+    )]
     #[derive(Debug)]
     pub struct UsedUnderscoreBindingStruct<T, U> {
         #[pin]
@@ -119,7 +131,11 @@ pub mod clippy {
         pub _unpinned: U,
     }
 
-    #[pin_project(project_replace)]
+    #[pin_project(
+        project = UsedUnderscoreBindingEnumProj,
+        project_ref = UsedUnderscoreBindingEnumProjRef,
+        project_replace = UsedUnderscoreBindingEnumProjOwn,
+    )]
     #[derive(Debug)]
     pub enum UsedUnderscoreBindingEnum<T, U> {
         Struct {

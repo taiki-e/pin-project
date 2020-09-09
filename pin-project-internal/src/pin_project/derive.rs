@@ -610,7 +610,10 @@ impl<'a> Context<'a> {
             let Self #proj_pat = &mut *__self_ptr;
             #proj_own_body
         };
-        generate.extend(false, self.make_proj_impl(&proj_mut_body, &proj_ref_body, &proj_own_body));
+        generate.extend(
+            false,
+            self.make_proj_impl(false, &proj_mut_body, &proj_ref_body, &proj_own_body),
+        );
 
         Ok(())
     }
@@ -620,6 +623,13 @@ impl<'a> Context<'a> {
         DataEnum { brace_token, variants, .. }: &DataEnum,
         generate: &mut GenerateTokens,
     ) -> Result<()> {
+        if let ProjReplace::Unnamed { span } = &self.project_replace {
+            return Err(Error::new(
+                *span,
+                "`project_replace` argument requires a value when used on enums",
+            ));
+        }
+
         validate_enum(*brace_token, variants)?;
 
         let ProjectedVariants {
@@ -641,20 +651,24 @@ impl<'a> Context<'a> {
         let proj_where_clause = &self.proj.where_clause;
 
         let (proj_attrs, proj_ref_attrs, proj_own_attrs) = self.proj_attrs();
-        generate.extend(self.project, quote! {
-            #proj_attrs
-            #vis enum #proj_ident #proj_generics #proj_where_clause {
-                #proj_variants
-            }
-        });
-        generate.extend(self.project_ref, quote! {
-            #proj_ref_attrs
-            #vis enum #proj_ref_ident #proj_generics #proj_where_clause {
-                #proj_ref_variants
-            }
-        });
-        if self.project_replace.span().is_some() {
-            generate.extend(self.project_replace.ident().is_some(), quote! {
+        if self.project {
+            generate.extend(true, quote! {
+                #proj_attrs
+                #vis enum #proj_ident #proj_generics #proj_where_clause {
+                    #proj_variants
+                }
+            });
+        }
+        if self.project_ref {
+            generate.extend(true, quote! {
+                #proj_ref_attrs
+                #vis enum #proj_ref_ident #proj_generics #proj_where_clause {
+                    #proj_ref_variants
+                }
+            });
+        }
+        if self.project_replace.ident().is_some() {
+            generate.extend(true, quote! {
                 #proj_own_attrs
                 #vis enum #proj_own_ident #orig_generics #orig_where_clause {
                     #proj_own_variants
@@ -678,7 +692,10 @@ impl<'a> Context<'a> {
                 #proj_own_arms
             }
         };
-        generate.extend(false, self.make_proj_impl(&proj_mut_body, &proj_ref_body, &proj_own_body));
+        generate.extend(
+            false,
+            self.make_proj_impl(true, &proj_mut_body, &proj_ref_body, &proj_own_body),
+        );
 
         Ok(())
     }
@@ -1104,6 +1121,7 @@ impl<'a> Context<'a> {
     /// Creates an implementation of the projection method.
     fn make_proj_impl(
         &self,
+        is_enum: bool,
         proj_body: &TokenStream,
         proj_ref_body: &TokenStream,
         proj_own_body: &TokenStream,
@@ -1119,7 +1137,25 @@ impl<'a> Context<'a> {
         let proj_ty_generics = self.proj.generics.split_for_impl().1;
         let (impl_generics, ty_generics, where_clause) = self.orig.generics.split_for_impl();
 
-        let replace_impl = self.project_replace.span().map(|span| {
+        let mut project = Some(quote! {
+            #vis fn project<#lifetime>(
+                self: ::pin_project::__private::Pin<&#lifetime mut Self>,
+            ) -> #proj_ident #proj_ty_generics {
+                unsafe {
+                    #proj_body
+                }
+            }
+        });
+        let mut project_ref = Some(quote! {
+            #vis fn project_ref<#lifetime>(
+                self: ::pin_project::__private::Pin<&#lifetime Self>,
+            ) -> #proj_ref_ident #proj_ty_generics {
+                unsafe {
+                    #proj_ref_body
+                }
+            }
+        });
+        let mut project_replace = self.project_replace.span().map(|span| {
             // For interoperability with `forbid(unsafe_code)`, `unsafe` token should be
             // call-site span.
             let unsafety = <Token![unsafe]>::default();
@@ -1135,23 +1171,23 @@ impl<'a> Context<'a> {
             }
         });
 
+        if is_enum {
+            if !self.project {
+                project = None;
+            }
+            if !self.project_ref {
+                project_ref = None;
+            }
+            if self.project_replace.ident().is_none() {
+                project_replace = None;
+            }
+        }
+
         quote! {
             impl #impl_generics #orig_ident #ty_generics #where_clause {
-                #vis fn project<#lifetime>(
-                    self: ::pin_project::__private::Pin<&#lifetime mut Self>,
-                ) -> #proj_ident #proj_ty_generics {
-                    unsafe {
-                        #proj_body
-                    }
-                }
-                #vis fn project_ref<#lifetime>(
-                    self: ::pin_project::__private::Pin<&#lifetime Self>,
-                ) -> #proj_ref_ident #proj_ty_generics {
-                    unsafe {
-                        #proj_ref_body
-                    }
-                }
-                #replace_impl
+                #project
+                #project_ref
+                #project_replace
             }
         }
     }

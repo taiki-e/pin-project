@@ -62,7 +62,7 @@ fn projection() {
     let y: &mut i32 = s.1;
     assert_eq!(*y, 2);
 
-    #[pin_project(project_replace, project = EnumProj)]
+    #[pin_project(project = EnumProj, project_ref = EnumProjRef, project_replace = EnumProjOwn)]
     #[derive(Eq, PartialEq, Debug)]
     enum Enum<A, B, C, D> {
         Tuple(#[pin] A, B),
@@ -121,7 +121,7 @@ fn projection() {
 
 #[test]
 fn enum_project_set() {
-    #[pin_project(project_replace, project = EnumProj)]
+    #[pin_project(project = EnumProj, project_ref = EnumProjRef, project_replace = EnumProjOwn)]
     #[derive(Eq, PartialEq, Debug)]
     enum Enum {
         V1(#[pin] u8),
@@ -158,7 +158,7 @@ fn where_clause() {
     where
         T: Copy;
 
-    #[pin_project]
+    #[pin_project(project = EnumProj, project_ref = EnumProjRef, project_replace = EnumProjOwn)]
     enum EnumWhere<T>
     where
         T: Copy,
@@ -206,7 +206,7 @@ fn where_clause_and_associated_type_field() {
     where
         I: Iterator;
 
-    #[pin_project(project_replace)]
+    #[pin_project(project = EnumProj, project_ref = EnumProjRef, project_replace = EnumProjOwn)]
     enum Enum<I>
     where
         I: Iterator,
@@ -241,7 +241,7 @@ fn move_out() {
     let x = Struct { f: NotCopy };
     let _val: NotCopy = x.f;
 
-    #[pin_project(project_replace)]
+    #[pin_project(project = EnumProj, project_ref = EnumProjRef, project_replace = EnumProjOwn)]
     enum Enum {
         V(NotCopy),
     }
@@ -305,7 +305,7 @@ fn trait_bounds_on_type_generics() {
     #[pin_project(project_replace)]
     pub struct TupleStruct<'a, T: ?Sized>(&'a mut T);
 
-    #[pin_project(project_replace)]
+    #[pin_project(project = EnumProj, project_ref = EnumProjRef, project_replace = EnumProjOwn)]
     enum Enum<'a, T: ?Sized> {
         V(&'a mut T),
     }
@@ -408,7 +408,7 @@ fn lifetime_project() {
         unpinned: U,
     }
 
-    #[pin_project(project_replace, project = EnumProj, project_ref = EnumProjRef)]
+    #[pin_project(project = EnumProj, project_ref = EnumProjRef, project_replace = EnumProjOwn)]
     enum Enum<T, U> {
         V {
             #[pin]
@@ -466,7 +466,7 @@ fn lifetime_project_elided() {
         unpinned: U,
     }
 
-    #[pin_project(project_replace, project = EnumProj, project_ref = EnumProjRef)]
+    #[pin_project(project = EnumProj, project_ref = EnumProjRef, project_replace = EnumProjOwn)]
     enum Enum<T, U> {
         V {
             #[pin]
@@ -779,7 +779,7 @@ fn parse_self() {
         type Assoc = Self;
     }
 
-    #[pin_project(project_replace)]
+    #[pin_project(project = EnumProj, project_ref = EnumProjRef, project_replace = EnumProjOwn)]
     enum Enum {
         Struct {
             _f1: Box<Self>,

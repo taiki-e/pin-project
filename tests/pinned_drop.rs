@@ -143,7 +143,7 @@ fn self_struct() {
 #[rustversion::since(1.37)] // type_alias_enum_variants requires Rust 1.37
 #[test]
 fn self_enum() {
-    #[pin_project(PinnedDrop)]
+    #[pin_project(PinnedDrop, project = EnumProj, project_ref = EnumProjRef)]
     pub enum Enum {
         Struct { f: () },
         Tuple(()),
