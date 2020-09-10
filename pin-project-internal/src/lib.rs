@@ -50,29 +50,36 @@ use proc_macro::TokenStream;
 /// ```
 ///
 /// By passing an argument with the same name as the method to the attribute,
-/// you can name the projection type returned from the method:
+/// you can name the projection type returned from the method. This allows you
+/// to use pattern matching on the projected types.
 ///
 /// ```rust
-/// use pin_project::pin_project;
-/// use std::pin::Pin;
-///
-/// #[pin_project(project = StructProj)]
-/// struct Struct<T> {
-///     #[pin]
-///     field: T,
+/// # use pin_project::pin_project;
+/// # use std::pin::Pin;
+/// #[pin_project(project = EnumProj)]
+/// enum Enum<T> {
+///     Variant(#[pin] T),
 /// }
 ///
-/// impl<T> Struct<T> {
+/// impl<T> Enum<T> {
 ///     fn method(self: Pin<&mut Self>) {
-///         let this: StructProj<'_, T> = self.project();
-///         let StructProj { field } = this;
-///         let _: Pin<&mut T> = field;
+///         let this: EnumProj<'_, T> = self.project();
+///         match this {
+///             EnumProj::Variant(x) => {
+///                 let _: Pin<&mut T> = x;
+///             }
+///         }
 ///     }
 /// }
 /// ```
 ///
 /// Note that the projection types returned by `project` and `project_ref` have
 /// an additional lifetime at the beginning of generics.
+///
+/// ```text
+/// let this: EnumProj<'_, T> = self.project();
+///                    ^^
+/// ```
 ///
 /// The visibility of the projected type and projection method is based on the
 /// original type. However, if the visibility of the original type is `pub`, the
@@ -217,6 +224,32 @@ use proc_macro::TokenStream;
 ///             }
 ///             EnumProj::Unit => {}
 ///         }
+///     }
+/// }
+/// ```
+///
+/// When `#[pin_project]` is used on enums, only named projection types and
+/// methods are generated because there is no way to access variants of
+/// projected types without naming it.
+/// For example, in the above example, only `project()` method is generated,
+/// and `project_ref()` method is not generated.
+/// (When `#[pin_project]` is used on structs, both methods are always generated.)
+///
+/// ```rust,compile_fail,E0599
+/// # use pin_project::pin_project;
+/// # use std::pin::Pin;
+/// #
+/// # #[pin_project(project = EnumProj)]
+/// # enum Enum<T, U> {
+/// #     Tuple(#[pin] T),
+/// #     Struct { field: U },
+/// #     Unit,
+/// # }
+/// #
+/// impl<T, U> Enum<T, U> {
+///     fn call_project_ref(self: Pin<&Self>) {
+///         let _this = self.project_ref();
+///         //~^ ERROR no method named `project_ref` found for struct `Pin<&Enum<T, U>>` in the current scope
 ///     }
 /// }
 /// ```

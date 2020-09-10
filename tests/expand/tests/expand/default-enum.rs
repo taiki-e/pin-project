@@ -1,6 +1,6 @@
 use pin_project::pin_project;
 
-#[pin_project]
+#[pin_project(project = EnumProj, project_ref = EnumProjRef)]
 enum Enum<T, U> {
     Struct {
         #[pin]

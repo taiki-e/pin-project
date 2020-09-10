@@ -186,6 +186,11 @@ mod pin_project_argument {
 
     #[pin_project(project_replace = !)] //~ ERROR expected identifier
     struct ProjectReplace3(#[pin] ());
+
+    #[pin_project(project_replace)] //~ ERROR `project_replace` argument requires a value when used on enums
+    enum ProjectReplaceEnum {
+        V(#[pin] ()),
+    }
 }
 
 mod pin_project_conflict_naming {

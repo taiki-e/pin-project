@@ -83,7 +83,11 @@ fn cfg() {
 
     // enums
 
-    #[pin_project(project_replace)]
+    #[pin_project(
+        project = VariantProj,
+        project_ref = VariantProjRef,
+        project_replace = VariantProjOwn,
+    )]
     enum Variant {
         #[cfg(target_os = "linux")]
         Inner(#[pin] Linux),
@@ -110,7 +114,11 @@ fn cfg() {
     #[cfg(not(target_os = "linux"))]
     let _x = Variant::Other(Other);
 
-    #[pin_project(project_replace)]
+    #[pin_project(
+        project = FieldProj,
+        project_ref = FieldProjRef,
+        project_replace = FieldProjOwn,
+    )]
     enum Field {
         SameName {
             #[cfg(target_os = "linux")]
