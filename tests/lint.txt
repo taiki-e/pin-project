@@ -52,6 +52,7 @@ Lint checks provided by rustc:
                                        coherence-leak-check  warn     distinct impls distinguished only by the leak-check code
                                           confusable-idents  warn     detects visually confusable pairs between identifiers
                                 const-evaluatable-unchecked  warn     detects a generic constant is used in a type without a emitting a warning
+                                        const-item-mutation  warn     detects attempts to mutate a `const` item
                                                   dead-code  warn     detect unused, unexported items
                                                  deprecated  warn     detects use of deprecated items
                           ellipsis-inclusive-range-patterns  warn     `...` range patterns are deprecated
