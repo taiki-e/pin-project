@@ -62,7 +62,7 @@ const _: () = {
     {
     }
     trait StructMustNotImplDrop {}
-    #[allow(clippy::drop_bounds)]
+    #[allow(clippy::drop_bounds, drop_bounds)]
     impl<T: ::pin_project::__private::Drop> StructMustNotImplDrop for T {}
     impl<T, U> StructMustNotImplDrop for Struct<T, U> {}
     impl<T, U> ::pin_project::__private::PinnedDrop for Struct<T, U> {
