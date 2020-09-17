@@ -7,6 +7,7 @@ on:
       - master
       - staging
       - trying
+      - v0.4
   schedule:
     - cron: '00 01 * * *'
 
