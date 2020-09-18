@@ -1,5 +1,5 @@
 use proc_macro2::{Group, Spacing, Span, TokenStream, TokenTree};
-use quote::{format_ident, quote, quote_spanned, ToTokens};
+use quote::{quote, quote_spanned, ToTokens};
 use std::{iter::FromIterator, mem};
 use syn::{
     parse::{Parse, ParseBuffer, ParseStream},
@@ -23,25 +23,6 @@ macro_rules! parse_quote_spanned {
     ($span:expr => $($tt:tt)*) => {
         syn::parse2(quote::quote_spanned!($span => $($tt)*)).unwrap_or_else(|e| panic!("{}", e))
     };
-}
-
-#[derive(Clone, Copy, Eq, PartialEq)]
-pub(crate) enum ProjKind {
-    Mutable,
-    Immutable,
-    Owned,
-}
-
-impl ProjKind {
-    /// Creates the ident of the projected type from the ident of the original
-    /// type.
-    pub(crate) fn proj_ident(self, ident: &Ident) -> Ident {
-        match self {
-            ProjKind::Mutable => format_ident!("__{}Projection", ident),
-            ProjKind::Immutable => format_ident!("__{}ProjectionRef", ident),
-            ProjKind::Owned => format_ident!("__{}ProjectionOwned", ident),
-        }
-    }
 }
 
 /// Determines the lifetime names. Ensure it doesn't overlap with any existing
