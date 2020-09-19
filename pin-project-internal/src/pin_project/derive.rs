@@ -10,7 +10,7 @@ use syn::{
 use super::PIN;
 use crate::utils::{
     determine_lifetime_name, determine_visibility, insert_lifetime_and_bound, ParseBufferExt,
-    ProjKind, ReplaceReceiver, SliceExt, Variants,
+    ReplaceReceiver, SliceExt, Variants,
 };
 
 pub(super) fn parse_derive(input: TokenStream) -> Result<TokenStream> {
@@ -155,34 +155,6 @@ struct Args {
     project_replace: ProjReplace,
 }
 
-enum ProjReplace {
-    None,
-    /// `project_replace`.
-    Unnamed {
-        span: Span,
-    },
-    /// `project_replace = <ident>`.
-    Named {
-        span: Span,
-        ident: Ident,
-    },
-}
-
-impl ProjReplace {
-    fn span(&self) -> Option<Span> {
-        match self {
-            ProjReplace::None => None,
-            ProjReplace::Named { span, .. } | ProjReplace::Unnamed { span, .. } => Some(*span),
-        }
-    }
-
-    fn ident(&self) -> Option<&Ident> {
-        if let ProjReplace::Named { ident, .. } = self { Some(ident) } else { None }
-    }
-}
-
-const DUPLICATE_PIN: &str = "duplicate #[pin] attribute";
-
 impl Args {
     fn get(attrs: &[Attribute]) -> Result<Self> {
         // `(__private(<args>))` -> `<args>`
@@ -221,12 +193,12 @@ impl Args {
             // has the same span as `#[pin_project]`, it is possible
             // that a useless error message will be generated.
             let res = syn::parse2::<Input>(attr.tokens.clone()).unwrap().0;
-            let span = match (&prev_res, res) {
+            let span = match (prev_res, res) {
                 (Some(_), _) => attr,
                 (_, Some(_)) => prev_attr,
                 (None, None) => prev_attr,
             };
-            Err(error!(span, DUPLICATE_PIN))
+            Err(error!(span, "duplicate #[pin] attribute"))
         } else {
             // This `unwrap` only fails if another macro removes `#[pin]` and inserts own `#[pin]`.
             syn::parse2(prev.1.unwrap())
@@ -240,7 +212,7 @@ impl Parse for Args {
             syn::custom_keyword!(Unpin);
         }
 
-        // Parses `= <value>` in `<name> = <value>` and returns value and span of name-value pair.
+        /// Parses `= <value>` in `<name> = <value>` and returns value and span of name-value pair.
         fn parse_value(
             input: ParseStream<'_>,
             name: &Ident,
@@ -381,6 +353,44 @@ impl Parse for Args {
     }
 }
 
+/// `UnsafeUnpin` or `!Unpin` argument.
+#[derive(Clone, Copy)]
+enum UnpinImpl {
+    Default,
+    /// `UnsafeUnpin`.
+    Unsafe(Span),
+    /// `!Unpin`.
+    Negative(Span),
+}
+
+/// `project_replace [= <ident>]` argument.
+enum ProjReplace {
+    None,
+    /// `project_replace`.
+    Unnamed {
+        span: Span,
+    },
+    /// `project_replace = <ident>`.
+    Named {
+        span: Span,
+        ident: Ident,
+    },
+}
+
+impl ProjReplace {
+    /// Return the span of this argument.
+    fn span(&self) -> Option<Span> {
+        match self {
+            ProjReplace::None => None,
+            ProjReplace::Named { span, .. } | ProjReplace::Unnamed { span, .. } => Some(*span),
+        }
+    }
+
+    fn ident(&self) -> Option<&Ident> {
+        if let ProjReplace::Named { ident, .. } = self { Some(ident) } else { None }
+    }
+}
+
 struct OriginalType<'a> {
     /// Attributes of the original type.
     attrs: &'a [Attribute],
@@ -449,15 +459,6 @@ struct Context<'a> {
     project_replace: ProjReplace,
 }
 
-#[derive(Clone, Copy)]
-enum UnpinImpl {
-    Default,
-    /// `UnsafeUnpin`.
-    Unsafe(Span),
-    /// `!Unpin`.
-    Negative(Span),
-}
-
 impl<'a> Context<'a> {
     fn new(
         attrs: &'a [Attribute],
@@ -492,8 +493,10 @@ impl<'a> Context<'a> {
         let mut where_clause = generics.make_where_clause().clone();
         where_clause.predicates.push(pred);
 
-        let own_ident =
-            project_replace.ident().cloned().unwrap_or_else(|| ProjKind::Owned.proj_ident(ident));
+        let own_ident = project_replace
+            .ident()
+            .cloned()
+            .unwrap_or_else(|| format_ident!("__{}ProjectionOwned", ident));
 
         Ok(Self {
             pinned_drop,
@@ -503,8 +506,8 @@ impl<'a> Context<'a> {
             project_replace,
             proj: ProjectedType {
                 vis: determine_visibility(vis),
-                mut_ident: project.unwrap_or_else(|| ProjKind::Mutable.proj_ident(ident)),
-                ref_ident: project_ref.unwrap_or_else(|| ProjKind::Immutable.proj_ident(ident)),
+                mut_ident: project.unwrap_or_else(|| format_ident!("__{}Projection", ident)),
+                ref_ident: project_ref.unwrap_or_else(|| format_ident!("__{}ProjectionRef", ident)),
                 own_ident,
                 lifetime,
                 generics: proj_generics,
@@ -513,27 +516,6 @@ impl<'a> Context<'a> {
             orig: OriginalType { attrs, vis, ident, generics },
             pinned_fields: Vec::new(),
         })
-    }
-
-    /// Returns attributes used on projected types.
-    fn proj_attrs(&self) -> (TokenStream, TokenStream, TokenStream) {
-        let proj_mut = quote! {
-            #[allow(dead_code)] // This lint warns unused fields/variants.
-            #[allow(single_use_lifetimes)] // https://github.com/rust-lang/rust/issues/55058
-            #[allow(clippy::mut_mut)] // This lint warns `&mut &mut <ty>`.
-            #[allow(clippy::type_repetition_in_bounds)] // https://github.com/rust-lang/rust-clippy/issues/4326}
-        };
-        let proj_ref = quote! {
-            #[allow(dead_code)] // This lint warns unused fields/variants.
-            #[allow(single_use_lifetimes)] // https://github.com/rust-lang/rust/issues/55058
-            #[allow(clippy::type_repetition_in_bounds)] // https://github.com/rust-lang/rust-clippy/issues/4326
-        };
-        let proj_own = quote! {
-            #[allow(dead_code)] // This lint warns unused fields/variants.
-            #[allow(single_use_lifetimes)] // https://github.com/rust-lang/rust/issues/55058
-            #[allow(unreachable_pub)] // This lint warns `pub` field in private struct.
-        };
-        (proj_mut, proj_ref, proj_own)
     }
 
     fn parse_struct(
@@ -846,6 +828,27 @@ impl<'a> Context<'a> {
         })
     }
 
+    /// Returns attributes used on projected types.
+    fn proj_attrs(&self) -> (TokenStream, TokenStream, TokenStream) {
+        let proj_mut = quote! {
+            #[allow(dead_code)] // This lint warns unused fields/variants.
+            #[allow(single_use_lifetimes)] // https://github.com/rust-lang/rust/issues/55058
+            #[allow(clippy::mut_mut)] // This lint warns `&mut &mut <ty>`.
+            #[allow(clippy::type_repetition_in_bounds)] // https://github.com/rust-lang/rust-clippy/issues/4326}
+        };
+        let proj_ref = quote! {
+            #[allow(dead_code)] // This lint warns unused fields/variants.
+            #[allow(single_use_lifetimes)] // https://github.com/rust-lang/rust/issues/55058
+            #[allow(clippy::type_repetition_in_bounds)] // https://github.com/rust-lang/rust-clippy/issues/4326
+        };
+        let proj_own = quote! {
+            #[allow(dead_code)] // This lint warns unused fields/variants.
+            #[allow(single_use_lifetimes)] // https://github.com/rust-lang/rust/issues/55058
+            #[allow(unreachable_pub)] // This lint warns `pub` field in private struct.
+        };
+        (proj_mut, proj_ref, proj_own)
+    }
+
     /// Generates the processing that `project_replace` does for the struct or each variant.
     fn proj_own_body(
         &self,
@@ -886,7 +889,12 @@ impl<'a> Context<'a> {
         }
     }
 
-    /// Creates `Unpin` implementation for original type.
+    /// Creates `Unpin` implementation for the original type.
+    ///
+    /// The kind of `Unpin` impl generated depends on `unpin_impl` field:
+    /// * `UnpinImpl::Unsafe` - Implements `Unpin` via `UnsafeUnpin` impl.
+    /// * `UnpinImpl::Negative` - Generates `Unpin` impl with bounds that will never be true.
+    /// * `UnpinImpl::Default` - Generates `Unpin` impl that requires `Unpin` for all pinned fields.
     fn make_unpin_impl(&self) -> TokenStream {
         match self.unpin_impl {
             UnpinImpl::Unsafe(span) => {
@@ -1041,7 +1049,12 @@ impl<'a> Context<'a> {
         }
     }
 
-    /// Creates `Drop` implementation for original type.
+    /// Creates `Drop` implementation for the original type.
+    ///
+    /// The kind of `Drop` impl generated depends on `pinned_drop` field:
+    /// * `Some` - Implements `Drop` via `PinnedDrop` impl.
+    /// * `None` - Generates code that ensures that `Drop`
+    ///   trait is not implemented, not `Drop` impl.
     fn make_drop_impl(&self) -> TokenStream {
         let ident = self.orig.ident;
         let (impl_generics, ty_generics, where_clause) = self.orig.generics.split_for_impl();
@@ -1118,7 +1131,12 @@ impl<'a> Context<'a> {
         }
     }
 
-    /// Creates an implementation of the projection method.
+    /// Creates an implementation of the projection methods.
+    ///
+    /// On structs, both `project` and `project_ref` methods are always generated,
+    /// and `project_replace` is only generated if `ProjReplace::span` is `Some`.
+    ///
+    /// On enums, only methods that the returned projected type is named will be generated.
     fn make_proj_impl(
         &self,
         is_enum: bool,
@@ -1192,6 +1210,11 @@ impl<'a> Context<'a> {
         }
     }
 
+    /// Checks that the `[repr(packed)]` attribute is not included.
+    ///
+    /// This currently does two checks:
+    /// * Checks the attributes of structs to ensure there is no `[repr(packed)]`.
+    /// * Generates a function that borrows fields without an unsafe block.
     fn ensure_not_packed(&self, fields: &Fields) -> Result<TokenStream> {
         for meta in self.orig.attrs.iter().filter_map(|attr| attr.parse_meta().ok()) {
             if let Meta::List(list) = meta {

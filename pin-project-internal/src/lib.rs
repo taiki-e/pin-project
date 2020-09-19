@@ -81,10 +81,10 @@ use proc_macro::TokenStream;
 ///                    ^^
 /// ```
 ///
-/// The visibility of the projected type and projection method is based on the
+/// The visibility of the projected types and projection methods is based on the
 /// original type. However, if the visibility of the original type is `pub`, the
-/// visibility of the projected type and the projection method is downgraded to
-/// `pub(crate)`.
+/// visibility of the projected types and the projection methods is downgraded
+/// to `pub(crate)`.
 ///
 /// # Safety
 ///
