@@ -181,8 +181,6 @@ impl ProjReplace {
     }
 }
 
-const DUPLICATE_PIN: &str = "duplicate #[pin] attribute";
-
 impl Args {
     fn get(attrs: &[Attribute]) -> Result<Self> {
         // `(__private(<args>))` -> `<args>`
@@ -221,12 +219,12 @@ impl Args {
             // has the same span as `#[pin_project]`, it is possible
             // that a useless error message will be generated.
             let res = syn::parse2::<Input>(attr.tokens.clone()).unwrap().0;
-            let span = match (&prev_res, res) {
+            let span = match (prev_res, res) {
                 (Some(_), _) => attr,
                 (_, Some(_)) => prev_attr,
                 (None, None) => prev_attr,
             };
-            Err(error!(span, DUPLICATE_PIN))
+            Err(error!(span, "duplicate #[pin] attribute"))
         } else {
             // This `unwrap` only fails if another macro removes `#[pin]` and inserts own `#[pin]`.
             syn::parse2(prev.1.unwrap())

@@ -139,7 +139,7 @@ impl SliceExt for [Attribute] {
     }
 
     fn find(&self, ident: &str) -> Option<&Attribute> {
-        self.iter().position(|attr| attr.path.is_ident(ident)).and_then(|i| self.get(i))
+        self.iter().position(|attr| attr.path.is_ident(ident)).map(|i| &self[i])
     }
 }
 
