@@ -6,6 +6,33 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 ## [Unreleased]
 
+* [Remove deprecated `#[project]`, `#[project_ref]`, and `#[project_replace]` attributes.](https://github.com/taiki-e/pin-project/pull/265)
+
+  Name the projected type by passing an argument with the same name as the method to the `#[pin_project]` attribute instead:
+
+  ```diff
+  - #[pin_project]
+  + #[pin_project(project = EnumProj)]
+    enum Enum<T> {
+        Variant(#[pin] T),
+    }
+
+  - #[project]
+    fn func<T>(x: Pin<&mut Enum<T>>) {
+  -     #[project]
+        match x.project() {
+  -         Enum::Variant(_) => { /* ... */ }
+  +         EnumProj::Variant(_) => { /* ... */ }
+        }
+    }
+  ```
+
+* [Remove deprecated `Replace` argument from `#[pin_project]` attribute.](https://github.com/taiki-e/pin-project/pull/266) Use `project_replace` argument instead.
+
+* [Optimize code generation when used on enums.](https://github.com/taiki-e/pin-project/pull/270)
+
+* Diagnostic improvements.
+
 ## [0.4.23] - 2020-07-27
 
 * [Fix compile error with `?Sized` type parameters.][263]
@@ -20,12 +47,9 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 * [Deprecated `#[project]`, `#[project_ref]`, and `#[project_replace]` attributes due to some unfixable limitations.][244]
 
-  Consider naming the projected type by passing an argument with the same name as the method to the #[pin_project] attribute instead.
+  Consider naming the projected type by passing an argument with the same name as the method to the `#[pin_project]` attribute instead.
 
   ```rust
-  use pin_project::pin_project;
-  use std::pin::Pin;
-
   #[pin_project(project = EnumProj)]
   enum Enum<T> {
       Variant(#[pin] T),
@@ -107,9 +131,6 @@ This project adheres to [Semantic Versioning](https://semver.org).
   By passing an argument with the same name as the method to the attribute, you can name the projection type returned from the method:
 
   ```rust
-  use pin_project::pin_project;
-  use std::pin::Pin;
-
   #[pin_project(project = EnumProj)]
   enum Enum<T> {
       Variant(#[pin] T),
@@ -143,7 +164,6 @@ This project adheres to [Semantic Versioning](https://semver.org).
 * [Added `!Unpin` option to `#[pin_project]` attribute for guarantee the type is `!Unpin`.][219]
 
   ```rust
-  use pin_project::pin_project;
   #[pin_project(!Unpin)]
   struct Struct<T, U> {
       field: T,
@@ -153,8 +173,6 @@ This project adheres to [Semantic Versioning](https://semver.org).
   This is equivalent to use `#[pin]` attribute for `PhantomPinned` field.
 
   ```rust
-  use pin_project::pin_project;
-  use std::marker::PhantomPinned;
   #[pin_project]
   struct Struct<T, U> {
       field: T,
@@ -392,7 +410,7 @@ Changes since the 0.4.0-beta.1 release:
 
 ## [0.4.0-alpha.9] - 2019-09-05
 
-* [Added 'project_into' method to #[pin_project] types][69]. This can be useful when returning a pin projection from a method.
+* [Added 'project_into' method to `#[pin_project]` types][69]. This can be useful when returning a pin projection from a method.
   ```rust
   fn get_pin_mut(self: Pin<&mut Self>) -> Pin<&mut T> {
       self.project_into().pinned
