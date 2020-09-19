@@ -76,7 +76,10 @@ pub(crate) fn insert_lifetime(generics: &mut Generics, lifetime: Lifetime) {
     generics.params.insert(0, LifetimeDef::new(lifetime).into());
 }
 
-/// Determines the visibility of the projected type and projection method.
+/// Determines the visibility of the projected types and projection methods.
+///
+/// If given visibility is `pub`, returned visibility is `pub(crate)`.
+/// Otherwise, returned visibility is the same as given visibility.
 pub(crate) fn determine_visibility(vis: &Visibility) -> Visibility {
     if let Visibility::Public(token) = vis {
         parse_quote_spanned!(token.pub_token.span => pub(crate))
@@ -85,7 +88,8 @@ pub(crate) fn determine_visibility(vis: &Visibility) -> Visibility {
     }
 }
 
-/// Check if `tokens` is an empty `TokenStream`.
+/// Checks if `tokens` is an empty `TokenStream`.
+///
 /// This is almost equivalent to `syn::parse2::<Nothing>()`, but produces
 /// a better error message and does not require ownership of `tokens`.
 pub(crate) fn parse_as_empty(tokens: &TokenStream) -> Result<()> {
@@ -124,6 +128,10 @@ pub(crate) trait VecExt {
 }
 
 impl SliceExt for [Attribute] {
+    /// # Errors
+    ///
+    /// * There are multiple specified attributes.
+    /// * The `Attribute::tokens` field of the specified attribute is not empty.
     fn position_exact(&self, ident: &str) -> Result<Option<usize>> {
         self.iter()
             .try_fold((0, None), |(i, mut prev), attr| {
