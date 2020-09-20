@@ -127,8 +127,9 @@ impl GenerateTokens {
             // * https://github.com/rust-lang/rust/issues/63281
             // * https://github.com/taiki-e/pin-project/pull/53#issuecomment-525906867
             // * https://github.com/taiki-e/pin-project/pull/70
-            #[doc(hidden)]
-            #[allow(non_upper_case_globals)]
+            #[doc(hidden)] // for Rust 1.34 - 1.41
+            #[allow(non_upper_case_globals)] // for Rust 1.34 - 1.36
+            #[allow(explicit_outlives_requirements)] // https://github.com/rust-lang/rust/issues/60993
             #[allow(single_use_lifetimes)] // https://github.com/rust-lang/rust/issues/55058
             #[allow(clippy::used_underscore_binding)]
             const #dummy_const: () = {
@@ -832,17 +833,20 @@ impl<'a> Context<'a> {
     fn proj_attrs(&self) -> (TokenStream, TokenStream, TokenStream) {
         let proj_mut = quote! {
             #[allow(dead_code)] // This lint warns unused fields/variants.
+            #[allow(explicit_outlives_requirements)] // https://github.com/rust-lang/rust/issues/60993
             #[allow(single_use_lifetimes)] // https://github.com/rust-lang/rust/issues/55058
             #[allow(clippy::mut_mut)] // This lint warns `&mut &mut <ty>`.
             #[allow(clippy::type_repetition_in_bounds)] // https://github.com/rust-lang/rust-clippy/issues/4326}
         };
         let proj_ref = quote! {
             #[allow(dead_code)] // This lint warns unused fields/variants.
+            #[allow(explicit_outlives_requirements)] // https://github.com/rust-lang/rust/issues/60993
             #[allow(single_use_lifetimes)] // https://github.com/rust-lang/rust/issues/55058
             #[allow(clippy::type_repetition_in_bounds)] // https://github.com/rust-lang/rust-clippy/issues/4326
         };
         let proj_own = quote! {
             #[allow(dead_code)] // This lint warns unused fields/variants.
+            #[allow(explicit_outlives_requirements)] // https://github.com/rust-lang/rust/issues/60993
             #[allow(single_use_lifetimes)] // https://github.com/rust-lang/rust/issues/55058
             #[allow(unreachable_pub)] // This lint warns `pub` field in private struct.
         };
