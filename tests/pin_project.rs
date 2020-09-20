@@ -556,6 +556,25 @@ fn dst() {
     let x: Pin<&mut Struct2<dyn core::fmt::Debug + Unpin>> = Pin::new(&mut x as _);
     let _: Pin<&mut (dyn core::fmt::Debug + Unpin)> = x.project().f;
 
+    #[allow(explicit_outlives_requirements)] // https://github.com/rust-lang/rust/issues/60993
+    #[pin_project]
+    struct Struct3<T>
+    where
+        T: ?Sized,
+    {
+        f: T,
+    }
+
+    #[allow(explicit_outlives_requirements)] // https://github.com/rust-lang/rust/issues/60993
+    #[pin_project]
+    struct Struct4<T>
+    where
+        T: ?Sized,
+    {
+        #[pin]
+        f: T,
+    }
+
     #[pin_project(UnsafeUnpin)]
     struct Struct5<T: ?Sized> {
         f: T,
@@ -611,6 +630,18 @@ fn dst() {
     #[pin_project]
     struct TupleStruct2<T: ?Sized>(#[pin] T);
 
+    #[allow(explicit_outlives_requirements)] // https://github.com/rust-lang/rust/issues/60993
+    #[pin_project]
+    struct TupleStruct3<T>(T)
+    where
+        T: ?Sized;
+
+    #[allow(explicit_outlives_requirements)] // https://github.com/rust-lang/rust/issues/60993
+    #[pin_project]
+    struct TupleStruct4<T>(#[pin] T)
+    where
+        T: ?Sized;
+
     #[pin_project(UnsafeUnpin)]
     struct TupleStruct5<T: ?Sized>(T);
 
@@ -641,37 +672,6 @@ fn dst() {
 
     #[pin_project]
     struct TupleStruct11<'a, T: ?Sized, U: ?Sized>(&'a mut T, U);
-}
-
-#[allow(explicit_outlives_requirements)] // https://github.com/rust-lang/rust/issues/60993
-#[test]
-fn unsized_in_where_clause() {
-    #[pin_project]
-    struct Struct3<T>
-    where
-        T: ?Sized,
-    {
-        f: T,
-    }
-
-    #[pin_project]
-    struct Struct4<T>
-    where
-        T: ?Sized,
-    {
-        #[pin]
-        f: T,
-    }
-
-    #[pin_project]
-    struct TupleStruct3<T>(T)
-    where
-        T: ?Sized;
-
-    #[pin_project]
-    struct TupleStruct4<T>(#[pin] T)
-    where
-        T: ?Sized;
 }
 
 #[test]

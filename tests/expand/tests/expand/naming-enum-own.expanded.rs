@@ -10,6 +10,7 @@ enum Enum<T, U> {
     Unit,
 }
 #[allow(dead_code)]
+#[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
 #[allow(unreachable_pub)]
 enum ProjOwn<T, U> {
@@ -22,6 +23,7 @@ enum ProjOwn<T, U> {
 }
 #[doc(hidden)]
 #[allow(non_upper_case_globals)]
+#[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
 #[allow(clippy::used_underscore_binding)]
 const _: () = {

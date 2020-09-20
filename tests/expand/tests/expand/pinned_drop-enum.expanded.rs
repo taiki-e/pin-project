@@ -11,6 +11,7 @@ enum Enum<T, U> {
     Unit,
 }
 #[allow(dead_code)]
+#[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
 #[allow(clippy::mut_mut)]
 #[allow(clippy::type_repetition_in_bounds)]
@@ -26,6 +27,7 @@ where
     Unit,
 }
 #[allow(dead_code)]
+#[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
 #[allow(clippy::type_repetition_in_bounds)]
 enum EnumProjRef<'pin, T, U>
@@ -41,6 +43,7 @@ where
 }
 #[doc(hidden)]
 #[allow(non_upper_case_globals)]
+#[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
 #[allow(clippy::used_underscore_binding)]
 const _: () = {

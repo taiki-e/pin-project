@@ -2,6 +2,7 @@ use pin_project::pin_project;
 # [pin (__private (project_ref = ProjRef))]
 struct TupleStruct<T, U>(#[pin] T, U);
 #[allow(dead_code)]
+#[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
 #[allow(clippy::type_repetition_in_bounds)]
 struct ProjRef<'pin, T, U>(::pin_project::__private::Pin<&'pin (T)>, &'pin (U))
@@ -9,10 +10,12 @@ where
     TupleStruct<T, U>: 'pin;
 #[doc(hidden)]
 #[allow(non_upper_case_globals)]
+#[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
 #[allow(clippy::used_underscore_binding)]
 const _: () = {
     #[allow(dead_code)]
+    #[allow(explicit_outlives_requirements)]
     #[allow(single_use_lifetimes)]
     #[allow(clippy::mut_mut)]
     #[allow(clippy::type_repetition_in_bounds)]

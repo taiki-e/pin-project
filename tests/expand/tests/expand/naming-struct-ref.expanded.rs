@@ -6,6 +6,7 @@ struct Struct<T, U> {
     unpinned: U,
 }
 #[allow(dead_code)]
+#[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
 #[allow(clippy::type_repetition_in_bounds)]
 struct ProjRef<'pin, T, U>
@@ -17,10 +18,12 @@ where
 }
 #[doc(hidden)]
 #[allow(non_upper_case_globals)]
+#[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
 #[allow(clippy::used_underscore_binding)]
 const _: () = {
     #[allow(dead_code)]
+    #[allow(explicit_outlives_requirements)]
     #[allow(single_use_lifetimes)]
     #[allow(clippy::mut_mut)]
     #[allow(clippy::type_repetition_in_bounds)]

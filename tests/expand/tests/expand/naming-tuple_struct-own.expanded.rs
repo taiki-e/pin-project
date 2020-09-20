@@ -2,15 +2,18 @@ use pin_project::pin_project;
 # [pin (__private (project_replace = ProjOwn))]
 struct TupleStruct<T, U>(#[pin] T, U);
 #[allow(dead_code)]
+#[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
 #[allow(unreachable_pub)]
 struct ProjOwn<T, U>(::pin_project::__private::PhantomData<T>, U);
 #[doc(hidden)]
 #[allow(non_upper_case_globals)]
+#[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
 #[allow(clippy::used_underscore_binding)]
 const _: () = {
     #[allow(dead_code)]
+    #[allow(explicit_outlives_requirements)]
     #[allow(single_use_lifetimes)]
     #[allow(clippy::mut_mut)]
     #[allow(clippy::type_repetition_in_bounds)]
@@ -21,6 +24,7 @@ const _: () = {
     where
         TupleStruct<T, U>: 'pin;
     #[allow(dead_code)]
+    #[allow(explicit_outlives_requirements)]
     #[allow(single_use_lifetimes)]
     #[allow(clippy::type_repetition_in_bounds)]
     struct __TupleStructProjectionRef<'pin, T, U>(

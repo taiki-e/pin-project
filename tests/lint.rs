@@ -49,6 +49,58 @@ pub mod forbid_unsafe {
     include!("include/basic-safe-part.rs");
 }
 
+pub mod rustc {
+    use pin_project::pin_project;
+
+    #[rustversion::attr(before(1.37), allow(single_use_lifetimes))] // https://github.com/rust-lang/rust/issues/53738
+    #[allow(explicit_outlives_requirements)] // https://github.com/rust-lang/rust/issues/60993
+    #[pin_project(project_replace)]
+    #[derive(Debug)]
+    pub struct ExplicitOutlivesRequirementsStruct<'a, T, U>
+    where
+        T: ?Sized,
+        U: ?Sized,
+    {
+        #[pin]
+        pub pinned: &'a mut T,
+        pub unpinned: &'a mut U,
+    }
+
+    #[rustversion::attr(before(1.37), allow(single_use_lifetimes))] // https://github.com/rust-lang/rust/issues/53738
+    #[allow(explicit_outlives_requirements)] // https://github.com/rust-lang/rust/issues/60993
+    #[pin_project(project_replace)]
+    #[derive(Debug)]
+    pub struct ExplicitOutlivesRequirementsTupleStruct<'a, T, U>(
+        #[pin] pub &'a mut T,
+        pub &'a mut U,
+    )
+    where
+        T: ?Sized,
+        U: ?Sized;
+
+    #[rustversion::attr(before(1.37), allow(single_use_lifetimes))] // https://github.com/rust-lang/rust/issues/53738
+    #[allow(explicit_outlives_requirements)] // https://github.com/rust-lang/rust/issues/60993
+    #[pin_project(
+        project = ExplicitOutlivesRequirementsEnumProj,
+        project_ref = ExplicitOutlivesRequirementsEnumProjRef,
+        project_replace = ExplicitOutlivesRequirementsEnumProjOwn,
+    )]
+    #[derive(Debug)]
+    pub enum ExplicitOutlivesRequirementsEnum<'a, T, U>
+    where
+        T: ?Sized,
+        U: ?Sized,
+    {
+        Struct {
+            #[pin]
+            pinned: &'a mut T,
+            unpinned: &'a mut U,
+        },
+        Tuple(#[pin] &'a mut T, &'a mut U),
+        Unit,
+    }
+}
+
 pub mod clippy {
     use pin_project::pin_project;
 
@@ -68,7 +120,7 @@ pub mod clippy {
 
     #[rustversion::attr(before(1.37), allow(single_use_lifetimes))] // https://github.com/rust-lang/rust/issues/53738
     #[pin_project(
-        project = MutMutProjEnum,
+        project = MutMutEnumProj,
         project_ref = MutMutEnumProjRef,
         project_replace = MutMutEnumProjOwn,
     )]
@@ -101,7 +153,7 @@ pub mod clippy {
         Self: Sized;
 
     #[pin_project(
-        project = TypeRepetitionInBoundsProjEnum,
+        project = TypeRepetitionInBoundsEnumProj,
         project_ref = TypeRepetitionInBoundsEnumProjRef,
         project_replace = TypeRepetitionInBoundsEnumProjOwn,
     )]
