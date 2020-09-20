@@ -9,8 +9,8 @@ use syn::{
 
 use super::PIN;
 use crate::utils::{
-    determine_lifetime_name, determine_visibility, insert_lifetime_and_bound, ParseBufferExt,
-    ReplaceReceiver, SliceExt, Variants,
+    determine_lifetime_name, determine_visibility, insert_lifetime_and_bound, LeadingColon,
+    ParseBufferExt, ReplaceReceiver, SliceExt, Variants,
 };
 
 pub(super) fn parse_derive(input: TokenStream) -> Result<TokenStream> {
@@ -465,14 +465,27 @@ struct ProjectedVariants {
     proj_own_arms: TokenStream,
 }
 
-#[derive(Default)]
 struct ProjectedFields {
     proj_pat: TokenStream,
     proj_body: TokenStream,
     proj_own_body: TokenStream,
-    proj_fields: TokenStream,
-    proj_ref_fields: TokenStream,
-    proj_own_fields: TokenStream,
+    proj_fields: Option<Group>,
+    proj_ref_fields: Option<Group>,
+    proj_own_fields: Option<Group>,
+}
+
+impl ProjectedFields {
+    fn unit(cx: &Context<'_>, variant: LeadingColon<'_>) -> Self {
+        let orig_ident = cx.orig.ident;
+        Self {
+            proj_pat: quote!(#orig_ident #variant),
+            proj_body: variant.to_token_stream(),
+            proj_own_body: cx.proj_own_body(Some(variant), None, &[]),
+            proj_fields: None,
+            proj_ref_fields: None,
+            proj_own_fields: None,
+        }
+    }
 }
 
 struct Context<'a> {
@@ -616,16 +629,16 @@ impl<'a> Context<'a> {
         }
 
         let proj_mut_body = quote! {
-            let Self #proj_pat = self.get_unchecked_mut();
+            let #proj_pat = self.get_unchecked_mut();
             #proj_ident #proj_body
         };
         let proj_ref_body = quote! {
-            let Self #proj_pat = self.get_ref();
+            let #proj_pat = self.get_ref();
             #proj_ref_ident #proj_body
         };
         let proj_own_body = quote! {
             let __self_ptr: *mut Self = self.get_unchecked_mut();
-            let Self #proj_pat = &mut *__self_ptr;
+            let #proj_pat = &mut *__self_ptr;
             #proj_own_body
         };
         generate.extend(
@@ -727,6 +740,8 @@ impl<'a> Context<'a> {
         let mut proj_own_arms = TokenStream::new();
 
         for Variant { ident, fields, .. } in variants {
+            let variant = LeadingColon(ident);
+
             let ProjectedFields {
                 proj_pat,
                 proj_body,
@@ -735,17 +750,13 @@ impl<'a> Context<'a> {
                 proj_own_fields,
                 proj_own_body,
             } = match fields {
-                Fields::Named(_) => self.visit_fields(Some(ident), fields, Delimiter::Brace)?,
+                Fields::Named(_) => self.visit_fields(Some(variant), fields, Delimiter::Brace)?,
                 Fields::Unnamed(_) => {
-                    self.visit_fields(Some(ident), fields, Delimiter::Parenthesis)?
+                    self.visit_fields(Some(variant), fields, Delimiter::Parenthesis)?
                 }
-                Fields::Unit => ProjectedFields {
-                    proj_own_body: self.proj_own_body(Some(ident), None, &[]),
-                    ..ProjectedFields::default()
-                },
+                Fields::Unit => ProjectedFields::unit(self, variant),
             };
 
-            let orig_ident = self.orig.ident;
             let proj_ident = &self.proj.mut_ident;
             let proj_ref_ident = &self.proj.ref_ident;
             proj_variants.extend(quote! {
@@ -757,20 +768,15 @@ impl<'a> Context<'a> {
             proj_own_variants.extend(quote! {
                 #ident #proj_own_fields,
             });
+
             proj_arms.extend(quote! {
-                #orig_ident::#ident #proj_pat => {
-                    #proj_ident::#ident #proj_body
-                }
+                #proj_pat => { #proj_ident #proj_body }
             });
             proj_ref_arms.extend(quote! {
-                #orig_ident::#ident #proj_pat => {
-                    #proj_ref_ident::#ident #proj_body
-                }
+                #proj_pat => { #proj_ref_ident #proj_body }
             });
             proj_own_arms.extend(quote! {
-                #orig_ident::#ident #proj_pat => {
-                    #proj_own_body
-                }
+                #proj_pat => { #proj_own_body }
             });
         }
 
@@ -786,7 +792,7 @@ impl<'a> Context<'a> {
 
     fn visit_fields(
         &mut self,
-        variant_ident: Option<&Ident>,
+        variant: Option<LeadingColon<'_>>,
         fields: &Fields,
         delim: Delimiter,
     ) -> Result<ProjectedFields> {
@@ -841,45 +847,38 @@ impl<'a> Context<'a> {
             }
         }
 
-        fn surround(delim: Delimiter, tokens: TokenStream) -> TokenStream {
-            Group::new(delim, tokens).into_token_stream()
-        }
+        let orig_ident = self.orig.ident;
+        let proj_pat = Group::new(delim, proj_pat);
+        let proj_pat = quote!(#orig_ident #variant #proj_pat);
 
-        let proj_pat = surround(delim, proj_pat);
-        let proj_body = surround(delim, proj_body);
-        let proj_fields = surround(delim, proj_fields);
-        let proj_ref_fields = surround(delim, proj_ref_fields);
-        let proj_own_fields = surround(delim, proj_own_fields);
+        let proj_body = Group::new(delim, proj_body);
+        let proj_body = quote!(#variant #proj_body);
 
         let proj_move = Group::new(delim, proj_move);
-        let proj_own_body = self.proj_own_body(variant_ident, Some(proj_move), &pinned_bindings);
+        let proj_own_body = self.proj_own_body(variant, Some(proj_move), &pinned_bindings);
 
         Ok(ProjectedFields {
             proj_pat,
             proj_body,
             proj_own_body,
-            proj_fields,
-            proj_ref_fields,
-            proj_own_fields,
+            proj_fields: Some(Group::new(delim, proj_fields)),
+            proj_ref_fields: Some(Group::new(delim, proj_ref_fields)),
+            proj_own_fields: Some(Group::new(delim, proj_own_fields)),
         })
     }
 
     /// Generates the processing that `project_replace` does for the struct or each variant.
     fn proj_own_body(
         &self,
-        variant_ident: Option<&'a Ident>,
+        variant: Option<LeadingColon<'_>>,
         proj_move: Option<Group>,
         pinned_fields: &[Ident],
     ) -> TokenStream {
         let ident = &self.proj.own_ident;
-        let proj_own = match variant_ident {
-            Some(variant_ident) => quote!(#ident::#variant_ident),
-            None => quote!(#ident),
-        };
 
         quote! {
             // First, extract all the unpinned fields
-            let __result = #proj_own #proj_move;
+            let __result = #ident #variant #proj_move;
 
             // Destructors will run in reverse order, so next create a guard to overwrite
             // `self` with the replacement value without calling destructors.

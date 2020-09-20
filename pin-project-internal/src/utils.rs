@@ -115,6 +115,17 @@ fn respan_tokens(tokens: TokenStream, span: Span) -> TokenStream {
         .collect()
 }
 
+/// An ident starting with `::`.
+#[derive(Clone, Copy)]
+pub(crate) struct LeadingColon<'a>(pub(crate) &'a Ident);
+
+impl ToTokens for LeadingColon<'_> {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        Token![::](self.0.span()).to_tokens(tokens);
+        self.0.to_tokens(tokens);
+    }
+}
+
 // =================================================================================================
 // extension traits
 
