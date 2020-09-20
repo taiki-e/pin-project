@@ -55,10 +55,11 @@ const _: () = {
             self: ::pin_project::__private::Pin<&'pin mut Self>,
         ) -> __StructProjection<'pin, T, U> {
             unsafe {
-                let Self { pinned, unpinned } = self.get_unchecked_mut();
-                __StructProjection {
-                    pinned: ::pin_project::__private::Pin::new_unchecked(pinned),
-                    unpinned,
+                match self.get_unchecked_mut() {
+                    Struct { pinned, unpinned } => __StructProjection {
+                        pinned: ::pin_project::__private::Pin::new_unchecked(pinned),
+                        unpinned,
+                    },
                 }
             }
         }
@@ -66,10 +67,11 @@ const _: () = {
             self: ::pin_project::__private::Pin<&'pin Self>,
         ) -> __StructProjectionRef<'pin, T, U> {
             unsafe {
-                let Self { pinned, unpinned } = self.get_ref();
-                __StructProjectionRef {
-                    pinned: ::pin_project::__private::Pin::new_unchecked(pinned),
-                    unpinned,
+                match self.get_ref() {
+                    Struct { pinned, unpinned } => __StructProjectionRef {
+                        pinned: ::pin_project::__private::Pin::new_unchecked(pinned),
+                        unpinned,
+                    },
                 }
             }
         }
@@ -79,19 +81,22 @@ const _: () = {
         ) -> __StructProjectionOwned<T, U> {
             unsafe {
                 let __self_ptr: *mut Self = self.get_unchecked_mut();
-                let Self { pinned, unpinned } = &mut *__self_ptr;
-                let __result = __StructProjectionOwned {
-                    pinned: ::pin_project::__private::PhantomData,
-                    unpinned: ::pin_project::__private::ptr::read(unpinned),
-                };
-                let __guard = ::pin_project::__private::UnsafeOverwriteGuard {
-                    target: __self_ptr,
-                    value: ::pin_project::__private::ManuallyDrop::new(__replacement),
-                };
-                {
-                    let __guard = ::pin_project::__private::UnsafeDropInPlaceGuard(pinned);
+                match &mut *__self_ptr {
+                    Struct { pinned, unpinned } => {
+                        let __result = __StructProjectionOwned {
+                            pinned: ::pin_project::__private::PhantomData,
+                            unpinned: ::pin_project::__private::ptr::read(unpinned),
+                        };
+                        let __guard = ::pin_project::__private::UnsafeOverwriteGuard {
+                            target: __self_ptr,
+                            value: ::pin_project::__private::ManuallyDrop::new(__replacement),
+                        };
+                        {
+                            let __guard = ::pin_project::__private::UnsafeDropInPlaceGuard(pinned);
+                        }
+                        __result
+                    }
                 }
-                __result
             }
         }
     }

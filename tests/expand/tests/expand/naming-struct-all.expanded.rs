@@ -53,10 +53,11 @@ const _: () = {
     impl<T, U> Struct<T, U> {
         fn project<'pin>(self: ::pin_project::__private::Pin<&'pin mut Self>) -> Proj<'pin, T, U> {
             unsafe {
-                let Self { pinned, unpinned } = self.get_unchecked_mut();
-                Proj {
-                    pinned: ::pin_project::__private::Pin::new_unchecked(pinned),
-                    unpinned,
+                match self.get_unchecked_mut() {
+                    Struct { pinned, unpinned } => Proj {
+                        pinned: ::pin_project::__private::Pin::new_unchecked(pinned),
+                        unpinned,
+                    },
                 }
             }
         }
@@ -64,10 +65,11 @@ const _: () = {
             self: ::pin_project::__private::Pin<&'pin Self>,
         ) -> ProjRef<'pin, T, U> {
             unsafe {
-                let Self { pinned, unpinned } = self.get_ref();
-                ProjRef {
-                    pinned: ::pin_project::__private::Pin::new_unchecked(pinned),
-                    unpinned,
+                match self.get_ref() {
+                    Struct { pinned, unpinned } => ProjRef {
+                        pinned: ::pin_project::__private::Pin::new_unchecked(pinned),
+                        unpinned,
+                    },
                 }
             }
         }
@@ -77,19 +79,22 @@ const _: () = {
         ) -> ProjOwn<T, U> {
             unsafe {
                 let __self_ptr: *mut Self = self.get_unchecked_mut();
-                let Self { pinned, unpinned } = &mut *__self_ptr;
-                let __result = ProjOwn {
-                    pinned: ::pin_project::__private::PhantomData,
-                    unpinned: ::pin_project::__private::ptr::read(unpinned),
-                };
-                let __guard = ::pin_project::__private::UnsafeOverwriteGuard {
-                    target: __self_ptr,
-                    value: ::pin_project::__private::ManuallyDrop::new(__replacement),
-                };
-                {
-                    let __guard = ::pin_project::__private::UnsafeDropInPlaceGuard(pinned);
+                match &mut *__self_ptr {
+                    Struct { pinned, unpinned } => {
+                        let __result = ProjOwn {
+                            pinned: ::pin_project::__private::PhantomData,
+                            unpinned: ::pin_project::__private::ptr::read(unpinned),
+                        };
+                        let __guard = ::pin_project::__private::UnsafeOverwriteGuard {
+                            target: __self_ptr,
+                            value: ::pin_project::__private::ManuallyDrop::new(__replacement),
+                        };
+                        {
+                            let __guard = ::pin_project::__private::UnsafeDropInPlaceGuard(pinned);
+                        }
+                        __result
+                    }
                 }
-                __result
             }
         }
     }

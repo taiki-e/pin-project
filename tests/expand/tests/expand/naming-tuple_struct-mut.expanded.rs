@@ -34,16 +34,23 @@ const _: () = {
     impl<T, U> TupleStruct<T, U> {
         fn project<'pin>(self: ::pin_project::__private::Pin<&'pin mut Self>) -> Proj<'pin, T, U> {
             unsafe {
-                let Self(_0, _1) = self.get_unchecked_mut();
-                Proj(::pin_project::__private::Pin::new_unchecked(_0), _1)
+                match self.get_unchecked_mut() {
+                    TupleStruct(_0, _1) => {
+                        Proj(::pin_project::__private::Pin::new_unchecked(_0), _1)
+                    }
+                }
             }
         }
         fn project_ref<'pin>(
             self: ::pin_project::__private::Pin<&'pin Self>,
         ) -> __TupleStructProjectionRef<'pin, T, U> {
             unsafe {
-                let Self(_0, _1) = self.get_ref();
-                __TupleStructProjectionRef(::pin_project::__private::Pin::new_unchecked(_0), _1)
+                match self.get_ref() {
+                    TupleStruct(_0, _1) => __TupleStructProjectionRef(
+                        ::pin_project::__private::Pin::new_unchecked(_0),
+                        _1,
+                    ),
+                }
             }
         }
     }

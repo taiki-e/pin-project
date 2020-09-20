@@ -46,16 +46,24 @@ const _: () = {
             self: ::pin_project::__private::Pin<&'pin mut Self>,
         ) -> __TupleStructProjection<'pin, T, U> {
             unsafe {
-                let Self(_0, _1) = self.get_unchecked_mut();
-                __TupleStructProjection(::pin_project::__private::Pin::new_unchecked(_0), _1)
+                match self.get_unchecked_mut() {
+                    TupleStruct(_0, _1) => __TupleStructProjection(
+                        ::pin_project::__private::Pin::new_unchecked(_0),
+                        _1,
+                    ),
+                }
             }
         }
         fn project_ref<'pin>(
             self: ::pin_project::__private::Pin<&'pin Self>,
         ) -> __TupleStructProjectionRef<'pin, T, U> {
             unsafe {
-                let Self(_0, _1) = self.get_ref();
-                __TupleStructProjectionRef(::pin_project::__private::Pin::new_unchecked(_0), _1)
+                match self.get_ref() {
+                    TupleStruct(_0, _1) => __TupleStructProjectionRef(
+                        ::pin_project::__private::Pin::new_unchecked(_0),
+                        _1,
+                    ),
+                }
             }
         }
         fn project_replace(
@@ -64,19 +72,22 @@ const _: () = {
         ) -> __TupleStructProjectionOwned<T, U> {
             unsafe {
                 let __self_ptr: *mut Self = self.get_unchecked_mut();
-                let Self(_0, _1) = &mut *__self_ptr;
-                let __result = __TupleStructProjectionOwned(
-                    ::pin_project::__private::PhantomData,
-                    ::pin_project::__private::ptr::read(_1),
-                );
-                let __guard = ::pin_project::__private::UnsafeOverwriteGuard {
-                    target: __self_ptr,
-                    value: ::pin_project::__private::ManuallyDrop::new(__replacement),
-                };
-                {
-                    let __guard = ::pin_project::__private::UnsafeDropInPlaceGuard(_0);
+                match &mut *__self_ptr {
+                    TupleStruct(_0, _1) => {
+                        let __result = __TupleStructProjectionOwned(
+                            ::pin_project::__private::PhantomData,
+                            ::pin_project::__private::ptr::read(_1),
+                        );
+                        let __guard = ::pin_project::__private::UnsafeOverwriteGuard {
+                            target: __self_ptr,
+                            value: ::pin_project::__private::ManuallyDrop::new(__replacement),
+                        };
+                        {
+                            let __guard = ::pin_project::__private::UnsafeDropInPlaceGuard(_0);
+                        }
+                        __result
+                    }
                 }
-                __result
             }
         }
     }

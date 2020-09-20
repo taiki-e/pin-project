@@ -45,10 +45,11 @@ const _: () = {
             self: ::pin_project::__private::Pin<&'pin mut Self>,
         ) -> __StructProjection<'pin, T, U> {
             unsafe {
-                let Self { pinned, unpinned } = self.get_unchecked_mut();
-                __StructProjection {
-                    pinned: ::pin_project::__private::Pin::new_unchecked(pinned),
-                    unpinned,
+                match self.get_unchecked_mut() {
+                    Struct { pinned, unpinned } => __StructProjection {
+                        pinned: ::pin_project::__private::Pin::new_unchecked(pinned),
+                        unpinned,
+                    },
                 }
             }
         }
@@ -56,10 +57,11 @@ const _: () = {
             self: ::pin_project::__private::Pin<&'pin Self>,
         ) -> ProjRef<'pin, T, U> {
             unsafe {
-                let Self { pinned, unpinned } = self.get_ref();
-                ProjRef {
-                    pinned: ::pin_project::__private::Pin::new_unchecked(pinned),
-                    unpinned,
+                match self.get_ref() {
+                    Struct { pinned, unpinned } => ProjRef {
+                        pinned: ::pin_project::__private::Pin::new_unchecked(pinned),
+                        unpinned,
+                    },
                 }
             }
         }

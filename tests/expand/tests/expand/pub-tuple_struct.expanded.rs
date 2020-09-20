@@ -39,16 +39,24 @@ const _: () = {
             self: ::pin_project::__private::Pin<&'pin mut Self>,
         ) -> __TupleStructProjection<'pin, T, U> {
             unsafe {
-                let Self(_0, _1) = self.get_unchecked_mut();
-                __TupleStructProjection(::pin_project::__private::Pin::new_unchecked(_0), _1)
+                match self.get_unchecked_mut() {
+                    TupleStruct(_0, _1) => __TupleStructProjection(
+                        ::pin_project::__private::Pin::new_unchecked(_0),
+                        _1,
+                    ),
+                }
             }
         }
         pub(crate) fn project_ref<'pin>(
             self: ::pin_project::__private::Pin<&'pin Self>,
         ) -> __TupleStructProjectionRef<'pin, T, U> {
             unsafe {
-                let Self(_0, _1) = self.get_ref();
-                __TupleStructProjectionRef(::pin_project::__private::Pin::new_unchecked(_0), _1)
+                match self.get_ref() {
+                    TupleStruct(_0, _1) => __TupleStructProjectionRef(
+                        ::pin_project::__private::Pin::new_unchecked(_0),
+                        _1,
+                    ),
+                }
             }
         }
     }

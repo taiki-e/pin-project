@@ -457,18 +457,16 @@ struct ProjectedType {
 }
 
 struct ProjectedVariants {
-    proj_variants: TokenStream,
+    proj_mut_variants: TokenStream,
     proj_ref_variants: TokenStream,
     proj_own_variants: TokenStream,
-    proj_arms: TokenStream,
-    proj_ref_arms: TokenStream,
-    proj_own_arms: TokenStream,
+    proj_impl: TokenStream,
 }
 
 struct ProjectedFields {
-    proj_pat: TokenStream,
-    proj_body: TokenStream,
-    proj_own_body: TokenStream,
+    proj_mut_arm: TokenStream,
+    proj_ref_arm: TokenStream,
+    proj_own_arm: TokenStream,
     proj_fields: Option<Group>,
     proj_ref_fields: Option<Group>,
     proj_own_fields: Option<Group>,
@@ -477,10 +475,21 @@ struct ProjectedFields {
 impl ProjectedFields {
     fn unit(cx: &Context<'_>, variant: LeadingColon<'_>) -> Self {
         let orig_ident = cx.orig.ident;
+        let proj_mut_ident = &cx.proj.mut_ident;
+        let proj_ref_ident = &cx.proj.ref_ident;
+        let proj_pat = quote!(#orig_ident #variant);
+        let proj_body = variant.to_token_stream();
+        let proj_own_body = cx.proj_own_body(Some(variant), None, &[]);
         Self {
-            proj_pat: quote!(#orig_ident #variant),
-            proj_body: variant.to_token_stream(),
-            proj_own_body: cx.proj_own_body(Some(variant), None, &[]),
+            proj_mut_arm: quote! {
+                #proj_pat => { #proj_mut_ident #proj_body }
+            },
+            proj_ref_arm: quote! {
+                #proj_pat => { #proj_ref_ident #proj_body }
+            },
+            proj_own_arm: quote! {
+                #proj_pat => { #proj_own_body }
+            },
             proj_fields: None,
             proj_ref_fields: None,
             proj_own_fields: None,
@@ -575,12 +584,12 @@ impl<'a> Context<'a> {
         validate_struct(self.orig.ident, fields)?;
 
         let ProjectedFields {
-            proj_pat,
-            proj_body,
+            proj_mut_arm,
+            proj_ref_arm,
+            proj_own_arm,
             proj_fields,
             proj_ref_fields,
             proj_own_fields,
-            proj_own_body,
         } = match fields {
             Fields::Named(_) => self.visit_fields(None, fields, Delimiter::Brace)?,
             Fields::Unnamed(_) => self.visit_fields(None, fields, Delimiter::Parenthesis)?,
@@ -628,23 +637,8 @@ impl<'a> Context<'a> {
             });
         }
 
-        let proj_mut_body = quote! {
-            let #proj_pat = self.get_unchecked_mut();
-            #proj_ident #proj_body
-        };
-        let proj_ref_body = quote! {
-            let #proj_pat = self.get_ref();
-            #proj_ref_ident #proj_body
-        };
-        let proj_own_body = quote! {
-            let __self_ptr: *mut Self = self.get_unchecked_mut();
-            let #proj_pat = &mut *__self_ptr;
-            #proj_own_body
-        };
-        generate.extend(
-            false,
-            self.make_proj_impl(false, &proj_mut_body, &proj_ref_body, &proj_own_body),
-        );
+        generate
+            .extend(false, self.make_proj_impl(false, proj_mut_arm, proj_ref_arm, proj_own_arm));
 
         Ok(())
     }
@@ -664,12 +658,10 @@ impl<'a> Context<'a> {
         validate_enum(*brace_token, variants)?;
 
         let ProjectedVariants {
-            proj_variants,
+            proj_mut_variants,
             proj_ref_variants,
             proj_own_variants,
-            proj_arms,
-            proj_ref_arms,
-            proj_own_arms,
+            proj_impl,
         } = self.visit_variants(variants)?;
 
         let proj_ident = &self.proj.mut_ident;
@@ -686,7 +678,7 @@ impl<'a> Context<'a> {
             generate.extend(true, quote! {
                 #proj_attrs
                 #vis enum #proj_ident #proj_generics #proj_where_clause {
-                    #proj_variants
+                    #proj_mut_variants
                 }
             });
         }
@@ -707,35 +699,16 @@ impl<'a> Context<'a> {
             });
         }
 
-        let proj_mut_body = quote! {
-            match self.get_unchecked_mut() {
-                #proj_arms
-            }
-        };
-        let proj_ref_body = quote! {
-            match self.get_ref() {
-                #proj_ref_arms
-            }
-        };
-        let proj_own_body = quote! {
-            let __self_ptr: *mut Self = self.get_unchecked_mut();
-            match &mut *__self_ptr {
-                #proj_own_arms
-            }
-        };
-        generate.extend(
-            false,
-            self.make_proj_impl(true, &proj_mut_body, &proj_ref_body, &proj_own_body),
-        );
+        generate.extend(false, proj_impl);
 
         Ok(())
     }
 
     fn visit_variants(&mut self, variants: &Variants) -> Result<ProjectedVariants> {
-        let mut proj_variants = TokenStream::new();
+        let mut proj_mut_variants = TokenStream::new();
         let mut proj_ref_variants = TokenStream::new();
         let mut proj_own_variants = TokenStream::new();
-        let mut proj_arms = TokenStream::new();
+        let mut proj_mut_arms = TokenStream::new();
         let mut proj_ref_arms = TokenStream::new();
         let mut proj_own_arms = TokenStream::new();
 
@@ -743,12 +716,12 @@ impl<'a> Context<'a> {
             let variant = LeadingColon(ident);
 
             let ProjectedFields {
-                proj_pat,
-                proj_body,
+                proj_mut_arm,
+                proj_ref_arm,
+                proj_own_arm,
                 proj_fields,
                 proj_ref_fields,
                 proj_own_fields,
-                proj_own_body,
             } = match fields {
                 Fields::Named(_) => self.visit_fields(Some(variant), fields, Delimiter::Brace)?,
                 Fields::Unnamed(_) => {
@@ -757,37 +730,18 @@ impl<'a> Context<'a> {
                 Fields::Unit => ProjectedFields::unit(self, variant),
             };
 
-            let proj_ident = &self.proj.mut_ident;
-            let proj_ref_ident = &self.proj.ref_ident;
-            proj_variants.extend(quote! {
-                #ident #proj_fields,
-            });
-            proj_ref_variants.extend(quote! {
-                #ident #proj_ref_fields,
-            });
-            proj_own_variants.extend(quote! {
-                #ident #proj_own_fields,
-            });
+            proj_mut_variants.extend(quote!(#ident #proj_fields,));
+            proj_ref_variants.extend(quote!(#ident #proj_ref_fields,));
+            proj_own_variants.extend(quote!(#ident #proj_own_fields,));
 
-            proj_arms.extend(quote! {
-                #proj_pat => { #proj_ident #proj_body }
-            });
-            proj_ref_arms.extend(quote! {
-                #proj_pat => { #proj_ref_ident #proj_body }
-            });
-            proj_own_arms.extend(quote! {
-                #proj_pat => { #proj_own_body }
-            });
+            proj_mut_arms.extend(proj_mut_arm);
+            proj_ref_arms.extend(proj_ref_arm);
+            proj_own_arms.extend(proj_own_arm);
         }
 
-        Ok(ProjectedVariants {
-            proj_variants,
-            proj_ref_variants,
-            proj_own_variants,
-            proj_arms,
-            proj_ref_arms,
-            proj_own_arms,
-        })
+        let proj_impl = self.make_proj_impl(true, proj_mut_arms, proj_ref_arms, proj_own_arms);
+
+        Ok(ProjectedVariants { proj_mut_variants, proj_ref_variants, proj_own_variants, proj_impl })
     }
 
     fn visit_fields(
@@ -848,6 +802,8 @@ impl<'a> Context<'a> {
         }
 
         let orig_ident = self.orig.ident;
+        let proj_mut_ident = &self.proj.mut_ident;
+        let proj_ref_ident = &self.proj.ref_ident;
         let proj_pat = Group::new(delim, proj_pat);
         let proj_pat = quote!(#orig_ident #variant #proj_pat);
 
@@ -858,9 +814,15 @@ impl<'a> Context<'a> {
         let proj_own_body = self.proj_own_body(variant, Some(proj_move), &pinned_bindings);
 
         Ok(ProjectedFields {
-            proj_pat,
-            proj_body,
-            proj_own_body,
+            proj_mut_arm: quote! {
+                #proj_pat => { #proj_mut_ident #proj_body }
+            },
+            proj_ref_arm: quote! {
+                #proj_pat => { #proj_ref_ident #proj_body }
+            },
+            proj_own_arm: quote! {
+                #proj_pat => { #proj_own_body }
+            },
             proj_fields: Some(Group::new(delim, proj_fields)),
             proj_ref_fields: Some(Group::new(delim, proj_ref_fields)),
             proj_own_fields: Some(Group::new(delim, proj_own_fields)),
@@ -1154,9 +1116,9 @@ impl<'a> Context<'a> {
     fn make_proj_impl(
         &self,
         is_enum: bool,
-        proj_body: &TokenStream,
-        proj_ref_body: &TokenStream,
-        proj_own_body: &TokenStream,
+        proj_mut_arms: TokenStream,
+        proj_ref_arms: TokenStream,
+        proj_own_arms: TokenStream,
     ) -> TokenStream {
         let vis = &self.proj.vis;
         let lifetime = &self.proj.lifetime;
@@ -1174,7 +1136,9 @@ impl<'a> Context<'a> {
                 self: ::pin_project::__private::Pin<&#lifetime mut Self>,
             ) -> #proj_ident #proj_ty_generics {
                 unsafe {
-                    #proj_body
+                    match self.get_unchecked_mut() {
+                        #proj_mut_arms
+                    }
                 }
             }
         });
@@ -1183,7 +1147,9 @@ impl<'a> Context<'a> {
                 self: ::pin_project::__private::Pin<&#lifetime Self>,
             ) -> #proj_ref_ident #proj_ty_generics {
                 unsafe {
-                    #proj_ref_body
+                    match self.get_ref() {
+                        #proj_ref_arms
+                    }
                 }
             }
         });
@@ -1201,7 +1167,10 @@ impl<'a> Context<'a> {
             quote! {
                 #sig {
                     #unsafety {
-                        #proj_own_body
+                        let __self_ptr: *mut Self = self.get_unchecked_mut();
+                        match &mut *__self_ptr {
+                            #proj_own_arms
+                        }
                     }
                 }
             }
