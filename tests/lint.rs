@@ -23,7 +23,6 @@
     trivial_numeric_casts,
     unaligned_references,
     unreachable_pub,
-    unstable_features,
     unused_extern_crates,
     unused_import_braces,
     unused_lifetimes,
@@ -34,6 +33,7 @@
 // unused_crate_dependencies: unrelated
 // unsafe_code: checked in forbid_unsafe module
 // unsafe_block_in_unsafe_fn: unstable
+// unstable_features: deprecated: https://doc.rust-lang.org/beta/rustc/lints/listing/allowed-by-default.html#unstable-features
 #![warn(clippy::all, clippy::pedantic, clippy::nursery)]
 #![warn(clippy::restriction)]
 #![allow(clippy::blanket_clippy_restriction_lints)] // this is a test, so enable all restriction lints intentionally.
