@@ -10,9 +10,12 @@ enum Enum<T, U> {
     Unit,
 }
 #[allow(dead_code)]
+#[allow(unreachable_pub)]
+#[allow(clippy::large_enum_variant)]
+#[allow(box_pointers)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
-#[allow(unreachable_pub)]
+#[allow(clippy::pattern_type_mismatch)]
 enum EnumProjOwn<T, U> {
     Struct {
         pinned: ::pin_project::__private::PhantomData<T>,
@@ -23,9 +26,11 @@ enum EnumProjOwn<T, U> {
 }
 #[doc(hidden)]
 #[allow(non_upper_case_globals)]
+#[allow(clippy::used_underscore_binding)]
+#[allow(box_pointers)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
-#[allow(clippy::used_underscore_binding)]
+#[allow(clippy::pattern_type_mismatch)]
 const _: () = {
     impl<T, U> Enum<T, U> {
         fn project_replace(

@@ -10,10 +10,12 @@ enum Enum<T, U> {
     Unit,
 }
 #[allow(dead_code)]
-#[allow(explicit_outlives_requirements)]
-#[allow(single_use_lifetimes)]
 #[allow(clippy::mut_mut)]
 #[allow(clippy::type_repetition_in_bounds)]
+#[allow(box_pointers)]
+#[allow(explicit_outlives_requirements)]
+#[allow(single_use_lifetimes)]
+#[allow(clippy::pattern_type_mismatch)]
 enum Proj<'pin, T, U>
 where
     Enum<T, U>: 'pin,
@@ -27,9 +29,11 @@ where
 }
 #[doc(hidden)]
 #[allow(non_upper_case_globals)]
+#[allow(clippy::used_underscore_binding)]
+#[allow(box_pointers)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
-#[allow(clippy::used_underscore_binding)]
+#[allow(clippy::pattern_type_mismatch)]
 const _: () = {
     impl<T, U> Enum<T, U> {
         fn project<'pin>(self: ::pin_project::__private::Pin<&'pin mut Self>) -> Proj<'pin, T, U> {

@@ -2,23 +2,29 @@ use pin_project::pin_project;
 # [pin (__private (project_ref = ProjRef))]
 struct TupleStruct<T, U>(#[pin] T, U);
 #[allow(dead_code)]
+#[allow(clippy::type_repetition_in_bounds)]
+#[allow(box_pointers)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
-#[allow(clippy::type_repetition_in_bounds)]
+#[allow(clippy::pattern_type_mismatch)]
 struct ProjRef<'pin, T, U>(::pin_project::__private::Pin<&'pin (T)>, &'pin (U))
 where
     TupleStruct<T, U>: 'pin;
 #[doc(hidden)]
 #[allow(non_upper_case_globals)]
+#[allow(clippy::used_underscore_binding)]
+#[allow(box_pointers)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
-#[allow(clippy::used_underscore_binding)]
+#[allow(clippy::pattern_type_mismatch)]
 const _: () = {
     #[allow(dead_code)]
-    #[allow(explicit_outlives_requirements)]
-    #[allow(single_use_lifetimes)]
     #[allow(clippy::mut_mut)]
     #[allow(clippy::type_repetition_in_bounds)]
+    #[allow(box_pointers)]
+    #[allow(explicit_outlives_requirements)]
+    #[allow(single_use_lifetimes)]
+    #[allow(clippy::pattern_type_mismatch)]
     struct __TupleStructProjection<'pin, T, U>(
         ::pin_project::__private::Pin<&'pin mut (T)>,
         &'pin mut (U),
