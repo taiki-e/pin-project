@@ -61,6 +61,28 @@ pub mod box_pointers {
         pub p: Box<isize>,
         pub u: Box<isize>,
     }
+
+    #[allow(box_pointers)] // for the type itself
+    #[pin_project(project_replace)]
+    #[derive(Debug)]
+    pub struct TupleStruct(#[pin] pub Box<isize>, pub Box<isize>);
+
+    #[allow(box_pointers)] // for the type itself
+    #[pin_project(
+        project = EnumProj,
+        project_ref = EnumProjRef,
+        project_replace = EnumProjOwn,
+    )]
+    #[derive(Debug)]
+    pub enum Enum {
+        Struct {
+            #[pin]
+            p: Box<isize>,
+            u: Box<isize>,
+        },
+        Tuple(#[pin] Box<isize>, Box<isize>),
+        Unit,
+    }
 }
 
 pub mod explicit_outlives_requirements {
