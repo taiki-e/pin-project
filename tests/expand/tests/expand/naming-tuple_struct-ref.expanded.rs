@@ -72,9 +72,9 @@ const _: () = {
         unsafe fn drop(self: ::pin_project::__private::Pin<&mut Self>) {}
     }
     #[deny(safe_packed_borrows)]
-    fn __assert_not_repr_packed<T, U>(val: &TupleStruct<T, U>) {
-        &val.0;
-        &val.1;
+    fn __assert_not_repr_packed<T, U>(this: &TupleStruct<T, U>) {
+        let _ = &this.0;
+        let _ = &this.1;
     }
 };
 fn main() {}

@@ -1302,13 +1302,13 @@ impl<'a> Context<'a> {
         match fields {
             Fields::Named(FieldsNamed { named, .. }) => {
                 for Field { ident, .. } in named {
-                    field_refs.push(quote!(&val.#ident;));
+                    field_refs.push(quote!(&this.#ident));
                 }
             }
             Fields::Unnamed(FieldsUnnamed { unnamed, .. }) => {
                 for (index, _) in unnamed.iter().enumerate() {
                     let index = Index::from(index);
-                    field_refs.push(quote!(&val.#index;));
+                    field_refs.push(quote!(&this.#index));
                 }
             }
             Fields::Unit => {}
@@ -1318,8 +1318,8 @@ impl<'a> Context<'a> {
         let ident = self.orig.ident;
         Ok(quote! {
             #[deny(safe_packed_borrows)]
-            fn __assert_not_repr_packed #impl_generics (val: &#ident #ty_generics) #where_clause {
-                #(#field_refs)*
+            fn __assert_not_repr_packed #impl_generics (this: &#ident #ty_generics) #where_clause {
+                #(let _ = #field_refs;)*
             }
         })
     }
