@@ -159,7 +159,7 @@ fn where_clause() {
         T: Copy;
 
     #[pin_project(project = EnumProj, project_ref = EnumProjRef, project_replace = EnumProjOwn)]
-    enum EnumWhere<T>
+    enum Enum<T>
     where
         T: Copy,
     {
@@ -325,14 +325,14 @@ fn overlapping_lifetime_names() {
         f: &'pin &'pin_ &'pin__ (),
     }
 
-    pub trait A<'a> {}
+    pub trait Trait<'a> {}
 
     #[allow(single_use_lifetimes)] // https://github.com/rust-lang/rust/issues/55058
     #[pin_project(project_replace)]
     pub struct HRTB<'pin___, T>
     where
         for<'pin> &'pin T: Unpin,
-        T: for<'pin> A<'pin>,
+        T: for<'pin> Trait<'pin>,
         for<'pin, 'pin_, 'pin__> &'pin &'pin_ &'pin__ T: Unpin,
     {
         #[pin]

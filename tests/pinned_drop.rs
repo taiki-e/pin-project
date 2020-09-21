@@ -206,20 +206,20 @@ fn self_inside_macro() {
     }
 
     impl<T: Send> Struct<T> {
-        const ASSOCIATED1: &'static str = "1";
-        fn associated1() {}
+        const ASSOC1: &'static str = "1";
+        fn assoc1() {}
     }
 
     trait Trait {
-        type Associated2;
-        const ASSOCIATED2: &'static str;
-        fn associated2();
+        type Assoc2;
+        const ASSOC2: &'static str;
+        fn assoc2();
     }
 
     impl<T: Send> Trait for Struct<T> {
-        type Associated2 = ();
-        const ASSOCIATED2: &'static str = "2";
-        fn associated2() {}
+        type Assoc2 = ();
+        const ASSOC2: &'static str = "2";
+        fn assoc2() {}
     }
 
     #[pinned_drop]
@@ -231,19 +231,19 @@ fn self_inside_macro() {
         #[allow(clippy::no_effect)]
         fn drop(self: Pin<&mut Self>) {
             // inherent items
-            mac!(Self::ASSOCIATED1;);
-            mac!(<Self>::ASSOCIATED1;);
-            mac!(Self::associated1(););
-            mac!(<Self>::associated1(););
+            mac!(Self::ASSOC1;);
+            mac!(<Self>::ASSOC1;);
+            mac!(Self::assoc1(););
+            mac!(<Self>::assoc1(););
 
             // trait items
-            mac!(let _: <Self as Trait>::Associated2;);
-            mac!(Self::ASSOCIATED2;);
-            mac!(<Self>::ASSOCIATED2;);
-            mac!(<Self as Trait>::ASSOCIATED2;);
-            mac!(Self::associated2(););
-            mac!(<Self>::associated2(););
-            mac!(<Self as Trait>::associated2(););
+            mac!(let _: <Self as Trait>::Assoc2;);
+            mac!(Self::ASSOC2;);
+            mac!(<Self>::ASSOC2;);
+            mac!(<Self as Trait>::ASSOC2;);
+            mac!(Self::assoc2(););
+            mac!(<Self>::assoc2(););
+            mac!(<Self as Trait>::assoc2(););
         }
     }
 }
