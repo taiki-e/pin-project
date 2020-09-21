@@ -22,11 +22,11 @@
 // ```
 
 #![allow(dead_code, unused_imports, unused_parens)]
-#![allow(clippy::no_effect)]
 
 use pin_project::{pin_project, pinned_drop};
 use std::pin::Pin;
 
+// #[pin_project(PinnedDrop)]
 pub struct Struct<'a, T> {
     was_dropped: &'a mut bool,
     // #[pin]
@@ -35,13 +35,19 @@ pub struct Struct<'a, T> {
 
 #[doc(hidden)]
 #[allow(non_upper_case_globals)]
-#[allow(single_use_lifetimes)]
 #[allow(clippy::used_underscore_binding)]
+#[allow(box_pointers)]
+#[allow(explicit_outlives_requirements)]
+#[allow(single_use_lifetimes)]
+#[allow(clippy::pattern_type_mismatch)]
 const _: () = {
     #[allow(dead_code)]
-    #[allow(single_use_lifetimes)]
     #[allow(clippy::mut_mut)]
     #[allow(clippy::type_repetition_in_bounds)]
+    #[allow(box_pointers)]
+    #[allow(explicit_outlives_requirements)]
+    #[allow(single_use_lifetimes)]
+    #[allow(clippy::pattern_type_mismatch)]
     pub(crate) struct __StructProjection<'pin, 'a, T>
     where
         Struct<'a, T>: 'pin,
@@ -50,8 +56,11 @@ const _: () = {
         field: ::pin_project::__private::Pin<&'pin mut (T)>,
     }
     #[allow(dead_code)]
-    #[allow(single_use_lifetimes)]
     #[allow(clippy::type_repetition_in_bounds)]
+    #[allow(box_pointers)]
+    #[allow(explicit_outlives_requirements)]
+    #[allow(single_use_lifetimes)]
+    #[allow(clippy::pattern_type_mismatch)]
     pub(crate) struct __StructProjectionRef<'pin, 'a, T>
     where
         Struct<'a, T>: 'pin,
@@ -120,9 +129,9 @@ const _: () = {
     // See ./struct-default-expanded.rs and https://github.com/taiki-e/pin-project/pull/34
     // for details.
     #[deny(safe_packed_borrows)]
-    fn __assert_not_repr_packed<'a, T>(val: &Struct<'a, T>) {
-        &val.was_dropped;
-        &val.field;
+    fn __assert_not_repr_packed<'a, T>(this: &Struct<'a, T>) {
+        let _ = &this.was_dropped;
+        let _ = &this.field;
     }
 };
 

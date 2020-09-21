@@ -18,10 +18,10 @@
 // ```
 
 #![allow(dead_code, unused_imports, unused_parens)]
-#![allow(clippy::no_effect)]
 
 use pin_project::{pin_project, UnsafeUnpin};
 
+// #[pin_project(UnsafeUnpin)]
 pub struct Struct<T, U> {
     // #[pin]
     pinned: T,
@@ -30,13 +30,19 @@ pub struct Struct<T, U> {
 
 #[doc(hidden)]
 #[allow(non_upper_case_globals)]
-#[allow(single_use_lifetimes)]
 #[allow(clippy::used_underscore_binding)]
+#[allow(box_pointers)]
+#[allow(explicit_outlives_requirements)]
+#[allow(single_use_lifetimes)]
+#[allow(clippy::pattern_type_mismatch)]
 const _: () = {
     #[allow(dead_code)]
-    #[allow(single_use_lifetimes)]
     #[allow(clippy::mut_mut)]
     #[allow(clippy::type_repetition_in_bounds)]
+    #[allow(box_pointers)]
+    #[allow(explicit_outlives_requirements)]
+    #[allow(single_use_lifetimes)]
+    #[allow(clippy::pattern_type_mismatch)]
     pub(crate) struct __StructProjection<'pin, T, U>
     where
         Struct<T, U>: 'pin,
@@ -45,8 +51,11 @@ const _: () = {
         unpinned: &'pin mut (U),
     }
     #[allow(dead_code)]
-    #[allow(single_use_lifetimes)]
     #[allow(clippy::type_repetition_in_bounds)]
+    #[allow(box_pointers)]
+    #[allow(explicit_outlives_requirements)]
+    #[allow(single_use_lifetimes)]
+    #[allow(clippy::pattern_type_mismatch)]
     pub(crate) struct __StructProjectionRef<'pin, T, U>
     where
         Struct<T, U>: 'pin,
@@ -102,9 +111,9 @@ const _: () = {
     // See ./struct-default-expanded.rs and https://github.com/taiki-e/pin-project/pull/34
     // for details.
     #[deny(safe_packed_borrows)]
-    fn __assert_not_repr_packed<T, U>(val: &Struct<T, U>) {
-        &val.pinned;
-        &val.unpinned;
+    fn __assert_not_repr_packed<T, U>(this: &Struct<T, U>) {
+        let _ = &this.pinned;
+        let _ = &this.unpinned;
     }
 };
 
