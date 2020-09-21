@@ -111,6 +111,7 @@ impl GenerateTokens {
         } else {
             format_ident!("__SCOPE_{}", cx.orig.ident)
         };
+        let allowed_lints = global_allowed_lints();
 
         tokens.extend(quote! {
             // All items except projected types are generated inside a `const` scope.
@@ -129,9 +130,8 @@ impl GenerateTokens {
             // * https://github.com/taiki-e/pin-project/pull/70
             #[doc(hidden)] // for Rust 1.34 - 1.41
             #[allow(non_upper_case_globals)] // for Rust 1.34 - 1.36
-            #[allow(explicit_outlives_requirements)] // https://github.com/rust-lang/rust/issues/60993
-            #[allow(single_use_lifetimes)] // https://github.com/rust-lang/rust/issues/55058
             #[allow(clippy::used_underscore_binding)]
+            #allowed_lints
             const #dummy_const: () = {
                 #scoped
                 #unpin_impl
@@ -141,6 +141,41 @@ impl GenerateTokens {
         });
         tokens
     }
+}
+
+/// Returns attributes that should be applied to all generated code.
+fn global_allowed_lints() -> TokenStream {
+    quote! {
+        #[allow(box_pointers)] // This lint warns use of the `Box` type.
+        #[allow(explicit_outlives_requirements)] // https://github.com/rust-lang/rust/issues/60993
+        #[allow(single_use_lifetimes)] // https://github.com/rust-lang/rust/issues/55058
+        #[allow(clippy::pattern_type_mismatch)]
+    }
+}
+
+/// Returns attributes used on projected types.
+fn proj_allowed_lints(is_enum: bool) -> (TokenStream, TokenStream, TokenStream) {
+    let large_enum_variant =
+        if is_enum { Some(quote!(#[allow(clippy::large_enum_variant)])) } else { None };
+    let global_allowed_lints = global_allowed_lints();
+    let proj_mut = quote! {
+        #[allow(dead_code)] // This lint warns unused fields/variants.
+        #[allow(clippy::mut_mut)] // This lint warns `&mut &mut <ty>`.
+        #[allow(clippy::type_repetition_in_bounds)] // https://github.com/rust-lang/rust-clippy/issues/4326}
+        #global_allowed_lints
+    };
+    let proj_ref = quote! {
+        #[allow(dead_code)] // This lint warns unused fields/variants.
+        #[allow(clippy::type_repetition_in_bounds)] // https://github.com/rust-lang/rust-clippy/issues/4326
+        #global_allowed_lints
+    };
+    let proj_own = quote! {
+        #[allow(dead_code)] // This lint warns unused fields/variants.
+        #[allow(unreachable_pub)] // This lint warns `pub` field in private struct.
+        #large_enum_variant
+        #global_allowed_lints
+    };
+    (proj_mut, proj_ref, proj_own)
 }
 
 struct Args {
@@ -564,7 +599,7 @@ impl<'a> Context<'a> {
             Fields::Unit => unreachable!(),
         };
 
-        let (proj_attrs, proj_ref_attrs, proj_own_attrs) = self.proj_attrs();
+        let (proj_attrs, proj_ref_attrs, proj_own_attrs) = proj_allowed_lints(false);
         generate.extend(self.project, quote! {
             #proj_attrs
             #vis struct #proj_ident #proj_generics #where_clause_fields
@@ -633,7 +668,7 @@ impl<'a> Context<'a> {
         let proj_generics = &self.proj.generics;
         let proj_where_clause = &self.proj.where_clause;
 
-        let (proj_attrs, proj_ref_attrs, proj_own_attrs) = self.proj_attrs();
+        let (proj_attrs, proj_ref_attrs, proj_own_attrs) = proj_allowed_lints(true);
         if self.project {
             generate.extend(true, quote! {
                 #proj_attrs
@@ -827,30 +862,6 @@ impl<'a> Context<'a> {
             proj_ref_fields,
             proj_own_fields,
         })
-    }
-
-    /// Returns attributes used on projected types.
-    fn proj_attrs(&self) -> (TokenStream, TokenStream, TokenStream) {
-        let proj_mut = quote! {
-            #[allow(dead_code)] // This lint warns unused fields/variants.
-            #[allow(explicit_outlives_requirements)] // https://github.com/rust-lang/rust/issues/60993
-            #[allow(single_use_lifetimes)] // https://github.com/rust-lang/rust/issues/55058
-            #[allow(clippy::mut_mut)] // This lint warns `&mut &mut <ty>`.
-            #[allow(clippy::type_repetition_in_bounds)] // https://github.com/rust-lang/rust-clippy/issues/4326}
-        };
-        let proj_ref = quote! {
-            #[allow(dead_code)] // This lint warns unused fields/variants.
-            #[allow(explicit_outlives_requirements)] // https://github.com/rust-lang/rust/issues/60993
-            #[allow(single_use_lifetimes)] // https://github.com/rust-lang/rust/issues/55058
-            #[allow(clippy::type_repetition_in_bounds)] // https://github.com/rust-lang/rust-clippy/issues/4326
-        };
-        let proj_own = quote! {
-            #[allow(dead_code)] // This lint warns unused fields/variants.
-            #[allow(explicit_outlives_requirements)] // https://github.com/rust-lang/rust/issues/60993
-            #[allow(single_use_lifetimes)] // https://github.com/rust-lang/rust/issues/55058
-            #[allow(unreachable_pub)] // This lint warns `pub` field in private struct.
-        };
-        (proj_mut, proj_ref, proj_own)
     }
 
     /// Generates the processing that `project_replace` does for the struct or each variant.
@@ -1181,11 +1192,15 @@ impl<'a> Context<'a> {
             // For interoperability with `forbid(unsafe_code)`, `unsafe` token should be
             // call-site span.
             let unsafety = <Token![unsafe]>::default();
-            quote_spanned! { span =>
+            // It is enough to only set the span of the signature.
+            let sig = quote_spanned! { span =>
                 #vis fn project_replace(
                     self: ::pin_project::__private::Pin<&mut Self>,
                     __replacement: Self,
-                ) -> #proj_own_ident #orig_ty_generics {
+                ) -> #proj_own_ident #orig_ty_generics
+            };
+            quote! {
+                #sig {
                     #unsafety {
                         #proj_own_body
                     }

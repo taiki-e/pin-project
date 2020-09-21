@@ -7,15 +7,19 @@ struct Struct<T, U> {
 }
 #[doc(hidden)]
 #[allow(non_upper_case_globals)]
+#[allow(clippy::used_underscore_binding)]
+#[allow(box_pointers)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
-#[allow(clippy::used_underscore_binding)]
+#[allow(clippy::pattern_type_mismatch)]
 const _: () = {
     #[allow(dead_code)]
-    #[allow(explicit_outlives_requirements)]
-    #[allow(single_use_lifetimes)]
     #[allow(clippy::mut_mut)]
     #[allow(clippy::type_repetition_in_bounds)]
+    #[allow(box_pointers)]
+    #[allow(explicit_outlives_requirements)]
+    #[allow(single_use_lifetimes)]
+    #[allow(clippy::pattern_type_mismatch)]
     struct __StructProjection<'pin, T, U>
     where
         Struct<T, U>: 'pin,
@@ -24,9 +28,11 @@ const _: () = {
         unpinned: &'pin mut (U),
     }
     #[allow(dead_code)]
+    #[allow(clippy::type_repetition_in_bounds)]
+    #[allow(box_pointers)]
     #[allow(explicit_outlives_requirements)]
     #[allow(single_use_lifetimes)]
-    #[allow(clippy::type_repetition_in_bounds)]
+    #[allow(clippy::pattern_type_mismatch)]
     struct __StructProjectionRef<'pin, T, U>
     where
         Struct<T, U>: 'pin,

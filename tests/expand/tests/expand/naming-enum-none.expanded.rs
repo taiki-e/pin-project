@@ -11,9 +11,11 @@ enum Enum<T, U> {
 }
 #[doc(hidden)]
 #[allow(non_upper_case_globals)]
+#[allow(clippy::used_underscore_binding)]
+#[allow(box_pointers)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
-#[allow(clippy::used_underscore_binding)]
+#[allow(clippy::pattern_type_mismatch)]
 const _: () = {
     impl<T, U> Enum<T, U> {}
     struct __Enum<'pin, T, U> {

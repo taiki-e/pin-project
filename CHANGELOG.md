@@ -31,7 +31,7 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 * [Optimize code generation when used on enums.](https://github.com/taiki-e/pin-project/pull/270)
 
-* [Suppress `explicit_outlives_requirements` lint in generated code.](https://github.com/taiki-e/pin-project/pull/276)
+* Suppress `explicit_outlives_requirements`, `box_pointers`, `clippy::large_enum_variant`, `clippy::pattern_type_mismatch`, and `clippy::implicit_return` lints in generated code.([#276](https://github.com/taiki-e/pin-project/pull/276), [#277](https://github.com/taiki-e/pin-project/pull/277))
 
 * Diagnostic improvements.
 
