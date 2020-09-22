@@ -21,7 +21,7 @@
 // fn main() {}
 // ```
 
-#![allow(dead_code, unused_imports, unused_parens)]
+#![allow(dead_code, unused_imports, unused_parens, unknown_lints, renamed_and_removed_lints)]
 
 use pin_project::{pin_project, pinned_drop};
 use std::pin::Pin;
