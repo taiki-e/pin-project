@@ -1,6 +1,6 @@
 //! An internal crate to support pin_project - **do not use directly**
 
-#![doc(html_root_url = "https://docs.rs/pin-project-internal/0.4.23")]
+#![doc(html_root_url = "https://docs.rs/pin-project-internal/1.0.0-alpha.1")]
 #![doc(test(
     no_crate_inject,
     attr(deny(warnings, rust_2018_idioms, single_use_lifetimes), allow(dead_code))
@@ -471,7 +471,7 @@ use proc_macro::TokenStream;
 /// [`Pin::as_mut`]: core::pin::Pin::as_mut
 /// [`Pin::set`]: core::pin::Pin::set
 /// [`Pin`]: core::pin::Pin
-/// [`UnsafeUnpin`]: https://docs.rs/pin-project/0.4/pin_project/trait.UnsafeUnpin.html
+/// [`UnsafeUnpin`]: https://docs.rs/pin-project/1.0.0-alpha.1/pin_project/trait.UnsafeUnpin.html
 /// [`pinned_drop`]: ./attr.pinned_drop.html
 /// [drop-guarantee]: core::pin#drop-guarantee
 /// [pin-projection]: core::pin#projections-and-structural-pinning
