@@ -15,7 +15,7 @@
 // fn main() {}
 // ```
 
-#![allow(dead_code, unused_imports, unused_parens)]
+#![allow(dead_code, unused_imports, unused_parens, unknown_lints, renamed_and_removed_lints)]
 
 use pin_project::pin_project;
 
@@ -138,7 +138,7 @@ const _: () = {
     // then apply to your type, causing a compile-time error due to
     // the conflict with the second impl.
     trait StructMustNotImplDrop {}
-    #[allow(clippy::drop_bounds)]
+    #[allow(clippy::drop_bounds, drop_bounds)]
     impl<T: ::pin_project::__private::Drop> StructMustNotImplDrop for T {}
     impl<T, U> StructMustNotImplDrop for Struct<T, U> {}
     // A dummy impl of `PinnedDrop`, to ensure that users don't accidentally

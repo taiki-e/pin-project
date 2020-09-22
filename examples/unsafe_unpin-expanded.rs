@@ -17,7 +17,7 @@
 // fn main() {}
 // ```
 
-#![allow(dead_code, unused_imports, unused_parens)]
+#![allow(dead_code, unused_imports, unused_parens, unknown_lints, renamed_and_removed_lints)]
 
 use pin_project::{pin_project, UnsafeUnpin};
 
@@ -98,7 +98,7 @@ const _: () = {
     //
     // See ./struct-default-expanded.rs for details.
     trait StructMustNotImplDrop {}
-    #[allow(clippy::drop_bounds)]
+    #[allow(clippy::drop_bounds, drop_bounds)]
     impl<T: ::pin_project::__private::Drop> StructMustNotImplDrop for T {}
     impl<T, U> StructMustNotImplDrop for Struct<T, U> {}
     impl<T, U> ::pin_project::__private::PinnedDrop for Struct<T, U> {
