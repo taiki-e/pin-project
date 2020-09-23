@@ -72,6 +72,7 @@ const _: () = {
     #[allow(clippy::drop_bounds, drop_bounds)]
     impl<T: ::pin_project::__private::Drop> StructMustNotImplDrop for T {}
     impl<T, U> StructMustNotImplDrop for Struct<T, U> {}
+    #[doc(hidden)]
     impl<T, U> ::pin_project::__private::PinnedDrop for Struct<T, U> {
         unsafe fn drop(self: ::pin_project::__private::Pin<&mut Self>) {}
     }

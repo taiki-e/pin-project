@@ -94,6 +94,7 @@ const _: () = {
     #[allow(clippy::drop_bounds, drop_bounds)]
     impl<T: ::pin_project::__private::Drop> EnumMustNotImplDrop for T {}
     impl<T, U> EnumMustNotImplDrop for Enum<T, U> {}
+    #[doc(hidden)]
     impl<T, U> ::pin_project::__private::PinnedDrop for Enum<T, U> {
         unsafe fn drop(self: ::pin_project::__private::Pin<&mut Self>) {}
     }

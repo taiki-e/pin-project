@@ -69,11 +69,17 @@ const _: () = {
             ::pin_project::__private::Unpin
     {
     }
-    unsafe impl<T, U> ::pin_project::UnsafeUnpin for Struct<T, U> {}
+    #[doc(hidden)]
+    unsafe impl<'pin, T, U> ::pin_project::UnsafeUnpin for Struct<T, U> where
+        ::pin_project::__private::Wrapper<'pin, ::pin_project::__private::PhantomPinned>:
+            ::pin_project::__private::Unpin
+    {
+    }
     trait StructMustNotImplDrop {}
     #[allow(clippy::drop_bounds, drop_bounds)]
     impl<T: ::pin_project::__private::Drop> StructMustNotImplDrop for T {}
     impl<T, U> StructMustNotImplDrop for Struct<T, U> {}
+    #[doc(hidden)]
     impl<T, U> ::pin_project::__private::PinnedDrop for Struct<T, U> {
         unsafe fn drop(self: ::pin_project::__private::Pin<&mut Self>) {}
     }

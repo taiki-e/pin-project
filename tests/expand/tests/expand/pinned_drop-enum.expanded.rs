@@ -102,7 +102,11 @@ const _: () = {
         __Enum<'pin, T, U>: ::pin_project::__private::Unpin
     {
     }
-    unsafe impl<T, U> ::pin_project::UnsafeUnpin for Enum<T, U> {}
+    #[doc(hidden)]
+    unsafe impl<'pin, T, U> ::pin_project::UnsafeUnpin for Enum<T, U> where
+        __Enum<'pin, T, U>: ::pin_project::__private::Unpin
+    {
+    }
     impl<T, U> ::pin_project::__private::Drop for Enum<T, U> {
         fn drop(&mut self) {
             let pinned_self = unsafe { ::pin_project::__private::Pin::new_unchecked(self) };

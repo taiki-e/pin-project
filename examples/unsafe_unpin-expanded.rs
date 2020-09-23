@@ -89,6 +89,7 @@ const _: () = {
         }
     }
 
+    // Implement `Unpin` via `UnsafeUnpin`.
     impl<'pin, T, U> ::pin_project::__private::Unpin for Struct<T, U> where
         ::pin_project::__private::Wrapper<'pin, Self>: ::pin_project::UnsafeUnpin
     {
@@ -101,6 +102,9 @@ const _: () = {
     #[allow(clippy::drop_bounds, drop_bounds)]
     impl<T: ::pin_project::__private::Drop> StructMustNotImplDrop for T {}
     impl<T, U> StructMustNotImplDrop for Struct<T, U> {}
+    // A dummy impl of `PinnedDrop`, to ensure that users don't accidentally
+    // write a non-functional `PinnedDrop` impls.
+    #[doc(hidden)]
     impl<T, U> ::pin_project::__private::PinnedDrop for Struct<T, U> {
         unsafe fn drop(self: ::pin_project::__private::Pin<&mut Self>) {}
     }

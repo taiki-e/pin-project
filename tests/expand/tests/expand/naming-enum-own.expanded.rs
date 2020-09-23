@@ -96,11 +96,16 @@ const _: () = {
         __Enum<'pin, T, U>: ::pin_project::__private::Unpin
     {
     }
-    unsafe impl<T, U> ::pin_project::UnsafeUnpin for Enum<T, U> {}
+    #[doc(hidden)]
+    unsafe impl<'pin, T, U> ::pin_project::UnsafeUnpin for Enum<T, U> where
+        __Enum<'pin, T, U>: ::pin_project::__private::Unpin
+    {
+    }
     trait EnumMustNotImplDrop {}
     #[allow(clippy::drop_bounds, drop_bounds)]
     impl<T: ::pin_project::__private::Drop> EnumMustNotImplDrop for T {}
     impl<T, U> EnumMustNotImplDrop for Enum<T, U> {}
+    #[doc(hidden)]
     impl<T, U> ::pin_project::__private::PinnedDrop for Enum<T, U> {
         unsafe fn drop(self: ::pin_project::__private::Pin<&mut Self>) {}
     }
