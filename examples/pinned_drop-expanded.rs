@@ -121,7 +121,12 @@ const _: () = {
         __Struct<'pin, 'a, T>: ::pin_project::__private::Unpin
     {
     }
-    unsafe impl<'a, T> ::pin_project::UnsafeUnpin for Struct<'a, T> {}
+    // A dummy impl of `UnsafeUnpin`, to ensure that the user cannot implement it.
+    #[doc(hidden)]
+    unsafe impl<'pin, 'a, T> ::pin_project::UnsafeUnpin for Struct<'a, T> where
+        __Struct<'pin, 'a, T>: ::pin_project::__private::Unpin
+    {
+    }
 
     // Ensure that it's impossible to use pin projections on a #[repr(packed)]
     // struct.

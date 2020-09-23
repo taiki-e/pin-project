@@ -79,7 +79,11 @@ const _: () = {
         __Struct<'pin, T, U>: ::pin_project::__private::Unpin
     {
     }
-    unsafe impl<T, U> ::pin_project::UnsafeUnpin for Struct<T, U> {}
+    #[doc(hidden)]
+    unsafe impl<'pin, T, U> ::pin_project::UnsafeUnpin for Struct<T, U> where
+        __Struct<'pin, T, U>: ::pin_project::__private::Unpin
+    {
+    }
     impl<T, U> ::pin_project::__private::Drop for Struct<T, U> {
         fn drop(&mut self) {
             let pinned_self = unsafe { ::pin_project::__private::Pin::new_unchecked(self) };

@@ -130,7 +130,11 @@ const _: () = {
     // impls, we emit one ourselves. If the user ends up writing an `UnsafeUnpin`
     // impl, they'll get a "conflicting implementations of trait" error when
     // coherence checks are run.
-    unsafe impl<T, U> ::pin_project::UnsafeUnpin for Struct<T, U> {}
+    #[doc(hidden)]
+    unsafe impl<'pin, T, U> ::pin_project::UnsafeUnpin for Struct<T, U> where
+        __Struct<'pin, T, U>: ::pin_project::__private::Unpin
+    {
+    }
 
     // Ensure that struct does not implement `Drop`.
     //
@@ -143,6 +147,7 @@ const _: () = {
     impl<T, U> StructMustNotImplDrop for Struct<T, U> {}
     // A dummy impl of `PinnedDrop`, to ensure that users don't accidentally
     // write a non-functional `PinnedDrop` impls.
+    #[doc(hidden)]
     impl<T, U> ::pin_project::__private::PinnedDrop for Struct<T, U> {
         unsafe fn drop(self: ::pin_project::__private::Pin<&mut Self>) {}
     }

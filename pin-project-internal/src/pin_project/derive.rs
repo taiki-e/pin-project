@@ -944,8 +944,7 @@ impl<'a> Context<'a> {
                 });
 
                 let (proj_impl_generics, _, proj_where_clause) = proj_generics.split_for_impl();
-                let (impl_generics, ty_generics, orig_where_clause) =
-                    self.orig.generics.split_for_impl();
+                let ty_generics = self.orig.generics.split_for_impl().1;
 
                 // For interoperability with `forbid(unsafe_code)`, `unsafe` token should be
                 // call-site span.
@@ -963,9 +962,10 @@ impl<'a> Context<'a> {
                     // impls, we emit one ourselves. If the user ends up writing an `UnsafeUnpin`
                     // impl, they'll get a "conflicting implementations of trait" error when
                     // coherence checks are run.
-                    #unsafety impl #impl_generics ::pin_project::UnsafeUnpin
+                    #[doc(hidden)]
+                    #unsafety impl #proj_impl_generics ::pin_project::UnsafeUnpin
                         for #orig_ident #ty_generics
-                    #orig_where_clause
+                    #proj_where_clause
                     {
                     }
                 }
@@ -1015,8 +1015,7 @@ impl<'a> Context<'a> {
                 let type_params = self.orig.generics.type_params().map(|t| &t.ident);
                 let proj_generics = &self.proj.generics;
                 let (proj_impl_generics, proj_ty_generics, _) = proj_generics.split_for_impl();
-                let (impl_generics, ty_generics, where_clause) =
-                    self.orig.generics.split_for_impl();
+                let (_, ty_generics, where_clause) = self.orig.generics.split_for_impl();
 
                 full_where_clause.predicates.push(parse_quote! {
                     #struct_ident #proj_ty_generics: ::pin_project::__private::Unpin
@@ -1054,9 +1053,10 @@ impl<'a> Context<'a> {
                     // impls, we emit one ourselves. If the user ends up writing an `UnsafeUnpin`
                     // impl, they'll get a "conflicting implementations of trait" error when
                     // coherence checks are run.
-                    unsafe impl #impl_generics ::pin_project::UnsafeUnpin
+                    #[doc(hidden)]
+                    unsafe impl #proj_impl_generics ::pin_project::UnsafeUnpin
                         for #orig_ident #ty_generics
-                    #where_clause
+                    #full_where_clause
                     {
                     }
                 }
@@ -1137,6 +1137,7 @@ impl<'a> Context<'a> {
                 // impls, we emit one ourselves. If the user ends up writing a `PinnedDrop` impl,
                 // they'll get a "conflicting implementations of trait" error when coherence
                 // checks are run.
+                #[doc(hidden)]
                 impl #impl_generics ::pin_project::__private::PinnedDrop for #ident #ty_generics
                 #where_clause
                 {
