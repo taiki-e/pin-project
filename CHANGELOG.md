@@ -6,6 +6,13 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 ## [Unreleased]
 
+## [0.4.24] - 2020-09-26
+
+* Fix compatibility of generated code with `forbid(future_incompatible)`
+
+  Note: This does not guarantee compatibility with `forbid(future_incompatible)` in the future.
+  If rustc adds a new lint, we may not be able to keep this.
+
 ## [0.4.23] - 2020-07-27
 
 * [Fix compile error with `?Sized` type parameters.][263]

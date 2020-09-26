@@ -1,6 +1,6 @@
 [package]
 name = "pin-project"
-version = "0.4.23"
+version = "0.4.24"
 authors = ["Taiki Endo <te316e89@gmail.com>"]
 edition = "2018"
 license = "Apache-2.0 OR MIT"
@@ -29,7 +29,7 @@ members = [
 ]
 
 [dependencies]
-pin-project-internal = { version = "=0.4.23", path = "pin-project-internal", default-features = false }
+pin-project-internal = { version = "=0.4.24", path = "pin-project-internal", default-features = false }
 
 [dev-dependencies]
 auxiliary-macros = { version = "0.1", path = "tests/ui/auxiliary" }
