@@ -133,7 +133,7 @@ const _: () = {
     //
     // See ./struct-default-expanded.rs and https://github.com/taiki-e/pin-project/pull/34
     // for details.
-    #[deny(safe_packed_borrows)]
+    #[forbid(safe_packed_borrows)]
     fn __assert_not_repr_packed<'a, T>(this: &Struct<'a, T>) {
         let _ = &this.was_dropped;
         let _ = &this.field;

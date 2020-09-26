@@ -1,4 +1,7 @@
-#![warn(future_incompatible, nonstandard_style, rust_2018_compatibility, rust_2018_idioms, unused)]
+#![warn(nonstandard_style, rust_2018_compatibility, rust_2018_idioms, unused)]
+// Note: This does not guarantee compatibility with `forbid(future_incompatible)` in the future.
+// If rustc adds a new lint, we may not be able to keep this.
+#![forbid(future_incompatible)]
 #![allow(unknown_lints)] // for old compilers
 #![warn(
     absolute_paths_not_starting_with_crate,
