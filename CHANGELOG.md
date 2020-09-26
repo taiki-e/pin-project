@@ -560,7 +560,8 @@ See also [tracking issue for 0.4 release][21].
 
 Initial release
 
-[Unreleased]: https://github.com/taiki-e/pin-project/compare/v0.4.23...HEAD
+[Unreleased]: https://github.com/taiki-e/pin-project/compare/v0.4.24...HEAD
+[0.4.24]: https://github.com/taiki-e/pin-project/compare/v0.4.23...v0.4.24
 [0.4.23]: https://github.com/taiki-e/pin-project/compare/v0.4.22...v0.4.23
 [0.4.22]: https://github.com/taiki-e/pin-project/compare/v0.4.21...v0.4.22
 [0.4.21]: https://github.com/taiki-e/pin-project/compare/v0.4.20...v0.4.21
