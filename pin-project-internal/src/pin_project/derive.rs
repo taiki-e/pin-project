@@ -1166,7 +1166,7 @@ impl<'a> Context<'a> {
         // struct, we generate code like this:
         //
         // ```rust
-        // #[deny(safe_packed_borrows)]
+        // #[forbid(safe_packed_borrows)]
         // fn assert_not_repr_packed(val: &MyStruct) {
         //     let _field1 = &val.field1;
         //     let _field2 = &val.field2;
@@ -1176,7 +1176,7 @@ impl<'a> Context<'a> {
         // ```
         //
         // Taking a reference to a packed field is unsafe, and applying
-        // `#[deny(safe_packed_borrows)]` makes sure that doing this without
+        // `#[forbid(safe_packed_borrows)]` makes sure that doing this without
         // an `unsafe` block (which we deliberately do not generate)
         // is a hard error.
         //
@@ -1217,7 +1217,7 @@ impl<'a> Context<'a> {
         let (impl_generics, ty_generics, where_clause) = self.orig.generics.split_for_impl();
         let ident = self.orig.ident;
         Ok(quote! {
-            #[deny(safe_packed_borrows)]
+            #[forbid(safe_packed_borrows)]
             fn __assert_not_repr_packed #impl_generics (val: &#ident #ty_generics) #where_clause {
                 #(#field_refs)*
             }

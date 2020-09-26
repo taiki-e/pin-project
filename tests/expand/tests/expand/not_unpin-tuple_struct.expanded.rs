@@ -1,5 +1,5 @@
 use pin_project::pin_project;
-# [ pin ( __private ( ! Unpin ) ) ]
+# [pin (__private (! Unpin))]
 struct TupleStruct<T, U>(#[pin] T, U);
 #[doc(hidden)]
 #[allow(dead_code)]
@@ -55,7 +55,7 @@ const _: () = {
     impl<T, U> ::pin_project::__private::PinnedDrop for TupleStruct<T, U> {
         unsafe fn drop(self: ::pin_project::__private::Pin<&mut Self>) {}
     }
-    #[deny(safe_packed_borrows)]
+    #[forbid(safe_packed_borrows)]
     fn __assert_not_repr_packed<T, U>(val: &TupleStruct<T, U>) {
         &val.0;
         &val.1;

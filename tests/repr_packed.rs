@@ -1,5 +1,5 @@
 #![warn(rust_2018_idioms, single_use_lifetimes)]
-#![deny(safe_packed_borrows)]
+#![forbid(safe_packed_borrows)]
 
 use std::cell::Cell;
 
