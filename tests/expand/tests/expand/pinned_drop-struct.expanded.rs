@@ -92,7 +92,7 @@ const _: () = {
             }
         }
     }
-    #[deny(safe_packed_borrows)]
+    #[forbid(safe_packed_borrows)]
     fn __assert_not_repr_packed<T, U>(this: &Struct<T, U>) {
         let _ = &this.pinned;
         let _ = &this.unpinned;
