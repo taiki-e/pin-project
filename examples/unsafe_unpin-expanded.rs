@@ -103,7 +103,7 @@ const _: () = {
     //
     // See ./struct-default-expanded.rs and https://github.com/taiki-e/pin-project/pull/34
     // for details.
-    #[deny(safe_packed_borrows)]
+    #[forbid(safe_packed_borrows)]
     fn __assert_not_repr_packed<T, U>(val: &Struct<T, U>) {
         &val.pinned;
         &val.unpinned;

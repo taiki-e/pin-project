@@ -144,7 +144,7 @@ const _: () = {
     // struct.
     //
     // Taking a reference to a packed field is unsafe, and applying
-    // #[deny(safe_packed_borrows)] makes sure that doing this without
+    // #[forbid(safe_packed_borrows)] makes sure that doing this without
     // an 'unsafe' block (which we deliberately do not generate)
     // is a hard error.
     //
@@ -154,7 +154,7 @@ const _: () = {
     // a much nicer error above.
     //
     // See https://github.com/taiki-e/pin-project/pull/34 for more details.
-    #[deny(safe_packed_borrows)]
+    #[forbid(safe_packed_borrows)]
     fn __assert_not_repr_packed<T, U>(val: &Struct<T, U>) {
         &val.pinned;
         &val.unpinned;

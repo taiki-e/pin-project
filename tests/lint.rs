@@ -1,5 +1,8 @@
 #![warn(rust_2018_idioms, single_use_lifetimes)]
-#![warn(future_incompatible, nonstandard_style, rust_2018_compatibility, unused)]
+#![warn(nonstandard_style, rust_2018_compatibility, unused)]
+// Note: This does not guarantee compatibility with `forbid(future_incompatible)` in the future.
+// If rustc adds a new lint, we may not be able to keep this.
+#![forbid(future_incompatible)]
 #![warn(clippy::all, clippy::pedantic, clippy::nursery)]
 #![allow(unknown_lints)] // for old compilers
 #![warn(
