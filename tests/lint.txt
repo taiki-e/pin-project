@@ -16,7 +16,6 @@ Lint checks provided by rustc:
                                        deprecated-in-future  allow    detects use of items that will be deprecated in a future version
                                   elided-lifetimes-in-paths  allow    hidden lifetime parameters in types are deprecated
                              explicit-outlives-requirements  allow    outlives requirements can be inferred
-                                  indirect-structural-match  allow    pattern with const indirectly referencing non-structural-match type
                                              keyword-idents  allow    detects edition keywords being used as an identifier
                                      macro-use-extern-crate  allow    the `#[macro_use]` attribute is now deprecated in favor of using macros via the module system
                                        meta-variable-misuse  allow    possible meta-variable misuse at macro definition
@@ -26,6 +25,7 @@ Lint checks provided by rustc:
                                                missing-docs  allow    detects missing documentation for public members
                                   missing-doc-code-examples  allow    detects publicly-exported items without code samples in their documentation
                                            non-ascii-idents  allow    detects non-ASCII identifiers
+                                   pointer-structural-match  allow    pointers are not structural-match
                                           private-doc-tests  allow    detects code samples in docs of private items not documented by rustdoc
                                        single-use-lifetimes  allow    detects lifetime parameters that are only used once
                                               trivial-casts  allow    detects trivial casts which could be removed
@@ -61,6 +61,7 @@ Lint checks provided by rustc:
                                             improper-ctypes  warn     proper use of libc types in foreign modules
                                 improper-ctypes-definitions  warn     proper use of libc types in foreign item definitions
                                         incomplete-features  warn     incomplete features that may function improperly in some or all cases
+                                  indirect-structural-match  warn     constant used in pattern contains value of non-structural-match type in a field or a variant
                                          inline-no-sanitize  warn     detects incompatible use of `#[inline(always)]` and `#[no_sanitize(...)]`
                                invalid-codeblock-attributes  warn     codeblock attribute looks a lot like a known one
                                               invalid-value  warn     an invalid value is being created (such as a NULL reference)
@@ -68,6 +69,7 @@ Lint checks provided by rustc:
                               late-bound-lifetime-arguments  warn     detects generic lifetime arguments in path segments with late bound lifetime parameters
                                    mixed-script-confusables  warn     detects Unicode scripts whose mixed script confusables codepoints are solely used
                         mutable-borrow-reservation-conflict  warn     reservation of a two-phased borrow conflicts with other shared borrows
+                                nontrivial-structural-match  warn     constant used in pattern of non-structural-match type and the constant's initializer expression contains values of non-structural-match types
                                        non-camel-case-types  warn     types, variants, traits and type parameters should have camel case names
                                non-shorthand-field-patterns  warn     using `Struct { x: x }` instead of `Struct { x }` in a pattern
                                              non-snake-case  warn     variables, methods, functions, lifetime parameters and modules should have snake case names
@@ -133,7 +135,7 @@ Lint groups provided by rustc:
                        name  sub-lints
                        ----  ---------
                    warnings  all lints that are set to issue warnings
-        future-incompatible  keyword-idents, anonymous-parameters, illegal-floating-point-literal-pattern, private-in-public, pub-use-of-private-extern-crate, invalid-type-param-default, safe-packed-borrows, patterns-in-fns-without-body, late-bound-lifetime-arguments, order-dependent-trait-objects, coherence-leak-check, tyvar-behind-raw-pointer, absolute-paths-not-starting-with-crate, unstable-name-collisions, where-clauses-object-safety, proc-macro-derive-resolution-fallback, macro-expanded-macro-exports-accessed-by-absolute-paths, ill-formed-attribute-input, conflicting-repr-hints, ambiguous-associated-items, mutable-borrow-reservation-conflict, indirect-structural-match, soft-unstable, cenum-impl-drop-cast, const-evaluatable-unchecked, array-into-iter
+        future-incompatible  keyword-idents, anonymous-parameters, illegal-floating-point-literal-pattern, private-in-public, pub-use-of-private-extern-crate, invalid-type-param-default, safe-packed-borrows, patterns-in-fns-without-body, late-bound-lifetime-arguments, order-dependent-trait-objects, coherence-leak-check, tyvar-behind-raw-pointer, absolute-paths-not-starting-with-crate, unstable-name-collisions, where-clauses-object-safety, proc-macro-derive-resolution-fallback, macro-expanded-macro-exports-accessed-by-absolute-paths, ill-formed-attribute-input, conflicting-repr-hints, ambiguous-associated-items, mutable-borrow-reservation-conflict, indirect-structural-match, pointer-structural-match, nontrivial-structural-match, soft-unstable, cenum-impl-drop-cast, const-evaluatable-unchecked, array-into-iter
           nonstandard-style  non-camel-case-types, non-snake-case, non-upper-case-globals
     rust-2018-compatibility  keyword-idents, anonymous-parameters, tyvar-behind-raw-pointer, absolute-paths-not-starting-with-crate
            rust-2018-idioms  bare-trait-objects, unused-extern-crates, ellipsis-inclusive-range-patterns, elided-lifetimes-in-paths, explicit-outlives-requirements
