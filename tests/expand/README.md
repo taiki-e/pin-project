@@ -4,6 +4,6 @@ Similar to ui tests, but instead of checking the compiler output, this checks th
 
 See [examples](https://github.com/taiki-e/pin-project/tree/master/examples) for descriptions of what the generated code does, and why it needs to be generated.
 
-[*Note that the way of updating the generated code is different than trybuild.*](https://docs.rs/macrotest/1/macrotest/#updating-expandedrs)
+To run this test, use [`scripts/expandtest.sh`](https://github.com/taiki-e/pin-project/blob/master/scripts/expandtest.sh) or [`scripts/ci.sh`](https://github.com/taiki-e/pin-project/blob/master/scripts/ci.sh).
 
 Refs: https://github.com/eupn/macrotest
