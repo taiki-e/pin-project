@@ -16,6 +16,7 @@ enum Enum<T, U> {
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
 #[allow(clippy::pattern_type_mismatch)]
+#[allow(clippy::redundant_pub_crate)]
 const _: () = {
     impl<T, U> Enum<T, U> {}
     struct __Enum<'pin, T, U> {

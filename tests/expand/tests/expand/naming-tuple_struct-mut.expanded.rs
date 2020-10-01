@@ -8,6 +8,7 @@ struct TupleStruct<T, U>(#[pin] T, U);
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
 #[allow(clippy::pattern_type_mismatch)]
+#[allow(clippy::redundant_pub_crate)]
 struct Proj<'pin, T, U>(::pin_project::__private::Pin<&'pin mut (T)>, &'pin mut (U))
 where
     TupleStruct<T, U>: 'pin;
@@ -18,6 +19,7 @@ where
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
 #[allow(clippy::pattern_type_mismatch)]
+#[allow(clippy::redundant_pub_crate)]
 const _: () = {
     #[allow(dead_code)]
     #[allow(clippy::type_repetition_in_bounds)]
@@ -25,6 +27,7 @@ const _: () = {
     #[allow(explicit_outlives_requirements)]
     #[allow(single_use_lifetimes)]
     #[allow(clippy::pattern_type_mismatch)]
+    #[allow(clippy::redundant_pub_crate)]
     struct __TupleStructProjectionRef<'pin, T, U>(
         ::pin_project::__private::Pin<&'pin (T)>,
         &'pin (U),

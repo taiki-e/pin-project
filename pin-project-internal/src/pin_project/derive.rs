@@ -150,6 +150,7 @@ fn global_allowed_lints() -> TokenStream {
         #[allow(explicit_outlives_requirements)] // https://github.com/rust-lang/rust/issues/60993
         #[allow(single_use_lifetimes)] // https://github.com/rust-lang/rust/issues/55058
         #[allow(clippy::pattern_type_mismatch)]
+        #[allow(clippy::redundant_pub_crate)]
     }
 }
 

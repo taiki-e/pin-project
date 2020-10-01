@@ -11,6 +11,7 @@ struct Struct<T, U> {
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
 #[allow(clippy::pattern_type_mismatch)]
+#[allow(clippy::redundant_pub_crate)]
 struct ProjOwn<T, U> {
     pinned: ::pin_project::__private::PhantomData<T>,
     unpinned: U,
@@ -22,6 +23,7 @@ struct ProjOwn<T, U> {
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
 #[allow(clippy::pattern_type_mismatch)]
+#[allow(clippy::redundant_pub_crate)]
 const _: () = {
     #[allow(dead_code)]
     #[allow(clippy::mut_mut)]
@@ -30,6 +32,7 @@ const _: () = {
     #[allow(explicit_outlives_requirements)]
     #[allow(single_use_lifetimes)]
     #[allow(clippy::pattern_type_mismatch)]
+    #[allow(clippy::redundant_pub_crate)]
     struct __StructProjection<'pin, T, U>
     where
         Struct<T, U>: 'pin,
@@ -43,6 +46,7 @@ const _: () = {
     #[allow(explicit_outlives_requirements)]
     #[allow(single_use_lifetimes)]
     #[allow(clippy::pattern_type_mismatch)]
+    #[allow(clippy::redundant_pub_crate)]
     struct __StructProjectionRef<'pin, T, U>
     where
         Struct<T, U>: 'pin,
