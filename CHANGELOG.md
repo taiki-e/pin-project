@@ -39,6 +39,12 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 See also [tracking issue for 1.0 release](https://github.com/taiki-e/pin-project/issues/264).
 
+## [0.4.25] - 2020-10-01
+
+* Fix compatibility with `drop_bounds` lint, which will be added to rustc in the future. See [#272](https://github.com/taiki-e/pin-project/issues/272) for more details.
+
+  (Note: 1.0.0-alpha.1 already contains this change.)
+
 ## [0.4.24] - 2020-09-26
 
 * Fix compatibility of generated code with `forbid(future_incompatible)`
@@ -586,6 +592,7 @@ Initial release
 
 [Unreleased]: https://github.com/taiki-e/pin-project/compare/v1.0.0-alpha.1...HEAD
 [1.0.0-alpha.1]: https://github.com/taiki-e/pin-project/compare/v0.4.23...v1.0.0-alpha.1
+[0.4.25]: https://github.com/taiki-e/pin-project/compare/v0.4.24...v0.4.25
 [0.4.24]: https://github.com/taiki-e/pin-project/compare/v0.4.23...v0.4.24
 [0.4.23]: https://github.com/taiki-e/pin-project/compare/v0.4.22...v0.4.23
 [0.4.22]: https://github.com/taiki-e/pin-project/compare/v0.4.21...v0.4.22
