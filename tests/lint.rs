@@ -137,15 +137,36 @@ pub mod clippy {
 #[rustversion::attr(not(nightly), ignore)]
 #[test]
 fn check_lint_list() {
-    use std::{env, process::Command, str};
+    use std::{env, fs, path::PathBuf, process::Command, str};
 
-    (|| -> Result<(), Box<dyn std::error::Error>> {
-        let current = include_str!("lint.txt");
+    type Result<T, E = Box<dyn std::error::Error>> = std::result::Result<T, E>;
+
+    fn assert_eq(expected_path: &str, actual: &str) -> Result<()> {
+        let manifest_dir = env::var_os("CARGO_MANIFEST_DIR")
+            .map(PathBuf::from)
+            .expect("CARGO_MANIFEST_DIR not set");
+        let expected_path = manifest_dir.join(expected_path);
+        let expected = fs::read_to_string(&expected_path)?;
+        if expected != actual {
+            if env::var_os("CI").map_or(false, |v| v == "true") {
+                panic!(
+                    "assertion failed:\n\nEXPECTED:\n{0}\n{1}\n{0}\n\nACTUAL:\n{0}\n{2}\n{0}\n",
+                    "-".repeat(60),
+                    expected,
+                    actual,
+                );
+            } else {
+                fs::write(&expected_path, actual)?;
+            }
+        }
+        Ok(())
+    }
+
+    (|| -> Result<()> {
         let rustc = env::var_os("RUSTC").unwrap_or_else(|| "rustc".into());
         let output = Command::new(rustc).args(&["-W", "help"]).output()?;
         let new = str::from_utf8(&output.stdout)?;
-        assert_eq!(current, new);
-        Ok(())
+        assert_eq("tests/lint.txt", new)
     })()
     .unwrap_or_else(|e| panic!("{}", e));
 }
