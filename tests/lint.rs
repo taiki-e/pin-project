@@ -210,6 +210,40 @@ pub mod clippy_mut_mut {
     }
 }
 
+#[allow(unreachable_pub)]
+mod clippy_redundant_pub_crate {
+    use pin_project::pin_project;
+
+    #[pin_project(project_replace)]
+    #[derive(Debug)]
+    pub struct Struct<T, U> {
+        #[pin]
+        pub pinned: T,
+        pub unpinned: U,
+    }
+
+    #[pin_project(project_replace)]
+    #[derive(Debug)]
+    pub struct TupleStruct<T, U>(#[pin] pub T, pub U);
+
+    #[allow(dead_code)]
+    #[pin_project(
+        project = EnumProj,
+        project_ref = EnumProjRef,
+        project_replace = EnumProjOwn,
+    )]
+    #[derive(Debug)]
+    pub enum Enum<T, U> {
+        Struct {
+            #[pin]
+            pinned: T,
+            unpinned: U,
+        },
+        Tuple(#[pin] T, U),
+        Unit,
+    }
+}
+
 pub mod clippy_type_repetition_in_bounds {
     use pin_project::pin_project;
 
