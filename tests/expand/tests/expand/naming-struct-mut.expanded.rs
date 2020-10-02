@@ -12,6 +12,7 @@ struct Struct<T, U> {
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
 #[allow(clippy::pattern_type_mismatch)]
+#[allow(clippy::redundant_pub_crate)]
 struct Proj<'pin, T, U>
 where
     Struct<T, U>: 'pin,
@@ -26,6 +27,7 @@ where
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
 #[allow(clippy::pattern_type_mismatch)]
+#[allow(clippy::redundant_pub_crate)]
 const _: () = {
     #[allow(dead_code)]
     #[allow(clippy::type_repetition_in_bounds)]
@@ -33,6 +35,7 @@ const _: () = {
     #[allow(explicit_outlives_requirements)]
     #[allow(single_use_lifetimes)]
     #[allow(clippy::pattern_type_mismatch)]
+    #[allow(clippy::redundant_pub_crate)]
     struct __StructProjectionRef<'pin, T, U>
     where
         Struct<T, U>: 'pin,

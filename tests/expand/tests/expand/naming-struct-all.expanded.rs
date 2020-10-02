@@ -12,6 +12,7 @@ struct Struct<T, U> {
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
 #[allow(clippy::pattern_type_mismatch)]
+#[allow(clippy::redundant_pub_crate)]
 struct Proj<'pin, T, U>
 where
     Struct<T, U>: 'pin,
@@ -25,6 +26,7 @@ where
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
 #[allow(clippy::pattern_type_mismatch)]
+#[allow(clippy::redundant_pub_crate)]
 struct ProjRef<'pin, T, U>
 where
     Struct<T, U>: 'pin,
@@ -38,6 +40,7 @@ where
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
 #[allow(clippy::pattern_type_mismatch)]
+#[allow(clippy::redundant_pub_crate)]
 struct ProjOwn<T, U> {
     pinned: ::pin_project::__private::PhantomData<T>,
     unpinned: U,
@@ -49,6 +52,7 @@ struct ProjOwn<T, U> {
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
 #[allow(clippy::pattern_type_mismatch)]
+#[allow(clippy::redundant_pub_crate)]
 const _: () = {
     impl<T, U> Struct<T, U> {
         fn project<'pin>(self: ::pin_project::__private::Pin<&'pin mut Self>) -> Proj<'pin, T, U> {

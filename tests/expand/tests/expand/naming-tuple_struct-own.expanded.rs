@@ -7,6 +7,7 @@ struct TupleStruct<T, U>(#[pin] T, U);
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
 #[allow(clippy::pattern_type_mismatch)]
+#[allow(clippy::redundant_pub_crate)]
 struct ProjOwn<T, U>(::pin_project::__private::PhantomData<T>, U);
 #[doc(hidden)]
 #[allow(non_upper_case_globals)]
@@ -15,6 +16,7 @@ struct ProjOwn<T, U>(::pin_project::__private::PhantomData<T>, U);
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
 #[allow(clippy::pattern_type_mismatch)]
+#[allow(clippy::redundant_pub_crate)]
 const _: () = {
     #[allow(dead_code)]
     #[allow(clippy::mut_mut)]
@@ -23,6 +25,7 @@ const _: () = {
     #[allow(explicit_outlives_requirements)]
     #[allow(single_use_lifetimes)]
     #[allow(clippy::pattern_type_mismatch)]
+    #[allow(clippy::redundant_pub_crate)]
     struct __TupleStructProjection<'pin, T, U>(
         ::pin_project::__private::Pin<&'pin mut (T)>,
         &'pin mut (U),
@@ -35,6 +38,7 @@ const _: () = {
     #[allow(explicit_outlives_requirements)]
     #[allow(single_use_lifetimes)]
     #[allow(clippy::pattern_type_mismatch)]
+    #[allow(clippy::redundant_pub_crate)]
     struct __TupleStructProjectionRef<'pin, T, U>(
         ::pin_project::__private::Pin<&'pin (T)>,
         &'pin (U),
