@@ -21,6 +21,13 @@ fn main() {
     }
 }
 
+fn is_nightly() -> bool {
+    env::var_os("RUSTC")
+        .and_then(|rustc| Command::new(rustc).arg("--version").output().ok())
+        .and_then(|output| String::from_utf8(output.stdout).ok())
+        .map_or(false, |version| version.contains("nightly") || version.contains("dev"))
+}
+
 fn has_command(command: &str) -> bool {
     Command::new(command)
         .arg("--version")
@@ -31,11 +38,4 @@ fn has_command(command: &str) -> bool {
         .as_ref()
         .map(ExitStatus::success)
         .unwrap_or(false)
-}
-
-fn is_nightly() -> bool {
-    env::var_os("RUSTC")
-        .and_then(|rustc| Command::new(rustc).arg("--version").output().ok())
-        .and_then(|output| String::from_utf8(output.stdout).ok())
-        .map_or(false, |version| version.contains("nightly") || version.contains("dev"))
 }
