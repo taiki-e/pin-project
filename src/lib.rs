@@ -27,11 +27,41 @@
 //!
 //! [*code like this will be generated*][struct-default-expanded]
 //!
+//! To use [`#[pin_project]`] on enums, you need to name the projection type
+//! returned from the method.
+//!
+//! ```rust
+//! use pin_project::pin_project;
+//! use std::pin::Pin;
+//!
+//! #[pin_project(project = EnumProj)]
+//! enum Enum<T, U> {
+//!     Pinned(#[pin] T),
+//!     Unpinned(U),
+//! }
+//!
+//! impl<T, U> Enum<T, U> {
+//!     fn method(self: Pin<&mut Self>) {
+//!         match self.project() {
+//!             EnumProj::Pinned(x) => {
+//!                 let _: Pin<&mut T> = x;
+//!             }
+//!             EnumProj::Unpinned(y) => {
+//!                 let _: &mut U = y;
+//!             }
+//!         }
+//!     }
+//! }
+//! ```
+//!
+//! [*code like this will be generated*][enum-default-expanded]
+//!
 //! See [`#[pin_project]`][`pin_project`] attribute for more details, and
 //! see [examples] directory for more examples and generated code.
 //!
 //! [`pin_project`]: attr.pin_project.html
 //! [examples]: https://github.com/taiki-e/pin-project/blob/master/examples/README.md
+//! [enum-default-expanded]: https://github.com/taiki-e/pin-project/blob/master/examples/enum-default-expanded.rs
 //! [pin-projection]: core::pin#projections-and-structural-pinning
 //! [struct-default-expanded]: https://github.com/taiki-e/pin-project/blob/master/examples/struct-default-expanded.rs
 
