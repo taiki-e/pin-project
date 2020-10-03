@@ -1,4 +1,4 @@
-use auxiliary_macros::{hidden_repr_macro, HiddenRepr};
+use auxiliary_macro::{hidden_repr_macro, HiddenRepr};
 use pin_project::pin_project;
 
 hidden_repr_macro! {} //~ ERROR expected item after attributes
