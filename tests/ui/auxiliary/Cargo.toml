@@ -1,6 +1,6 @@
 [package]
-name = "auxiliary-macros"
-version = "0.1.0"
+name = "pin-project-auxiliary-macro"
+version = "0.0.0"
 authors = ["Taiki Endo <te316e89@gmail.com>"]
 edition = "2018"
 publish = false
@@ -8,6 +8,7 @@ publish = false
 [lib]
 path = "lib.rs"
 proc-macro = true
+name = "auxiliary_macro"
 
 [dependencies]
 quote = "1.0"

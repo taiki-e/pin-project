@@ -1,4 +1,4 @@
-use auxiliary_macros::remove_attr;
+use auxiliary_macro::remove_attr;
 use pin_project::pin_project;
 use std::{marker::PhantomPinned, pin::Pin};
 
