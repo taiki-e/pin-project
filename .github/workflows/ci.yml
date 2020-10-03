@@ -68,7 +68,7 @@ jobs:
       - name: cargo check (minimal versions)
         if: matrix.rust == 'nightly'
         run: |
-          bash ci/check-minimal-versions.sh
+          bash scripts/check-minimal-versions.sh
 
   expandtest:
     name: expandtest
@@ -82,7 +82,7 @@ jobs:
           cargo install cargo-expand
       - name: cargo test (expandtest)
         run: |
-          cargo test --all-features --manifest-path tests/expand/Cargo.toml
+          bash scripts/expandtest.sh
 
   clippy:
     name: clippy
