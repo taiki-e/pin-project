@@ -106,12 +106,14 @@ impl GenerateTokens {
         let unpin_impl = cx.make_unpin_impl();
         let drop_impl = cx.make_drop_impl();
 
+        let mut allowed_lints = global_allowed_lints();
         let dummy_const = if cfg!(underscore_consts) {
             format_ident!("_")
         } else {
+            // for Rust 1.34 - 1.36
+            allowed_lints.extend(quote!(#[allow(non_upper_case_globals)]));
             format_ident!("__SCOPE_{}", cx.orig.ident)
         };
-        let allowed_lints = global_allowed_lints();
 
         tokens.extend(quote! {
             // All items except projected types are generated inside a `const` scope.
@@ -129,7 +131,6 @@ impl GenerateTokens {
             // * https://github.com/taiki-e/pin-project/pull/53#issuecomment-525906867
             // * https://github.com/taiki-e/pin-project/pull/70
             #[doc(hidden)] // for Rust 1.34 - 1.41
-            #[allow(non_upper_case_globals)] // for Rust 1.34 - 1.36
             #[allow(clippy::used_underscore_binding)]
             #allowed_lints
             const #dummy_const: () = {

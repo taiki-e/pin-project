@@ -13,7 +13,6 @@ struct Proj<'pin, T, U>(::pin_project::__private::Pin<&'pin mut (T)>, &'pin mut 
 where
     TupleStruct<T, U>: 'pin;
 #[doc(hidden)]
-#[allow(non_upper_case_globals)]
 #[allow(clippy::used_underscore_binding)]
 #[allow(box_pointers)]
 #[allow(explicit_outlives_requirements)]

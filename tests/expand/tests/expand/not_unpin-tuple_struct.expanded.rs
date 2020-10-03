@@ -2,7 +2,6 @@ use pin_project::pin_project;
 # [pin (__private (! Unpin))]
 struct TupleStruct<T, U>(#[pin] T, U);
 #[doc(hidden)]
-#[allow(non_upper_case_globals)]
 #[allow(clippy::used_underscore_binding)]
 #[allow(box_pointers)]
 #[allow(explicit_outlives_requirements)]
