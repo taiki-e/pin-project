@@ -27,7 +27,7 @@
 //!
 //! [*code like this will be generated*][struct-default-expanded]
 //!
-//! To use [`#[pin_project]`] on enums, you need to name the projection type
+//! To use [`#[pin_project]`][`pin_project`] on enums, you need to name the projection type
 //! returned from the method.
 //!
 //! ```rust
