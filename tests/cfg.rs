@@ -1,7 +1,7 @@
 #![warn(rust_2018_idioms, single_use_lifetimes)]
 #![allow(dead_code)]
 
-// Refs: https://doc.rust-lang.org/nightly/reference/attributes.html
+// Refs: https://doc.rust-lang.org/reference/attributes.html
 
 use pin_project::pin_project;
 use std::{marker::PhantomPinned, pin::Pin};

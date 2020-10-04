@@ -713,7 +713,7 @@ impl<'a> Context<'a> {
                     {
                     }
 
-                    // A dummy impl of `UnsafeUnpin`, to ensure that the user cannot implement it.
+                    // Generate a dummy impl of `UnsafeUnpin`, to ensure that the user cannot implement it.
                     //
                     // To ensure that users don't accidentally write a non-functional `UnsafeUnpin`
                     // impls, we emit one ourselves. If the user ends up writing an `UnsafeUnpin`
@@ -804,7 +804,7 @@ impl<'a> Context<'a> {
                     {
                     }
 
-                    // A dummy impl of `UnsafeUnpin`, to ensure that the user cannot implement it.
+                    // Generate a dummy impl of `UnsafeUnpin`, to ensure that the user cannot implement it.
                     //
                     // To ensure that users don't accidentally write a non-functional `UnsafeUnpin`
                     // impls, we emit one ourselves. If the user ends up writing an `UnsafeUnpin`
@@ -824,9 +824,9 @@ impl<'a> Context<'a> {
     /// Creates `Drop` implementation for the original type.
     ///
     /// The kind of `Drop` impl generated depends on `pinned_drop` field:
-    /// * `Some` - Implements `Drop` via `PinnedDrop` impl.
-    /// * `None` - Generates code that ensures that `Drop`
-    ///   trait is not implemented, not `Drop` impl.
+    /// * `Some` - implements `Drop` via `PinnedDrop` impl.
+    /// * `None` - generates code that ensures that `Drop` trait is not implemented,
+    ///            instead of generating `Drop` impl.
     fn make_drop_impl(&self) -> TokenStream {
         let ident = self.orig.ident;
         let (impl_generics, ty_generics, where_clause) = self.orig.generics.split_for_impl();
@@ -884,7 +884,7 @@ impl<'a> Context<'a> {
                 impl<T: ::pin_project::__private::Drop> #trait_ident for T {}
                 impl #impl_generics #trait_ident for #ident #ty_generics #where_clause {}
 
-                // A dummy impl of `PinnedDrop`, to ensure that the user cannot implement it.
+                // Generate a dummy impl of `PinnedDrop`, to ensure that the user cannot implement it.
                 // Since the user did not pass `PinnedDrop` to `#[pin_project]`, any `PinnedDrop`
                 // impl will not actually be called. Unfortunately, we can't detect this situation
                 // directly from either the `#[pin_project]` or `#[pinned_drop]` attributes, since
@@ -906,8 +906,8 @@ impl<'a> Context<'a> {
 
     /// Creates an implementation of the projection methods.
     ///
-    /// On structs, both `project` and `project_ref` methods are always generated,
-    /// and `project_replace` is only generated if `ProjReplace::span` is `Some`.
+    /// On structs, both the `project` and `project_ref` methods are always generated,
+    /// and the `project_replace` method is only generated if `ProjReplace::span` is `Some`.
     ///
     /// On enums, only methods that the returned projected type is named will be generated.
     fn make_proj_impl(
@@ -991,7 +991,8 @@ impl<'a> Context<'a> {
     ///
     /// This currently does two checks:
     /// * Checks the attributes of structs to ensure there is no `[repr(packed)]`.
-    /// * Generates a function that borrows fields without an unsafe block.
+    /// * Generates a function that borrows fields without an unsafe block and
+    ///   forbidding `safe_packed_borrows` lint.
     fn ensure_not_packed(&self, fields: &Fields) -> Result<TokenStream> {
         for meta in self.orig.attrs.iter().filter_map(|attr| attr.parse_meta().ok()) {
             if let Meta::List(list) = meta {
