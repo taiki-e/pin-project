@@ -808,6 +808,8 @@ impl<'a> Context<'a> {
     }
 
     /// Generates the processing that `project_replace` does for the struct or each variant.
+    ///
+    /// Note: `pinned_fields` must be in declaration order.
     fn proj_own_body(
         &self,
         variant_ident: Option<&'a Ident>,
@@ -819,9 +821,13 @@ impl<'a> Context<'a> {
             Some(variant_ident) => quote!(#ident::#variant_ident),
             None => quote!(#ident),
         };
+        // The fields of the struct and the active enum variant are dropped
+        // in declaration order.
+        // Refs: https://doc.rust-lang.org/reference/destructors.html
+        let pinned_fields = pinned_fields.iter().rev();
 
         quote! {
-            // First, extract all the unpinned fields
+            // First, extract all the unpinned fields.
             let __result = #proj_own #proj_move;
 
             // Destructors will run in reverse order, so next create a guard to overwrite
@@ -831,7 +837,7 @@ impl<'a> Context<'a> {
                 value: ::pin_project::__private::ManuallyDrop::new(__replacement),
             };
 
-            // Now create guards to drop all the pinned fields
+            // Now create guards to drop all the pinned fields.
             //
             // Due to a compiler bug (https://github.com/rust-lang/rust/issues/47949)
             // this must be in its own scope, or else `__result` will not be dropped
@@ -842,7 +848,7 @@ impl<'a> Context<'a> {
                 )*
             }
 
-            // Finally, return the result
+            // Finally, return the result.
             __result
         }
     }
