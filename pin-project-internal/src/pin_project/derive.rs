@@ -14,6 +14,9 @@ use crate::utils::{
 pub(super) fn parse_derive(input: TokenStream) -> Result<TokenStream> {
     let mut input: DeriveInput = syn::parse2(input)?;
 
+    let mut cx;
+    let mut generate = GenerateTokens::default();
+
     let ident = &input.ident;
     let ty_generics = input.generics.split_for_impl().1;
     let self_ty = parse_quote!(#ident #ty_generics);
@@ -21,20 +24,13 @@ pub(super) fn parse_derive(input: TokenStream) -> Result<TokenStream> {
     visitor.visit_generics_mut(&mut input.generics);
     visitor.visit_data_mut(&mut input.data);
 
-    let mut cx = Context::new(&input.attrs, &input.vis, &input.ident, &mut input.generics)?;
-    let mut generate = GenerateTokens::default();
-    let packed_check;
-
     match &input.data {
         Data::Struct(data) => {
-            // Do this first for a better error message.
-            packed_check = Some(ensure_not_packed(&cx, &data.fields)?);
-            parse_struct(&mut cx, data, &mut generate)?;
+            cx = Context::new(&input.attrs, &input.vis, ident, &mut input.generics, Struct)?;
+            parse_struct(&mut cx, &data.fields, &mut generate)?;
         }
         Data::Enum(data) => {
-            // We don't need to check for `#[repr(packed)]`,
-            // since it does not apply to enums.
-            packed_check = None;
+            cx = Context::new(&input.attrs, &input.vis, ident, &mut input.generics, Enum)?;
             parse_enum(&mut cx, data, &mut generate)?;
         }
         Data::Union(_) => {
@@ -45,41 +41,7 @@ pub(super) fn parse_derive(input: TokenStream) -> Result<TokenStream> {
         }
     }
 
-    Ok(generate.into_tokens(&cx, packed_check))
-}
-
-fn validate_struct(ident: &Ident, fields: &Fields) -> Result<()> {
-    if fields.is_empty() {
-        let msg = "#[pin_project] attribute may not be used on structs with zero fields";
-        if let Fields::Unit = fields { Err(error!(ident, msg)) } else { Err(error!(fields, msg)) }
-    } else {
-        Ok(())
-    }
-}
-
-fn validate_enum(brace_token: token::Brace, variants: &Variants) -> Result<()> {
-    if variants.is_empty() {
-        return Err(Error::new(
-            brace_token.span,
-            "#[pin_project] attribute may not be used on enums without variants",
-        ));
-    }
-    let has_field = variants.iter().try_fold(false, |has_field, v| {
-        if let Some((_, e)) = &v.discriminant {
-            Err(error!(e, "#[pin_project] attribute may not be used on enums with discriminants"))
-        } else if let Some(attr) = v.attrs.find(PIN) {
-            Err(error!(attr, "#[pin] attribute may only be used on fields of structs or variants"))
-        } else if v.fields.is_empty() {
-            Ok(has_field)
-        } else {
-            Ok(true)
-        }
-    })?;
-    if has_field {
-        Ok(())
-    } else {
-        Err(error!(variants, "#[pin_project] attribute may not be used on enums with zero fields"))
-    }
+    Ok(generate.into_tokens(&cx))
 }
 
 #[derive(Default)]
@@ -97,7 +59,7 @@ impl GenerateTokens {
         }
     }
 
-    fn into_tokens(self, cx: &Context<'_>, packed_check: Option<TokenStream>) -> TokenStream {
+    fn into_tokens(self, cx: &Context<'_>) -> TokenStream {
         let mut tokens = self.exposed;
         let scoped = self.scoped;
 
@@ -129,13 +91,12 @@ impl GenerateTokens {
             // * https://github.com/taiki-e/pin-project/pull/53#issuecomment-525906867
             // * https://github.com/taiki-e/pin-project/pull/70
             #[doc(hidden)] // for Rust 1.34 - 1.41
-            #[allow(clippy::used_underscore_binding)]
             #allowed_lints
+            #[allow(clippy::used_underscore_binding)]
             const #dummy_const: () = {
                 #scoped
                 #unpin_impl
                 #drop_impl
-                #packed_check
             };
         });
         tokens
@@ -154,9 +115,9 @@ fn global_allowed_lints() -> TokenStream {
 }
 
 /// Returns attributes used on projected types.
-fn proj_allowed_lints(is_enum: bool) -> (TokenStream, TokenStream, TokenStream) {
+fn proj_allowed_lints(kind: TypeKind) -> (TokenStream, TokenStream, TokenStream) {
     let large_enum_variant =
-        if is_enum { Some(quote!(#[allow(clippy::large_enum_variant)])) } else { None };
+        if kind == Enum { Some(quote!(#[allow(clippy::large_enum_variant)])) } else { None };
     let global_allowed_lints = global_allowed_lints();
     let proj_mut = quote! {
         #[allow(dead_code)] // This lint warns unused fields/variants.
@@ -177,6 +138,98 @@ fn proj_allowed_lints(is_enum: bool) -> (TokenStream, TokenStream, TokenStream) 
     };
     (proj_mut, proj_ref, proj_own)
 }
+
+struct Context<'a> {
+    /// The original type.
+    orig: OriginalType<'a>,
+    /// The projected types.
+    proj: ProjectedType,
+    /// Types of the pinned fields.
+    pinned_fields: Vec<Type>,
+    /// Kind of the original type: struct or enum
+    kind: TypeKind,
+
+    /// `PinnedDrop` argument.
+    pinned_drop: Option<Span>,
+    /// `UnsafeUnpin` or `!Unpin` argument.
+    unpin_impl: UnpinImpl,
+    /// `project` argument.
+    project: bool,
+    /// `project_ref` argument.
+    project_ref: bool,
+    /// `project_replace [= <ident>]` argument.
+    project_replace: ProjReplace,
+}
+
+impl<'a> Context<'a> {
+    fn new(
+        attrs: &'a [Attribute],
+        vis: &'a Visibility,
+        ident: &'a Ident,
+        generics: &'a mut Generics,
+        kind: TypeKind,
+    ) -> Result<Self> {
+        let Args { pinned_drop, unpin_impl, project, project_ref, project_replace } =
+            parse_args(attrs)?;
+
+        if let Some(name) = [project.as_ref(), project_ref.as_ref(), project_replace.ident()]
+            .iter()
+            .filter_map(Option::as_ref)
+            .find(|name| **name == ident)
+        {
+            return Err(error!(name, "name `{}` is the same as the original type name", name));
+        }
+
+        let mut lifetime_name = String::from("'pin");
+        determine_lifetime_name(&mut lifetime_name, generics);
+        let lifetime = Lifetime::new(&lifetime_name, Span::call_site());
+
+        let ty_generics = generics.split_for_impl().1;
+        let ty_generics_as_generics = parse_quote!(#ty_generics);
+        let mut proj_generics = generics.clone();
+        let pred = insert_lifetime_and_bound(
+            &mut proj_generics,
+            lifetime.clone(),
+            &ty_generics_as_generics,
+            ident,
+        );
+        let mut where_clause = generics.make_where_clause().clone();
+        where_clause.predicates.push(pred);
+
+        let own_ident = project_replace
+            .ident()
+            .cloned()
+            .unwrap_or_else(|| format_ident!("__{}ProjectionOwned", ident));
+
+        Ok(Self {
+            kind,
+            pinned_drop,
+            unpin_impl,
+            project: project.is_some(),
+            project_ref: project_ref.is_some(),
+            project_replace,
+            proj: ProjectedType {
+                vis: determine_visibility(vis),
+                mut_ident: project.unwrap_or_else(|| format_ident!("__{}Projection", ident)),
+                ref_ident: project_ref.unwrap_or_else(|| format_ident!("__{}ProjectionRef", ident)),
+                own_ident,
+                lifetime,
+                generics: proj_generics,
+                where_clause,
+            },
+            orig: OriginalType { attrs, vis, ident, generics },
+            pinned_fields: Vec::new(),
+        })
+    }
+}
+
+#[derive(Copy, Clone, Eq, PartialEq)]
+enum TypeKind {
+    Enum,
+    Struct,
+}
+
+use TypeKind::{Enum, Struct};
 
 struct OriginalType<'a> {
     /// Attributes of the original type.
@@ -226,91 +279,48 @@ struct ProjectedFields {
     proj_own_fields: TokenStream,
 }
 
-struct Context<'a> {
-    /// The original type.
-    orig: OriginalType<'a>,
-    /// The projected types.
-    proj: ProjectedType,
-    /// Types of the pinned fields.
-    pinned_fields: Vec<Type>,
-
-    /// `PinnedDrop` argument.
-    pinned_drop: Option<Span>,
-    /// `UnsafeUnpin` or `!Unpin` argument.
-    unpin_impl: UnpinImpl,
-    /// `project` argument.
-    project: bool,
-    /// `project_ref` argument.
-    project_ref: bool,
-    /// `project_replace [= <ident>]` argument.
-    project_replace: ProjReplace,
+fn validate_struct(ident: &Ident, fields: &Fields) -> Result<()> {
+    if fields.is_empty() {
+        let msg = "#[pin_project] attribute may not be used on structs with zero fields";
+        if let Fields::Unit = fields { Err(error!(ident, msg)) } else { Err(error!(fields, msg)) }
+    } else {
+        Ok(())
+    }
 }
 
-impl<'a> Context<'a> {
-    fn new(
-        attrs: &'a [Attribute],
-        vis: &'a Visibility,
-        ident: &'a Ident,
-        generics: &'a mut Generics,
-    ) -> Result<Self> {
-        let Args { pinned_drop, unpin_impl, project, project_ref, project_replace } =
-            parse_args(attrs)?;
-
-        if let Some(name) = [project.as_ref(), project_ref.as_ref(), project_replace.ident()]
-            .iter()
-            .filter_map(Option::as_ref)
-            .find(|name| **name == ident)
-        {
-            return Err(error!(name, "name `{}` is the same as the original type name", name));
+fn validate_enum(brace_token: token::Brace, variants: &Variants) -> Result<()> {
+    if variants.is_empty() {
+        return Err(Error::new(
+            brace_token.span,
+            "#[pin_project] attribute may not be used on enums without variants",
+        ));
+    }
+    let has_field = variants.iter().try_fold(false, |has_field, v| {
+        if let Some((_, e)) = &v.discriminant {
+            Err(error!(e, "#[pin_project] attribute may not be used on enums with discriminants"))
+        } else if let Some(attr) = v.attrs.find(PIN) {
+            Err(error!(attr, "#[pin] attribute may only be used on fields of structs or variants"))
+        } else if v.fields.is_empty() {
+            Ok(has_field)
+        } else {
+            Ok(true)
         }
-
-        let mut lifetime_name = String::from("'pin");
-        determine_lifetime_name(&mut lifetime_name, generics);
-        let lifetime = Lifetime::new(&lifetime_name, Span::call_site());
-
-        let ty_generics = generics.split_for_impl().1;
-        let ty_generics_as_generics = parse_quote!(#ty_generics);
-        let mut proj_generics = generics.clone();
-        let pred = insert_lifetime_and_bound(
-            &mut proj_generics,
-            lifetime.clone(),
-            &ty_generics_as_generics,
-            ident,
-        );
-        let mut where_clause = generics.make_where_clause().clone();
-        where_clause.predicates.push(pred);
-
-        let own_ident = project_replace
-            .ident()
-            .cloned()
-            .unwrap_or_else(|| format_ident!("__{}ProjectionOwned", ident));
-
-        Ok(Self {
-            pinned_drop,
-            unpin_impl,
-            project: project.is_some(),
-            project_ref: project_ref.is_some(),
-            project_replace,
-            proj: ProjectedType {
-                vis: determine_visibility(vis),
-                mut_ident: project.unwrap_or_else(|| format_ident!("__{}Projection", ident)),
-                ref_ident: project_ref.unwrap_or_else(|| format_ident!("__{}ProjectionRef", ident)),
-                own_ident,
-                lifetime,
-                generics: proj_generics,
-                where_clause,
-            },
-            orig: OriginalType { attrs, vis, ident, generics },
-            pinned_fields: Vec::new(),
-        })
+    })?;
+    if has_field {
+        Ok(())
+    } else {
+        Err(error!(variants, "#[pin_project] attribute may not be used on enums with zero fields"))
     }
 }
 
 fn parse_struct(
     cx: &mut Context<'_>,
-    DataStruct { fields, .. }: &DataStruct,
+    fields: &Fields,
     generate: &mut GenerateTokens,
 ) -> Result<()> {
+    // Do this first for a better error message.
+    let packed_check = ensure_not_packed(&cx.orig, fields)?;
+
     validate_struct(cx.orig.ident, fields)?;
 
     let ProjectedFields {
@@ -351,7 +361,7 @@ fn parse_struct(
         Fields::Unit => unreachable!(),
     };
 
-    let (proj_attrs, proj_ref_attrs, proj_own_attrs) = proj_allowed_lints(false);
+    let (proj_attrs, proj_ref_attrs, proj_own_attrs) = proj_allowed_lints(cx.kind);
     generate.extend(cx.project, quote! {
         #proj_attrs
         #vis struct #proj_ident #proj_generics #where_clause_fields
@@ -380,9 +390,9 @@ fn parse_struct(
         let Self #proj_pat = &mut *__self_ptr;
         #proj_own_body
     };
-    generate
-        .extend(false, make_proj_impl(cx, false, &proj_mut_body, &proj_ref_body, &proj_own_body));
+    generate.extend(false, make_proj_impl(cx, &proj_mut_body, &proj_ref_body, &proj_own_body));
 
+    generate.extend(false, packed_check);
     Ok(())
 }
 
@@ -397,6 +407,9 @@ fn parse_enum(
             "`project_replace` argument requires a value when used on enums",
         ));
     }
+
+    // We don't need to check for `#[repr(packed)]`,
+    // since it does not apply to enums.
 
     validate_enum(*brace_token, variants)?;
 
@@ -418,7 +431,7 @@ fn parse_enum(
     let proj_generics = &cx.proj.generics;
     let proj_where_clause = &cx.proj.where_clause;
 
-    let (proj_attrs, proj_ref_attrs, proj_own_attrs) = proj_allowed_lints(true);
+    let (proj_attrs, proj_ref_attrs, proj_own_attrs) = proj_allowed_lints(cx.kind);
     if cx.project {
         generate.extend(true, quote! {
             #proj_attrs
@@ -460,8 +473,7 @@ fn parse_enum(
             #proj_own_arms
         }
     };
-    generate
-        .extend(false, make_proj_impl(cx, true, &proj_mut_body, &proj_ref_body, &proj_own_body));
+    generate.extend(false, make_proj_impl(cx, &proj_mut_body, &proj_ref_body, &proj_own_body));
 
     Ok(())
 }
@@ -624,6 +636,7 @@ fn proj_own_body(
         Some(variant_ident) => quote!(#ident::#variant_ident),
         None => quote!(#ident),
     };
+
     // The fields of the struct and the active enum variant are dropped
     // in declaration order.
     // Refs: https://doc.rust-lang.org/reference/destructors.html
@@ -905,7 +918,6 @@ fn make_drop_impl(cx: &Context<'_>) -> TokenStream {
 /// On enums, only methods that the returned projected type is named will be generated.
 fn make_proj_impl(
     cx: &Context<'_>,
-    is_enum: bool,
     proj_body: &TokenStream,
     proj_ref_body: &TokenStream,
     proj_own_body: &TokenStream,
@@ -956,7 +968,7 @@ fn make_proj_impl(
         }
     });
 
-    if is_enum {
+    if cx.kind == Enum {
         if !cx.project {
             project = None;
         }
@@ -983,8 +995,8 @@ fn make_proj_impl(
 /// * Checks the attributes of structs to ensure there is no `[repr(packed)]`.
 /// * Generates a function that borrows fields without an unsafe block and
 ///   forbidding `safe_packed_borrows` lint.
-fn ensure_not_packed(cx: &Context<'_>, fields: &Fields) -> Result<TokenStream> {
-    for meta in cx.orig.attrs.iter().filter_map(|attr| attr.parse_meta().ok()) {
+fn ensure_not_packed(orig: &OriginalType<'_>, fields: &Fields) -> Result<TokenStream> {
+    for meta in orig.attrs.iter().filter_map(|attr| attr.parse_meta().ok()) {
         if let Meta::List(list) = meta {
             if list.path.is_ident("repr") {
                 for repr in list.nested.iter() {
@@ -1063,8 +1075,8 @@ fn ensure_not_packed(cx: &Context<'_>, fields: &Fields) -> Result<TokenStream> {
         Fields::Unit => {}
     }
 
-    let (impl_generics, ty_generics, where_clause) = cx.orig.generics.split_for_impl();
-    let ident = cx.orig.ident;
+    let (impl_generics, ty_generics, where_clause) = orig.generics.split_for_impl();
+    let ident = orig.ident;
     Ok(quote! {
         #[forbid(safe_packed_borrows)]
         fn __assert_not_repr_packed #impl_generics (this: &#ident #ty_generics) #where_clause {

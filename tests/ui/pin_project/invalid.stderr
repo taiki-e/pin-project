@@ -339,20 +339,26 @@ error: #[pin_project] attribute may only be used on structs or enums
 257 | |     }
     | |_____^
 
-error: #[pin_project] attribute may not be used on #[repr(packed)] types
-   --> $DIR/invalid.rs:265:12
+error: #[pin_project] attribute may only be used on structs or enums
+   --> $DIR/invalid.rs:260:5
     |
-265 |     #[repr(packed)]
+260 |     impl Impl {} //~ ERROR may only be used on structs or enums
+    |     ^^^^^^^^^^^^
+
+error: #[pin_project] attribute may not be used on #[repr(packed)] types
+   --> $DIR/invalid.rs:268:12
+    |
+268 |     #[repr(packed)]
     |            ^^^^^^
 
 error: #[pin_project] attribute may not be used on #[repr(packed)] types
-   --> $DIR/invalid.rs:269:12
+   --> $DIR/invalid.rs:272:12
     |
-269 |     #[repr(packed)]
+272 |     #[repr(packed)]
     |            ^^^^^^
 
 error: #[pin_project] attribute may not be used on #[repr(packed)] types
-   --> $DIR/invalid.rs:273:12
+   --> $DIR/invalid.rs:276:12
     |
-273 |     #[repr(packed)]
+276 |     #[repr(packed)]
     |            ^^^^^^

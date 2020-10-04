@@ -21,12 +21,12 @@ where
     unpinned: &'pin mut (U),
 }
 #[doc(hidden)]
-#[allow(clippy::used_underscore_binding)]
 #[allow(box_pointers)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
 #[allow(clippy::pattern_type_mismatch)]
 #[allow(clippy::redundant_pub_crate)]
+#[allow(clippy::used_underscore_binding)]
 const _: () = {
     #[allow(dead_code)]
     #[allow(clippy::type_repetition_in_bounds)]
@@ -64,6 +64,11 @@ const _: () = {
             }
         }
     }
+    #[forbid(safe_packed_borrows)]
+    fn __assert_not_repr_packed<T, U>(this: &Struct<T, U>) {
+        let _ = &this.pinned;
+        let _ = &this.unpinned;
+    }
     struct __Struct<'pin, T, U> {
         __pin_project_use_generics: ::pin_project::__private::AlwaysUnpin<
             'pin,
@@ -90,11 +95,6 @@ const _: () = {
     #[doc(hidden)]
     impl<T, U> ::pin_project::__private::PinnedDrop for Struct<T, U> {
         unsafe fn drop(self: ::pin_project::__private::Pin<&mut Self>) {}
-    }
-    #[forbid(safe_packed_borrows)]
-    fn __assert_not_repr_packed<T, U>(this: &Struct<T, U>) {
-        let _ = &this.pinned;
-        let _ = &this.unpinned;
     }
 };
 fn main() {}

@@ -255,6 +255,9 @@ mod pin_project_item {
         //~^ ERROR may only be used on structs or enums
         f: (),
     }
+
+    #[pin_project]
+    impl Impl {} //~ ERROR may only be used on structs or enums
 }
 
 // #[repr(packed)] is always detected first, even on unsupported structs.
