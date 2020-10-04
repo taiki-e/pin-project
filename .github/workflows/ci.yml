@@ -75,7 +75,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Install Rust and rustfmt
+      - name: Install Rust and Rustfmt
         run: ci/install-component.sh rustfmt
       - name: Install cargo-expand
         run: |
@@ -83,6 +83,19 @@ jobs:
       - name: cargo test (expandtest)
         run: |
           bash scripts/expandtest.sh
+
+  miri:
+    name: miri
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Rust and Miri
+        run: |
+          ci/install-component.sh miri
+          cargo miri setup
+      - name: cargo miri test
+        run: |
+          cargo miri test
 
   clippy:
     name: clippy
@@ -100,7 +113,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Install Rust and rustfmt
+      - name: Install Rust and Rustfmt
         run: ci/install-component.sh rustfmt
       - name: cargo fmt --check
         run: |
@@ -143,6 +156,7 @@ jobs:
       - rustfmt
       - rustdoc
       - expandtest
+      - miri
       - shellcheck
     runs-on: ubuntu-latest
     steps:
@@ -157,6 +171,7 @@ jobs:
       - rustfmt
       - rustdoc
       - expandtest
+      - miri
       - shellcheck
     runs-on: ubuntu-latest
     steps:
