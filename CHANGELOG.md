@@ -6,6 +6,8 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 ## [Unreleased]
 
+* [Suppress `clippy::redundant_pub_crate` lint in generated code.](https://github.com/taiki-e/pin-project/pull/284)
+
 ## [1.0.0-alpha.1] - 2020-09-22
 
 * [Remove deprecated `#[project]`, `#[project_ref]`, and `#[project_replace]` attributes.](https://github.com/taiki-e/pin-project/pull/265)
@@ -39,9 +41,13 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 See also [tracking issue for 1.0 release](https://github.com/taiki-e/pin-project/issues/264).
 
+## [0.4.26] - 2020-10-04
+
+* [Fix drop order of pinned fields in project_replace](https://github.com/taiki-e/pin-project/pull/287)
+
 ## [0.4.25] - 2020-10-01
 
-* Fix compatibility with `drop_bounds` lint, which will be added to rustc in the future. See [#272](https://github.com/taiki-e/pin-project/issues/272) for more details.
+* Suppress `drop_bounds` lint, which will be added to rustc in the future. See [#272](https://github.com/taiki-e/pin-project/issues/272) for more details.
 
   (Note: 1.0.0-alpha.1 already contains this change.)
 
@@ -592,6 +598,7 @@ Initial release
 
 [Unreleased]: https://github.com/taiki-e/pin-project/compare/v1.0.0-alpha.1...HEAD
 [1.0.0-alpha.1]: https://github.com/taiki-e/pin-project/compare/v0.4.23...v1.0.0-alpha.1
+[0.4.26]: https://github.com/taiki-e/pin-project/compare/v0.4.25...v0.4.26
 [0.4.25]: https://github.com/taiki-e/pin-project/compare/v0.4.24...v0.4.25
 [0.4.24]: https://github.com/taiki-e/pin-project/compare/v0.4.23...v0.4.24
 [0.4.23]: https://github.com/taiki-e/pin-project/compare/v0.4.22...v0.4.23
