@@ -310,6 +310,7 @@ pub mod clippy_used_underscore_binding {
     }
 }
 
+#[cfg(not(miri))]
 #[allow(box_pointers)]
 #[allow(clippy::restriction)]
 #[rustversion::attr(not(nightly), ignore)]
