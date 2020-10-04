@@ -840,16 +840,14 @@ impl<'a> Context<'a> {
                 #where_clause
                 {
                     fn drop(&mut self) {
-                        // Safety - we're in 'drop', so we know that 'self' will
-                        // never move again.
-                        let pinned_self = #unsafety {
-                            ::pin_project::__private::Pin::new_unchecked(self)
-                        };
-                        // We call `pinned_drop` only once. Since `PinnedDrop::drop`
-                        // is an unsafe method and a private API, it is never called again in safe
-                        // code *unless the user uses a maliciously crafted macro*.
                         #unsafety {
-                            ::pin_project::__private::PinnedDrop::drop(pinned_self);
+                            // Safety - we're in 'drop', so we know that 'self' will
+                            // never move again.
+                            let __pinned_self = ::pin_project::__private::Pin::new_unchecked(self);
+                            // We call `pinned_drop` only once. Since `PinnedDrop::drop`
+                            // is an unsafe method and a private API, it is never called again in safe
+                            // code *unless the user uses a maliciously crafted macro*.
+                            ::pin_project::__private::PinnedDrop::drop(__pinned_self);
                         }
                     }
                 }
@@ -947,9 +945,6 @@ impl<'a> Context<'a> {
             }
         });
         let mut project_replace = self.project_replace.span().map(|span| {
-            // For interoperability with `forbid(unsafe_code)`, `unsafe` token should be
-            // call-site span.
-            let unsafety = <Token![unsafe]>::default();
             // It is enough to only set the span of the signature.
             let sig = quote_spanned! { span =>
                 #vis fn project_replace(
@@ -959,7 +954,7 @@ impl<'a> Context<'a> {
             };
             quote! {
                 #sig {
-                    #unsafety {
+                    unsafe {
                         #proj_own_body
                     }
                 }
