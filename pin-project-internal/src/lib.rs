@@ -130,7 +130,7 @@ use proc_macro::TokenStream;
 ///    your struct - that is, [`Pin`]`<&mut MyStruct>` where `MyStruct` is the
 ///    type of your struct.
 ///
-///    You can call `project()` on this type as usual, along with any other
+///    You can call `.project()` on this type as usual, along with any other
 ///    methods you have defined. Because your code is never provided with
 ///    a `&mut MyStruct`, it is impossible to move out of pin-projectable
 ///    fields in safe code in your destructor.
@@ -156,8 +156,8 @@ use proc_macro::TokenStream;
 ///    code.
 ///
 /// Pin projections are also incompatible with [`#[repr(packed)]`][repr-packed]
-/// structs. Attempting to use this attribute on a
-/// [`#[repr(packed)]`][repr-packed] struct results in a compile-time error.
+/// types. Attempting to use this attribute on a `#[repr(packed)]` type results
+/// in a compile-time error.
 ///
 /// # Examples
 ///
@@ -231,8 +231,8 @@ use proc_macro::TokenStream;
 /// When `#[pin_project]` is used on enums, only named projection types and
 /// methods are generated because there is no way to access variants of
 /// projected types without naming it.
-/// For example, in the above example, only `project()` method is generated,
-/// and `project_ref()` method is not generated.
+/// For example, in the above example, only the `project` method is generated,
+/// and the `project_ref` method is not generated.
 /// (When `#[pin_project]` is used on structs, both methods are always generated.)
 ///
 /// ```rust,compile_fail,E0599
@@ -254,7 +254,7 @@ use proc_macro::TokenStream;
 /// }
 /// ```
 ///
-/// If you want to call the `project()` method multiple times or later use the
+/// If you want to call `.project()` multiple times or later use the
 /// original [`Pin`] type, it needs to use [`.as_mut()`][`Pin::as_mut`] to avoid
 /// consuming the [`Pin`].
 ///
@@ -373,14 +373,14 @@ use proc_macro::TokenStream;
 /// use std::{fmt::Debug, pin::Pin};
 ///
 /// #[pin_project(PinnedDrop)]
-/// struct Struct<T: Debug, U: Debug> {
+/// struct PrintOnDrop<T: Debug, U: Debug> {
 ///     #[pin]
 ///     pinned_field: T,
 ///     unpin_field: U,
 /// }
 ///
 /// #[pinned_drop]
-/// impl<T: Debug, U: Debug> PinnedDrop for Struct<T, U> {
+/// impl<T: Debug, U: Debug> PinnedDrop for PrintOnDrop<T, U> {
 ///     fn drop(self: Pin<&mut Self>) {
 ///         println!("Dropping pinned field: {:?}", self.pinned_field);
 ///         println!("Dropping unpin field: {:?}", self.unpin_field);
@@ -388,17 +388,17 @@ use proc_macro::TokenStream;
 /// }
 ///
 /// fn main() {
-///     let _x = Struct { pinned_field: true, unpin_field: 40 };
+///     let _x = PrintOnDrop { pinned_field: true, unpin_field: 40 };
 /// }
 /// ```
 ///
-/// See also [`#[pinned_drop]`][`pinned_drop`] attribute.
+/// See also [`#[pinned_drop]`][macro@pinned_drop] attribute.
 ///
-/// # `project_replace()`
+/// # `project_replace` method
 ///
-/// In addition to the `project()` and `project_ref()` methods which are always
+/// In addition to the `project` and `project_ref` methods which are always
 /// provided when you use the `#[pin_project]` attribute, there is a third
-/// method, `project_replace()` which can be useful in some situations. It is
+/// method, `project_replace` which can be useful in some situations. It is
 /// equivalent to [`Pin::set`], except that the unpinned fields are moved and
 /// returned, instead of being dropped in-place.
 ///
@@ -441,8 +441,8 @@ use proc_macro::TokenStream;
 /// ```
 ///
 /// By passing the value to the `project_replace` argument, you can name the
-/// returned type of `project_replace()`. This is necessary whenever
-/// destructuring the return type of `project_replace()`, and work in exactly
+/// returned type of the `project_replace` method. This is necessary whenever
+/// destructuring the return type of the `project_replace` method, and work in exactly
 /// the same way as the `project` and `project_ref` arguments.
 ///
 /// ```rust
@@ -472,25 +472,24 @@ use proc_macro::TokenStream;
 /// [`Pin::set`]: core::pin::Pin::set
 /// [`Pin`]: core::pin::Pin
 /// [`UnsafeUnpin`]: https://docs.rs/pin-project/1.0.0-alpha.1/pin_project/trait.UnsafeUnpin.html
-/// [`pinned_drop`]: ./attr.pinned_drop.html
 /// [drop-guarantee]: core::pin#drop-guarantee
 /// [pin-projection]: core::pin#projections-and-structural-pinning
-/// [pinned-drop]: ./attr.pin_project.html#pinned_drop
+/// [pinned-drop]: macro@pin_project#pinned_drop
 /// [repr-packed]: https://doc.rust-lang.org/nomicon/other-reprs.html#reprpacked
 /// [undefined-behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html
-/// [unsafe-unpin]: ./attr.pin_project.html#unsafeunpin
+/// [unsafe-unpin]: macro@pin_project#unsafeunpin
 #[proc_macro_attribute]
 pub fn pin_project(args: TokenStream, input: TokenStream) -> TokenStream {
     pin_project::attribute(&args.into(), input.into()).into()
 }
 
-/// An attribute for annotating an impl block that implements [`Drop`].
+/// An attribute used for custom implementations of [`Drop`].
 ///
-/// This attribute is only needed when you wish to provide a [`Drop`]
-/// impl for your type.
+/// This attribute is used in conjunction with the `PinnedDrop` argument to
+/// the [`#[pin_project]`][macro@pin_project] attribute.
 ///
-/// This impl block acts just like a normal [`Drop`] impl,
-/// except for the following two:
+/// The impl block annotated with this attribute acts just like a normal
+/// [`Drop`] impl, except for the following two:
 ///
 /// * `drop` method takes [`Pin`]`<&mut Self>`
 /// * Name of the trait is `PinnedDrop`.
@@ -509,27 +508,27 @@ pub fn pin_project(args: TokenStream, input: TokenStream) -> TokenStream {
 /// In particular, it will never be called more than once, just like
 /// [`Drop::drop`].
 ///
-/// # Example
+/// # Examples
 ///
 /// ```rust
 /// use pin_project::{pin_project, pinned_drop};
 /// use std::pin::Pin;
 ///
 /// #[pin_project(PinnedDrop)]
-/// struct Foo {
+/// struct PrintOnDrop {
 ///     #[pin]
 ///     field: u8,
 /// }
 ///
 /// #[pinned_drop]
-/// impl PinnedDrop for Foo {
+/// impl PinnedDrop for PrintOnDrop {
 ///     fn drop(self: Pin<&mut Self>) {
 ///         println!("Dropping: {}", self.field);
 ///     }
 /// }
 ///
 /// fn main() {
-///     let _x = Foo { field: 50 };
+///     let _x = PrintOnDrop { field: 50 };
 /// }
 /// ```
 ///
@@ -538,13 +537,13 @@ pub fn pin_project(args: TokenStream, input: TokenStream) -> TokenStream {
 /// # Why `#[pinned_drop]` attribute is needed?
 ///
 /// Implementing `PinnedDrop::drop` is safe, but calling it is not safe.
-// This is because destructors can be called multiple times in safe code and
-/// [double dropping is unsound](https://github.com/rust-lang/rust/pull/62360).
+/// This is because destructors can be called multiple times in safe code and
+/// [double dropping is unsound][rust-lang/rust#62360].
 ///
 /// Ideally, it would be desirable to be able to forbid manual calls in
 /// the same way as [`Drop::drop`], but the library cannot do it. So, by using
-/// macros and replacing them with private traits like the following, we prevent
-/// users from calling `PinnedDrop::drop` in safe code.
+/// macros and replacing them with private traits like the following,
+/// this crate prevent users from calling `PinnedDrop::drop` in safe code.
 ///
 /// ```rust
 /// # use std::pin::Pin;
@@ -557,8 +556,9 @@ pub fn pin_project(args: TokenStream, input: TokenStream) -> TokenStream {
 /// Also by using the [`drop`] function just like dropping a type that directly
 /// implements [`Drop`], can drop safely a type that implements `PinnedDrop`.
 ///
+/// [rust-lang/rust#62360]: https://github.com/rust-lang/rust/pull/62360
 /// [`Pin`]: core::pin::Pin
-/// [pinned-drop]: ./attr.pin_project.html#pinned_drop
+/// [pinned-drop]: macro@pin_project#pinned_drop
 #[proc_macro_attribute]
 pub fn pinned_drop(args: TokenStream, input: TokenStream) -> TokenStream {
     let input = syn::parse_macro_input!(input);

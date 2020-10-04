@@ -47,12 +47,12 @@ where
     Unit,
 }
 #[doc(hidden)]
-#[allow(clippy::used_underscore_binding)]
 #[allow(box_pointers)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
 #[allow(clippy::pattern_type_mismatch)]
 #[allow(clippy::redundant_pub_crate)]
+#[allow(clippy::used_underscore_binding)]
 const _: () = {
     impl<T, U> Enum<T, U> {
         pub(crate) fn project<'pin>(

@@ -31,12 +31,12 @@ where
 #[allow(clippy::redundant_pub_crate)]
 struct ProjOwn<T, U>(::pin_project::__private::PhantomData<T>, U);
 #[doc(hidden)]
-#[allow(clippy::used_underscore_binding)]
 #[allow(box_pointers)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
 #[allow(clippy::pattern_type_mismatch)]
 #[allow(clippy::redundant_pub_crate)]
+#[allow(clippy::used_underscore_binding)]
 const _: () = {
     impl<T, U> TupleStruct<T, U> {
         fn project<'pin>(self: ::pin_project::__private::Pin<&'pin mut Self>) -> Proj<'pin, T, U> {
@@ -75,6 +75,11 @@ const _: () = {
             }
         }
     }
+    #[forbid(safe_packed_borrows)]
+    fn __assert_not_repr_packed<T, U>(this: &TupleStruct<T, U>) {
+        let _ = &this.0;
+        let _ = &this.1;
+    }
     struct __TupleStruct<'pin, T, U> {
         __pin_project_use_generics: ::pin_project::__private::AlwaysUnpin<
             'pin,
@@ -101,11 +106,6 @@ const _: () = {
     #[doc(hidden)]
     impl<T, U> ::pin_project::__private::PinnedDrop for TupleStruct<T, U> {
         unsafe fn drop(self: ::pin_project::__private::Pin<&mut Self>) {}
-    }
-    #[forbid(safe_packed_borrows)]
-    fn __assert_not_repr_packed<T, U>(this: &TupleStruct<T, U>) {
-        let _ = &this.0;
-        let _ = &this.1;
     }
 };
 fn main() {}

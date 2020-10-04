@@ -123,10 +123,6 @@ pub(crate) trait SliceExt {
     fn find(&self, ident: &str) -> Option<&Attribute>;
 }
 
-pub(crate) trait VecExt {
-    fn find_remove(&mut self, ident: &str) -> Result<Option<Attribute>>;
-}
-
 impl SliceExt for [Attribute] {
     /// # Errors
     ///
@@ -148,12 +144,6 @@ impl SliceExt for [Attribute] {
 
     fn find(&self, ident: &str) -> Option<&Attribute> {
         self.iter().position(|attr| attr.path.is_ident(ident)).map(|i| &self[i])
-    }
-}
-
-impl VecExt for Vec<Attribute> {
-    fn find_remove(&mut self, ident: &str) -> Result<Option<Attribute>> {
-        self.position_exact(ident).map(|pos| pos.map(|i| self.remove(i)))
     }
 }
 

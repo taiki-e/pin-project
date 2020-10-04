@@ -48,12 +48,12 @@ where
     Unit,
 }
 #[doc(hidden)]
-#[allow(clippy::used_underscore_binding)]
 #[allow(box_pointers)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
 #[allow(clippy::pattern_type_mismatch)]
 #[allow(clippy::redundant_pub_crate)]
+#[allow(clippy::used_underscore_binding)]
 const _: () = {
     impl<T, U> Enum<T, U> {
         fn project<'pin>(
@@ -111,9 +111,9 @@ const _: () = {
     }
     impl<T, U> ::pin_project::__private::Drop for Enum<T, U> {
         fn drop(&mut self) {
-            let pinned_self = unsafe { ::pin_project::__private::Pin::new_unchecked(self) };
             unsafe {
-                ::pin_project::__private::PinnedDrop::drop(pinned_self);
+                let __pinned_self = ::pin_project::__private::Pin::new_unchecked(self);
+                ::pin_project::__private::PinnedDrop::drop(__pinned_self);
             }
         }
     }

@@ -17,7 +17,7 @@ pub(crate) fn attribute(args: &TokenStream, mut input: ItemImpl) -> TokenStream 
         if let Type::Path(self_ty) = &*input.self_ty {
             let (impl_generics, _, where_clause) = input.generics.split_for_impl();
 
-            // A dummy impl of `PinnedDrop`.
+            // Generate a dummy impl of `PinnedDrop`.
             // In many cases, `#[pinned_drop] impl` is declared after `#[pin_project]`.
             // Therefore, if `pinned_drop` compile fails, you will also get an error
             // about `PinnedDrop` not being implemented.

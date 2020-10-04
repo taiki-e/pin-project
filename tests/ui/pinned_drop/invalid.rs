@@ -48,7 +48,7 @@ mod item {
     impl InherentImpl {} //~ ERROR may only be used on implementation for the `PinnedDrop` trait
 
     #[pinned_drop]
-    fn drop(_: Pin<&mut ()>) {} //~ ERROR expected `impl`
+    fn func(_: Pin<&mut ()>) {} //~ ERROR expected `impl`
 }
 
 mod unsafety {
