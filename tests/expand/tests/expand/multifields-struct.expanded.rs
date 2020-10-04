@@ -9,59 +9,47 @@ struct Struct<T, U> {
     unpinned2: U,
 }
 #[doc(hidden)]
-#[allow(clippy::used_underscore_binding)]
-#[allow(box_pointers)]
-#[allow(explicit_outlives_requirements)]
+#[allow(dead_code)]
 #[allow(single_use_lifetimes)]
-#[allow(clippy::pattern_type_mismatch)]
-#[allow(clippy::redundant_pub_crate)]
+#[allow(clippy::mut_mut)]
+#[allow(clippy::type_repetition_in_bounds)]
+struct __StructProjection<'pin, T, U>
+where
+    Struct<T, U>: 'pin,
+{
+    pinned1: ::pin_project::__private::Pin<&'pin mut (T)>,
+    pinned2: ::pin_project::__private::Pin<&'pin mut (T)>,
+    unpinned1: &'pin mut (U),
+    unpinned2: &'pin mut (U),
+}
+#[doc(hidden)]
+#[allow(dead_code)]
+#[allow(single_use_lifetimes)]
+#[allow(clippy::type_repetition_in_bounds)]
+struct __StructProjectionRef<'pin, T, U>
+where
+    Struct<T, U>: 'pin,
+{
+    pinned1: ::pin_project::__private::Pin<&'pin (T)>,
+    pinned2: ::pin_project::__private::Pin<&'pin (T)>,
+    unpinned1: &'pin (U),
+    unpinned2: &'pin (U),
+}
+#[doc(hidden)]
+#[allow(dead_code)]
+#[allow(single_use_lifetimes)]
+#[allow(unreachable_pub)]
+struct __StructProjectionOwned<T, U> {
+    pinned1: ::pin_project::__private::PhantomData<T>,
+    pinned2: ::pin_project::__private::PhantomData<T>,
+    unpinned1: U,
+    unpinned2: U,
+}
+#[doc(hidden)]
+#[allow(non_upper_case_globals)]
+#[allow(single_use_lifetimes)]
+#[allow(clippy::used_underscore_binding)]
 const _: () = {
-    #[allow(dead_code)]
-    #[allow(clippy::mut_mut)]
-    #[allow(clippy::type_repetition_in_bounds)]
-    #[allow(box_pointers)]
-    #[allow(explicit_outlives_requirements)]
-    #[allow(single_use_lifetimes)]
-    #[allow(clippy::pattern_type_mismatch)]
-    #[allow(clippy::redundant_pub_crate)]
-    struct __StructProjection<'pin, T, U>
-    where
-        Struct<T, U>: 'pin,
-    {
-        pinned1: ::pin_project::__private::Pin<&'pin mut (T)>,
-        pinned2: ::pin_project::__private::Pin<&'pin mut (T)>,
-        unpinned1: &'pin mut (U),
-        unpinned2: &'pin mut (U),
-    }
-    #[allow(dead_code)]
-    #[allow(clippy::type_repetition_in_bounds)]
-    #[allow(box_pointers)]
-    #[allow(explicit_outlives_requirements)]
-    #[allow(single_use_lifetimes)]
-    #[allow(clippy::pattern_type_mismatch)]
-    #[allow(clippy::redundant_pub_crate)]
-    struct __StructProjectionRef<'pin, T, U>
-    where
-        Struct<T, U>: 'pin,
-    {
-        pinned1: ::pin_project::__private::Pin<&'pin (T)>,
-        pinned2: ::pin_project::__private::Pin<&'pin (T)>,
-        unpinned1: &'pin (U),
-        unpinned2: &'pin (U),
-    }
-    #[allow(dead_code)]
-    #[allow(unreachable_pub)]
-    #[allow(box_pointers)]
-    #[allow(explicit_outlives_requirements)]
-    #[allow(single_use_lifetimes)]
-    #[allow(clippy::pattern_type_mismatch)]
-    #[allow(clippy::redundant_pub_crate)]
-    struct __StructProjectionOwned<T, U> {
-        pinned1: ::pin_project::__private::PhantomData<T>,
-        pinned2: ::pin_project::__private::PhantomData<T>,
-        unpinned1: U,
-        unpinned2: U,
-    }
     impl<T, U> Struct<T, U> {
         fn project<'pin>(
             self: ::pin_project::__private::Pin<&'pin mut Self>,
@@ -144,25 +132,20 @@ const _: () = {
         __Struct<'pin, T, U>: ::pin_project::__private::Unpin
     {
     }
-    #[doc(hidden)]
-    unsafe impl<'pin, T, U> ::pin_project::UnsafeUnpin for Struct<T, U> where
-        __Struct<'pin, T, U>: ::pin_project::__private::Unpin
-    {
-    }
+    unsafe impl<T, U> ::pin_project::UnsafeUnpin for Struct<T, U> {}
     trait StructMustNotImplDrop {}
     #[allow(clippy::drop_bounds, drop_bounds)]
     impl<T: ::pin_project::__private::Drop> StructMustNotImplDrop for T {}
     impl<T, U> StructMustNotImplDrop for Struct<T, U> {}
-    #[doc(hidden)]
     impl<T, U> ::pin_project::__private::PinnedDrop for Struct<T, U> {
         unsafe fn drop(self: ::pin_project::__private::Pin<&mut Self>) {}
     }
     #[forbid(safe_packed_borrows)]
-    fn __assert_not_repr_packed<T, U>(this: &Struct<T, U>) {
-        let _ = &this.pinned1;
-        let _ = &this.pinned2;
-        let _ = &this.unpinned1;
-        let _ = &this.unpinned2;
+    fn __assert_not_repr_packed<T, U>(val: &Struct<T, U>) {
+        &val.pinned1;
+        &val.pinned2;
+        &val.unpinned1;
+        &val.unpinned2;
     }
 };
 fn main() {}

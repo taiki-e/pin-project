@@ -13,13 +13,9 @@ enum Enum<T, U> {
     Unit,
 }
 #[allow(dead_code)]
+#[allow(single_use_lifetimes)]
 #[allow(clippy::mut_mut)]
 #[allow(clippy::type_repetition_in_bounds)]
-#[allow(box_pointers)]
-#[allow(explicit_outlives_requirements)]
-#[allow(single_use_lifetimes)]
-#[allow(clippy::pattern_type_mismatch)]
-#[allow(clippy::redundant_pub_crate)]
 enum EnumProj<'pin, T, U>
 where
     Enum<T, U>: 'pin,
@@ -39,12 +35,8 @@ where
     Unit,
 }
 #[allow(dead_code)]
-#[allow(clippy::type_repetition_in_bounds)]
-#[allow(box_pointers)]
-#[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
-#[allow(clippy::pattern_type_mismatch)]
-#[allow(clippy::redundant_pub_crate)]
+#[allow(clippy::type_repetition_in_bounds)]
 enum EnumProjRef<'pin, T, U>
 where
     Enum<T, U>: 'pin,
@@ -64,13 +56,8 @@ where
     Unit,
 }
 #[allow(dead_code)]
-#[allow(unreachable_pub)]
-#[allow(clippy::large_enum_variant)]
-#[allow(box_pointers)]
-#[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
-#[allow(clippy::pattern_type_mismatch)]
-#[allow(clippy::redundant_pub_crate)]
+#[allow(unreachable_pub)]
 enum EnumProjOwn<T, U> {
     Struct {
         pinned1: ::pin_project::__private::PhantomData<T>,
@@ -87,12 +74,9 @@ enum EnumProjOwn<T, U> {
     Unit,
 }
 #[doc(hidden)]
-#[allow(clippy::used_underscore_binding)]
-#[allow(box_pointers)]
-#[allow(explicit_outlives_requirements)]
+#[allow(non_upper_case_globals)]
 #[allow(single_use_lifetimes)]
-#[allow(clippy::pattern_type_mismatch)]
-#[allow(clippy::redundant_pub_crate)]
+#[allow(clippy::used_underscore_binding)]
 const _: () = {
     impl<T, U> Enum<T, U> {
         fn project<'pin>(
@@ -223,16 +207,11 @@ const _: () = {
         __Enum<'pin, T, U>: ::pin_project::__private::Unpin
     {
     }
-    #[doc(hidden)]
-    unsafe impl<'pin, T, U> ::pin_project::UnsafeUnpin for Enum<T, U> where
-        __Enum<'pin, T, U>: ::pin_project::__private::Unpin
-    {
-    }
+    unsafe impl<T, U> ::pin_project::UnsafeUnpin for Enum<T, U> {}
     trait EnumMustNotImplDrop {}
     #[allow(clippy::drop_bounds, drop_bounds)]
     impl<T: ::pin_project::__private::Drop> EnumMustNotImplDrop for T {}
     impl<T, U> EnumMustNotImplDrop for Enum<T, U> {}
-    #[doc(hidden)]
     impl<T, U> ::pin_project::__private::PinnedDrop for Enum<T, U> {
         unsafe fn drop(self: ::pin_project::__private::Pin<&mut Self>) {}
     }

@@ -2,57 +2,45 @@ use pin_project::pin_project;
 #[pin(__private(project_replace))]
 struct TupleStruct<T, U>(#[pin] T, #[pin] T, U, U);
 #[doc(hidden)]
-#[allow(clippy::used_underscore_binding)]
-#[allow(box_pointers)]
-#[allow(explicit_outlives_requirements)]
+#[allow(dead_code)]
 #[allow(single_use_lifetimes)]
-#[allow(clippy::pattern_type_mismatch)]
-#[allow(clippy::redundant_pub_crate)]
+#[allow(clippy::mut_mut)]
+#[allow(clippy::type_repetition_in_bounds)]
+struct __TupleStructProjection<'pin, T, U>(
+    ::pin_project::__private::Pin<&'pin mut (T)>,
+    ::pin_project::__private::Pin<&'pin mut (T)>,
+    &'pin mut (U),
+    &'pin mut (U),
+)
+where
+    TupleStruct<T, U>: 'pin;
+#[doc(hidden)]
+#[allow(dead_code)]
+#[allow(single_use_lifetimes)]
+#[allow(clippy::type_repetition_in_bounds)]
+struct __TupleStructProjectionRef<'pin, T, U>(
+    ::pin_project::__private::Pin<&'pin (T)>,
+    ::pin_project::__private::Pin<&'pin (T)>,
+    &'pin (U),
+    &'pin (U),
+)
+where
+    TupleStruct<T, U>: 'pin;
+#[doc(hidden)]
+#[allow(dead_code)]
+#[allow(single_use_lifetimes)]
+#[allow(unreachable_pub)]
+struct __TupleStructProjectionOwned<T, U>(
+    ::pin_project::__private::PhantomData<T>,
+    ::pin_project::__private::PhantomData<T>,
+    U,
+    U,
+);
+#[doc(hidden)]
+#[allow(non_upper_case_globals)]
+#[allow(single_use_lifetimes)]
+#[allow(clippy::used_underscore_binding)]
 const _: () = {
-    #[allow(dead_code)]
-    #[allow(clippy::mut_mut)]
-    #[allow(clippy::type_repetition_in_bounds)]
-    #[allow(box_pointers)]
-    #[allow(explicit_outlives_requirements)]
-    #[allow(single_use_lifetimes)]
-    #[allow(clippy::pattern_type_mismatch)]
-    #[allow(clippy::redundant_pub_crate)]
-    struct __TupleStructProjection<'pin, T, U>(
-        ::pin_project::__private::Pin<&'pin mut (T)>,
-        ::pin_project::__private::Pin<&'pin mut (T)>,
-        &'pin mut (U),
-        &'pin mut (U),
-    )
-    where
-        TupleStruct<T, U>: 'pin;
-    #[allow(dead_code)]
-    #[allow(clippy::type_repetition_in_bounds)]
-    #[allow(box_pointers)]
-    #[allow(explicit_outlives_requirements)]
-    #[allow(single_use_lifetimes)]
-    #[allow(clippy::pattern_type_mismatch)]
-    #[allow(clippy::redundant_pub_crate)]
-    struct __TupleStructProjectionRef<'pin, T, U>(
-        ::pin_project::__private::Pin<&'pin (T)>,
-        ::pin_project::__private::Pin<&'pin (T)>,
-        &'pin (U),
-        &'pin (U),
-    )
-    where
-        TupleStruct<T, U>: 'pin;
-    #[allow(dead_code)]
-    #[allow(unreachable_pub)]
-    #[allow(box_pointers)]
-    #[allow(explicit_outlives_requirements)]
-    #[allow(single_use_lifetimes)]
-    #[allow(clippy::pattern_type_mismatch)]
-    #[allow(clippy::redundant_pub_crate)]
-    struct __TupleStructProjectionOwned<T, U>(
-        ::pin_project::__private::PhantomData<T>,
-        ::pin_project::__private::PhantomData<T>,
-        U,
-        U,
-    );
     impl<T, U> TupleStruct<T, U> {
         fn project<'pin>(
             self: ::pin_project::__private::Pin<&'pin mut Self>,
@@ -120,25 +108,20 @@ const _: () = {
         __TupleStruct<'pin, T, U>: ::pin_project::__private::Unpin
     {
     }
-    #[doc(hidden)]
-    unsafe impl<'pin, T, U> ::pin_project::UnsafeUnpin for TupleStruct<T, U> where
-        __TupleStruct<'pin, T, U>: ::pin_project::__private::Unpin
-    {
-    }
+    unsafe impl<T, U> ::pin_project::UnsafeUnpin for TupleStruct<T, U> {}
     trait TupleStructMustNotImplDrop {}
     #[allow(clippy::drop_bounds, drop_bounds)]
     impl<T: ::pin_project::__private::Drop> TupleStructMustNotImplDrop for T {}
     impl<T, U> TupleStructMustNotImplDrop for TupleStruct<T, U> {}
-    #[doc(hidden)]
     impl<T, U> ::pin_project::__private::PinnedDrop for TupleStruct<T, U> {
         unsafe fn drop(self: ::pin_project::__private::Pin<&mut Self>) {}
     }
     #[forbid(safe_packed_borrows)]
-    fn __assert_not_repr_packed<T, U>(this: &TupleStruct<T, U>) {
-        let _ = &this.0;
-        let _ = &this.1;
-        let _ = &this.2;
-        let _ = &this.3;
+    fn __assert_not_repr_packed<T, U>(val: &TupleStruct<T, U>) {
+        &val.0;
+        &val.1;
+        &val.2;
+        &val.3;
     }
 };
 fn main() {}
