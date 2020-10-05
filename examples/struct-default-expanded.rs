@@ -26,20 +26,7 @@ struct Struct<T, U> {
     unpinned: U,
 }
 
-#[allow(non_upper_case_globals)]
-#[allow(clippy::used_underscore_binding)]
-#[allow(box_pointers)]
-#[allow(explicit_outlives_requirements)]
-#[allow(single_use_lifetimes)]
-#[allow(clippy::pattern_type_mismatch)]
 const _: () = {
-    #[allow(dead_code)]
-    #[allow(clippy::mut_mut)]
-    #[allow(clippy::type_repetition_in_bounds)]
-    #[allow(box_pointers)]
-    #[allow(explicit_outlives_requirements)]
-    #[allow(single_use_lifetimes)]
-    #[allow(clippy::pattern_type_mismatch)]
     struct __StructProjection<'pin, T, U>
     where
         Struct<T, U>: 'pin,
@@ -47,12 +34,6 @@ const _: () = {
         pinned: ::pin_project::__private::Pin<&'pin mut (T)>,
         unpinned: &'pin mut (U),
     }
-    #[allow(dead_code)]
-    #[allow(clippy::type_repetition_in_bounds)]
-    #[allow(box_pointers)]
-    #[allow(explicit_outlives_requirements)]
-    #[allow(single_use_lifetimes)]
-    #[allow(clippy::pattern_type_mismatch)]
     struct __StructProjectionRef<'pin, T, U>
     where
         Struct<T, U>: 'pin,
@@ -84,6 +65,26 @@ const _: () = {
                 }
             }
         }
+    }
+
+    // Ensure that it's impossible to use pin projections on a #[repr(packed)]
+    // struct.
+    //
+    // Taking a reference to a packed field is unsafe, and applying
+    // #[forbid(safe_packed_borrows)] makes sure that doing this without
+    // an 'unsafe' block (which we deliberately do not generate)
+    // is a hard error.
+    //
+    // If the struct ends up having #[repr(packed)] applied somehow,
+    // this will generate an (unfriendly) error message. Under all reasonable
+    // circumstances, we'll detect the #[repr(packed)] attribute, and generate
+    // a much nicer error above.
+    //
+    // See https://github.com/taiki-e/pin-project/pull/34 for more details.
+    #[forbid(safe_packed_borrows)]
+    fn __assert_not_repr_packed<T, U>(this: &Struct<T, U>) {
+        let _ = &this.pinned;
+        let _ = &this.unpinned;
     }
 
     // Automatically create the appropriate conditional `Unpin` implementation.
@@ -149,26 +150,6 @@ const _: () = {
     #[doc(hidden)]
     impl<T, U> ::pin_project::__private::PinnedDrop for Struct<T, U> {
         unsafe fn drop(self: ::pin_project::__private::Pin<&mut Self>) {}
-    }
-
-    // Ensure that it's impossible to use pin projections on a #[repr(packed)]
-    // struct.
-    //
-    // Taking a reference to a packed field is unsafe, and applying
-    // #[forbid(safe_packed_borrows)] makes sure that doing this without
-    // an 'unsafe' block (which we deliberately do not generate)
-    // is a hard error.
-    //
-    // If the struct ends up having #[repr(packed)] applied somehow,
-    // this will generate an (unfriendly) error message. Under all reasonable
-    // circumstances, we'll detect the #[repr(packed)] attribute, and generate
-    // a much nicer error above.
-    //
-    // See https://github.com/taiki-e/pin-project/pull/34 for more details.
-    #[forbid(safe_packed_borrows)]
-    fn __assert_not_repr_packed<T, U>(this: &Struct<T, U>) {
-        let _ = &this.pinned;
-        let _ = &this.unpinned;
     }
 };
 

@@ -14,4 +14,4 @@ Or if you want to run all the tests that include expandtest:
 bash scripts/ci.sh
 ```
 
-See [examples](https://github.com/taiki-e/pin-project/tree/master/examples) for descriptions of what the generated code does, and why it needs to be generated.
+See [examples](../../examples/README.md) for descriptions of what the generated code does, and why it needs to be generated.
