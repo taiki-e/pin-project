@@ -28,7 +28,6 @@ where
     Tuple(::pin_project::__private::Pin<&'pin mut (T)>, &'pin mut (U)),
     Unit,
 }
-#[doc(hidden)]
 #[allow(box_pointers)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]

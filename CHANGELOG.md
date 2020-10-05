@@ -6,6 +6,8 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 ## [Unreleased]
 
+* [Raise the minimum supported Rust version of this crate from Rust 1.34 to Rust 1.37.](https://github.com/taiki-e/pin-project/pull/292)
+
 * [Suppress `clippy::redundant_pub_crate` lint in generated code.](https://github.com/taiki-e/pin-project/pull/284)
 
 ## [1.0.0-alpha.1] - 2020-09-22
@@ -206,7 +208,7 @@ See also [tracking issue for 1.0 release](https://github.com/taiki-e/pin-project
   }
   ```
 
-  *[Note: This raises the minimum supported Rust version of this crate from rustc 1.33 to rustc 1.34.](https://github.com/taiki-e/pin-project/pull/219#pullrequestreview-408644187)*
+  *[Note: This raises the minimum supported Rust version of this crate from Rust 1.33 to Rust 1.34.](https://github.com/taiki-e/pin-project/pull/219#pullrequestreview-408644187)*
 
 * [Fixed an issue where duplicate `#[project]` attributes were ignored.][218]
 

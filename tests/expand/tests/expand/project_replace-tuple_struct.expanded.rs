@@ -1,7 +1,6 @@
 use pin_project::pin_project;
 #[pin(__private(project_replace))]
 struct TupleStruct<T, U>(#[pin] T, U);
-#[doc(hidden)]
 #[allow(box_pointers)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]

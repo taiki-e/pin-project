@@ -91,7 +91,6 @@ pub mod box_pointers {
 pub mod explicit_outlives_requirements {
     use pin_project::pin_project;
 
-    #[rustversion::attr(before(1.37), allow(single_use_lifetimes))] // https://github.com/rust-lang/rust/issues/53738
     #[allow(explicit_outlives_requirements)] // for the type itself: https://github.com/rust-lang/rust/issues/60993
     #[pin_project(project_replace)]
     #[derive(Debug)]
@@ -105,7 +104,6 @@ pub mod explicit_outlives_requirements {
         pub unpinned: &'a mut U,
     }
 
-    #[rustversion::attr(before(1.37), allow(single_use_lifetimes))] // https://github.com/rust-lang/rust/issues/53738
     #[allow(explicit_outlives_requirements)] // for the type itself: https://github.com/rust-lang/rust/issues/60993
     #[pin_project(project_replace)]
     #[derive(Debug)]
@@ -114,7 +112,6 @@ pub mod explicit_outlives_requirements {
         T: ?Sized,
         U: ?Sized;
 
-    #[rustversion::attr(before(1.37), allow(single_use_lifetimes))] // https://github.com/rust-lang/rust/issues/53738
     #[allow(explicit_outlives_requirements)] // for the type itself: https://github.com/rust-lang/rust/issues/60993
     #[pin_project(
         project = EnumProj,
@@ -178,7 +175,6 @@ pub mod variant_size_differences {
 pub mod clippy_mut_mut {
     use pin_project::pin_project;
 
-    #[rustversion::attr(before(1.37), allow(single_use_lifetimes))] // https://github.com/rust-lang/rust/issues/53738
     #[pin_project(project_replace)]
     #[derive(Debug)]
     pub struct Struct<'a, T, U> {
@@ -187,12 +183,10 @@ pub mod clippy_mut_mut {
         pub unpinned: &'a mut U,
     }
 
-    #[rustversion::attr(before(1.37), allow(single_use_lifetimes))] // https://github.com/rust-lang/rust/issues/53738
     #[pin_project(project_replace)]
     #[derive(Debug)]
     pub struct TupleStruct<'a, T, U>(#[pin] &'a mut T, &'a mut U);
 
-    #[rustversion::attr(before(1.37), allow(single_use_lifetimes))] // https://github.com/rust-lang/rust/issues/53738
     #[pin_project(
         project = EnumProj,
         project_ref = EnumProjRef,

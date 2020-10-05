@@ -9,7 +9,6 @@ enum Enum<T, U> {
     Tuple(#[pin] T, U),
     Unit,
 }
-#[doc(hidden)]
 #[allow(box_pointers)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]

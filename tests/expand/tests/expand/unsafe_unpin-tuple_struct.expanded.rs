@@ -1,7 +1,6 @@
 use pin_project::{pin_project, UnsafeUnpin};
 #[pin(__private(UnsafeUnpin))]
 struct TupleStruct<T, U>(#[pin] T, U);
-#[doc(hidden)]
 #[allow(box_pointers)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]

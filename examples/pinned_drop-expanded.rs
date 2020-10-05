@@ -33,7 +33,6 @@ pub struct Struct<'a, T> {
     field: T,
 }
 
-#[doc(hidden)]
 #[allow(non_upper_case_globals)]
 #[allow(clippy::used_underscore_binding)]
 #[allow(box_pointers)]

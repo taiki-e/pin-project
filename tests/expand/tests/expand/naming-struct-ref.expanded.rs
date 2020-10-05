@@ -19,7 +19,6 @@ where
     pinned: ::pin_project::__private::Pin<&'pin (T)>,
     unpinned: &'pin (U),
 }
-#[doc(hidden)]
 #[allow(box_pointers)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
