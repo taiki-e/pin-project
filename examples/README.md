@@ -33,3 +33,6 @@
   * [example](not_unpin.rs)
   * [generated code](not_unpin-expanded.rs)
   * [`!Unpin` documentation](https://docs.rs/pin-project/1.0.0-alpha.1/pin_project/attr.pin_project.html#unpin)
+
+Note: These generated code examples are the little simplified version of the actual generated code.
+See [expansion tests](../tests/expand/README.md) if you want to see the exact version of the actual generated code.

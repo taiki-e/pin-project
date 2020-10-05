@@ -25,13 +25,6 @@ enum Enum<T, U> {
     Unpinned(U),
 }
 
-#[allow(dead_code)]
-#[allow(clippy::mut_mut)]
-#[allow(clippy::type_repetition_in_bounds)]
-#[allow(box_pointers)]
-#[allow(explicit_outlives_requirements)]
-#[allow(single_use_lifetimes)]
-#[allow(clippy::pattern_type_mismatch)]
 enum EnumProj<'pin, T, U>
 where
     Enum<T, U>: 'pin,
@@ -40,12 +33,6 @@ where
     Unpinned(&'pin mut (U)),
 }
 
-#[allow(non_upper_case_globals)]
-#[allow(clippy::used_underscore_binding)]
-#[allow(box_pointers)]
-#[allow(explicit_outlives_requirements)]
-#[allow(single_use_lifetimes)]
-#[allow(clippy::pattern_type_mismatch)]
 const _: () = {
     // When `#[pin_project]` is used on enums, only named projection types and
     // methods are generated because there is no way to access variants of
