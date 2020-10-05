@@ -12,7 +12,6 @@ struct TupleStruct<T, U>(#[pin] T, U);
 struct Proj<'pin, T, U>(::pin_project::__private::Pin<&'pin mut (T)>, &'pin mut (U))
 where
     TupleStruct<T, U>: 'pin;
-#[doc(hidden)]
 #[allow(box_pointers)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]

@@ -30,7 +30,6 @@ where
 #[allow(clippy::pattern_type_mismatch)]
 #[allow(clippy::redundant_pub_crate)]
 struct ProjOwn<T, U>(::pin_project::__private::PhantomData<T>, U);
-#[doc(hidden)]
 #[allow(box_pointers)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]

@@ -45,7 +45,6 @@ struct ProjOwn<T, U> {
     pinned: ::pin_project::__private::PhantomData<T>,
     unpinned: U,
 }
-#[doc(hidden)]
 #[allow(box_pointers)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]

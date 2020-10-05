@@ -20,7 +20,6 @@ where
     pinned: ::pin_project::__private::Pin<&'pin mut (T)>,
     unpinned: &'pin mut (U),
 }
-#[doc(hidden)]
 #[allow(box_pointers)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]

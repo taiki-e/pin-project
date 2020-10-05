@@ -449,7 +449,6 @@ fn lifetime_project() {
     }
 }
 
-#[rustversion::since(1.36)] // https://github.com/rust-lang/rust/pull/61207
 #[test]
 fn lifetime_project_elided() {
     #[pin_project(project_replace)]

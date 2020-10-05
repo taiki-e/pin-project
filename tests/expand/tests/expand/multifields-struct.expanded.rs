@@ -8,7 +8,6 @@ struct Struct<T, U> {
     unpinned1: U,
     unpinned2: U,
 }
-#[doc(hidden)]
 #[allow(box_pointers)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]

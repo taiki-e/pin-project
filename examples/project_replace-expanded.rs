@@ -26,7 +26,6 @@ struct Struct<T, U> {
     unpinned: U,
 }
 
-#[doc(hidden)]
 #[allow(non_upper_case_globals)]
 #[allow(clippy::used_underscore_binding)]
 #[allow(box_pointers)]
