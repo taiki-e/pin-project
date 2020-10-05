@@ -55,6 +55,7 @@ Lint checks provided by rustc:
                                         const-item-mutation  warn     detects attempts to mutate a `const` item
                                                   dead-code  warn     detect unused, unexported items
                                                  deprecated  warn     detects use of deprecated items
+                                                drop-bounds  warn     bounds of the form `T: Drop` are useless
                           ellipsis-inclusive-range-patterns  warn     `...` range patterns are deprecated
                               exported-private-dependencies  warn     public interface leaks type from a private dependency
                      illegal-floating-point-literal-pattern  warn     floating-point literals cannot be used in patterns
