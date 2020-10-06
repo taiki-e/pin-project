@@ -5,14 +5,19 @@
 # Usage:
 #     bash scripts/expandtest.sh
 #
+# Note: This script requires nightly Rust, rustfmt, and cargo-expand
 
 set -euo pipefail
 
 script_dir="$(cd "$(dirname "${0}")" && pwd)"
 
-if [[ "${CI:-false}" != "true" ]]; then
+if [[ "${1:-none}" == "+"* ]]; then
+    toolchain="${1}"
+elif [[ "${CI:-false}" != "true" ]]; then
     toolchain="+nightly"
+fi
 
+if [[ "${CI:-false}" != "true" ]]; then
     # First, check if the compile fails for another reason.
     cargo ${toolchain} check --tests --manifest-path "${script_dir}"/../tests/expand/Cargo.toml
 
