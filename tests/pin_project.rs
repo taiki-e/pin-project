@@ -424,6 +424,12 @@ fn lifetime_project() {
         fn get_pin_mut<'a>(self: Pin<&'a mut Self>) -> Pin<&'a mut T> {
             self.project().pinned
         }
+        fn get_pin_ref_elided(self: Pin<&Self>) -> Pin<&T> {
+            self.project_ref().pinned
+        }
+        fn get_pin_mut_elided(self: Pin<&mut Self>) -> Pin<&mut T> {
+            self.project().pinned
+        }
     }
 
     impl<'b, T, U> Struct2<'b, T, U> {
@@ -431,6 +437,12 @@ fn lifetime_project() {
             self.project_ref().pinned
         }
         fn get_pin_mut<'a>(self: Pin<&'a mut Self>) -> Pin<&'a mut &'b mut T> {
+            self.project().pinned
+        }
+        fn get_pin_ref_elided(self: Pin<&Self>) -> Pin<&&'b mut T> {
+            self.project_ref().pinned
+        }
+        fn get_pin_mut_elided(self: Pin<&mut Self>) -> Pin<&mut &'b mut T> {
             self.project().pinned
         }
     }
@@ -446,59 +458,12 @@ fn lifetime_project() {
                 EnumProj::V { pinned, .. } => pinned,
             }
         }
-    }
-}
-
-#[test]
-fn lifetime_project_elided() {
-    #[pin_project(project_replace)]
-    struct Struct1<T, U> {
-        #[pin]
-        pinned: T,
-        unpinned: U,
-    }
-
-    #[pin_project(project_replace)]
-    struct Struct2<'a, T, U> {
-        #[pin]
-        pinned: &'a mut T,
-        unpinned: U,
-    }
-
-    #[pin_project(project = EnumProj, project_ref = EnumProjRef, project_replace = EnumProjOwn)]
-    enum Enum<T, U> {
-        V {
-            #[pin]
-            pinned: T,
-            unpinned: U,
-        },
-    }
-
-    impl<T, U> Struct1<T, U> {
-        fn get_pin_ref(self: Pin<&Self>) -> Pin<&T> {
-            self.project_ref().pinned
-        }
-        fn get_pin_mut(self: Pin<&mut Self>) -> Pin<&mut T> {
-            self.project().pinned
-        }
-    }
-
-    impl<'b, T, U> Struct2<'b, T, U> {
-        fn get_pin_ref(self: Pin<&Self>) -> Pin<&&'b mut T> {
-            self.project_ref().pinned
-        }
-        fn get_pin_mut(self: Pin<&mut Self>) -> Pin<&mut &'b mut T> {
-            self.project().pinned
-        }
-    }
-
-    impl<T, U> Enum<T, U> {
-        fn get_pin_ref(self: Pin<&Self>) -> Pin<&T> {
+        fn get_pin_ref_elided(self: Pin<&Self>) -> Pin<&T> {
             match self.project_ref() {
                 EnumProjRef::V { pinned, .. } => pinned,
             }
         }
-        fn get_pin_mut(self: Pin<&mut Self>) -> Pin<&mut T> {
+        fn get_pin_mut_elided(self: Pin<&mut Self>) -> Pin<&mut T> {
             match self.project() {
                 EnumProj::V { pinned, .. } => pinned,
             }
