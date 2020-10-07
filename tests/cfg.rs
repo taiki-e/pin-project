@@ -3,10 +3,11 @@
 
 // Refs: https://doc.rust-lang.org/reference/attributes.html
 
+#[macro_use]
+mod auxiliary;
+
 use pin_project::pin_project;
 use std::{marker::PhantomPinned, pin::Pin};
-
-fn is_unpin<T: Unpin>() {}
 
 #[cfg(target_os = "linux")]
 struct Linux;
@@ -14,7 +15,6 @@ struct Linux;
 struct Other;
 
 // Use this type to check that `cfg(any())` is working properly.
-// If `cfg(any())` is not working properly, `is_unpin` will fail.
 struct Any(PhantomPinned);
 
 #[test]
@@ -34,7 +34,7 @@ fn cfg() {
         any: Any,
     }
 
-    is_unpin::<SameName>();
+    assert_unpin!(SameName);
 
     #[cfg(target_os = "linux")]
     let _x = SameName { inner: Linux };
@@ -54,7 +54,7 @@ fn cfg() {
         a: Any,
     }
 
-    is_unpin::<DifferentName>();
+    assert_unpin!(DifferentName);
 
     #[cfg(target_os = "linux")]
     let _x = DifferentName { l: Linux };
@@ -74,7 +74,7 @@ fn cfg() {
         Any,
     );
 
-    is_unpin::<TupleStruct>();
+    assert_unpin!(TupleStruct);
 
     #[cfg(target_os = "linux")]
     let _x = TupleStruct(Linux);
@@ -102,7 +102,7 @@ fn cfg() {
         Any(#[pin] Any),
     }
 
-    is_unpin::<Variant>();
+    assert_unpin!(Variant);
 
     #[cfg(target_os = "linux")]
     let _x = Variant::Inner(Linux);
@@ -155,7 +155,7 @@ fn cfg() {
         ),
     }
 
-    is_unpin::<Field>();
+    assert_unpin!(Field);
 
     #[cfg(target_os = "linux")]
     let _x = Field::SameName { inner: Linux };
@@ -188,7 +188,7 @@ fn cfg_attr() {
         any: Any,
     }
 
-    is_unpin::<SameCfg>();
+    assert_unpin!(SameCfg);
 
     #[cfg(target_os = "linux")]
     let mut x = SameCfg { inner: Linux };
@@ -214,7 +214,7 @@ fn cfg_attr() {
         any: Any,
     }
 
-    is_unpin::<DifferentCfg>();
+    assert_unpin!(DifferentCfg);
 
     #[cfg(target_os = "linux")]
     let mut x = DifferentCfg { inner: Linux };
@@ -232,6 +232,9 @@ fn cfg_attr() {
         #[cfg_attr(not(any()), pin)]
         inner: T,
     }
+
+    assert_unpin!(Foo<()>);
+    assert_not_unpin!(Foo<PhantomPinned>);
 
     let mut x = Foo { inner: 0_u8 };
     let x = Pin::new(&mut x).project();
