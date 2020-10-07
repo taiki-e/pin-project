@@ -1,6 +1,9 @@
 #![warn(rust_2018_idioms, single_use_lifetimes)]
 #![allow(dead_code)]
 
+#[macro_use]
+mod auxiliary;
+
 use pin_project::{pin_project, pinned_drop, UnsafeUnpin};
 use std::{
     marker::{PhantomData, PhantomPinned},
@@ -338,6 +341,31 @@ fn overlapping_lifetime_names() {
         #[pin]
         f: &'pin___ mut T,
     }
+
+    #[pin_project(PinnedDrop)]
+    pub struct PinnedDropStruct<'pin> {
+        #[pin]
+        f: &'pin (),
+    }
+
+    #[pinned_drop]
+    impl PinnedDrop for PinnedDropStruct<'_> {
+        fn drop(self: Pin<&mut Self>) {}
+    }
+
+    #[pin_project(UnsafeUnpin)]
+    pub struct UnsafeUnpinStruct<'pin> {
+        #[pin]
+        f: &'pin (),
+    }
+
+    unsafe impl UnsafeUnpin for UnsafeUnpinStruct<'_> {}
+
+    #[pin_project(!Unpin)]
+    pub struct NotUnpinStruct<'pin> {
+        #[pin]
+        f: &'pin (),
+    }
 }
 
 #[test]
@@ -497,6 +525,8 @@ fn trivial_bounds() {
         #[pin]
         f: PhantomPinned,
     }
+
+    assert_not_unpin!(NoGenerics);
 }
 
 #[test]
