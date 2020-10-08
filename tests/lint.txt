@@ -16,6 +16,7 @@ Lint checks provided by rustc:
                                        deprecated-in-future  allow    detects use of items that will be deprecated in a future version
                                   elided-lifetimes-in-paths  allow    hidden lifetime parameters in types are deprecated
                              explicit-outlives-requirements  allow    outlives requirements can be inferred
+                                          invalid-html-tags  allow    detects invalid HTML tags in doc comments
                                              keyword-idents  allow    detects edition keywords being used as an identifier
                                      macro-use-extern-crate  allow    the `#[macro_use]` attribute is now deprecated in favor of using macros via the module system
                                        meta-variable-misuse  allow    possible meta-variable misuse at macro definition
@@ -140,7 +141,7 @@ Lint groups provided by rustc:
           nonstandard-style  non-camel-case-types, non-snake-case, non-upper-case-globals
     rust-2018-compatibility  keyword-idents, anonymous-parameters, tyvar-behind-raw-pointer, absolute-paths-not-starting-with-crate
            rust-2018-idioms  bare-trait-objects, unused-extern-crates, ellipsis-inclusive-range-patterns, elided-lifetimes-in-paths, explicit-outlives-requirements
-                    rustdoc  broken-intra-doc-links, private-intra-doc-links, invalid-codeblock-attributes, missing-doc-code-examples, private-doc-tests
+                    rustdoc  broken-intra-doc-links, private-intra-doc-links, invalid-codeblock-attributes, missing-doc-code-examples, private-doc-tests, invalid-html-tags
                      unused  unused-imports, unused-variables, unused-assignments, dead-code, unused-mut, unreachable-code, unreachable-patterns, overlapping-patterns, unused-must-use, unused-unsafe, path-statements, unused-attributes, unused-macros, unused-allocation, unused-doc-comments, unused-extern-crates, unused-features, unused-labels, unused-parens, unused-braces, redundant-semicolons
 
 
