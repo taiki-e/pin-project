@@ -14,8 +14,8 @@
 // fn main() {}
 // ```
 
-#![allow(dead_code, unused_imports, unused_parens)]
-#![allow(clippy::just_underscores_and_digits)]
+#![allow(dead_code, unused_imports, unused_parens, unknown_lints, renamed_and_removed_lints)]
+#![allow(clippy::needless_lifetimes, clippy::just_underscores_and_digits)]
 
 use pin_project::pin_project;
 
@@ -100,7 +100,7 @@ const _: () = {
     //
     // See ./struct-default-expanded.rs for details.
     trait EnumMustNotImplDrop {}
-    #[allow(clippy::drop_bounds)]
+    #[allow(clippy::drop_bounds, drop_bounds)]
     impl<T: ::pin_project::__private::Drop> EnumMustNotImplDrop for T {}
     impl<T, U> EnumMustNotImplDrop for Enum<T, U> {}
     impl<T, U> ::pin_project::__private::PinnedDrop for Enum<T, U> {
