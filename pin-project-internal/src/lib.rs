@@ -109,6 +109,7 @@ use crate::utils::ProjKind;
 ///    ```rust
 ///    struct MyStruct {}
 ///    trait MyStructMustNotImplDrop {}
+///    # #[allow(unknown_lints, drop_bounds)]
 ///    impl<T: Drop> MyStructMustNotImplDrop for T {}
 ///    impl MyStructMustNotImplDrop for MyStruct {}
 ///    ```
