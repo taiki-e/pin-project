@@ -20,10 +20,10 @@ targets = ["x86_64-unknown-linux-gnu"]
 proc-macro = true
 
 [dependencies]
-proc-macro2 = "1.0"
-quote = "1.0"
-syn = { version = "1.0.13", features = ["full", "visit-mut"] }
+proc-macro2 = "1"
+quote = "1"
+syn = { version = "1.0.44", features = ["full", "visit-mut"] }
 
 [dev-dependencies]
 pin-project = { version = "0.4.26", path = ".." }
-rustversion = "1.0"
+rustversion = "1"
