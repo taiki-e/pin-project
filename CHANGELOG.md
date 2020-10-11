@@ -43,6 +43,10 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 See also [tracking issue for 1.0 release](https://github.com/taiki-e/pin-project/issues/264).
 
+## [0.4.27] - 2020-10-11
+
+* Update minimal version of `syn` to 1.0.44
+
 ## [0.4.26] - 2020-10-04
 
 * [Fix drop order of pinned fields in project_replace](https://github.com/taiki-e/pin-project/pull/287)
@@ -600,6 +604,7 @@ Initial release
 
 [Unreleased]: https://github.com/taiki-e/pin-project/compare/v1.0.0-alpha.1...HEAD
 [1.0.0-alpha.1]: https://github.com/taiki-e/pin-project/compare/v0.4.23...v1.0.0-alpha.1
+[0.4.27]: https://github.com/taiki-e/pin-project/compare/v0.4.26...v0.4.27
 [0.4.26]: https://github.com/taiki-e/pin-project/compare/v0.4.25...v0.4.26
 [0.4.25]: https://github.com/taiki-e/pin-project/compare/v0.4.24...v0.4.25
 [0.4.24]: https://github.com/taiki-e/pin-project/compare/v0.4.23...v0.4.24
