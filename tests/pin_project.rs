@@ -420,6 +420,7 @@ fn private_type_in_public_type() {
     struct PrivateStruct<T>(T);
 }
 
+#[allow(clippy::needless_lifetimes)]
 #[test]
 fn lifetime_project() {
     #[pin_project(project_replace)]
