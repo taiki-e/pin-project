@@ -6,9 +6,44 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 ## [Unreleased]
 
+## [1.0.0] - 2020-10-13
+
+* [Remove deprecated `#[project]`, `#[project_ref]`, and `#[project_replace]` attributes.](https://github.com/taiki-e/pin-project/pull/265)
+
+  Name the projected type by passing an argument with the same name as the method to the `#[pin_project]` attribute instead:
+
+  ```diff
+  - #[pin_project]
+  + #[pin_project(project = EnumProj)]
+    enum Enum<T> {
+        Variant(#[pin] T),
+    }
+
+  - #[project]
+    fn func<T>(x: Pin<&mut Enum<T>>) {
+  -     #[project]
+        match x.project() {
+  -         Enum::Variant(_) => { /* ... */ }
+  +         EnumProj::Variant(_) => { /* ... */ }
+        }
+    }
+  ```
+
+* [Remove deprecated `Replace` argument from `#[pin_project]` attribute.](https://github.com/taiki-e/pin-project/pull/266) Use `project_replace` argument instead.
+
+* [Optimize code generation when used on enums.](https://github.com/taiki-e/pin-project/pull/270)
+
 * [Raise the minimum supported Rust version of this crate from Rust 1.34 to Rust 1.37.](https://github.com/taiki-e/pin-project/pull/292)
 
-* [Suppress `clippy::redundant_pub_crate` lint in generated code.](https://github.com/taiki-e/pin-project/pull/284)
+* Suppress `explicit_outlives_requirements`, `box_pointers`, `clippy::large_enum_variant`, `clippy::pattern_type_mismatch`, `clippy::implicit_return`, and `clippy::redundant_pub_crate` lints in generated code. ([#276](https://github.com/taiki-e/pin-project/pull/276), [#277](https://github.com/taiki-e/pin-project/pull/277), [#284](https://github.com/taiki-e/pin-project/pull/284))
+
+* Diagnostic improvements.
+
+Changes since the 1.0.0-alpha.1 release:
+
+* [Fix drop order of pinned fields in project_replace](https://github.com/taiki-e/pin-project/pull/287)
+
+* Update minimal version of `syn` to 1.0.44
 
 ## [1.0.0-alpha.1] - 2020-09-22
 
@@ -602,7 +637,8 @@ See also [tracking issue for 0.4 release][21].
 
 Initial release
 
-[Unreleased]: https://github.com/taiki-e/pin-project/compare/v1.0.0-alpha.1...HEAD
+[Unreleased]: https://github.com/taiki-e/pin-project/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/taiki-e/pin-project/compare/v1.0.0-alpha.1...v1.0.0
 [1.0.0-alpha.1]: https://github.com/taiki-e/pin-project/compare/v0.4.23...v1.0.0-alpha.1
 [0.4.27]: https://github.com/taiki-e/pin-project/compare/v0.4.26...v0.4.27
 [0.4.26]: https://github.com/taiki-e/pin-project/compare/v0.4.25...v0.4.26

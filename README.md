@@ -22,7 +22,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-pin-project = "1.0.0-alpha.1"
+pin-project = "1"
 ```
 
 The current pin-project requires Rust 1.37 or later.
@@ -86,7 +86,7 @@ impl<T, U> Enum<T, U> {
 See [documentation][docs-url] for more details, and
 see [examples] directory for more examples and generated code.
 
-[`pin_project`]: https://docs.rs/pin-project/1.0.0-alpha.1/pin_project/attr.pin_project.html
+[`pin_project`]: https://docs.rs/pin-project/1/pin_project/attr.pin_project.html
 [enum-default-expanded]: examples/enum-default-expanded.rs
 [examples]: examples/README.md
 [pin-projection]: https://doc.rust-lang.org/nightly/std/pin/index.html#projections-and-structural-pinning
