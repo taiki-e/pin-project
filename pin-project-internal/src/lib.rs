@@ -1,4 +1,4 @@
-//! An internal crate to support pin_project - **do not use directly**
+//! Implementation detail of the `pin-project` crate. - **do not use directly**
 
 #![doc(html_root_url = "https://docs.rs/pin-project-internal/1.0.0-alpha.1")]
 #![doc(test(
@@ -566,7 +566,7 @@ pub fn pinned_drop(args: TokenStream, input: TokenStream) -> TokenStream {
     pinned_drop::attribute(&args.into(), input).into()
 }
 
-// An internal helper macro. Not public API.
+// Not public API.
 #[doc(hidden)]
 #[proc_macro_derive(__PinProjectInternalDerive, attributes(pin))]
 pub fn __pin_project_internal_derive(input: TokenStream) -> TokenStream {

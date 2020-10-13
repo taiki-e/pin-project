@@ -10,7 +10,7 @@ documentation = "https://docs.rs/pin-project-internal"
 keywords = ["pin", "macros", "attribute"]
 categories = ["no-std", "rust-patterns"]
 description = """
-An internal crate to support pin_project - do not use directly
+Implementation detail of the `pin-project` crate.
 """
 
 [package.metadata.docs.rs]

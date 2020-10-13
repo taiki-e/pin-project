@@ -1,5 +1,7 @@
 #![warn(rust_2018_idioms, single_use_lifetimes)]
 
+// Refs: https://doc.rust-lang.org/reference/destructors.html
+
 use pin_project::pin_project;
 use std::{cell::Cell, pin::Pin, thread};
 
@@ -34,7 +36,7 @@ struct TuplePinned<'a>(#[pin] D<'a>, #[pin] D<'a>);
 #[pin_project(project_replace)]
 struct TupleUnpinned<'a>(D<'a>, D<'a>);
 
-#[pin_project(project_replace= EnumProj)]
+#[pin_project(project_replace = EnumProj)]
 enum Enum<'a> {
     StructPinned {
         #[pin]
