@@ -93,8 +93,8 @@ pub use pin_project_internal::pinned_drop;
 /// the [`#[pin_project]`][macro@pin_project] attribute.
 ///
 /// The Rust [`Unpin`] trait is safe to implement - by itself,
-/// implementing it cannot lead to [undefined behavior]. Undefined
-/// behavior can only occur when other unsafe code is used.
+/// implementing it cannot lead to [undefined behavior][undefined-behavior].
+/// Undefined behavior can only occur when other unsafe code is used.
 ///
 /// It turns out that using pin projections, which requires unsafe code,
 /// imposes additional requirements on an [`Unpin`] impl. Normally, all of this
