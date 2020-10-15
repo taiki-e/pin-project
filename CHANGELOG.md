@@ -6,7 +6,9 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 ## [Unreleased]
 
-* Fix warnings when `#[pin_project]` attribute used within `macro_rules!` macros.
+## [1.0.1] - 2020-10-15
+
+* [Fix warnings when `#[pin_project]` attribute used within `macro_rules!` macros.](https://github.com/taiki-e/pin-project/pull/298)
 
 ## [1.0.0] - 2020-10-13
 
@@ -639,7 +641,8 @@ See also [tracking issue for 0.4 release][21].
 
 Initial release
 
-[Unreleased]: https://github.com/taiki-e/pin-project/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/taiki-e/pin-project/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/taiki-e/pin-project/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/taiki-e/pin-project/compare/v1.0.0-alpha.1...v1.0.0
 [1.0.0-alpha.1]: https://github.com/taiki-e/pin-project/compare/v0.4.23...v1.0.0-alpha.1
 [0.4.27]: https://github.com/taiki-e/pin-project/compare/v0.4.26...v0.4.27
