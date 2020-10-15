@@ -4,6 +4,7 @@ struct TupleStruct<T, U>(#[pin] T, U);
 #[allow(box_pointers)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
+#[allow(unreachable_pub)]
 #[allow(clippy::pattern_type_mismatch)]
 #[allow(clippy::redundant_pub_crate)]
 #[allow(clippy::used_underscore_binding)]
@@ -14,6 +15,7 @@ const _: () = {
     #[allow(box_pointers)]
     #[allow(explicit_outlives_requirements)]
     #[allow(single_use_lifetimes)]
+    #[allow(unreachable_pub)]
     #[allow(clippy::pattern_type_mismatch)]
     #[allow(clippy::redundant_pub_crate)]
     struct __TupleStructProjection<'pin, T, U>(
@@ -27,6 +29,7 @@ const _: () = {
     #[allow(box_pointers)]
     #[allow(explicit_outlives_requirements)]
     #[allow(single_use_lifetimes)]
+    #[allow(unreachable_pub)]
     #[allow(clippy::pattern_type_mismatch)]
     #[allow(clippy::redundant_pub_crate)]
     struct __TupleStructProjectionRef<'pin, T, U>(
@@ -36,10 +39,10 @@ const _: () = {
     where
         TupleStruct<T, U>: 'pin;
     #[allow(dead_code)]
-    #[allow(unreachable_pub)]
     #[allow(box_pointers)]
     #[allow(explicit_outlives_requirements)]
     #[allow(single_use_lifetimes)]
+    #[allow(unreachable_pub)]
     #[allow(clippy::pattern_type_mismatch)]
     #[allow(clippy::redundant_pub_crate)]
     struct __TupleStructProjectionOwned<T, U>(::pin_project::__private::PhantomData<T>, U);
@@ -52,6 +55,7 @@ const _: () = {
                 __TupleStructProjection(::pin_project::__private::Pin::new_unchecked(_0), _1)
             }
         }
+        #[allow(clippy::missing_const_for_fn)]
         fn project_ref<'pin>(
             self: ::pin_project::__private::Pin<&'pin Self>,
         ) -> __TupleStructProjectionRef<'pin, T, U> {
@@ -87,6 +91,7 @@ const _: () = {
         let _ = &this.0;
         let _ = &this.1;
     }
+    #[allow(missing_debug_implementations)]
     struct __TupleStruct<'pin, T, U> {
         __pin_project_use_generics: ::pin_project::__private::AlwaysUnpin<
             'pin,
