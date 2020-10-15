@@ -11,6 +11,7 @@ struct Struct<T, U> {
 #[allow(box_pointers)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
+#[allow(unreachable_pub)]
 #[allow(clippy::pattern_type_mismatch)]
 #[allow(clippy::redundant_pub_crate)]
 struct Proj<'pin, T, U>
@@ -25,6 +26,7 @@ where
 #[allow(box_pointers)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
+#[allow(unreachable_pub)]
 #[allow(clippy::pattern_type_mismatch)]
 #[allow(clippy::redundant_pub_crate)]
 struct ProjRef<'pin, T, U>
@@ -35,10 +37,10 @@ where
     unpinned: &'pin (U),
 }
 #[allow(dead_code)]
-#[allow(unreachable_pub)]
 #[allow(box_pointers)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
+#[allow(unreachable_pub)]
 #[allow(clippy::pattern_type_mismatch)]
 #[allow(clippy::redundant_pub_crate)]
 struct ProjOwn<T, U> {
@@ -48,6 +50,7 @@ struct ProjOwn<T, U> {
 #[allow(box_pointers)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
+#[allow(unreachable_pub)]
 #[allow(clippy::pattern_type_mismatch)]
 #[allow(clippy::redundant_pub_crate)]
 #[allow(clippy::used_underscore_binding)]
@@ -62,6 +65,7 @@ const _: () = {
                 }
             }
         }
+        #[allow(clippy::missing_const_for_fn)]
         fn project_ref<'pin>(
             self: ::pin_project::__private::Pin<&'pin Self>,
         ) -> ProjRef<'pin, T, U> {
@@ -100,6 +104,7 @@ const _: () = {
         let _ = &this.pinned;
         let _ = &this.unpinned;
     }
+    #[allow(missing_debug_implementations)]
     struct __Struct<'pin, T, U> {
         __pin_project_use_generics: ::pin_project::__private::AlwaysUnpin<
             'pin,

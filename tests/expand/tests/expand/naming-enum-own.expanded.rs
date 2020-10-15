@@ -10,11 +10,12 @@ enum Enum<T, U> {
     Unit,
 }
 #[allow(dead_code)]
-#[allow(unreachable_pub)]
+#[allow(variant_size_differences)]
 #[allow(clippy::large_enum_variant)]
 #[allow(box_pointers)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
+#[allow(unreachable_pub)]
 #[allow(clippy::pattern_type_mismatch)]
 #[allow(clippy::redundant_pub_crate)]
 enum ProjOwn<T, U> {
@@ -28,6 +29,7 @@ enum ProjOwn<T, U> {
 #[allow(box_pointers)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
+#[allow(unreachable_pub)]
 #[allow(clippy::pattern_type_mismatch)]
 #[allow(clippy::redundant_pub_crate)]
 #[allow(clippy::used_underscore_binding)]
@@ -81,6 +83,7 @@ const _: () = {
             }
         }
     }
+    #[allow(missing_debug_implementations)]
     struct __Enum<'pin, T, U> {
         __pin_project_use_generics: ::pin_project::__private::AlwaysUnpin<
             'pin,

@@ -6,6 +6,8 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 ## [Unreleased]
 
+* Fix warnings when `#[pin_project]` attribute used within `macro_rules!` macros.
+
 ## [1.0.0] - 2020-10-13
 
 * [Remove deprecated `#[project]`, `#[project_ref]`, and `#[project_replace]` attributes.](https://github.com/taiki-e/pin-project/pull/265)

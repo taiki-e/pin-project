@@ -100,15 +100,22 @@ fn global_allowed_lints() -> TokenStream {
         #[allow(box_pointers)] // This lint warns use of the `Box` type.
         #[allow(explicit_outlives_requirements)] // https://github.com/rust-lang/rust/issues/60993
         #[allow(single_use_lifetimes)] // https://github.com/rust-lang/rust/issues/55058
+        #[allow(unreachable_pub)] // This lint warns `pub` field in private struct.
         #[allow(clippy::pattern_type_mismatch)]
-        #[allow(clippy::redundant_pub_crate)]
+        #[allow(clippy::redundant_pub_crate)] // This lint warns `pub(crate)` field in private struct.
     }
 }
 
 /// Returns attributes used on projected types.
 fn proj_allowed_lints(kind: TypeKind) -> (TokenStream, TokenStream, TokenStream) {
-    let large_enum_variant =
-        if kind == Enum { Some(quote!(#[allow(clippy::large_enum_variant)])) } else { None };
+    let large_enum_variant = if kind == Enum {
+        Some(quote! {
+            #[allow(variant_size_differences)]
+            #[allow(clippy::large_enum_variant)]
+        })
+    } else {
+        None
+    };
     let global_allowed_lints = global_allowed_lints();
     let proj_mut = quote! {
         #[allow(dead_code)] // This lint warns unused fields/variants.
@@ -123,7 +130,6 @@ fn proj_allowed_lints(kind: TypeKind) -> (TokenStream, TokenStream, TokenStream)
     };
     let proj_own = quote! {
         #[allow(dead_code)] // This lint warns unused fields/variants.
-        #[allow(unreachable_pub)] // This lint warns `pub` field in private struct.
         #large_enum_variant
         #global_allowed_lints
     };
@@ -788,6 +794,7 @@ fn make_unpin_impl(cx: &Context<'_>) -> TokenStream {
                 // `__UnpinStruct` type must also be public.
                 // However, we ensure that the user can never actually reference
                 // this 'public' type by creating this type in the inside of `const`.
+                #[allow(missing_debug_implementations)]
                 #vis struct #struct_ident #proj_generics #where_clause {
                     __pin_project_use_generics: ::pin_project::__private::AlwaysUnpin<
                         #lifetime, (#(::pin_project::__private::PhantomData<#type_params>),*)
@@ -934,6 +941,7 @@ fn make_proj_impl(
         }
     });
     let mut project_ref = Some(quote! {
+        #[allow(clippy::missing_const_for_fn)]
         #vis fn project_ref<#lifetime>(
             self: ::pin_project::__private::Pin<&#lifetime Self>,
         ) -> #proj_ref_ident #proj_ty_generics {

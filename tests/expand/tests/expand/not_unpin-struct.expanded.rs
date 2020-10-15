@@ -8,6 +8,7 @@ struct Struct<T, U> {
 #[allow(box_pointers)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
+#[allow(unreachable_pub)]
 #[allow(clippy::pattern_type_mismatch)]
 #[allow(clippy::redundant_pub_crate)]
 #[allow(clippy::used_underscore_binding)]
@@ -18,6 +19,7 @@ const _: () = {
     #[allow(box_pointers)]
     #[allow(explicit_outlives_requirements)]
     #[allow(single_use_lifetimes)]
+    #[allow(unreachable_pub)]
     #[allow(clippy::pattern_type_mismatch)]
     #[allow(clippy::redundant_pub_crate)]
     struct __StructProjection<'pin, T, U>
@@ -32,6 +34,7 @@ const _: () = {
     #[allow(box_pointers)]
     #[allow(explicit_outlives_requirements)]
     #[allow(single_use_lifetimes)]
+    #[allow(unreachable_pub)]
     #[allow(clippy::pattern_type_mismatch)]
     #[allow(clippy::redundant_pub_crate)]
     struct __StructProjectionRef<'pin, T, U>
@@ -53,6 +56,7 @@ const _: () = {
                 }
             }
         }
+        #[allow(clippy::missing_const_for_fn)]
         fn project_ref<'pin>(
             self: ::pin_project::__private::Pin<&'pin Self>,
         ) -> __StructProjectionRef<'pin, T, U> {

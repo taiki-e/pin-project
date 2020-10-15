@@ -18,6 +18,7 @@ enum Enum<T, U> {
 #[allow(box_pointers)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
+#[allow(unreachable_pub)]
 #[allow(clippy::pattern_type_mismatch)]
 #[allow(clippy::redundant_pub_crate)]
 enum EnumProj<'pin, T, U>
@@ -43,6 +44,7 @@ where
 #[allow(box_pointers)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
+#[allow(unreachable_pub)]
 #[allow(clippy::pattern_type_mismatch)]
 #[allow(clippy::redundant_pub_crate)]
 enum EnumProjRef<'pin, T, U>
@@ -64,11 +66,12 @@ where
     Unit,
 }
 #[allow(dead_code)]
-#[allow(unreachable_pub)]
+#[allow(variant_size_differences)]
 #[allow(clippy::large_enum_variant)]
 #[allow(box_pointers)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
+#[allow(unreachable_pub)]
 #[allow(clippy::pattern_type_mismatch)]
 #[allow(clippy::redundant_pub_crate)]
 enum EnumProjOwn<T, U> {
@@ -89,6 +92,7 @@ enum EnumProjOwn<T, U> {
 #[allow(box_pointers)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
+#[allow(unreachable_pub)]
 #[allow(clippy::pattern_type_mismatch)]
 #[allow(clippy::redundant_pub_crate)]
 #[allow(clippy::used_underscore_binding)]
@@ -120,6 +124,7 @@ const _: () = {
                 }
             }
         }
+        #[allow(clippy::missing_const_for_fn)]
         fn project_ref<'pin>(
             self: ::pin_project::__private::Pin<&'pin Self>,
         ) -> EnumProjRef<'pin, T, U> {
@@ -205,6 +210,7 @@ const _: () = {
             }
         }
     }
+    #[allow(missing_debug_implementations)]
     struct __Enum<'pin, T, U> {
         __pin_project_use_generics: ::pin_project::__private::AlwaysUnpin<
             'pin,
