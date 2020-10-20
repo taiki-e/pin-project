@@ -302,7 +302,7 @@ use proc_macro::TokenStream;
 /// #[pin_project]
 /// struct Struct<T> {
 ///     field: T,
-///     #[pin]
+///     #[pin] // <------ This `#[pin]` is required to make `Struct` to `!Unpin`.
 ///     _pin: PhantomPinned,
 /// }
 /// ```
