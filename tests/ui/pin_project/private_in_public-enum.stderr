@@ -5,7 +5,7 @@ error[E0446]: private type `PrivateEnum` in public interface
   |       ^^^^^^^^^^^ can't leak private type
 ...
 9 | enum PrivateEnum {
-  | - `PrivateEnum` declared as private
+  | ---------------- `PrivateEnum` declared as private
 
 error[E0446]: private type `foo::PrivateEnum` in public interface
   --> $DIR/private_in_public-enum.rs:15:11
@@ -14,4 +14,4 @@ error[E0446]: private type `foo::PrivateEnum` in public interface
    |           ^^^^^^^^^^^ can't leak private type
 ...
 18 |     enum PrivateEnum {
-   |     - `foo::PrivateEnum` declared as private
+   |     ---------------- `foo::PrivateEnum` declared as private
