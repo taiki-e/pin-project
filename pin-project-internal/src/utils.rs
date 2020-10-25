@@ -3,9 +3,13 @@ use quote::{quote, quote_spanned, ToTokens};
 use std::{iter::FromIterator, mem};
 use syn::{
     parse::{Parse, ParseBuffer, ParseStream},
+    parse_quote,
     punctuated::Punctuated,
+    token,
     visit_mut::{self, VisitMut},
-    *,
+    Attribute, ExprPath, ExprStruct, Generics, Ident, Item, Lifetime, LifetimeDef, Macro, PatPath,
+    PatStruct, PatTupleStruct, Path, PathArguments, PredicateType, QSelf, Result, Token, Type,
+    TypeParamBound, TypePath, Variant, Visibility, WherePredicate,
 };
 
 pub(crate) type Variants = Punctuated<Variant, Token![,]>;

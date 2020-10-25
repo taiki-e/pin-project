@@ -3,7 +3,7 @@ use quote::quote;
 use syn::{
     parse::{Parse, ParseStream},
     spanned::Spanned,
-    *,
+    Attribute, Error, Ident, Result, Token,
 };
 
 use super::PIN;

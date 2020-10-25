@@ -1,6 +1,10 @@
 use proc_macro2::{Delimiter, Group, Span, TokenStream};
 use quote::{format_ident, quote, quote_spanned, ToTokens};
-use syn::{visit_mut::VisitMut, *};
+use syn::{
+    parse_quote, token, visit_mut::VisitMut, Attribute, Data, DataEnum, DeriveInput, Error, Field,
+    Fields, FieldsNamed, FieldsUnnamed, Generics, Ident, Index, Lifetime, LifetimeDef, Meta,
+    MetaList, NestedMeta, Result, Token, Type, Variant, Visibility, WhereClause,
+};
 
 use super::{
     args::{parse_args, Args, ProjReplace, UnpinImpl},
