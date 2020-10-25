@@ -549,6 +549,10 @@ fn visit_fields(
     fields: &Fields,
     delim: Delimiter,
 ) -> Result<ProjectedFields> {
+    fn surround(delim: Delimiter, tokens: TokenStream) -> TokenStream {
+        Group::new(delim, tokens).into_token_stream()
+    }
+
     let mut proj_pat = TokenStream::new();
     let mut proj_body = TokenStream::new();
     let mut proj_fields = TokenStream::new();
@@ -598,10 +602,6 @@ fn visit_fields(
                 #ident #colon_token ::pin_project::__private::ptr::read(#binding),
             });
         }
-    }
-
-    fn surround(delim: Delimiter, tokens: TokenStream) -> TokenStream {
-        Group::new(delim, tokens).into_token_stream()
     }
 
     let proj_pat = surround(delim, proj_pat);
