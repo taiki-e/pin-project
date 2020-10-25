@@ -8,9 +8,27 @@ pub struct DefaultStruct<T, U> {
     pub unpinned: U,
 }
 
+#[::pin_project::pin_project(
+    project = DefaultStructNamedProj,
+    project_ref = DefaultStructNamedProjRef,
+)]
+#[derive(Debug)]
+pub struct DefaultStructNamed<T, U> {
+    #[pin]
+    pub pinned: T,
+    pub unpinned: U,
+}
+
 #[::pin_project::pin_project]
 #[derive(Debug)]
 pub struct DefaultTupleStruct<T, U>(#[pin] pub T, pub U);
+
+#[::pin_project::pin_project(
+    project = DefaultTupleStructNamedProj,
+    project_ref = DefaultTupleStructNamedProjRef,
+)]
+#[derive(Debug)]
+pub struct DefaultTupleStructNamed<T, U>(#[pin] pub T, pub U);
 
 #[::pin_project::pin_project(
     project = DefaultEnumProj,
@@ -78,9 +96,29 @@ pub struct ReplaceStruct<T, U> {
     pub unpinned: U,
 }
 
+#[::pin_project::pin_project(
+    project = ReplaceStructNamedProj,
+    project_ref = ReplaceStructNamedProjRef,
+    project_replace = ReplaceStructNamedProjOwn,
+)]
+#[derive(Debug)]
+pub struct ReplaceStructNamed<T, U> {
+    #[pin]
+    pub pinned: T,
+    pub unpinned: U,
+}
+
 #[::pin_project::pin_project(project_replace)]
 #[derive(Debug)]
 pub struct ReplaceTupleStruct<T, U>(#[pin] pub T, pub U);
+
+#[::pin_project::pin_project(
+    project = ReplaceTupleStructNamedProj,
+    project_ref = ReplaceTupleStructNamedProjRef,
+    project_replace = ReplaceTupleStructNamedProjOwn,
+)]
+#[derive(Debug)]
+pub struct ReplaceTupleStructNamed<T, U>(#[pin] pub T, pub U);
 
 #[::pin_project::pin_project(
     project = ReplaceEnumProj,

@@ -16,16 +16,30 @@ pub mod default {
     assert_not_unpin!(Inner<PhantomPinned>);
 
     #[pin_project]
-    struct Foo<T, U> {
+    struct Struct<T, U> {
         #[pin]
         f1: Inner<T>,
         f2: U,
     }
 
-    assert_unpin!(Foo<(), ()>);
-    assert_unpin!(Foo<(), PhantomPinned>);
-    assert_not_unpin!(Foo<PhantomPinned, ()>);
-    assert_not_unpin!(Foo<PhantomPinned, PhantomPinned>);
+    assert_unpin!(Struct<(), ()>);
+    assert_unpin!(Struct<(), PhantomPinned>);
+    assert_not_unpin!(Struct<PhantomPinned, ()>);
+    assert_not_unpin!(Struct<PhantomPinned, PhantomPinned>);
+
+    #[pin_project(project = EnumProj, project_ref = EnumProjRef)]
+    enum Enum<T, U> {
+        V1 {
+            #[pin]
+            f1: Inner<T>,
+            f2: U,
+        },
+    }
+
+    assert_unpin!(Enum<(), ()>);
+    assert_unpin!(Enum<(), PhantomPinned>);
+    assert_not_unpin!(Enum<PhantomPinned, ()>);
+    assert_not_unpin!(Enum<PhantomPinned, PhantomPinned>);
 
     #[pin_project]
     struct TrivialBounds {
@@ -36,13 +50,13 @@ pub mod default {
     assert_not_unpin!(TrivialBounds);
 
     #[pin_project]
-    struct Bar<'a, T, U> {
+    struct PinRef<'a, T, U> {
         #[pin]
         f1: &'a mut Inner<T>,
         f2: U,
     }
 
-    assert_unpin!(Bar<'_, PhantomPinned, PhantomPinned>);
+    assert_unpin!(PinRef<'_, PhantomPinned, PhantomPinned>);
 }
 
 pub mod cfg {
@@ -105,16 +119,16 @@ pub mod not_unpin {
     }
 
     #[pin_project(!Unpin)]
-    struct Foo<T, U> {
+    struct Struct<T, U> {
         #[pin]
         inner: Inner<T>,
         other: U,
     }
 
-    assert_not_unpin!(Foo<(), ()>);
-    assert_not_unpin!(Foo<(), PhantomPinned>);
-    assert_not_unpin!(Foo<PhantomPinned, ()>);
-    assert_not_unpin!(Foo<PhantomPinned, PhantomPinned>);
+    assert_not_unpin!(Struct<(), ()>);
+    assert_not_unpin!(Struct<(), PhantomPinned>);
+    assert_not_unpin!(Struct<PhantomPinned, ()>);
+    assert_not_unpin!(Struct<PhantomPinned, PhantomPinned>);
 
     #[pin_project(!Unpin)]
     struct TrivialBounds {
@@ -125,11 +139,11 @@ pub mod not_unpin {
     assert_not_unpin!(TrivialBounds);
 
     #[pin_project(!Unpin)]
-    struct Bar<'a, T, U> {
+    struct PinRef<'a, T, U> {
         #[pin]
         inner: &'a mut Inner<T>,
         other: U,
     }
 
-    assert_not_unpin!(Bar<'_, (), ()>);
+    assert_not_unpin!(PinRef<'_, (), ()>);
 }
