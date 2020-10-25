@@ -109,7 +109,7 @@ impl<T, U> ::pin_project::__private::PinnedDrop for Struct<T, U> {
         #[allow(clippy::needless_pass_by_value)]
         fn __drop_inner<T, U>(__self: Pin<&mut Struct<T, U>>) {
             fn __drop_inner() {}
-            let _this = __self;
+            let _ = __self;
         }
         __drop_inner(self);
     }

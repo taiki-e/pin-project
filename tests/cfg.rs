@@ -37,9 +37,9 @@ fn cfg() {
     assert_unpin!(SameName);
 
     #[cfg(target_os = "linux")]
-    let _x = SameName { inner: Linux };
+    let _ = SameName { inner: Linux };
     #[cfg(not(target_os = "linux"))]
-    let _x = SameName { inner: Other };
+    let _ = SameName { inner: Other };
 
     #[pin_project(project_replace)]
     struct DifferentName {
@@ -57,9 +57,9 @@ fn cfg() {
     assert_unpin!(DifferentName);
 
     #[cfg(target_os = "linux")]
-    let _x = DifferentName { l: Linux };
+    let _ = DifferentName { l: Linux };
     #[cfg(not(target_os = "linux"))]
-    let _x = DifferentName { o: Other };
+    let _ = DifferentName { o: Other };
 
     #[pin_project(project_replace)]
     struct TupleStruct(
@@ -77,9 +77,9 @@ fn cfg() {
     assert_unpin!(TupleStruct);
 
     #[cfg(target_os = "linux")]
-    let _x = TupleStruct(Linux);
+    let _ = TupleStruct(Linux);
     #[cfg(not(target_os = "linux"))]
-    let _x = TupleStruct(Other);
+    let _ = TupleStruct(Other);
 
     // enums
 
@@ -105,14 +105,14 @@ fn cfg() {
     assert_unpin!(Variant);
 
     #[cfg(target_os = "linux")]
-    let _x = Variant::Inner(Linux);
+    let _ = Variant::Inner(Linux);
     #[cfg(not(target_os = "linux"))]
-    let _x = Variant::Inner(Other);
+    let _ = Variant::Inner(Other);
 
     #[cfg(target_os = "linux")]
-    let _x = Variant::Linux(Linux);
+    let _ = Variant::Linux(Linux);
     #[cfg(not(target_os = "linux"))]
-    let _x = Variant::Other(Other);
+    let _ = Variant::Other(Other);
 
     #[pin_project(
         project = FieldProj,
@@ -158,19 +158,19 @@ fn cfg() {
     assert_unpin!(Field);
 
     #[cfg(target_os = "linux")]
-    let _x = Field::SameName { inner: Linux };
+    let _ = Field::SameName { inner: Linux };
     #[cfg(not(target_os = "linux"))]
-    let _x = Field::SameName { inner: Other };
+    let _ = Field::SameName { inner: Other };
 
     #[cfg(target_os = "linux")]
-    let _x = Field::DifferentName { l: Linux };
+    let _ = Field::DifferentName { l: Linux };
     #[cfg(not(target_os = "linux"))]
-    let _x = Field::DifferentName { w: Other };
+    let _ = Field::DifferentName { w: Other };
 
     #[cfg(target_os = "linux")]
-    let _x = Field::TupleVariant(Linux);
+    let _ = Field::TupleVariant(Linux);
     #[cfg(not(target_os = "linux"))]
-    let _x = Field::TupleVariant(Other);
+    let _ = Field::TupleVariant(Other);
 }
 
 #[test]

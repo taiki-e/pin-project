@@ -7,7 +7,7 @@ struct TupleStruct<T, U>(#[pin] T, U);
 #[pinned_drop]
 impl<T, U> PinnedDrop for TupleStruct<T, U> {
     fn drop(self: Pin<&mut Self>) {
-        let _this = self;
+        let _ = self;
     }
 }
 

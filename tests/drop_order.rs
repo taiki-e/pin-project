@@ -60,9 +60,9 @@ fn struct_pinned() {
     }
     {
         let c = Cell::new(0);
-        let mut _x = StructPinned { f1: D(&c, 1), f2: D(&c, 2) };
-        let _y = Pin::new(&mut _x);
-        let _z = _y.project_replace(StructPinned { f1: D(&c, 3), f2: D(&c, 4) });
+        let mut x = StructPinned { f1: D(&c, 1), f2: D(&c, 2) };
+        let y = Pin::new(&mut x);
+        let _z = y.project_replace(StructPinned { f1: D(&c, 3), f2: D(&c, 4) });
     }
 }
 
@@ -74,9 +74,9 @@ fn struct_unpinned() {
     }
     {
         let c = Cell::new(0);
-        let mut _x = StructUnpinned { f1: D(&c, 1), f2: D(&c, 2) };
-        let _y = Pin::new(&mut _x);
-        let _z = _y.project_replace(StructUnpinned { f1: D(&c, 3), f2: D(&c, 4) });
+        let mut x = StructUnpinned { f1: D(&c, 1), f2: D(&c, 2) };
+        let y = Pin::new(&mut x);
+        let _z = y.project_replace(StructUnpinned { f1: D(&c, 3), f2: D(&c, 4) });
     }
 }
 
@@ -88,9 +88,9 @@ fn tuple_pinned() {
     }
     {
         let c = Cell::new(0);
-        let mut _x = TuplePinned(D(&c, 1), D(&c, 2));
-        let _y = Pin::new(&mut _x);
-        let _z = _y.project_replace(TuplePinned(D(&c, 3), D(&c, 4)));
+        let mut x = TuplePinned(D(&c, 1), D(&c, 2));
+        let y = Pin::new(&mut x);
+        let _z = y.project_replace(TuplePinned(D(&c, 3), D(&c, 4)));
     }
 }
 
@@ -102,9 +102,9 @@ fn tuple_unpinned() {
     }
     {
         let c = Cell::new(0);
-        let mut _x = TupleUnpinned(D(&c, 1), D(&c, 2));
-        let _y = Pin::new(&mut _x);
-        let _z = _y.project_replace(TupleUnpinned(D(&c, 3), D(&c, 4)));
+        let mut x = TupleUnpinned(D(&c, 1), D(&c, 2));
+        let y = Pin::new(&mut x);
+        let _z = y.project_replace(TupleUnpinned(D(&c, 3), D(&c, 4)));
     }
 }
 
@@ -116,9 +116,9 @@ fn enum_struct() {
     }
     {
         let c = Cell::new(0);
-        let mut _x = Enum::StructPinned { f1: D(&c, 1), f2: D(&c, 2) };
-        let _y = Pin::new(&mut _x);
-        let _z = _y.project_replace(Enum::StructPinned { f1: D(&c, 3), f2: D(&c, 4) });
+        let mut x = Enum::StructPinned { f1: D(&c, 1), f2: D(&c, 2) };
+        let y = Pin::new(&mut x);
+        let _z = y.project_replace(Enum::StructPinned { f1: D(&c, 3), f2: D(&c, 4) });
     }
 
     {
@@ -127,9 +127,9 @@ fn enum_struct() {
     }
     {
         let c = Cell::new(0);
-        let mut _x = Enum::StructUnpinned { f1: D(&c, 1), f2: D(&c, 2) };
-        let _y = Pin::new(&mut _x);
-        let _z = _y.project_replace(Enum::StructUnpinned { f1: D(&c, 3), f2: D(&c, 4) });
+        let mut x = Enum::StructUnpinned { f1: D(&c, 1), f2: D(&c, 2) };
+        let y = Pin::new(&mut x);
+        let _z = y.project_replace(Enum::StructUnpinned { f1: D(&c, 3), f2: D(&c, 4) });
     }
 }
 
@@ -141,9 +141,9 @@ fn enum_tuple() {
     }
     {
         let c = Cell::new(0);
-        let mut _x = Enum::TuplePinned(D(&c, 1), D(&c, 2));
-        let _y = Pin::new(&mut _x);
-        let _z = _y.project_replace(Enum::TuplePinned(D(&c, 3), D(&c, 4)));
+        let mut x = Enum::TuplePinned(D(&c, 1), D(&c, 2));
+        let y = Pin::new(&mut x);
+        let _z = y.project_replace(Enum::TuplePinned(D(&c, 3), D(&c, 4)));
     }
 
     {
@@ -152,8 +152,8 @@ fn enum_tuple() {
     }
     {
         let c = Cell::new(0);
-        let mut _x = Enum::TupleUnpinned(D(&c, 1), D(&c, 2));
-        let _y = Pin::new(&mut _x);
-        let _z = _y.project_replace(Enum::TupleUnpinned(D(&c, 3), D(&c, 4)));
+        let mut x = Enum::TupleUnpinned(D(&c, 1), D(&c, 2));
+        let y = Pin::new(&mut x);
+        let _z = y.project_replace(Enum::TupleUnpinned(D(&c, 3), D(&c, 4)));
     }
 }

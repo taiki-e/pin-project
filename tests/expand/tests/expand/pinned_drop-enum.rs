@@ -15,7 +15,7 @@ enum Enum<T, U> {
 #[pinned_drop]
 impl<T, U> PinnedDrop for Enum<T, U> {
     fn drop(self: Pin<&mut Self>) {
-        let _this = self;
+        let _ = self;
     }
 }
 

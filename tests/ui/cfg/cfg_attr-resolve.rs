@@ -7,5 +7,5 @@ struct Foo<T> {
 
 fn main() {
     let mut x = Foo { f: 0_u8 };
-    let _x = Pin::new(&mut x).project(); //~ ERROR E0599
+    let _ = Pin::new(&mut x).project(); //~ ERROR E0599
 }
