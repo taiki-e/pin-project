@@ -6,9 +6,9 @@ edition = "2018"
 publish = false
 
 [lib]
+name = "auxiliary_macro"
 path = "lib.rs"
 proc-macro = true
-name = "auxiliary_macro"
 
 [dependencies]
 proc-macro2 = "1"
