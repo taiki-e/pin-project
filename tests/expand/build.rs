@@ -15,8 +15,8 @@ fn main() {
         println!("cargo:rustc-cfg=ci");
     }
 
-    let cargo_expand = if cfg!(windows) { "cargo-expand.exe" } else { "cargo-expand" };
-    if is_ci || has_command(cargo_expand) && has_command("rustfmt") {
+    let cargo = &*env::var("CARGO").unwrap_or_else(|_| "cargo".into());
+    if is_ci || has_command(&[cargo, "expand"]) && has_command(&[cargo, "fmt"]) {
         println!("cargo:rustc-cfg=expandtest");
     }
 }
@@ -28,8 +28,9 @@ fn is_nightly() -> bool {
         .map_or(false, |version| version.contains("nightly") || version.contains("dev"))
 }
 
-fn has_command(command: &str) -> bool {
-    Command::new(command)
+fn has_command(command: &[&str]) -> bool {
+    Command::new(command[0])
+        .args(&command[1..])
         .arg("--version")
         .stdin(Stdio::null())
         .stdout(Stdio::null())

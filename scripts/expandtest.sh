@@ -18,7 +18,7 @@ elif [[ "${CI:-false}" != "true" ]]; then
     toolchain="+nightly"
 fi
 
-if [[ "${toolchain:-+nightly}" != "+nightly"* ]] || ! rustfmt -V &>/dev/null || ! cargo expand -V &>/dev/null; then
+if [[ "${toolchain:-+nightly}" != "+nightly"* ]] || ! cargo ${toolchain:-} fmt --version &>/dev/null || ! cargo expand -V &>/dev/null; then
     echo "error: expandtest.sh requires nightly Rust, rustfmt, and cargo-expand"
     exit 1
 fi
