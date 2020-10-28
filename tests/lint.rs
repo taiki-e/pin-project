@@ -1043,7 +1043,8 @@ fn check_lint_list() {
                     .args(&["--no-pager", "diff", "--no-index", "--"])
                     .args(&[expected_path, actual_path])
                     .status()?;
-                assert!(status.success()); // This always fails.
+                assert!(!status.success());
+                panic!("assertion failed");
             } else {
                 fs::write(expected_path, actual)?;
             }
