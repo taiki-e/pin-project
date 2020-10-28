@@ -1031,13 +1031,14 @@ fn check_lint_list() {
 
     type Result<T, E = Box<dyn std::error::Error>> = std::result::Result<T, E>;
 
-    fn assert_eq(expected_path: impl AsRef<Path>, actual: &str) -> Result<()> {
+    fn assert_eq(expected_path: &str, actual: &str) -> Result<()> {
         let manifest_dir = Path::new(env!("CARGO_MANIFEST_DIR"));
         let expected_path = &manifest_dir.join(expected_path);
         let expected = fs::read_to_string(expected_path)?;
         if expected != actual {
             if env::var_os("CI").map_or(false, |v| v == "true") {
-                let actual_path = &manifest_dir.join("target/lint.txt");
+                let actual_path =
+                    &manifest_dir.join("target").join(expected_path.file_name().unwrap());
                 fs::write(actual_path, actual)?;
                 let status = Command::new("git")
                     .args(&["--no-pager", "diff", "--no-index", "--"])
