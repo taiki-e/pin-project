@@ -59,6 +59,7 @@ Lint checks provided by rustc:
                                                 drop-bounds  warn     bounds of the form `T: Drop` are useless
                           ellipsis-inclusive-range-patterns  warn     `...` range patterns are deprecated
                               exported-private-dependencies  warn     public interface leaks type from a private dependency
+                                   function-item-references  warn     suggest casting to a function pointer when attempting to take references to function items
                      illegal-floating-point-literal-pattern  warn     floating-point literals cannot be used in patterns
                                             improper-ctypes  warn     proper use of libc types in foreign modules
                                 improper-ctypes-definitions  warn     proper use of libc types in foreign item definitions
