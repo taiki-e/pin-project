@@ -1024,29 +1024,28 @@ pub mod clippy_used_underscore_binding {
 #[cfg(not(miri))]
 #[allow(box_pointers)]
 #[allow(clippy::restriction)]
-#[rustversion::attr(not(nightly), ignore)]
+#[rustversion::attr(before(2020-10-26), ignore)]
 #[test]
 fn check_lint_list() {
-    use std::{env, fs, path::PathBuf, process::Command, str};
+    use std::{env, fs, path::Path, process::Command, str};
 
     type Result<T, E = Box<dyn std::error::Error>> = std::result::Result<T, E>;
 
-    fn assert_eq(expected_path: &str, actual: &str) -> Result<()> {
-        let manifest_dir = env::var_os("CARGO_MANIFEST_DIR")
-            .map(PathBuf::from)
-            .expect("CARGO_MANIFEST_DIR not set");
-        let expected_path = manifest_dir.join(expected_path);
-        let expected = fs::read_to_string(&expected_path)?;
+    fn assert_eq(expected_path: impl AsRef<Path>, actual: &str) -> Result<()> {
+        let manifest_dir = Path::new(env!("CARGO_MANIFEST_DIR"));
+        let expected_path = &manifest_dir.join(expected_path);
+        let expected = fs::read_to_string(expected_path)?;
         if expected != actual {
             if env::var_os("CI").map_or(false, |v| v == "true") {
-                panic!(
-                    "assertion failed:\n\nEXPECTED:\n{0}\n{1}\n{0}\n\nACTUAL:\n{0}\n{2}\n{0}\n",
-                    "-".repeat(60),
-                    expected,
-                    actual,
-                );
+                let actual_path = &manifest_dir.join("target/lint.txt");
+                fs::write(actual_path, actual)?;
+                let status = Command::new("git")
+                    .args(&["--no-pager", "diff", "--no-index", "--"])
+                    .args(&[expected_path, actual_path])
+                    .status()?;
+                assert!(status.success()); // This always fails.
             } else {
-                fs::write(&expected_path, actual)?;
+                fs::write(expected_path, actual)?;
             }
         }
         Ok(())
