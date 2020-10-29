@@ -7,4 +7,4 @@ publish = false
 
 [dev-dependencies]
 pin-project = { path = "../.." }
-macrotest = { version = "1.0.2", git = "https://github.com/taiki-e/macrotest", branch = "overwrite" }
+macrotest = "1.0.6"
