@@ -86,6 +86,7 @@ Lint checks provided by rustc:
                                   renamed-and-removed-lints  warn     lints that have been renamed or removed
                                         safe-packed-borrows  warn     safe borrows of fields of packed structs were erroneously allowed
                                             stable-features  warn     stable features found in `#[feature]` directive
+                                   temporary-cstring-as-ptr  warn     detects getting the inner pointer of a temporary `CString`
                                              trivial-bounds  warn     these bounds don't depend on an type parameters
                                           type-alias-bounds  warn     bounds in type aliases are not enforced
                                    tyvar-behind-raw-pointer  warn     raw pointer to an inference variable
