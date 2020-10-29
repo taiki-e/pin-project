@@ -58,7 +58,7 @@ jobs:
       - name: Install Rust and Rustfmt
         run: ci/install-component.sh rustfmt
       - run: cargo install cargo-expand
-      - run: bash scripts/expandtest.sh
+      - run: cargo test -p expandtest
 
   miri:
     name: miri

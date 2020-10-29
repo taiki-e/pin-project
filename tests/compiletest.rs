@@ -1,9 +1,15 @@
 #![cfg(not(miri))]
 #![warn(rust_2018_idioms, single_use_lifetimes)]
 
+use std::env;
+
 #[rustversion::attr(before(2020-10-28), ignore)] // Note: This date is the day before the toolchain date.
 #[test]
 fn ui() {
+    if !env::var_os("CI").map_or(false, |v| v == "true") {
+        env::set_var("TRYBUILD", "overwrite");
+    }
+
     let t = trybuild::TestCases::new();
     t.compile_fail("tests/ui/cfg/*.rs");
     t.compile_fail("tests/ui/not_unpin/*.rs");

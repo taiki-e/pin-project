@@ -5,10 +5,10 @@ Similar to ui tests, but instead of checking the compiler output, this checks th
 To run this test, run the following command:
 
 ```sh
-bash scripts/expandtest.sh
+cargo test -p expandtest
 ```
 
-Or if you want to run all the tests that include expandtest:
+Or if you want to run all the tests that include this test:
 
 ```sh
 bash scripts/ci.sh
