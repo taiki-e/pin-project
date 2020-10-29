@@ -1,4 +1,4 @@
-#![feature(unsized_locals)]
+#![feature(unsized_fn_params)]
 
 use pin_project::pin_project;
 
