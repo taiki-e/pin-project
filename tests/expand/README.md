@@ -5,7 +5,7 @@ Similar to ui tests, but instead of checking the compiler output, this checks th
 To run this test, run the following command:
 
 ```sh
-MACROTEST=overwrite cargo test -p expandtest
+cargo test -p expandtest
 ```
 
 Or if you want to run all the tests that include this test:
