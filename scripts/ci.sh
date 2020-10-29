@@ -28,10 +28,7 @@ echo "Running 'cargo ${toolchain} clippy --all --all-targets'"
 cargo "${toolchain}" clippy --all --all-features --all-targets -Zunstable-options
 
 echo "Running 'cargo ${toolchain} test --all --exclude expandtest'"
-TRYBUILD=overwrite cargo "${toolchain}" test --all --all-features --exclude expandtest
-
-echo "Running 'bash scripts/expandtest.sh ${toolchain}'"
-"$(cd "$(dirname "${0}")" && pwd)"/expandtest.sh "${toolchain}"
+TRYBUILD=overwrite MACROTEST=overwrite cargo "${toolchain}" test --all --all-features
 
 echo "Running 'cargo ${toolchain} doc --no-deps --all'"
 cargo "${toolchain}" doc --no-deps --all --all-features
