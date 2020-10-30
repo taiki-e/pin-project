@@ -27,7 +27,7 @@ cargo "${toolchain}" fmt --all
 echo "Running 'cargo ${toolchain} clippy --all --all-targets'"
 cargo "${toolchain}" clippy --all --all-features --all-targets -Zunstable-options
 
-echo "Running 'cargo ${toolchain} test --all --exclude expandtest'"
+echo "Running 'cargo ${toolchain} test --all'"
 cargo "${toolchain}" test --all --all-features
 
 echo "Running 'cargo ${toolchain} doc --no-deps --all'"
