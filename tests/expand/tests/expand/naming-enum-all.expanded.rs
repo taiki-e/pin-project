@@ -77,14 +77,14 @@ const _: () = {
         fn project<'pin>(self: ::pin_project::__private::Pin<&'pin mut Self>) -> Proj<'pin, T, U> {
             unsafe {
                 match self.get_unchecked_mut() {
-                    Enum::Struct { pinned, unpinned } => Proj::Struct {
+                    Self::Struct { pinned, unpinned } => Proj::Struct {
                         pinned: ::pin_project::__private::Pin::new_unchecked(pinned),
                         unpinned,
                     },
-                    Enum::Tuple(_0, _1) => {
+                    Self::Tuple(_0, _1) => {
                         Proj::Tuple(::pin_project::__private::Pin::new_unchecked(_0), _1)
                     }
-                    Enum::Unit => Proj::Unit,
+                    Self::Unit => Proj::Unit,
                 }
             }
         }
@@ -94,14 +94,14 @@ const _: () = {
         ) -> ProjRef<'pin, T, U> {
             unsafe {
                 match self.get_ref() {
-                    Enum::Struct { pinned, unpinned } => ProjRef::Struct {
+                    Self::Struct { pinned, unpinned } => ProjRef::Struct {
                         pinned: ::pin_project::__private::Pin::new_unchecked(pinned),
                         unpinned,
                     },
-                    Enum::Tuple(_0, _1) => {
+                    Self::Tuple(_0, _1) => {
                         ProjRef::Tuple(::pin_project::__private::Pin::new_unchecked(_0), _1)
                     }
-                    Enum::Unit => ProjRef::Unit,
+                    Self::Unit => ProjRef::Unit,
                 }
             }
         }
@@ -112,7 +112,7 @@ const _: () = {
             unsafe {
                 let __self_ptr: *mut Self = self.get_unchecked_mut();
                 match &mut *__self_ptr {
-                    Enum::Struct { pinned, unpinned } => {
+                    Self::Struct { pinned, unpinned } => {
                         let __result = ProjOwn::Struct {
                             pinned: ::pin_project::__private::PhantomData,
                             unpinned: ::pin_project::__private::ptr::read(unpinned),
@@ -126,7 +126,7 @@ const _: () = {
                         }
                         __result
                     }
-                    Enum::Tuple(_0, _1) => {
+                    Self::Tuple(_0, _1) => {
                         let __result = ProjOwn::Tuple(
                             ::pin_project::__private::PhantomData,
                             ::pin_project::__private::ptr::read(_1),
@@ -140,7 +140,7 @@ const _: () = {
                         }
                         __result
                     }
-                    Enum::Unit => {
+                    Self::Unit => {
                         let __result = ProjOwn::Unit;
                         let __guard = ::pin_project::__private::UnsafeOverwriteGuard {
                             target: __self_ptr,

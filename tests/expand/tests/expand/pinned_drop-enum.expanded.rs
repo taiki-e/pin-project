@@ -63,14 +63,14 @@ const _: () = {
         ) -> EnumProj<'pin, T, U> {
             unsafe {
                 match self.get_unchecked_mut() {
-                    Enum::Struct { pinned, unpinned } => EnumProj::Struct {
+                    Self::Struct { pinned, unpinned } => EnumProj::Struct {
                         pinned: ::pin_project::__private::Pin::new_unchecked(pinned),
                         unpinned,
                     },
-                    Enum::Tuple(_0, _1) => {
+                    Self::Tuple(_0, _1) => {
                         EnumProj::Tuple(::pin_project::__private::Pin::new_unchecked(_0), _1)
                     }
-                    Enum::Unit => EnumProj::Unit,
+                    Self::Unit => EnumProj::Unit,
                 }
             }
         }
@@ -80,14 +80,14 @@ const _: () = {
         ) -> EnumProjRef<'pin, T, U> {
             unsafe {
                 match self.get_ref() {
-                    Enum::Struct { pinned, unpinned } => EnumProjRef::Struct {
+                    Self::Struct { pinned, unpinned } => EnumProjRef::Struct {
                         pinned: ::pin_project::__private::Pin::new_unchecked(pinned),
                         unpinned,
                     },
-                    Enum::Tuple(_0, _1) => {
+                    Self::Tuple(_0, _1) => {
                         EnumProjRef::Tuple(::pin_project::__private::Pin::new_unchecked(_0), _1)
                     }
-                    Enum::Unit => EnumProjRef::Unit,
+                    Self::Unit => EnumProjRef::Unit,
                 }
             }
         }

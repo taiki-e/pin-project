@@ -103,7 +103,7 @@ const _: () = {
         ) -> EnumProj<'pin, T, U> {
             unsafe {
                 match self.get_unchecked_mut() {
-                    Enum::Struct {
+                    Self::Struct {
                         pinned1,
                         pinned2,
                         unpinned1,
@@ -114,13 +114,13 @@ const _: () = {
                         unpinned1,
                         unpinned2,
                     },
-                    Enum::Tuple(_0, _1, _2, _3) => EnumProj::Tuple(
+                    Self::Tuple(_0, _1, _2, _3) => EnumProj::Tuple(
                         ::pin_project::__private::Pin::new_unchecked(_0),
                         ::pin_project::__private::Pin::new_unchecked(_1),
                         _2,
                         _3,
                     ),
-                    Enum::Unit => EnumProj::Unit,
+                    Self::Unit => EnumProj::Unit,
                 }
             }
         }
@@ -130,7 +130,7 @@ const _: () = {
         ) -> EnumProjRef<'pin, T, U> {
             unsafe {
                 match self.get_ref() {
-                    Enum::Struct {
+                    Self::Struct {
                         pinned1,
                         pinned2,
                         unpinned1,
@@ -141,13 +141,13 @@ const _: () = {
                         unpinned1,
                         unpinned2,
                     },
-                    Enum::Tuple(_0, _1, _2, _3) => EnumProjRef::Tuple(
+                    Self::Tuple(_0, _1, _2, _3) => EnumProjRef::Tuple(
                         ::pin_project::__private::Pin::new_unchecked(_0),
                         ::pin_project::__private::Pin::new_unchecked(_1),
                         _2,
                         _3,
                     ),
-                    Enum::Unit => EnumProjRef::Unit,
+                    Self::Unit => EnumProjRef::Unit,
                 }
             }
         }
@@ -158,7 +158,7 @@ const _: () = {
             unsafe {
                 let __self_ptr: *mut Self = self.get_unchecked_mut();
                 match &mut *__self_ptr {
-                    Enum::Struct {
+                    Self::Struct {
                         pinned1,
                         pinned2,
                         unpinned1,
@@ -180,7 +180,7 @@ const _: () = {
                         }
                         __result
                     }
-                    Enum::Tuple(_0, _1, _2, _3) => {
+                    Self::Tuple(_0, _1, _2, _3) => {
                         let __result = EnumProjOwn::Tuple(
                             ::pin_project::__private::PhantomData,
                             ::pin_project::__private::PhantomData,
@@ -197,7 +197,7 @@ const _: () = {
                         }
                         __result
                     }
-                    Enum::Unit => {
+                    Self::Unit => {
                         let __result = EnumProjOwn::Unit;
                         let __guard = ::pin_project::__private::UnsafeOverwriteGuard {
                             target: __self_ptr,
