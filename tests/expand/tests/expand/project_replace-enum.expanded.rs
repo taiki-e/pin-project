@@ -42,7 +42,7 @@ const _: () = {
             unsafe {
                 let __self_ptr: *mut Self = self.get_unchecked_mut();
                 match &mut *__self_ptr {
-                    Enum::Struct { pinned, unpinned } => {
+                    Self::Struct { pinned, unpinned } => {
                         let __result = EnumProjOwn::Struct {
                             pinned: ::pin_project::__private::PhantomData,
                             unpinned: ::pin_project::__private::ptr::read(unpinned),
@@ -56,7 +56,7 @@ const _: () = {
                         }
                         __result
                     }
-                    Enum::Tuple(_0, _1) => {
+                    Self::Tuple(_0, _1) => {
                         let __result = EnumProjOwn::Tuple(
                             ::pin_project::__private::PhantomData,
                             ::pin_project::__private::ptr::read(_1),
@@ -70,7 +70,7 @@ const _: () = {
                         }
                         __result
                     }
-                    Enum::Unit => {
+                    Self::Unit => {
                         let __result = EnumProjOwn::Unit;
                         let __guard = ::pin_project::__private::UnsafeOverwriteGuard {
                             target: __self_ptr,

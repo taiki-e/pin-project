@@ -41,14 +41,14 @@ const _: () = {
         fn project<'pin>(self: ::pin_project::__private::Pin<&'pin mut Self>) -> Proj<'pin, T, U> {
             unsafe {
                 match self.get_unchecked_mut() {
-                    Enum::Struct { pinned, unpinned } => Proj::Struct {
+                    Self::Struct { pinned, unpinned } => Proj::Struct {
                         pinned: ::pin_project::__private::Pin::new_unchecked(pinned),
                         unpinned,
                     },
-                    Enum::Tuple(_0, _1) => {
+                    Self::Tuple(_0, _1) => {
                         Proj::Tuple(::pin_project::__private::Pin::new_unchecked(_0), _1)
                     }
-                    Enum::Unit => Proj::Unit,
+                    Self::Unit => Proj::Unit,
                 }
             }
         }

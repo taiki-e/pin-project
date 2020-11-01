@@ -45,10 +45,10 @@ const _: () = {
         ) -> EnumProj<'pin, T, U> {
             unsafe {
                 match self.get_unchecked_mut() {
-                    Enum::Pinned(_0) => {
+                    Self::Pinned(_0) => {
                         EnumProj::Pinned(::pin_project::__private::Pin::new_unchecked(_0))
                     }
-                    Enum::Unpinned(_0) => EnumProj::Unpinned(_0),
+                    Self::Unpinned(_0) => EnumProj::Unpinned(_0),
                 }
             }
         }

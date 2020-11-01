@@ -504,7 +504,6 @@ fn visit_variants(cx: &mut Context<'_>, variants: &Variants) -> Result<Projected
             },
         };
 
-        let orig_ident = cx.orig.ident;
         let proj_ident = &cx.proj.mut_ident;
         let proj_ref_ident = &cx.proj.ref_ident;
         proj_variants.extend(quote! {
@@ -517,19 +516,13 @@ fn visit_variants(cx: &mut Context<'_>, variants: &Variants) -> Result<Projected
             #ident #proj_own_fields,
         });
         proj_arms.extend(quote! {
-            #orig_ident::#ident #proj_pat => {
-                #proj_ident::#ident #proj_body
-            }
+            Self::#ident #proj_pat => #proj_ident::#ident #proj_body,
         });
         proj_ref_arms.extend(quote! {
-            #orig_ident::#ident #proj_pat => {
-                #proj_ref_ident::#ident #proj_body
-            }
+            Self::#ident #proj_pat => #proj_ref_ident::#ident #proj_body,
         });
         proj_own_arms.extend(quote! {
-            #orig_ident::#ident #proj_pat => {
-                #proj_own_body
-            }
+            Self::#ident #proj_pat => { #proj_own_body }
         });
     }
 
@@ -561,7 +554,7 @@ fn visit_fields(
     let mut proj_move = TokenStream::new();
     let mut pinned_bindings = Vec::with_capacity(fields.len());
 
-    for (i, Field { attrs, vis, ident, colon_token, ty, .. }) in fields.iter().enumerate() {
+    for (i, Field { attrs, vis, ident, colon_token, ty }) in fields.iter().enumerate() {
         let binding = ident.clone().unwrap_or_else(|| format_ident!("_{}", i));
         proj_pat.extend(quote!(#binding,));
         if attrs.position_exact(PIN)?.is_some() {
