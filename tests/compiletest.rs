@@ -3,7 +3,8 @@
 
 use std::env;
 
-#[rustversion::attr(before(2020-10-28), ignore)] // Note: This date is the day before the toolchain date.
+// Run `./dev.sh +$toolchain test --test compiletest` to update this.
+#[rustversion::attr(before(2020-10-28), ignore)] // Note: This date is commit-date and the day before the toolchain date.
 #[test]
 fn ui() {
     if !env::var_os("CI").map_or(false, |v| v == "true") {

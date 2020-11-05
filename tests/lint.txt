@@ -133,6 +133,7 @@ Lint checks provided by rustc:
                                               soft-unstable  deny     a feature gate that doesn't break dependent crates
                                         unconditional-panic  deny     operation will cause a panic at runtime
                                         unknown-crate-types  deny     unknown crate type found in `#[crate_type]` directive
+                                         useless-deprecated  deny     detects deprecation attributes with no effect
 
 
 Lint groups provided by rustc:
