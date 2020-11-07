@@ -11,7 +11,7 @@ on:
 
 env:
   CARGO_INCREMENTAL: 0
-  RUSTFLAGS: -Dwarnings
+  RUSTFLAGS: -D warnings
   RUST_BACKTRACE: 1
 
 defaults:
@@ -85,7 +85,7 @@ jobs:
 
   rustdoc:
     env:
-      RUSTDOCFLAGS: -Dwarnings
+      RUSTDOCFLAGS: -D warnings
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
