@@ -73,6 +73,7 @@ Lint checks provided by rustc:
                                    mixed-script-confusables  warn     detects Unicode scripts whose mixed script confusables codepoints are solely used
                         mutable-borrow-reservation-conflict  warn     reservation of a two-phased borrow conflicts with other shared borrows
                                 nontrivial-structural-match  warn     constant used in pattern of non-structural-match type and the constant's initializer expression contains values of non-structural-match types
+                                              non-autolinks  warn     detects URLs that could be written using only angle brackets
                                        non-camel-case-types  warn     types, variants, traits and type parameters should have camel case names
                                non-shorthand-field-patterns  warn     using `Struct { x: x }` instead of `Struct { x }` in a pattern
                                              non-snake-case  warn     variables, methods, functions, lifetime parameters and modules should have snake case names
@@ -145,7 +146,7 @@ Lint groups provided by rustc:
           nonstandard-style  non-camel-case-types, non-snake-case, non-upper-case-globals
     rust-2018-compatibility  keyword-idents, anonymous-parameters, tyvar-behind-raw-pointer, absolute-paths-not-starting-with-crate
            rust-2018-idioms  bare-trait-objects, unused-extern-crates, ellipsis-inclusive-range-patterns, elided-lifetimes-in-paths, explicit-outlives-requirements
-                    rustdoc  broken-intra-doc-links, private-intra-doc-links, invalid-codeblock-attributes, missing-doc-code-examples, private-doc-tests, invalid-html-tags
+                    rustdoc  non-autolinks, broken-intra-doc-links, private-intra-doc-links, invalid-codeblock-attributes, missing-doc-code-examples, private-doc-tests, invalid-html-tags
                      unused  unused-imports, unused-variables, unused-assignments, dead-code, unused-mut, unreachable-code, unreachable-patterns, overlapping-patterns, unused-must-use, unused-unsafe, path-statements, unused-attributes, unused-macros, unused-allocation, unused-doc-comments, unused-extern-crates, unused-features, unused-labels, unused-parens, unused-braces, redundant-semicolons
 
 
