@@ -1037,7 +1037,7 @@ fn check_lint_list() {
         let expected_path = &manifest_dir.join(expected_path);
         let expected = fs::read_to_string(expected_path)?;
         if expected != actual {
-            if env::var_os("CI").map_or(false, |v| v == "true") {
+            if env::var_os("CI").is_some() {
                 let actual_path =
                     &manifest_dir.join("target").join(expected_path.file_name().unwrap());
                 fs::write(actual_path, actual)?;

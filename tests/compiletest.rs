@@ -7,7 +7,7 @@ use std::env;
 #[rustversion::attr(before(2020-10-28), ignore)] // Note: This date is commit-date and the day before the toolchain date.
 #[test]
 fn ui() {
-    if !env::var_os("CI").map_or(false, |v| v == "true") {
+    if env::var_os("CI").is_none() {
         env::set_var("TRYBUILD", "overwrite");
     }
 

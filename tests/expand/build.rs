@@ -10,7 +10,7 @@ fn main() {
         return;
     }
 
-    let is_ci = env::var_os("CI").map_or(false, |v| v == "true");
+    let is_ci = env::var_os("CI").is_some();
     if is_ci {
         println!("cargo:rustc-cfg=ci");
     }
