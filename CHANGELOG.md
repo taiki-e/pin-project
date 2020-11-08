@@ -292,7 +292,9 @@ See also [tracking issue for 1.0 release](https://github.com/taiki-e/pin-project
 
 [206]: https://github.com/taiki-e/pin-project/issues/206
 
-## [0.4.11] - 2020-05-07 - YANKED
+## [0.4.11] - 2020-05-07
+
+**Note: This release has been yanked.** See [#206][206] for details.
 
 * [Fixed an issue that `#[project]` on non-statement expression does not work without unstable features.][197]
 
@@ -367,7 +369,9 @@ See also [tracking issue for 1.0 release](https://github.com/taiki-e/pin-project
 
 [149]: https://github.com/taiki-e/pin-project/pull/149
 
-## [0.4.3] - 2019-10-15 - YANKED
+## [0.4.3] - 2019-10-15
+
+**Note: This release has been yanked.** See [#148] for details.
 
 * [`#[pin_project]` can now interoperate with `#[cfg_attr()]`.][135]
 
@@ -377,22 +381,29 @@ See also [tracking issue for 1.0 release](https://github.com/taiki-e/pin-project
 
 * Diagnostic improvements.
 
+[#148]: https://github.com/taiki-e/pin-project/pull/148
 [120]: https://github.com/taiki-e/pin-project/pull/120
 [135]: https://github.com/taiki-e/pin-project/pull/135
 
-## [0.4.2] - 2019-09-29 - YANKED
+## [0.4.2] - 2019-09-29
+
+**Note: This release has been yanked.** See [#148] for details.
 
 * [Fixed support for DSTs(Dynamically Sized Types).][113]
 
 [113]: https://github.com/taiki-e/pin-project/pull/113
 
-## [0.4.1] - 2019-09-26 - YANKED
+## [0.4.1] - 2019-09-26
+
+**Note: This release has been yanked.** See [#148] for details.
 
 * [Fixed an issue that caused an error when using `#[pin_project]` on a type that has `#[pin]` + `!Unpin` field with no generics or lifetime.][111]
 
 [111]: https://github.com/taiki-e/pin-project/pull/111
 
-## [0.4.0] - 2019-09-25 - YANKED
+## [0.4.0] - 2019-09-25
+
+**Note: This release has been yanked.** See [#148] for details.
 
 * [**Pin projection has become a safe operation.**][18] In the absence of other unsafe code that you write, it is impossible to cause undefined behavior.
 
@@ -481,6 +492,7 @@ Changes since the 0.4.0-beta.1 release:
 ## [0.4.0-alpha.9] - 2019-09-05
 
 * [Added 'project_into' method to `#[pin_project]` types][69]. This can be useful when returning a pin projection from a method.
+
   ```rust
   fn get_pin_mut(self: Pin<&mut Self>) -> Pin<&mut T> {
       self.project_into().pinned
@@ -565,9 +577,13 @@ See also [tracking issue for 0.4 release][21].
 
 * Diagnostic improvements.
 
-## [0.3.3] - 2019-07-15 - YANKED
+## [0.3.3] - 2019-07-15
+
+**Note: This release has been yanked.** See [#16] for details.
 
 * Diagnostic improvements.
+
+[#16]: https://github.com/taiki-e/pin-project/issues/16
 
 ## [0.3.2] - 2019-03-30
 
@@ -637,7 +653,9 @@ See also [tracking issue for 0.4 release][21].
 
 * Renamed from `unsafe_pin_project` to `unsafe_project`.
 
-## [0.1.0] - 2019-01-08 - YANKED
+## [0.1.0] - 2019-01-08
+
+**Note: This release has been yanked.**
 
 Initial release
 
