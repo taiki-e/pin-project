@@ -81,6 +81,7 @@ Lint checks provided by rustc:
                                     no-mangle-generic-items  warn     generic items must be mangled
                                        overlapping-patterns  warn     detects overlapping patterns
                                             path-statements  warn     path statements with no effect
+                                    private-intra-doc-links  warn     linking from a public item to a private one
                                           private-in-public  warn     detect private items in public interfaces not caught by the old implementation
                       proc-macro-derive-resolution-fallback  warn     detects proc macro derives using inaccessible names from parent modules
                                        redundant-semicolons  warn     detects unnecessary trailing semicolons
