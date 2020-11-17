@@ -39,8 +39,9 @@ jobs:
     runs-on: ${{ matrix.os || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@v2
-      - name: Install Rust
-        run: ci/install-rust.sh ${{ matrix.rust }}
+      - uses: taiki-e/github-actions/install-rust@main
+        with:
+          toolchain: ${{ matrix.rust }}
       - if: startsWith(matrix.rust, 'nightly')
         run: cargo install cargo-hack
       - run: rustup target add thumbv7m-none-eabi
@@ -54,8 +55,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Install Rust and Rustfmt
-        run: ci/install-component.sh rustfmt
+      - uses: taiki-e/github-actions/install-rust@main
+        with:
+          component: rustfmt
       - name: Fetch latest release version of cargo-expand
         run: |
           mkdir -p .github/caching
@@ -76,24 +78,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Install Rust and Miri
-        run: ci/install-component.sh miri
+      - uses: taiki-e/github-actions/install-rust@main
+        with:
+          component: miri
       - run: cargo miri test
 
   clippy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Install Rust and Clippy
-        run: ci/install-component.sh clippy
+      - uses: taiki-e/github-actions/install-rust@main
+        with:
+          component: clippy
       - run: cargo clippy --all --all-features --all-targets
 
   rustfmt:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Install Rust and Rustfmt
-        run: ci/install-component.sh rustfmt
+      - uses: taiki-e/github-actions/install-rust@main
+        with:
+          component: rustfmt
       - run: cargo fmt --all -- --check
 
   rustdoc:
@@ -102,8 +107,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Install Rust
-        run: ci/install-rust.sh
+      - run: taiki-e/github-actions/install-rust@main
       - run: cargo doc --no-deps --all --all-features
 
   shellcheck:

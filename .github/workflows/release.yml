@@ -1,13 +1,9 @@
-name: release
+name: Release
 
 on:
   push:
     tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+'
-
-defaults:
-  run:
-    shell: bash
+      - 'v*'
 
 jobs:
   create-release:
@@ -15,6 +11,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: ci/create-release.sh
+      - run: taiki-e/github-actions/create-release@main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
