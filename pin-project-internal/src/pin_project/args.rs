@@ -236,7 +236,7 @@ pub(super) enum ProjReplace {
         span: Span,
     },
     /// `project_replace = <ident>`.
-    #[allow(dead_code)] // false positive that fixed in Rust 1.39
+    #[allow(dead_code)] // false positive that fixed in Rust 1.38
     Named {
         span: Span,
         ident: Ident,

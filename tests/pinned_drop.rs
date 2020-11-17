@@ -201,19 +201,19 @@ fn self_ty_inside_macro_call() {
     }
 
     impl<T: Send> Struct<T> {
-        const ASSOC1: &'static str = "1";
+        const ASSOC1: usize = 1;
         fn assoc1() {}
     }
 
     trait Trait {
         type Assoc2;
-        const ASSOC2: &'static str;
+        const ASSOC2: usize;
         fn assoc2();
     }
 
     impl<T: Send> Trait for Struct<T> {
         type Assoc2 = ();
-        const ASSOC2: &'static str = "2";
+        const ASSOC2: usize = 2;
         fn assoc2() {}
     }
 

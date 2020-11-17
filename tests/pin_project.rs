@@ -28,31 +28,34 @@ fn projection() {
     let mut s_orig = Pin::new(&mut s);
     let s = s_orig.as_mut().project();
 
-    let x: Pin<&mut i32> = s.f1;
-    assert_eq!(*x, 1);
-    let y: &mut i32 = s.f2;
-    assert_eq!(*y, 2);
+    let _: Pin<&mut i32> = s.f1;
+    assert_eq!(*s.f1, 1);
+    let _: &mut i32 = s.f2;
+    assert_eq!(*s.f2, 2);
 
     assert_eq!(s_orig.as_ref().f1, 1);
     assert_eq!(s_orig.as_ref().f2, 2);
 
     let mut s = Struct { f1: 1, f2: 2 };
-
-    let StructProj { f1, f2 } = Pin::new(&mut s).project();
-    let _: Pin<&mut i32> = f1;
-    let _: &mut i32 = f2;
-
-    let StructProjRef { f1, f2 } = Pin::new(&s).project_ref();
-    let _: Pin<&i32> = f1;
-    let _: &i32 = f2;
-
     let mut s = Pin::new(&mut s);
-    let StructProjOwn { f1, f2 } = s.as_mut().project_replace(Struct { f1: 3, f2: 4 });
-    let _: PhantomData<i32> = f1;
-    let _: i32 = f2;
-    assert_eq!(f2, 2);
-    assert_eq!(s.f1, 3);
-    assert_eq!(s.f2, 4);
+    {
+        let StructProj { f1, f2 } = s.as_mut().project();
+        let _: Pin<&mut i32> = f1;
+        let _: &mut i32 = f2;
+    }
+    {
+        let StructProjRef { f1, f2 } = s.as_ref().project_ref();
+        let _: Pin<&i32> = f1;
+        let _: &i32 = f2;
+    }
+    {
+        let StructProjOwn { f1, f2 } = s.as_mut().project_replace(Struct { f1: 3, f2: 4 });
+        let _: PhantomData<i32> = f1;
+        let _: i32 = f2;
+        assert_eq!(f2, 2);
+        assert_eq!(s.f1, 3);
+        assert_eq!(s.f2, 4);
+    }
 
     #[pin_project(project_replace)]
     struct TupleStruct<T, U>(#[pin] T, U);
@@ -60,10 +63,10 @@ fn projection() {
     let mut s = TupleStruct(1, 2);
     let s = Pin::new(&mut s).project();
 
-    let x: Pin<&mut i32> = s.0;
-    assert_eq!(*x, 1);
-    let y: &mut i32 = s.1;
-    assert_eq!(*y, 2);
+    let _: Pin<&mut i32> = s.0;
+    assert_eq!(*s.0, 1);
+    let _: &mut i32 = s.1;
+    assert_eq!(*s.1, 2);
 
     #[pin_project(project = EnumProj, project_ref = EnumProjRef, project_replace = EnumProjOwn)]
     #[derive(Eq, PartialEq, Debug)]
@@ -78,10 +81,9 @@ fn projection() {
     }
 
     let mut e = Enum::Tuple(1, 2);
-    let mut e_orig = Pin::new(&mut e);
-    let e = e_orig.as_mut().project();
+    let mut e = Pin::new(&mut e);
 
-    match e {
+    match e.as_mut().project() {
         EnumProj::Tuple(x, y) => {
             let x: Pin<&mut i32> = x;
             assert_eq!(*x, 1);
@@ -91,34 +93,36 @@ fn projection() {
         EnumProj::Struct { f1, f2 } => {
             let _: Pin<&mut i32> = f1;
             let _: &mut i32 = f2;
+            unreachable!()
         }
-        EnumProj::Unit => {}
+        EnumProj::Unit => unreachable!(),
     }
 
-    assert_eq!(Pin::into_ref(e_orig).get_ref(), &Enum::Tuple(1, 2));
+    assert_eq!(&*e, &Enum::Tuple(1, 2));
 
     let mut e = Enum::Struct { f1: 3, f2: 4 };
-    let mut e = Pin::new(&mut e).project();
+    let mut e = Pin::new(&mut e);
 
-    match &mut e {
+    match e.as_mut().project() {
         EnumProj::Tuple(x, y) => {
-            let _: &mut Pin<&mut i32> = x;
-            let _: &mut &mut i32 = y;
+            let _: Pin<&mut i32> = x;
+            let _: &mut i32 = y;
+            unreachable!()
         }
         EnumProj::Struct { f1, f2 } => {
-            let x: &mut Pin<&mut i32> = f1;
-            assert_eq!(**x, 3);
-            let y: &mut &mut i32 = f2;
-            assert_eq!(**y, 4);
+            let _: Pin<&mut i32> = f1;
+            assert_eq!(*f1, 3);
+            let _: &mut i32 = f2;
+            assert_eq!(*f2, 4);
         }
-        EnumProj::Unit => {}
+        EnumProj::Unit => unreachable!(),
     }
 
-    if let EnumProj::Struct { f1, f2 } = e {
-        let x: Pin<&mut i32> = f1;
-        assert_eq!(*x, 3);
-        let y: &mut i32 = f2;
-        assert_eq!(*y, 4);
+    if let EnumProj::Struct { f1, f2 } = e.as_mut().project() {
+        let _: Pin<&mut i32> = f1;
+        assert_eq!(*f1, 3);
+        let _: &mut i32 = f2;
+        assert_eq!(*f2, 4);
     }
 }
 
@@ -140,7 +144,7 @@ fn enum_project_set() {
             let new_e = Enum::V2(val.as_ref().get_ref() == &25);
             e_orig.set(new_e);
         }
-        _ => unreachable!(),
+        EnumProj::V2(_) => unreachable!(),
     }
 
     assert_eq!(e, Enum::V2(true));
@@ -433,7 +437,7 @@ fn lifetime_project() {
     #[pin_project(project_replace)]
     struct Struct2<'a, T, U> {
         #[pin]
-        pinned: &'a mut T,
+        pinned: &'a T,
         unpinned: U,
     }
 
@@ -462,16 +466,16 @@ fn lifetime_project() {
     }
 
     impl<'b, T, U> Struct2<'b, T, U> {
-        fn get_pin_ref<'a>(self: Pin<&'a Self>) -> Pin<&'a &'b mut T> {
+        fn get_pin_ref<'a>(self: Pin<&'a Self>) -> Pin<&'a &'b T> {
             self.project_ref().pinned
         }
-        fn get_pin_mut<'a>(self: Pin<&'a mut Self>) -> Pin<&'a mut &'b mut T> {
+        fn get_pin_mut<'a>(self: Pin<&'a mut Self>) -> Pin<&'a mut &'b T> {
             self.project().pinned
         }
-        fn get_pin_ref_elided(self: Pin<&Self>) -> Pin<&&'b mut T> {
+        fn get_pin_ref_elided(self: Pin<&Self>) -> Pin<&&'b T> {
             self.project_ref().pinned
         }
-        fn get_pin_mut_elided(self: Pin<&mut Self>) -> Pin<&mut &'b mut T> {
+        fn get_pin_mut_elided(self: Pin<&mut Self>) -> Pin<&mut &'b T> {
             self.project().pinned
         }
     }
