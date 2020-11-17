@@ -107,7 +107,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: taiki-e/github-actions/install-rust@main
+      - uses: taiki-e/github-actions/install-rust@main
       - run: cargo doc --no-deps --all --all-features
 
   shellcheck:
