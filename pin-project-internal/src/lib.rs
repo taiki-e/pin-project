@@ -1,6 +1,6 @@
 //! Implementation detail of the `pin-project` crate. - **do not use directly**
 
-#![doc(html_root_url = "https://docs.rs/pin-project-internal/1.0.1")]
+#![doc(html_root_url = "https://docs.rs/pin-project-internal/1.0.2")]
 #![doc(test(
     no_crate_inject,
     attr(deny(warnings, rust_2018_idioms, single_use_lifetimes), allow(dead_code))

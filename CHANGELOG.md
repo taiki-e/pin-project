@@ -6,6 +6,10 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 ## [Unreleased]
 
+## [1.0.2] - 2020-10-19
+
+* [Suppress `clippy::unknown_clippy_lints` lint in generated code.](https://github.com/taiki-e/pin-project/pull/303)
+
 ## [1.0.1] - 2020-10-15
 
 * [Fix warnings when `#[pin_project]` attribute used within `macro_rules!` macros.](https://github.com/taiki-e/pin-project/pull/298)
@@ -659,7 +663,8 @@ See also [tracking issue for 0.4 release][21].
 
 Initial release
 
-[Unreleased]: https://github.com/taiki-e/pin-project/compare/v1.0.1...HEAD
+[Unreleased]: https://github.com/taiki-e/pin-project/compare/v1.0.2...HEAD
+[1.0.2]: https://github.com/taiki-e/pin-project/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/taiki-e/pin-project/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/taiki-e/pin-project/compare/v1.0.0-alpha.1...v1.0.0
 [1.0.0-alpha.1]: https://github.com/taiki-e/pin-project/compare/v0.4.23...v1.0.0-alpha.1
