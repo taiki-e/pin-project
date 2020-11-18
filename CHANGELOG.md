@@ -6,7 +6,7 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 ## [Unreleased]
 
-## [1.0.2] - 2020-10-19
+## [1.0.2] - 2020-11-18
 
 * [Suppress `clippy::unknown_clippy_lints` lint in generated code.](https://github.com/taiki-e/pin-project/pull/303)
 
