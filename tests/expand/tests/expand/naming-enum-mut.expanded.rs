@@ -9,15 +9,16 @@ enum Enum<T, U> {
     Tuple(#[pin] T, U),
     Unit,
 }
-#[allow(dead_code)]
-#[allow(clippy::mut_mut)]
-#[allow(clippy::type_repetition_in_bounds)]
 #[allow(box_pointers)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
 #[allow(unreachable_pub)]
+#[allow(clippy::unknown_clippy_lints)]
 #[allow(clippy::pattern_type_mismatch)]
 #[allow(clippy::redundant_pub_crate)]
+#[allow(dead_code)]
+#[allow(clippy::mut_mut)]
+#[allow(clippy::type_repetition_in_bounds)]
 enum Proj<'pin, T, U>
 where
     Enum<T, U>: 'pin,
@@ -33,6 +34,7 @@ where
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
 #[allow(unreachable_pub)]
+#[allow(clippy::unknown_clippy_lints)]
 #[allow(clippy::pattern_type_mismatch)]
 #[allow(clippy::redundant_pub_crate)]
 #[allow(clippy::used_underscore_binding)]

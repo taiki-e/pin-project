@@ -9,15 +9,16 @@ enum Enum<T, U> {
     Tuple(#[pin] T, U),
     Unit,
 }
-#[allow(dead_code)]
-#[allow(variant_size_differences)]
-#[allow(clippy::large_enum_variant)]
 #[allow(box_pointers)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
 #[allow(unreachable_pub)]
+#[allow(clippy::unknown_clippy_lints)]
 #[allow(clippy::pattern_type_mismatch)]
 #[allow(clippy::redundant_pub_crate)]
+#[allow(dead_code)]
+#[allow(variant_size_differences)]
+#[allow(clippy::large_enum_variant)]
 enum EnumProjOwn<T, U> {
     Struct {
         pinned: ::pin_project::__private::PhantomData<T>,
@@ -30,6 +31,7 @@ enum EnumProjOwn<T, U> {
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
 #[allow(unreachable_pub)]
+#[allow(clippy::unknown_clippy_lints)]
 #[allow(clippy::pattern_type_mismatch)]
 #[allow(clippy::redundant_pub_crate)]
 #[allow(clippy::used_underscore_binding)]

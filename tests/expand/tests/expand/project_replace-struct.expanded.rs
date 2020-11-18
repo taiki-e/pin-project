@@ -9,19 +9,21 @@ struct Struct<T, U> {
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
 #[allow(unreachable_pub)]
+#[allow(clippy::unknown_clippy_lints)]
 #[allow(clippy::pattern_type_mismatch)]
 #[allow(clippy::redundant_pub_crate)]
 #[allow(clippy::used_underscore_binding)]
 const _: () = {
-    #[allow(dead_code)]
-    #[allow(clippy::mut_mut)]
-    #[allow(clippy::type_repetition_in_bounds)]
     #[allow(box_pointers)]
     #[allow(explicit_outlives_requirements)]
     #[allow(single_use_lifetimes)]
     #[allow(unreachable_pub)]
+    #[allow(clippy::unknown_clippy_lints)]
     #[allow(clippy::pattern_type_mismatch)]
     #[allow(clippy::redundant_pub_crate)]
+    #[allow(dead_code)]
+    #[allow(clippy::mut_mut)]
+    #[allow(clippy::type_repetition_in_bounds)]
     struct __StructProjection<'pin, T, U>
     where
         Struct<T, U>: 'pin,
@@ -29,14 +31,15 @@ const _: () = {
         pinned: ::pin_project::__private::Pin<&'pin mut (T)>,
         unpinned: &'pin mut (U),
     }
-    #[allow(dead_code)]
-    #[allow(clippy::type_repetition_in_bounds)]
     #[allow(box_pointers)]
     #[allow(explicit_outlives_requirements)]
     #[allow(single_use_lifetimes)]
     #[allow(unreachable_pub)]
+    #[allow(clippy::unknown_clippy_lints)]
     #[allow(clippy::pattern_type_mismatch)]
     #[allow(clippy::redundant_pub_crate)]
+    #[allow(dead_code)]
+    #[allow(clippy::type_repetition_in_bounds)]
     struct __StructProjectionRef<'pin, T, U>
     where
         Struct<T, U>: 'pin,
@@ -44,13 +47,14 @@ const _: () = {
         pinned: ::pin_project::__private::Pin<&'pin (T)>,
         unpinned: &'pin (U),
     }
-    #[allow(dead_code)]
     #[allow(box_pointers)]
     #[allow(explicit_outlives_requirements)]
     #[allow(single_use_lifetimes)]
     #[allow(unreachable_pub)]
+    #[allow(clippy::unknown_clippy_lints)]
     #[allow(clippy::pattern_type_mismatch)]
     #[allow(clippy::redundant_pub_crate)]
+    #[allow(dead_code)]
     struct __StructProjectionOwned<T, U> {
         pinned: ::pin_project::__private::PhantomData<T>,
         unpinned: U,
