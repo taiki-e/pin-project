@@ -1,8 +1,8 @@
 # pin-project
 
 [![crates.io](https://img.shields.io/crates/v/pin-project.svg?style=flat-square&logo=rust)](https://crates.io/crates/pin-project)
-[![docs.rs](https://img.shields.io/badge/docs.rs-pin--project-blue?style=flat-square)][docs]
-[![license](https://img.shields.io/badge/license-Apache--2.0%20OR%20MIT-blue.svg?style=flat-square)](#license)
+[![docs.rs](https://img.shields.io/badge/docs.rs-pin--project-blue?style=flat-square)](https://docs.rs/pin-project)
+[![license](https://img.shields.io/badge/license-Apache--2.0_OR_MIT-blue.svg?style=flat-square)](#license)
 [![rustc](https://img.shields.io/badge/rustc-1.37+-blue.svg?style=flat-square)](https://www.rust-lang.org)
 [![build status](https://img.shields.io/github/workflow/status/taiki-e/pin-project/CI/master?style=flat-square)](https://github.com/taiki-e/pin-project/actions?query=workflow%3ACI+branch%3Amaster)
 
@@ -75,14 +75,13 @@ impl<T, U> Enum<T, U> {
 
 [*code like this will be generated*][enum-default-expanded]
 
-See [documentation][docs] for more details, and
+See [documentation](https://docs.rs/pin-project) for more details, and
 see [examples] directory for more examples and generated code.
 
-[docs]: https://docs.rs/pin-project
 [`pin_project`]: https://docs.rs/pin-project/1/pin_project/attr.pin_project.html
 [enum-default-expanded]: examples/enum-default-expanded.rs
 [examples]: examples/README.md
-[pin-projection]: https://doc.rust-lang.org/nightly/std/pin/index.html#projections-and-structural-pinning
+[pin-projection]: https://doc.rust-lang.org/std/pin/index.html#projections-and-structural-pinning
 [struct-default-expanded]: examples/struct-default-expanded.rs
 
 ## Related Projects
