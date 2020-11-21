@@ -80,6 +80,7 @@ Lint checks provided by rustc:
                                      non-upper-case-globals  warn     static constants should have uppercase identifiers
                                     no-mangle-generic-items  warn     generic items must be mangled
                                        overlapping-patterns  warn     detects overlapping patterns
+                                                  panic-fmt  warn     detect braces in single-argument panic!() invocations
                                             path-statements  warn     path statements with no effect
                                     private-intra-doc-links  warn     linking from a public item to a private one
                                           private-in-public  warn     detect private items in public interfaces not caught by the old implementation
