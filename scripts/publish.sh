@@ -84,10 +84,6 @@ for member in "${MEMBERS[@]}"; do
     cd "${member}"
     pwd
     echo "info: running 'cargo publish ${dryrun:-}'"
-    if [[ "${member}" == "pin-project-internal" ]]; then
-      retry 2 "cargo hack publish --no-dev-deps --allow-dirty ${dryrun:-}" "unable to publish ${member}"
-    else
-      retry 2 "cargo publish ${dryrun:-}" "unable to publish ${member}"
-    fi
+    retry 2 "cargo publish ${dryrun:-}" "unable to publish ${member}"
   )
 done
