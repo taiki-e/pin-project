@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# A script to run a simplified version of the checks done by CI.
+# Run a simplified version of the checks done by CI.
 #
 # Usage:
 #     bash scripts/ci.sh
@@ -9,6 +9,10 @@
 
 set -euo pipefail
 IFS=$'\n\t'
+
+function error {
+  echo "error: $*" >&2
+}
 
 # Decide Rust toolchain. Nightly is used by default.
 toolchain="+nightly"
@@ -20,7 +24,7 @@ fi
 cargo "${toolchain}" -V >/dev/null
 
 if [[ "${toolchain:-+nightly}" != "+nightly"* ]] || ! rustfmt -V &>/dev/null || ! cargo clippy -V &>/dev/null || ! cargo expand -V &>/dev/null; then
-  echo "error: ci.sh requires nightly Rust, rustfmt, clippy, and cargo-expand"
+  error "ci.sh requires nightly Rust, rustfmt, clippy, and cargo-expand"
   exit 1
 fi
 
