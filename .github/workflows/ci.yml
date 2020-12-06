@@ -49,6 +49,20 @@ jobs:
       - if: startsWith(matrix.rust, 'nightly')
         run: bash scripts/check-minimal-versions.sh
 
+  build:
+    strategy:
+      matrix:
+        range:
+          # This is the minimum supported Rust version of this crate.
+          # When updating this, the reminder to update the minimum supported Rust version in README.md.
+          - 1.37..1.40
+          - 1.41..
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: cargo install cargo-hack
+      - run: cargo hack build --all --ignore-private --no-dev-deps --version-range ${{ matrix.range }}
+
   expandtest:
     runs-on: ubuntu-latest
     steps:
