@@ -23,8 +23,6 @@ jobs:
     strategy:
       matrix:
         include:
-          # This is the minimum supported Rust version of this crate.
-          # When updating this, the reminder to update the minimum supported Rust version in README.md.
           - rust: 1.37
           - rust: stable
           - rust: beta
@@ -54,7 +52,8 @@ jobs:
       matrix:
         range:
           # This is the minimum supported Rust version of this crate.
-          # When updating this, the reminder to update the minimum supported Rust version in README.md.
+          # When updating this, the reminder to update the minimum supported
+          # Rust version in README.md and clippy.toml.
           - 1.37..1.40
           - 1.41..
     runs-on: ubuntu-latest
