@@ -101,6 +101,7 @@ Lint checks provided by rustc:
                                            unreachable-code  warn     detects unreachable code paths
                                        unreachable-patterns  warn     detects unreachable patterns
                                    unstable-name-collisions  warn     detects name collision with an existing but unstable method
+                                unsupported-naked-functions  warn     unsupported naked function definitions
                                           unused-allocation  warn     detects unnecessary allocations that can be eliminated
                                          unused-assignments  warn     detect assignments that will never be read
                                           unused-attributes  warn     detects attributes that were not used by the compiler
@@ -144,7 +145,7 @@ Lint groups provided by rustc:
                        name  sub-lints
                        ----  ---------
                    warnings  all lints that are set to issue warnings
-        future-incompatible  keyword-idents, anonymous-parameters, illegal-floating-point-literal-pattern, private-in-public, pub-use-of-private-extern-crate, invalid-type-param-default, safe-packed-borrows, patterns-in-fns-without-body, late-bound-lifetime-arguments, order-dependent-trait-objects, coherence-leak-check, tyvar-behind-raw-pointer, absolute-paths-not-starting-with-crate, unstable-name-collisions, where-clauses-object-safety, proc-macro-derive-resolution-fallback, macro-expanded-macro-exports-accessed-by-absolute-paths, ill-formed-attribute-input, conflicting-repr-hints, ambiguous-associated-items, mutable-borrow-reservation-conflict, indirect-structural-match, pointer-structural-match, nontrivial-structural-match, soft-unstable, cenum-impl-drop-cast, const-evaluatable-unchecked, uninhabited-static, array-into-iter
+        future-incompatible  keyword-idents, anonymous-parameters, illegal-floating-point-literal-pattern, private-in-public, pub-use-of-private-extern-crate, invalid-type-param-default, safe-packed-borrows, patterns-in-fns-without-body, late-bound-lifetime-arguments, order-dependent-trait-objects, coherence-leak-check, tyvar-behind-raw-pointer, absolute-paths-not-starting-with-crate, unstable-name-collisions, where-clauses-object-safety, proc-macro-derive-resolution-fallback, macro-expanded-macro-exports-accessed-by-absolute-paths, ill-formed-attribute-input, conflicting-repr-hints, ambiguous-associated-items, mutable-borrow-reservation-conflict, indirect-structural-match, pointer-structural-match, nontrivial-structural-match, soft-unstable, cenum-impl-drop-cast, const-evaluatable-unchecked, uninhabited-static, unsupported-naked-functions, array-into-iter
           nonstandard-style  non-camel-case-types, non-snake-case, non-upper-case-globals
     rust-2018-compatibility  keyword-idents, anonymous-parameters, tyvar-behind-raw-pointer, absolute-paths-not-starting-with-crate
            rust-2018-idioms  bare-trait-objects, unused-extern-crates, ellipsis-inclusive-range-patterns, elided-lifetimes-in-paths, explicit-outlives-requirements
