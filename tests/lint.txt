@@ -79,7 +79,7 @@ Lint checks provided by rustc:
                                              non-snake-case  warn     variables, methods, functions, lifetime parameters and modules should have snake case names
                                      non-upper-case-globals  warn     static constants should have uppercase identifiers
                                     no-mangle-generic-items  warn     generic items must be mangled
-                                       overlapping-patterns  warn     detects overlapping patterns
+                                overlapping-range-endpoints  warn     detects range patterns with overlapping endpoints
                                                   panic-fmt  warn     detect braces in single-argument panic!() invocations
                                             path-statements  warn     path statements with no effect
                                     private-intra-doc-links  warn     linking from a public item to a private one
@@ -150,7 +150,7 @@ Lint groups provided by rustc:
     rust-2018-compatibility  keyword-idents, anonymous-parameters, tyvar-behind-raw-pointer, absolute-paths-not-starting-with-crate
            rust-2018-idioms  bare-trait-objects, unused-extern-crates, ellipsis-inclusive-range-patterns, elided-lifetimes-in-paths, explicit-outlives-requirements
                     rustdoc  non-autolinks, broken-intra-doc-links, private-intra-doc-links, invalid-codeblock-attributes, missing-doc-code-examples, private-doc-tests, invalid-html-tags
-                     unused  unused-imports, unused-variables, unused-assignments, dead-code, unused-mut, unreachable-code, unreachable-patterns, overlapping-patterns, unused-must-use, unused-unsafe, path-statements, unused-attributes, unused-macros, unused-allocation, unused-doc-comments, unused-extern-crates, unused-features, unused-labels, unused-parens, unused-braces, redundant-semicolons
+                     unused  unused-imports, unused-variables, unused-assignments, dead-code, unused-mut, unreachable-code, unreachable-patterns, unused-must-use, unused-unsafe, path-statements, unused-attributes, unused-macros, unused-allocation, unused-doc-comments, unused-extern-crates, unused-features, unused-labels, unused-parens, unused-braces, redundant-semicolons
 
 
 Lint tools like Clippy can provide additional lints and lint groups.

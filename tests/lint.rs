@@ -1026,7 +1026,7 @@ pub mod clippy_used_underscore_binding {
 // Run `./dev.sh +$toolchain test --test lint` to update this.
 #[cfg(not(miri))]
 #[allow(clippy::restriction)]
-#[rustversion::attr(before(2020-12-08), ignore)] // Note: This date is commit-date and the day before the toolchain date.
+#[rustversion::attr(before(2020-12-22), ignore)] // Note: This date is commit-date and the day before the toolchain date.
 #[test]
 fn check_lint_list() {
     use auxiliary::assert_diff;
