@@ -9,6 +9,7 @@ documentation = "https://docs.rs/pin-project"
 keywords = ["pin", "macros", "attribute"]
 categories = ["no-std", "rust-patterns"]
 readme = "README.md"
+exclude = ["/.github", "/ci", "/scripts"]
 description = """
 A crate for safe and ergonomic pin-projection.
 """
