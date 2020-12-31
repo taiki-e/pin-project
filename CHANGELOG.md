@@ -142,7 +142,7 @@ See also [tracking issue for 1.0 release](https://github.com/taiki-e/pin-project
 
 - [Support `Self` in fields and generics in type definitions.][245]
 
-- [Fix errors involving _"`self` value is a keyword only available in methods with `self` parameter"_ in apparently correct code.][250]
+- [Fix errors involving *"`self` value is a keyword only available in methods with `self` parameter"* in apparently correct code.][250]
 
 - Diagnostic improvements.
 
@@ -173,7 +173,7 @@ See also [tracking issue for 1.0 release](https://github.com/taiki-e/pin-project
   }
   ```
 
-  _The `Replace` argument will be deprecated in the future._
+  *The `Replace` argument will be deprecated in the future.*
 
 - Suppress `unreachable_pub` lint in generated code.
 
@@ -255,7 +255,7 @@ See also [tracking issue for 1.0 release](https://github.com/taiki-e/pin-project
   }
   ```
 
-  _[Note: This raises the minimum supported Rust version of this crate from Rust 1.33 to Rust 1.34.](https://github.com/taiki-e/pin-project/pull/219#pullrequestreview-408644187)_
+  *[Note: This raises the minimum supported Rust version of this crate from Rust 1.33 to Rust 1.34.](https://github.com/taiki-e/pin-project/pull/219#pullrequestreview-408644187)*
 
 - [Fixed an issue where duplicate `#[project]` attributes were ignored.][218]
 
@@ -663,7 +663,7 @@ See also [tracking issue for 0.4 release][21].
 
 Initial release
 
-[unreleased]: https://github.com/taiki-e/pin-project/compare/v1.0.2...HEAD
+[Unreleased]: https://github.com/taiki-e/pin-project/compare/v1.0.2...HEAD
 [1.0.2]: https://github.com/taiki-e/pin-project/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/taiki-e/pin-project/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/taiki-e/pin-project/compare/v1.0.0-alpha.1...v1.0.0

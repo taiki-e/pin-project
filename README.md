@@ -86,7 +86,7 @@ see [examples] directory for more examples and generated code.
 
 ## Related Projects
 
-* [pin-project-lite]: A lightweight version of pin-project written with declarative macros.
+- [pin-project-lite]: A lightweight version of pin-project written with declarative macros.
 
 [pin-project-lite]: https://github.com/taiki-e/pin-project-lite
 
