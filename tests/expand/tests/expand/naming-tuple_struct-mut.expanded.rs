@@ -31,6 +31,7 @@ const _: () = {
     #[allow(clippy::pattern_type_mismatch)]
     #[allow(clippy::redundant_pub_crate)]
     #[allow(dead_code)]
+    #[allow(clippy::ref_option_ref)]
     #[allow(clippy::type_repetition_in_bounds)]
     struct __TupleStructProjectionRef<'pin, T, U>(
         ::pin_project::__private::Pin<&'pin (T)>,

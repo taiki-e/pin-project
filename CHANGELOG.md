@@ -10,6 +10,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+- Suppress `clippy::ref_option_ref` lint in generated code.
+
 ## [1.0.3] - 2021-01-05
 
 - Exclude unneeded files from crates.io.
