@@ -10,14 +10,9 @@ fn main() {
         return;
     }
 
-    let is_ci = env::var_os("CI").is_some();
-    if is_ci {
-        println!("cargo:rustc-cfg=ci");
-    }
-
     let cargo = &*env::var("CARGO").unwrap_or_else(|_| "cargo".into());
-    if is_ci || has_command(&[cargo, "expand"]) && has_command(&[cargo, "fmt"]) {
-        println!("cargo:rustc-cfg=expandtest");
+    if !has_command(&[cargo, "expand"]) || !has_command(&[cargo, "fmt"]) {
+        println!("cargo:warning=rustfmt or cargo-expand not found, skipping expandtest");
     }
 }
 
