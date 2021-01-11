@@ -8,3 +8,4 @@ publish = false
 [dev-dependencies]
 pin-project = { path = "../.." }
 macrotest = "1.0.6"
+rustversion = "1"
