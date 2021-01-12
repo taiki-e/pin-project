@@ -94,6 +94,10 @@ const _: () = {
         ) -> __TupleStructProjectionOwned<T, U> {
             unsafe {
                 let __self_ptr: *mut Self = self.get_unchecked_mut();
+                let __guard = ::pin_project::__private::UnsafeOverwriteGuard {
+                    target: __self_ptr,
+                    value: ::pin_project::__private::ManuallyDrop::new(__replacement),
+                };
                 let Self(_0, _1, _2, _3) = &mut *__self_ptr;
                 let __result = __TupleStructProjectionOwned(
                     ::pin_project::__private::PhantomData,
@@ -101,10 +105,6 @@ const _: () = {
                     ::pin_project::__private::ptr::read(_2),
                     ::pin_project::__private::ptr::read(_3),
                 );
-                let __guard = ::pin_project::__private::UnsafeOverwriteGuard {
-                    target: __self_ptr,
-                    value: ::pin_project::__private::ManuallyDrop::new(__replacement),
-                };
                 {
                     let __guard = ::pin_project::__private::UnsafeDropInPlaceGuard(_1);
                     let __guard = ::pin_project::__private::UnsafeDropInPlaceGuard(_0);

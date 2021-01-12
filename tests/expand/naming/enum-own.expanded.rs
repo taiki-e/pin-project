@@ -43,15 +43,15 @@ const _: () = {
         ) -> ProjOwn<T, U> {
             unsafe {
                 let __self_ptr: *mut Self = self.get_unchecked_mut();
+                let __guard = ::pin_project::__private::UnsafeOverwriteGuard {
+                    target: __self_ptr,
+                    value: ::pin_project::__private::ManuallyDrop::new(__replacement),
+                };
                 match &mut *__self_ptr {
                     Self::Struct { pinned, unpinned } => {
                         let __result = ProjOwn::Struct {
                             pinned: ::pin_project::__private::PhantomData,
                             unpinned: ::pin_project::__private::ptr::read(unpinned),
-                        };
-                        let __guard = ::pin_project::__private::UnsafeOverwriteGuard {
-                            target: __self_ptr,
-                            value: ::pin_project::__private::ManuallyDrop::new(__replacement),
                         };
                         {
                             let __guard = ::pin_project::__private::UnsafeDropInPlaceGuard(pinned);
@@ -63,10 +63,6 @@ const _: () = {
                             ::pin_project::__private::PhantomData,
                             ::pin_project::__private::ptr::read(_1),
                         );
-                        let __guard = ::pin_project::__private::UnsafeOverwriteGuard {
-                            target: __self_ptr,
-                            value: ::pin_project::__private::ManuallyDrop::new(__replacement),
-                        };
                         {
                             let __guard = ::pin_project::__private::UnsafeDropInPlaceGuard(_0);
                         }
@@ -74,10 +70,6 @@ const _: () = {
                     }
                     Self::Unit => {
                         let __result = ProjOwn::Unit;
-                        let __guard = ::pin_project::__private::UnsafeOverwriteGuard {
-                            target: __self_ptr,
-                            value: ::pin_project::__private::ManuallyDrop::new(__replacement),
-                        };
                         {}
                         __result
                     }

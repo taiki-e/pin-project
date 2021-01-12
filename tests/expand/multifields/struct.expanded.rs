@@ -113,6 +113,10 @@ const _: () = {
         ) -> __StructProjectionOwned<T, U> {
             unsafe {
                 let __self_ptr: *mut Self = self.get_unchecked_mut();
+                let __guard = ::pin_project::__private::UnsafeOverwriteGuard {
+                    target: __self_ptr,
+                    value: ::pin_project::__private::ManuallyDrop::new(__replacement),
+                };
                 let Self {
                     pinned1,
                     pinned2,
@@ -124,10 +128,6 @@ const _: () = {
                     pinned2: ::pin_project::__private::PhantomData,
                     unpinned1: ::pin_project::__private::ptr::read(unpinned1),
                     unpinned2: ::pin_project::__private::ptr::read(unpinned2),
-                };
-                let __guard = ::pin_project::__private::UnsafeOverwriteGuard {
-                    target: __self_ptr,
-                    value: ::pin_project::__private::ManuallyDrop::new(__replacement),
                 };
                 {
                     let __guard = ::pin_project::__private::UnsafeDropInPlaceGuard(pinned2);
