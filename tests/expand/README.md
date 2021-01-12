@@ -9,7 +9,7 @@ code does, and why it needs to be generated.
 To run this test, run the following command:
 
 ```sh
-cargo +nightly test -p expandtest
+cargo +nightly test --test expandtest
 ```
 
 Locally, this test updates the files in the `expand` directory if there are

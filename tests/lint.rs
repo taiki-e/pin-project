@@ -39,8 +39,6 @@
 
 // Check interoperability with rustc and clippy lints.
 
-mod auxiliary;
-
 pub mod basic {
     include!("include/basic.rs");
 
@@ -1043,19 +1041,4 @@ pub mod clippy_ref_option_ref {
             _unpinned: Option<&'a ()>,
         },
     }
-}
-
-// Run `./dev.sh +$toolchain test --test lint` to update this.
-#[cfg(not(miri))]
-#[allow(clippy::restriction)]
-#[rustversion::attr(before(2020-12-25), ignore)] // Note: This date is commit-date and the day before the toolchain date.
-#[test]
-fn check_lint_list() {
-    use auxiliary::assert_diff;
-    use std::{env, process::Command, str};
-
-    let rustc = env::var_os("RUSTC").unwrap_or_else(|| "rustc".into());
-    let output = Command::new(rustc).args(&["-W", "help"]).output().unwrap();
-    let new = str::from_utf8(&output.stdout).unwrap();
-    assert_diff("tests/lint.txt", new);
 }
