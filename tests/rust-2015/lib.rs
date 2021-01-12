@@ -1,5 +1,7 @@
 #![no_std]
 
+// Check compatibility with no-std environment and Rust 2015.
+
 extern crate pin_project;
 
 // This works in 2018 edition, but in 2015 edition it gives an error:

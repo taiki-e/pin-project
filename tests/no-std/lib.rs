@@ -1,6 +1,8 @@
 #![no_std]
 #![warn(rust_2018_idioms, single_use_lifetimes)]
 
+// Check compatibility with no-std environment and Rust 2018.
+
 // This works in 2018 edition, but in 2015 edition it gives an error:
 // ```text
 // error[E0659]: `pin` is ambiguous (derive helper attribute vs any other name)
