@@ -23,17 +23,12 @@ jobs:
   test:
     strategy:
       matrix:
-        include:
-          - rust: 1.37
-          - rust: stable
-          - rust: beta
-          - rust: nightly
-          # pin-project itself has no platform-dependent implementation.
-          # macOS is only used to check that pin-project can interoperate
-          # correctly with `#[cfg()]`.
-          - rust: nightly
-            os: macos-latest
-    runs-on: ${{ matrix.os || 'ubuntu-latest' }}
+        rust:
+          - 1.37
+          - stable
+          - beta
+          - nightly
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: taiki-e/github-actions/install-rust@main
