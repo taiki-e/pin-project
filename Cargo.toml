@@ -22,7 +22,6 @@ members = [
     "pin-project-internal",
     "tests/auxiliary/macro",
     "tests/doc",
-    "tests/expand",
     "tests/no-core",
     "tests/no-std",
     "tests/rust-2015",
@@ -33,6 +32,7 @@ pin-project-internal = { version = "=1.0.4", path = "pin-project-internal", defa
 
 [dev-dependencies]
 pin-project-auxiliary-macro = { path = "tests/auxiliary/macro" }
+macrotest = { version = "1.0.6", git = "https://github.com/taiki-e/macrotest.git", branch = "unique-name" }
 rustversion = "1"
 static_assertions = "1"
 tempfile = "~3.1" # use `~` due to the latest tempfile require Rust 1.40
