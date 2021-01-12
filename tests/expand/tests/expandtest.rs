@@ -1,3 +1,4 @@
+#![cfg(not(miri))]
 #![warn(rust_2018_idioms, single_use_lifetimes)]
 
 use std::{
@@ -17,11 +18,12 @@ fn expandtest() {
         return;
     }
 
+    let path = "expand/*/*.rs";
     if is_ci {
-        macrotest::expand_without_refresh("tests/expand/*.rs");
+        macrotest::expand_without_refresh(path);
     } else {
         env::set_var("MACROTEST", "overwrite");
-        macrotest::expand("tests/expand/*.rs");
+        macrotest::expand(path);
     }
 }
 

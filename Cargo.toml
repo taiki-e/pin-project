@@ -35,5 +35,5 @@ pin-project-internal = { version = "=1.0.4", path = "pin-project-internal", defa
 pin-project-auxiliary-macro = { path = "tests/auxiliary/macro" }
 rustversion = "1"
 static_assertions = "1"
-tempfile = "3"
+tempfile = "~3.1" # use `~` due to the latest tempfile require Rust 1.40
 trybuild = "1"

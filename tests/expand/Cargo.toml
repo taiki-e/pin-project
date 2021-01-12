@@ -7,5 +7,5 @@ publish = false
 
 [dev-dependencies]
 pin-project = { path = "../.." }
-macrotest = "1.0.6"
+macrotest = { version = "1.0.6", git = "https://github.com/taiki-e/macrotest.git", branch = "unique-name" }
 rustversion = "1"
