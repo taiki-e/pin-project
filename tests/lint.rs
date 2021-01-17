@@ -10,6 +10,7 @@
     explicit_outlives_requirements,
     macro_use_extern_crate,
     meta_variable_misuse,
+    missing_abi,
     missing_copy_implementations,
     missing_crate_level_docs,
     missing_debug_implementations,
