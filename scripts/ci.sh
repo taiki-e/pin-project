@@ -3,7 +3,7 @@
 # Run a simplified version of the checks done by CI.
 #
 # Usage:
-#     bash scripts/ci.sh
+#     ./scripts/ci.sh [+toolchain]
 #
 # Note: This script requires nightly Rust, rustfmt, clippy, and cargo-expand
 
@@ -13,6 +13,9 @@ IFS=$'\n\t'
 function error {
   echo "error: $*" >&2
 }
+function warn {
+  echo "warning: $*" >&2
+}
 
 # Decide Rust toolchain. Nightly is used by default.
 toolchain="+nightly"
@@ -21,21 +24,43 @@ if [[ "${1:-}" == "+"* ]]; then
   shift
 fi
 # Make sure toolchain is installed.
-cargo "${toolchain}" -V >/dev/null
-
-if [[ "${toolchain:-+nightly}" != "+nightly"* ]] || ! rustfmt -V &>/dev/null || ! cargo clippy -V &>/dev/null || ! cargo expand -V &>/dev/null; then
-  error "ci.sh requires nightly Rust, rustfmt, clippy, and cargo-expand"
-  exit 1
+if ! cargo "${toolchain}" -V &>/dev/null; then
+  rustup toolchain install "${toolchain#+}" --no-self-update --profile minimal
 fi
 
-echo "Running 'cargo ${toolchain} fmt --all'"
-cargo "${toolchain}" fmt --all
+if [[ "${toolchain:-+nightly}" != "+nightly"* ]]; then
+  error "ci.sh requires nightly Rust"
+  exit 1
+fi
+if ! rustup "${toolchain}" component add rustfmt &>/dev/null \
+  || ! cargo expand -V &>/dev/null; then
+  warn "ci.sh requires rustfmt and cargo-expand to run all tests"
+fi
 
-echo "Running 'cargo ${toolchain} clippy --all --all-targets'"
-cargo "${toolchain}" clippy --all --all-features --all-targets -Z unstable-options
+# Run rustfmt.
+if ! rustup "${toolchain}" component add rustfmt &>/dev/null; then
+  warn "component 'rustfmt' is unavailable for toolchain '${toolchain#+}'"
+else
+  (
+    set -x
+    cargo "${toolchain}" fmt --all
+  )
+fi
 
-echo "Running 'cargo ${toolchain} test --all'"
-cargo "${toolchain}" test --all --all-features
+# Run clippy.
+if ! rustup "${toolchain}" component add clippy &>/dev/null; then
+  warn "component 'clippy' is unavailable for toolchain '${toolchain#+}'"
+else
+  (
+    set -x
+    cargo "${toolchain}" clippy --all --all-features --all-targets -Z unstable-options
+  )
+fi
 
-echo "Running 'cargo ${toolchain} doc --no-deps --all'"
+set -x
+
+# Build documentation.
 cargo "${toolchain}" doc --no-deps --all --all-features
+
+# Run tests.
+cargo "${toolchain}" test --all --all-features

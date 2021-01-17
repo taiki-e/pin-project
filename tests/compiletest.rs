@@ -3,7 +3,6 @@
 
 use std::env;
 
-// Run `./dev.sh +$toolchain test --test compiletest` to update this.
 #[rustversion::attr(before(2021-01-08), ignore)] // Note: This date is commit-date and the day before the toolchain date.
 #[test]
 fn ui() {
