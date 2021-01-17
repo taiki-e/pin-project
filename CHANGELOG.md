@@ -281,7 +281,7 @@ See also [tracking issue for 1.0 release](https://github.com/taiki-e/pin-project
 
 ## [0.4.11] - 2020-05-07
 
-**Note: This release has been yanked.** See [#206][206] for details.
+**Note: This release has been yanked.** See [#206](https://github.com/taiki-e/pin-project/issues/206) for details.
 
 - [Fixed an issue that `#[project]` on non-statement expression does not work without unstable features.](https://github.com/taiki-e/pin-project/pull/197)
 
