@@ -6,6 +6,7 @@ struct Struct<T, U> {
     unpinned: U,
 }
 #[allow(box_pointers)]
+#[allow(deprecated)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
 #[allow(unreachable_pub)]
@@ -23,6 +24,7 @@ where
     unpinned: &'pin (U),
 }
 #[allow(box_pointers)]
+#[allow(deprecated)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
 #[allow(unreachable_pub)]
@@ -32,6 +34,7 @@ where
 #[allow(clippy::used_underscore_binding)]
 const _: () = {
     #[allow(box_pointers)]
+    #[allow(deprecated)]
     #[allow(explicit_outlives_requirements)]
     #[allow(single_use_lifetimes)]
     #[allow(unreachable_pub)]

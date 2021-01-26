@@ -2,6 +2,7 @@ use pin_project::pin_project;
 # [pin (__private (project_ref = ProjRef))]
 struct TupleStruct<T, U>(#[pin] T, U);
 #[allow(box_pointers)]
+#[allow(deprecated)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
 #[allow(unreachable_pub)]
@@ -15,6 +16,7 @@ struct ProjRef<'pin, T, U>(::pin_project::__private::Pin<&'pin (T)>, &'pin (U))
 where
     TupleStruct<T, U>: 'pin;
 #[allow(box_pointers)]
+#[allow(deprecated)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
 #[allow(unreachable_pub)]
@@ -24,6 +26,7 @@ where
 #[allow(clippy::used_underscore_binding)]
 const _: () = {
     #[allow(box_pointers)]
+    #[allow(deprecated)]
     #[allow(explicit_outlives_requirements)]
     #[allow(single_use_lifetimes)]
     #[allow(unreachable_pub)]

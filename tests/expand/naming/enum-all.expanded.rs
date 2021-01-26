@@ -10,6 +10,7 @@ enum Enum<T, U> {
     Unit,
 }
 #[allow(box_pointers)]
+#[allow(deprecated)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
 #[allow(unreachable_pub)]
@@ -31,6 +32,7 @@ where
     Unit,
 }
 #[allow(box_pointers)]
+#[allow(deprecated)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
 #[allow(unreachable_pub)]
@@ -52,6 +54,7 @@ where
     Unit,
 }
 #[allow(box_pointers)]
+#[allow(deprecated)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
 #[allow(unreachable_pub)]
@@ -70,6 +73,7 @@ enum ProjOwn<T, U> {
     Unit,
 }
 #[allow(box_pointers)]
+#[allow(deprecated)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
 #[allow(unreachable_pub)]

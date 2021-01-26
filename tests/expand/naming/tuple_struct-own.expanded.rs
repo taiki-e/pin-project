@@ -2,6 +2,7 @@ use pin_project::pin_project;
 # [pin (__private (project_replace = ProjOwn))]
 struct TupleStruct<T, U>(#[pin] T, U);
 #[allow(box_pointers)]
+#[allow(deprecated)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
 #[allow(unreachable_pub)]
@@ -11,6 +12,7 @@ struct TupleStruct<T, U>(#[pin] T, U);
 #[allow(dead_code)]
 struct ProjOwn<T, U>(::pin_project::__private::PhantomData<T>, U);
 #[allow(box_pointers)]
+#[allow(deprecated)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
 #[allow(unreachable_pub)]
@@ -20,6 +22,7 @@ struct ProjOwn<T, U>(::pin_project::__private::PhantomData<T>, U);
 #[allow(clippy::used_underscore_binding)]
 const _: () = {
     #[allow(box_pointers)]
+    #[allow(deprecated)]
     #[allow(explicit_outlives_requirements)]
     #[allow(single_use_lifetimes)]
     #[allow(unreachable_pub)]
@@ -36,6 +39,7 @@ const _: () = {
     where
         TupleStruct<T, U>: 'pin;
     #[allow(box_pointers)]
+    #[allow(deprecated)]
     #[allow(explicit_outlives_requirements)]
     #[allow(single_use_lifetimes)]
     #[allow(unreachable_pub)]
