@@ -6,6 +6,7 @@ pub struct Struct<T, U> {
     pub unpinned: U,
 }
 #[allow(box_pointers)]
+#[allow(deprecated)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
 #[allow(unreachable_pub)]
@@ -15,6 +16,7 @@ pub struct Struct<T, U> {
 #[allow(clippy::used_underscore_binding)]
 const _: () = {
     #[allow(box_pointers)]
+    #[allow(deprecated)]
     #[allow(explicit_outlives_requirements)]
     #[allow(single_use_lifetimes)]
     #[allow(unreachable_pub)]
@@ -32,6 +34,7 @@ const _: () = {
         pub unpinned: &'pin mut (U),
     }
     #[allow(box_pointers)]
+    #[allow(deprecated)]
     #[allow(explicit_outlives_requirements)]
     #[allow(single_use_lifetimes)]
     #[allow(unreachable_pub)]

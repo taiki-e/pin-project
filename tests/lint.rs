@@ -542,6 +542,123 @@ pub mod box_pointers {
     }
 }
 
+pub mod deprecated {
+    use pin_project::pin_project;
+
+    #[allow(deprecated)] // for the type itself
+    #[pin_project(project_replace)]
+    #[derive(Debug, Clone, Copy)]
+    #[deprecated]
+    pub struct Struct {
+        #[deprecated]
+        #[pin]
+        pub p: (),
+        #[deprecated]
+        pub u: (),
+    }
+
+    #[allow(deprecated)] // for the type itself
+    #[pin_project(project_replace)]
+    #[derive(Debug, Clone, Copy)]
+    #[deprecated]
+    pub struct TupleStruct(
+        #[deprecated]
+        #[pin]
+        pub (),
+        #[deprecated] pub (),
+    );
+
+    #[allow(deprecated)] // for the type itself
+    #[pin_project(
+        project = EnumProj,
+        project_ref = EnumProjRef,
+        project_replace = EnumProjOwn,
+    )]
+    #[derive(Debug, Clone, Copy)]
+    #[deprecated]
+    pub enum Enum {
+        #[deprecated]
+        Struct {
+            #[deprecated]
+            #[pin]
+            p: (),
+            #[deprecated]
+            u: (),
+        },
+        #[deprecated]
+        Tuple(
+            #[deprecated]
+            #[pin]
+            (),
+            #[deprecated] (),
+        ),
+        #[deprecated]
+        Unit,
+    }
+
+    pub mod inside_macro {
+        use pin_project::pin_project;
+
+        #[rustfmt::skip]
+        macro_rules! mac {
+            () => {
+                #[allow(deprecated)] // for the type itself
+                #[pin_project(project_replace)]
+                #[derive(Debug, Clone, Copy)]
+                #[deprecated]
+                pub struct Struct {
+                    #[deprecated]
+                    #[pin]
+                    pub p: (),
+                    #[deprecated]
+                    pub u: (),
+                }
+
+                #[allow(deprecated)] // for the type itself
+                #[pin_project(project_replace)]
+                #[derive(Debug, Clone, Copy)]
+                #[deprecated]
+                pub struct TupleStruct(
+                    #[deprecated]
+                    #[pin]
+                    pub (),
+                    #[deprecated] pub (),
+                );
+
+                #[allow(deprecated)] // for the type itself
+                #[pin_project(
+                    project = EnumProj,
+                    project_ref = EnumProjRef,
+                    project_replace = EnumProjOwn,
+                )]
+                #[derive(Debug, Clone, Copy)]
+                #[deprecated]
+                pub enum Enum {
+                    #[deprecated]
+                    Struct {
+                        #[deprecated]
+                        #[pin]
+                        p: (),
+                        #[deprecated]
+                        u: (),
+                    },
+                    #[deprecated]
+                    Tuple(
+                        #[deprecated]
+                        #[pin]
+                        (),
+                        #[deprecated] (),
+                    ),
+                    #[deprecated]
+                    Unit,
+                }
+            };
+        }
+
+        mac!();
+    }
+}
+
 pub mod explicit_outlives_requirements {
     use pin_project::pin_project;
 

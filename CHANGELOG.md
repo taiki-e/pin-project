@@ -10,6 +10,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+- Suppress `deprecated` lint in generated code.
+
 ## [1.0.4] - 2021-01-09
 
 - [Suppress `clippy::ref_option_ref` lint in generated code.](https://github.com/taiki-e/pin-project/pull/308)
