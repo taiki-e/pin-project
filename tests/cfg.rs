@@ -6,8 +6,9 @@
 #[macro_use]
 mod auxiliary;
 
-use pin_project::pin_project;
 use std::{marker::PhantomPinned, pin::Pin};
+
+use pin_project::pin_project;
 
 struct Always;
 

@@ -4,12 +4,13 @@
 #[macro_use]
 mod auxiliary;
 
-use pin_project::{pin_project, pinned_drop, UnsafeUnpin};
 use std::{
     marker::{PhantomData, PhantomPinned},
     panic,
     pin::Pin,
 };
+
+use pin_project::{pin_project, pinned_drop, UnsafeUnpin};
 
 #[test]
 fn projection() {
