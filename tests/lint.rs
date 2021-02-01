@@ -37,6 +37,7 @@
 #![warn(clippy::all, clippy::pedantic, clippy::nursery)]
 #![warn(clippy::restriction)]
 #![allow(clippy::blanket_clippy_restriction_lints)] // this is a test, so enable all restriction lints intentionally.
+#![allow(clippy::exhaustive_structs, clippy::exhaustive_enums)] // TODO
 
 // Check interoperability with rustc and clippy lints.
 
