@@ -29,11 +29,15 @@ mod pin_project {}
 use ::pin_project as pin;
 
 pub mod module {
+    #[rustversion::since(2021-02-07)]
+    use _core::prelude::v1::derive;
     use _core::{fmt::Debug, include};
 
     include!("../include/basic.rs");
 }
 
+#[rustversion::since(2021-02-07)]
+use _core::prelude::v1::derive;
 use _core::{fmt::Debug, include};
 
 include!("../include/basic.rs");
