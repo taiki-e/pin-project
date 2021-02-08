@@ -10,3 +10,4 @@ path = "lib.rs"
 
 [dependencies]
 pin-project = { path = "../.." }
+rustversion = "1"
