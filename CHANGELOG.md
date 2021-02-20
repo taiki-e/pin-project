@@ -10,6 +10,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+- Suppress `clippy::semicolon_if_nothing_returned` lint in generated code.
+
 ## [1.0.5] - 2021-02-03
 
 - [Suppress `deprecated` lint in generated code.](https://github.com/taiki-e/pin-project/pull/313)
