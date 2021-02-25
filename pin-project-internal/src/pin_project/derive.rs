@@ -396,7 +396,9 @@ fn parse_struct(
         let Self #proj_pat = &mut *__self_ptr;
         #proj_own_body
     };
-    generate.extend(false, make_proj_impl(cx, &proj_mut_body, &proj_ref_body, &proj_own_body));
+    generate
+        .extend(false, make_proj_impl(cx, false, &proj_mut_body, &proj_ref_body, &proj_own_body));
+    generate.extend(true, make_proj_impl(cx, true, &proj_mut_body, &proj_ref_body, &proj_own_body));
 
     generate.extend(false, packed_check);
     Ok(())
@@ -478,7 +480,7 @@ fn parse_enum(
             #proj_own_arms
         }
     };
-    generate.extend(false, make_proj_impl(cx, &proj_mut_body, &proj_ref_body, &proj_own_body));
+    generate.extend(true, make_proj_impl(cx, true, &proj_mut_body, &proj_ref_body, &proj_own_body));
 
     Ok(())
 }
@@ -910,6 +912,7 @@ fn make_drop_impl(cx: &Context<'_>) -> TokenStream {
 /// On enums, only methods that the returned projected type is named will be generated.
 fn make_proj_impl(
     cx: &Context<'_>,
+    expose: bool,
     proj_body: &TokenStream,
     proj_ref_body: &TokenStream,
     proj_own_body: &TokenStream,
@@ -970,16 +973,14 @@ fn make_proj_impl(
         }
     });
 
-    if cx.kind == Enum {
-        if !cx.project {
-            project = None;
-        }
-        if !cx.project_ref {
-            project_ref = None;
-        }
-        if cx.project_replace.ident().is_none() {
-            project_replace = None;
-        }
+    if cx.project != expose {
+        project = None;
+    }
+    if cx.project_ref != expose {
+        project_ref = None;
+    }
+    if cx.project_replace.ident().is_some() != expose {
+        project_replace = None;
     }
 
     quote! {
