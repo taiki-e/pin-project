@@ -83,6 +83,8 @@
 pub use pin_project_internal::pin_project;
 #[doc(inline)]
 pub use pin_project_internal::pinned_drop;
+#[doc(inline)]
+pub use pin_project_internal::PinProject;
 
 /// A trait used for custom implementations of [`Unpin`].
 ///
@@ -155,9 +157,6 @@ pub mod __private {
         pin::Pin,
         ptr,
     };
-
-    #[doc(hidden)]
-    pub use pin_project_internal::__PinProjectInternalDerive;
 
     use super::UnsafeUnpin;
 

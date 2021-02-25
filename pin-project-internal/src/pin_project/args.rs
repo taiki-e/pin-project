@@ -10,20 +10,12 @@ use super::PIN;
 use crate::utils::{ParseBufferExt, SliceExt};
 
 pub(super) fn parse_args(attrs: &[Attribute]) -> Result<Args> {
-    // `(__private(<args>))` -> `<args>`
+    // `(<args>)` -> `<args>`
     struct Input(Option<TokenStream>);
 
     impl Parse for Input {
         fn parse(input: ParseStream<'_>) -> Result<Self> {
-            Ok(Self((|| {
-                let content = input.parenthesized().ok()?;
-                let private = content.parse::<Ident>().ok()?;
-                if private == "__private" {
-                    content.parenthesized().ok()?.parse::<TokenStream>().ok()
-                } else {
-                    None
-                }
-            })()))
+            Ok(Self((|| input.parenthesized().ok()?.parse::<TokenStream>().ok())()))
         }
     }
 

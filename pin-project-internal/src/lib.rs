@@ -570,9 +570,7 @@ pub fn pinned_drop(args: TokenStream, input: TokenStream) -> TokenStream {
     pinned_drop::attribute(&args.into(), input).into()
 }
 
-// Not public API.
-#[doc(hidden)]
-#[proc_macro_derive(__PinProjectInternalDerive, attributes(pin))]
-pub fn __pin_project_internal_derive(input: TokenStream) -> TokenStream {
+#[proc_macro_derive(PinProject, attributes(pin))]
+pub fn pin_project_derive(input: TokenStream) -> TokenStream {
     pin_project::derive(input.into()).into()
 }

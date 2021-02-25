@@ -27,11 +27,8 @@ pub(super) fn parse_attribute(args: &TokenStream, input: TokenStream) -> Result<
 
     Ok(quote! {
         #(#attrs)*
-        #[derive(::pin_project::__private::__PinProjectInternalDerive)]
-        // Use `__private` to prevent users from trying to control `InternalDerive`
-        // manually. `__private` does not guarantee compatibility between patch
-        // versions, so it should be sufficient for this purpose in most cases.
-        #[pin(__private(#args))]
+        #[derive(::pin_project::PinProject)]
+        #[pin(#args)]
         #body
     })
 }
