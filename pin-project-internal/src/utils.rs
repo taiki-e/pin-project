@@ -3,10 +3,9 @@ use std::{iter::FromIterator, mem};
 use proc_macro2::{Group, Spacing, Span, TokenStream, TokenTree};
 use quote::{quote, quote_spanned, ToTokens};
 use syn::{
-    parse::{Parse, ParseBuffer, ParseStream},
+    parse::Parse,
     parse_quote,
     punctuated::Punctuated,
-    token,
     visit_mut::{self, VisitMut},
     Attribute, ExprPath, ExprStruct, Generics, Ident, Item, Lifetime, LifetimeDef, Macro, PatPath,
     PatStruct, PatTupleStruct, Path, PathArguments, PredicateType, QSelf, Result, Token, Type,
@@ -149,26 +148,6 @@ impl SliceExt for [Attribute] {
 
     fn find(&self, ident: &str) -> Option<&Attribute> {
         self.iter().position(|attr| attr.path.is_ident(ident)).map(|i| &self[i])
-    }
-}
-
-pub(crate) trait ParseBufferExt<'a> {
-    fn parenthesized(self) -> Result<ParseBuffer<'a>>;
-}
-
-impl<'a> ParseBufferExt<'a> for ParseStream<'a> {
-    fn parenthesized(self) -> Result<ParseBuffer<'a>> {
-        let content;
-        let _: token::Paren = syn::parenthesized!(content in self);
-        Ok(content)
-    }
-}
-
-impl<'a> ParseBufferExt<'a> for ParseBuffer<'a> {
-    fn parenthesized(self) -> Result<ParseBuffer<'a>> {
-        let content;
-        let _: token::Paren = syn::parenthesized!(content in self);
-        Ok(content)
     }
 }
 

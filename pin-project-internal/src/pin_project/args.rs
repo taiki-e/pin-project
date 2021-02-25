@@ -7,29 +7,16 @@ use syn::{
 };
 
 use super::PIN;
-use crate::utils::{ParseBufferExt, SliceExt};
+use crate::utils::SliceExt;
 
 pub(super) fn parse_args(attrs: &[Attribute]) -> Result<Args> {
-    // `(<args>)` -> `<args>`
-    struct Input(Option<TokenStream>);
-
-    impl Parse for Input {
-        fn parse(input: ParseStream<'_>) -> Result<Self> {
-            Ok(Self((|| input.parenthesized().ok()?.parse::<TokenStream>().ok())()))
-        }
-    }
-
     if let Some(attr) = attrs.find("pin_project") {
         return Err(error!(attr, "duplicate #[pin_project] attribute"));
     }
 
     let mut attrs = attrs.iter().filter(|attr| attr.path.is_ident(PIN));
 
-    let prev = if let Some(attr) = attrs.next() {
-        Some((attr, syn::parse2::<Input>(attr.tokens.clone()).unwrap().0))
-    } else {
-        None
-    };
+    let prev = attrs.next().map(|attr| (attr, attr.parse_args::<TokenStream>().ok()));
 
     if let Some((prev_attr, prev_res)) = &prev {
         if let Some(attr) = attrs.next() {
@@ -37,7 +24,7 @@ pub(super) fn parse_args(attrs: &[Attribute]) -> Result<Args> {
             // has the same span as `#[pin_project]`, it is possible
             // that a useless error message will be generated.
             // So, use the span of `prev_attr` if it is not a valid attribute.
-            let res = syn::parse2::<Input>(attr.tokens.clone()).unwrap().0;
+            let res = attr.parse_args::<TokenStream>().ok();
             let span = match (prev_res, res) {
                 (Some(_), _) => attr,
                 (None, _) => prev_attr,
