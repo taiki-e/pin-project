@@ -986,6 +986,7 @@ fn make_proj_impl(
     let allowed_lints = global_allowed_lints();
     quote! {
         #allowed_lints
+        #[allow(dead_code)]
         impl #impl_generics #orig_ident #ty_generics #where_clause {
             #project
             #project_ref
