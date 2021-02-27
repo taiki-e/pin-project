@@ -6,8 +6,8 @@ IFS=$'\n\t'
 # A list of paths to the crate to be published.
 # It will be published in the order listed.
 MEMBERS=(
-  "pin-project-internal"
-  "."
+    "pin-project-internal"
+    "."
 )
 
 cd "$(cd "$(dirname "${0}")" && pwd)"/..
@@ -15,11 +15,11 @@ cd "$(cd "$(dirname "${0}")" && pwd)"/..
 set -x
 
 for i in "${!MEMBERS[@]}"; do
-  (
-    cd "${MEMBERS[${i}]}"
-    cargo publish
-  )
-  if [[ $((i + 1)) != "${#MEMBERS[@]}" ]]; then
-    sleep 30
-  fi
+    (
+        cd "${MEMBERS[${i}]}"
+        cargo publish
+    )
+    if [[ $((i + 1)) != "${#MEMBERS[@]}" ]]; then
+        sleep 30
+    fi
 done
