@@ -25,4 +25,3 @@ syn = { version = "1.0.56", features = ["full", "visit-mut"] }
 
 [dev-dependencies]
 pin-project = { path = ".." }
-rustversion = "1"
