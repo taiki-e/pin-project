@@ -1,4 +1,4 @@
-#![warn(nonstandard_style, rust_2018_idioms, rustdoc, unused)]
+#![warn(nonstandard_style, rust_2018_idioms, unused)]
 // Note: This does not guarantee compatibility with forbidding these lints in the future.
 // If rustc adds a new lint, we may not be able to keep this.
 #![forbid(future_incompatible, rust_2018_compatibility)]
@@ -13,7 +13,6 @@
     meta_variable_misuse,
     missing_abi,
     missing_copy_implementations,
-    missing_crate_level_docs,
     missing_debug_implementations,
     missing_docs,
     non_ascii_idents,
@@ -30,8 +29,7 @@
     variant_size_differences
 )]
 // absolute_paths_not_starting_with_crate, anonymous_parameters, keyword_idents, pointer_structural_match, semicolon_in_expressions_from_macros: forbidden as a part of future_incompatible
-// missing_doc_code_examples, private_doc_tests, invalid_html_tags: warned as a part of rustdoc
-// unsafe_block_in_unsafe_fn: unstable
+// unsafe_block_in_unsafe_fn: unstable: https://github.com/rust-lang/rust/issues/71668
 // unsafe_code: checked in forbid_unsafe module
 // unstable_features: deprecated: https://doc.rust-lang.org/beta/rustc/lints/listing/allowed-by-default.html#unstable-features
 // unused_crate_dependencies: unrelated
