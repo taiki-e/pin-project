@@ -59,7 +59,7 @@ jobs:
       - run: cargo test --all --all-features
       - run: cargo build --manifest-path tests/no-std/Cargo.toml --target thumbv7m-none-eabi
       - run: cargo build --manifest-path tests/rust-2015/Cargo.toml --target thumbv7m-none-eabi
-      - run: scripts/check-minimal-versions.sh
+      - run: tools/check-minimal-versions.sh
         if: startsWith(matrix.rust, 'nightly')
 
   build:

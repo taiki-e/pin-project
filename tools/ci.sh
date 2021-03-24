@@ -3,7 +3,7 @@
 # Run a simplified version of the checks done by CI.
 #
 # Usage:
-#     ./scripts/ci.sh [+toolchain]
+#     ./tools/ci.sh [+toolchain]
 #
 # Note: This script requires nightly Rust, rustfmt, clippy, and cargo-expand
 
