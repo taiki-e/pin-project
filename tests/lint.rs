@@ -16,6 +16,7 @@
     missing_debug_implementations,
     missing_docs,
     non_ascii_idents,
+    noop_method_call,
     single_use_lifetimes,
     trivial_casts,
     trivial_numeric_casts,
