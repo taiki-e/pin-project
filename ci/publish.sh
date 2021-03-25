@@ -20,6 +20,6 @@ for i in "${!MEMBERS[@]}"; do
         cargo publish
     )
     if [[ $((i + 1)) != "${#MEMBERS[@]}" ]]; then
-        sleep 30
+        sleep 45
     fi
 done
