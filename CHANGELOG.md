@@ -10,7 +10,9 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
-- Suppress `clippy::semicolon_if_nothing_returned` lint in generated code.
+## [1.0.6] - 2021-03-25
+
+- [Suppress `clippy::semicolon_if_nothing_returned` lint in generated code.](https://github.com/taiki-e/pin-project/pull/318)
 
 ## [1.0.5] - 2021-02-03
 
@@ -586,7 +588,8 @@ See also [tracking issue for 0.4 release](https://github.com/taiki-e/pin-project
 
 Initial release
 
-[Unreleased]: https://github.com/taiki-e/pin-project/compare/v1.0.5...HEAD
+[Unreleased]: https://github.com/taiki-e/pin-project/compare/v1.0.6...HEAD
+[1.0.6]: https://github.com/taiki-e/pin-project/compare/v1.0.5...v1.0.6
 [1.0.5]: https://github.com/taiki-e/pin-project/compare/v1.0.4...v1.0.5
 [1.0.4]: https://github.com/taiki-e/pin-project/compare/v1.0.3...v1.0.4
 [1.0.3]: https://github.com/taiki-e/pin-project/compare/v1.0.2...v1.0.3
