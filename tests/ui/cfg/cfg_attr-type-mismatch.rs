@@ -1,5 +1,6 @@
-use pin_project::pin_project;
 use std::pin::Pin;
+
+use pin_project::pin_project;
 
 #[cfg_attr(not(any()), pin_project)]
 struct Foo<T> {

@@ -1,6 +1,7 @@
+use std::{marker::PhantomPinned, pin::Pin};
+
 use auxiliary_macro::remove_attr;
 use pin_project::pin_project;
-use std::{marker::PhantomPinned, pin::Pin};
 
 fn is_unpin<T: Unpin>() {}
 

@@ -1,5 +1,6 @@
-use pin_project::pin_project;
 use std::marker::PhantomPinned;
+
+use pin_project::pin_project;
 
 #[pin_project]
 struct S<T> {

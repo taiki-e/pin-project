@@ -1,6 +1,7 @@
+use std::marker::PhantomPinned;
+
 use auxiliary_macro::add_pin_attr;
 use pin_project::pin_project;
-use std::marker::PhantomPinned;
 
 #[pin_project]
 #[add_pin_attr(struct)] //~ ERROR duplicate #[pin] attribute
