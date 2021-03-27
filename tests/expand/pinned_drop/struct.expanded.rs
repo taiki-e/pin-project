@@ -1,5 +1,5 @@
-use pin_project::{pin_project, pinned_drop};
 use std::pin::Pin;
+use pin_project::{pin_project, pinned_drop};
 #[pin(__private(PinnedDrop))]
 struct Struct<T, U> {
     #[pin]
@@ -78,7 +78,7 @@ const _: () = {
             }
         }
     }
-    #[forbid(safe_packed_borrows)]
+    #[forbid(unaligned_references, safe_packed_borrows)]
     fn __assert_not_repr_packed<T, U>(this: &Struct<T, U>) {
         let _ = &this.pinned;
         let _ = &this.unpinned;
