@@ -8,6 +8,7 @@ error[E0277]: `PhantomPinned` cannot be unpinned
    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `Unpin` is not implemented for `PhantomPinned`
    |
    = note: required because of the requirements on the impl of `UnsafeUnpin` for `Blah<PhantomPinned, ()>`
+   = note: 1 redundant requirements hidden
    = note: required because of the requirements on the impl of `UnsafeUnpin` for `Wrapper<'_, Blah<PhantomPinned, ()>>`
    = note: required because of the requirements on the impl of `Unpin` for `Blah<PhantomPinned, ()>`
 
@@ -21,6 +22,7 @@ error[E0277]: `PhantomPinned` cannot be unpinned
    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `Unpin` is not implemented for `PhantomPinned`
    |
    = note: required because of the requirements on the impl of `UnsafeUnpin` for `Blah<PhantomPinned, PhantomPinned>`
+   = note: 1 redundant requirements hidden
    = note: required because of the requirements on the impl of `UnsafeUnpin` for `Wrapper<'_, Blah<PhantomPinned, PhantomPinned>>`
    = note: required because of the requirements on the impl of `Unpin` for `Blah<PhantomPinned, PhantomPinned>`
 
@@ -46,6 +48,7 @@ error[E0277]: `PhantomPinned` cannot be unpinned
    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `Unpin` is not implemented for `PhantomPinned`
    |
    = note: required because of the requirements on the impl of `UnsafeUnpin` for `OverlappingLifetimeNames<'_, PhantomPinned, ()>`
+   = note: 1 redundant requirements hidden
    = note: required because of the requirements on the impl of `UnsafeUnpin` for `Wrapper<'_, OverlappingLifetimeNames<'_, PhantomPinned, ()>>`
    = note: required because of the requirements on the impl of `Unpin` for `OverlappingLifetimeNames<'_, PhantomPinned, ()>`
 
@@ -59,5 +62,6 @@ error[E0277]: `PhantomPinned` cannot be unpinned
    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `Unpin` is not implemented for `PhantomPinned`
    |
    = note: required because of the requirements on the impl of `UnsafeUnpin` for `OverlappingLifetimeNames<'_, (), PhantomPinned>`
+   = note: 1 redundant requirements hidden
    = note: required because of the requirements on the impl of `UnsafeUnpin` for `Wrapper<'_, OverlappingLifetimeNames<'_, (), PhantomPinned>>`
    = note: required because of the requirements on the impl of `Unpin` for `OverlappingLifetimeNames<'_, (), PhantomPinned>`

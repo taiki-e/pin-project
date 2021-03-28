@@ -1,11 +1,12 @@
 #![warn(rust_2018_idioms, single_use_lifetimes)]
 #![allow(dead_code)]
 
-use pin_project::{pin_project, pinned_drop, UnsafeUnpin};
 use std::{
     marker::{PhantomData, PhantomPinned},
     pin::Pin,
 };
+
+use pin_project::{pin_project, pinned_drop, UnsafeUnpin};
 
 #[test]
 fn projection() {

@@ -52,8 +52,9 @@ use crate::utils::ProjKind;
 /// you can name the projection type returned from the method:
 ///
 /// ```rust
-/// use pin_project::pin_project;
 /// use std::pin::Pin;
+///
+/// use pin_project::pin_project;
 ///
 /// #[pin_project(project = StructProj)]
 /// struct Struct<T> {
@@ -157,8 +158,9 @@ use crate::utils::ProjKind;
 /// `#[pin_project]` can be used on structs and enums.
 ///
 /// ```rust
-/// use pin_project::pin_project;
 /// use std::pin::Pin;
+///
+/// use pin_project::pin_project;
 ///
 /// #[pin_project]
 /// struct Struct<T, U> {
@@ -177,8 +179,9 @@ use crate::utils::ProjKind;
 /// ```
 ///
 /// ```rust
-/// use pin_project::pin_project;
 /// use std::pin::Pin;
+///
+/// use pin_project::pin_project;
 ///
 /// #[pin_project]
 /// struct TupleStruct<T, U>(#[pin] T, U);
@@ -196,8 +199,9 @@ use crate::utils::ProjKind;
 /// returned from the method.
 ///
 /// ```rust
-/// use pin_project::pin_project;
 /// use std::pin::Pin;
+///
+/// use pin_project::pin_project;
 ///
 /// #[pin_project(project = EnumProj)]
 /// enum Enum<T, U> {
@@ -226,8 +230,9 @@ use crate::utils::ProjKind;
 /// consuming the [`Pin`].
 ///
 /// ```rust
-/// use pin_project::pin_project;
 /// use std::pin::Pin;
+///
+/// use pin_project::pin_project;
 ///
 /// #[pin_project]
 /// struct Struct<T> {
@@ -262,8 +267,9 @@ use crate::utils::ProjKind;
 /// field.
 ///
 /// ```rust
-/// use pin_project::pin_project;
 /// use std::marker::PhantomPinned;
+///
+/// use pin_project::pin_project;
 ///
 /// #[pin_project]
 /// struct Struct<T> {
@@ -336,8 +342,9 @@ use crate::utils::ProjKind;
 /// For example:
 ///
 /// ```rust
-/// use pin_project::{pin_project, pinned_drop};
 /// use std::{fmt::Debug, pin::Pin};
+///
+/// use pin_project::{pin_project, pinned_drop};
 ///
 /// #[pin_project(PinnedDrop)]
 /// struct Struct<T: Debug, U: Debug> {
@@ -388,8 +395,9 @@ use crate::utils::ProjKind;
 /// For example:
 ///
 /// ```rust
-/// use pin_project::pin_project;
 /// use std::{marker::PhantomData, pin::Pin};
+///
+/// use pin_project::pin_project;
 ///
 /// #[pin_project(project_replace)]
 /// struct Struct<T, U> {
@@ -479,8 +487,9 @@ pub fn pin_project(args: TokenStream, input: TokenStream) -> TokenStream {
 /// # Example
 ///
 /// ```rust
-/// use pin_project::{pin_project, pinned_drop};
 /// use std::pin::Pin;
+///
+/// use pin_project::{pin_project, pinned_drop};
 ///
 /// #[pin_project(PinnedDrop)]
 /// struct Foo {
@@ -550,8 +559,9 @@ pub fn pinned_drop(args: TokenStream, input: TokenStream) -> TokenStream {
 ///
 /// ```rust
 /// # #![allow(deprecated)]
-/// use pin_project::{pin_project, project};
 /// use std::pin::Pin;
+///
+/// use pin_project::{pin_project, project};
 ///
 /// #[pin_project]
 /// struct Foo<T, U> {
@@ -581,8 +591,9 @@ pub fn pinned_drop(args: TokenStream, input: TokenStream) -> TokenStream {
 ///
 /// ```rust
 /// # #![allow(deprecated)]
-/// use pin_project::{pin_project, project};
 /// use std::pin::Pin;
+///
+/// use pin_project::{pin_project, project};
 ///
 /// #[pin_project]
 /// enum Enum<A, B, C> {
@@ -622,8 +633,9 @@ pub fn pinned_drop(args: TokenStream, input: TokenStream) -> TokenStream {
 ///
 /// ```rust
 /// # #![allow(deprecated)]
-/// use pin_project::{pin_project, project};
 /// use std::pin::Pin;
+///
+/// use pin_project::{pin_project, project};
 ///
 /// #[pin_project]
 /// struct Foo<T, U> {
@@ -667,10 +679,11 @@ pub fn pinned_drop(args: TokenStream, input: TokenStream) -> TokenStream {
 /// }
 ///
 /// mod bar {
-///     use super::Foo;
-///     use pin_project::project;
 ///     use std::pin::Pin;
 ///
+///     use pin_project::project;
+///
+///     use super::Foo;
 ///     #[project]
 ///     use super::Foo;
 ///

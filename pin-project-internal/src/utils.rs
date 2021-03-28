@@ -1,6 +1,7 @@
+use std::{iter::FromIterator, mem};
+
 use proc_macro2::{Group, Spacing, Span, TokenStream, TokenTree};
 use quote::{format_ident, quote, quote_spanned, ToTokens};
-use std::{iter::FromIterator, mem};
 use syn::{
     parse::{Parse, ParseBuffer, ParseStream},
     punctuated::Punctuated,

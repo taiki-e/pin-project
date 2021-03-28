@@ -1,7 +1,8 @@
 #![warn(rust_2018_idioms, single_use_lifetimes)]
 
-use pin_project::pin_project;
 use std::{cell::Cell, pin::Pin, thread};
+
+use pin_project::pin_project;
 
 struct D<'a>(&'a Cell<usize>, usize);
 

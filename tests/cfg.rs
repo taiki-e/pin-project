@@ -3,8 +3,9 @@
 
 // Refs: https://doc.rust-lang.org/nightly/reference/attributes.html
 
-use pin_project::pin_project;
 use std::{marker::PhantomPinned, pin::Pin};
+
+use pin_project::pin_project;
 
 fn is_unpin<T: Unpin>() {}
 

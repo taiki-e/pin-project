@@ -2,8 +2,9 @@
 #![allow(dead_code)]
 #![allow(deprecated)]
 
-use pin_project::{pin_project, project_replace};
 use std::{marker::PhantomData, pin::Pin};
+
+use pin_project::{pin_project, project_replace};
 
 #[project_replace] // Nightly does not need a dummy attribute to the function.
 #[test]

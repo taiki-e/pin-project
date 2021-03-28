@@ -10,8 +10,9 @@
 #[rustversion::since(1.43)]
 include!("project_if_attr.rs.in");
 
-use pin_project::{pin_project, project, project_ref, project_replace};
 use std::pin::Pin;
+
+use pin_project::{pin_project, project, project_ref, project_replace};
 
 #[project] // Nightly does not need a dummy attribute to the function.
 #[test]
@@ -160,10 +161,11 @@ struct A {
 }
 
 mod project_use_1 {
-    use crate::A;
-    use pin_project::project;
     use std::pin::Pin;
 
+    use pin_project::project;
+
+    use crate::A;
     #[project]
     use crate::A;
 
@@ -178,9 +180,10 @@ mod project_use_1 {
 }
 
 mod project_use_2 {
+    use pin_project::project;
+
     #[project]
     use crate::A;
-    use pin_project::project;
 
     #[project]
     impl A {

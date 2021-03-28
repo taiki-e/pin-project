@@ -29,11 +29,11 @@ mod pin_project {}
 use ::pin_project as pin;
 
 pub mod module {
-    use _core::{fmt::Debug, include};
+    use _core::{fmt::Debug, include, prelude::v1::derive};
 
     include!("../include/basic.rs");
 }
 
-use _core::{fmt::Debug, include};
+use _core::{fmt::Debug, include, prelude::v1::derive};
 
 include!("../include/basic.rs");

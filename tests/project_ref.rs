@@ -2,8 +2,9 @@
 #![allow(dead_code)]
 #![allow(deprecated)]
 
-use pin_project::{pin_project, project_ref};
 use std::pin::Pin;
+
+use pin_project::{pin_project, project_ref};
 
 #[project_ref] // Nightly does not need a dummy attribute to the function.
 #[test]
