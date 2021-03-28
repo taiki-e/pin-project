@@ -55,7 +55,7 @@ const _: () = {
     impl<T, U> ::pin_project::__private::PinnedDrop for TupleStruct<T, U> {
         unsafe fn drop(self: ::pin_project::__private::Pin<&mut Self>) {}
     }
-    #[forbid(safe_packed_borrows)]
+    #[forbid(unaligned_references, safe_packed_borrows)]
     fn __assert_not_repr_packed<T, U>(this: &TupleStruct<T, U>) {
         let _ = &this.0;
         let _ = &this.1;

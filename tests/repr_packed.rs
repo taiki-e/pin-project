@@ -1,5 +1,8 @@
 #![warn(rust_2018_idioms, single_use_lifetimes)]
-#![forbid(safe_packed_borrows)]
+// unaligned_references did not exist in older compilers and safe_packed_borrows was removed in the latest compilers.
+// https://github.com/rust-lang/rust/pull/82525
+#![allow(unknown_lints, renamed_and_removed_lints)]
+#![forbid(unaligned_references, safe_packed_borrows)]
 
 use std::cell::Cell;
 
