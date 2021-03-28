@@ -1162,9 +1162,6 @@ impl<'a> Context<'a> {
             }
         }
 
-        // As proc-macro-derive can't rewrite the structure definition,
-        // it's probably no longer necessary, but it keeps it for now.
-
         // Workaround for https://github.com/taiki-e/pin-project/issues/32
         // Through the tricky use of proc macros, it's possible to bypass
         // the above check for the `repr` attribute.
@@ -1172,7 +1169,7 @@ impl<'a> Context<'a> {
         // struct, we generate code like this:
         //
         // ```rust
-        // #[forbid(safe_packed_borrows)]
+        // #[forbid(unaligned_references)]
         // fn assert_not_repr_packed(val: &MyStruct) {
         //     let _field1 = &val.field1;
         //     let _field2 = &val.field2;
@@ -1181,10 +1178,8 @@ impl<'a> Context<'a> {
         // }
         // ```
         //
-        // Taking a reference to a packed field is unsafe, and applying
-        // `#[forbid(safe_packed_borrows)]` makes sure that doing this without
-        // an `unsafe` block (which we deliberately do not generate)
-        // is a hard error.
+        // Taking a reference to a packed field is UB, and applying
+        // `#[forbid(unaligned_references)]` makes sure that doing this is a hard error.
         //
         // If the struct ends up having `#[repr(packed)]` applied somehow,
         // this will generate an (unfriendly) error message. Under all reasonable
@@ -1204,6 +1199,22 @@ impl<'a> Context<'a> {
         // `#[repr(packed)]` in the first place.
         //
         // See also https://github.com/taiki-e/pin-project/pull/34.
+        //
+        // Note:
+        // - pin-project v0.4.3 or later (ttps://github.com/taiki-e/pin-project/pull/135,
+        //   v0.4.0-v0.4.2 are already yanked for another reason) is internally
+        //   proc-macro-derive, so they are not affected by the problem that the
+        //   struct definition is rewritten by another macro after the
+        //   #[pin_project] is expanded. So this is probably no longer necessary,
+        //   but it keeps it for now.
+        //
+        // - Lint-based tricks aren't perfect, but they're much better than nothing:
+        //   https://github.com/taiki-e/pin-project-lite/issues/26
+        //
+        // - Forbid both unaligned_references and safe_packed_borrows lints
+        //   because unaligned_references lint does not exist in older compilers:
+        //   https://github.com/taiki-e/pin-project-lite/pull/55
+        //   https://github.com/rust-lang/rust/pull/82525
         let mut field_refs = vec![];
         match fields {
             Fields::Named(FieldsNamed { named, .. }) => {
@@ -1223,7 +1234,7 @@ impl<'a> Context<'a> {
         let (impl_generics, ty_generics, where_clause) = self.orig.generics.split_for_impl();
         let ident = self.orig.ident;
         Ok(quote! {
-            #[forbid(safe_packed_borrows)]
+            #[forbid(unaligned_references, safe_packed_borrows)]
             fn __assert_not_repr_packed #impl_generics (this: &#ident #ty_generics) #where_clause {
                 #(let _ = #field_refs;)*
             }
