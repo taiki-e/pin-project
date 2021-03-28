@@ -117,11 +117,11 @@ const _: () = {
         unsafe fn drop(self: ::pin_project::__private::Pin<&mut Self>) {}
     }
     #[forbid(safe_packed_borrows)]
-    fn __assert_not_repr_packed<T, U>(val: &TupleStruct<T, U>) {
-        &val.0;
-        &val.1;
-        &val.2;
-        &val.3;
+    fn __assert_not_repr_packed<T, U>(this: &TupleStruct<T, U>) {
+        let _ = &this.0;
+        let _ = &this.1;
+        let _ = &this.2;
+        let _ = &this.3;
     }
 };
 fn main() {}

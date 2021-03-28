@@ -82,9 +82,9 @@ const _: () = {
         }
     }
     #[forbid(safe_packed_borrows)]
-    fn __assert_not_repr_packed<T, U>(val: &Struct<T, U>) {
-        &val.pinned;
-        &val.unpinned;
+    fn __assert_not_repr_packed<T, U>(this: &Struct<T, U>) {
+        let _ = &this.pinned;
+        let _ = &this.unpinned;
     }
 };
 impl<T, U> ::pin_project::__private::PinnedDrop for Struct<T, U> {
