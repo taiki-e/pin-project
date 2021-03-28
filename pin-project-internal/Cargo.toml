@@ -1,16 +1,15 @@
 [package]
 name = "pin-project-internal"
-version = "0.4.27"
+version = "0.4.28"
 authors = ["Taiki Endo <te316e89@gmail.com>"]
 edition = "2018"
 license = "Apache-2.0 OR MIT"
 repository = "https://github.com/taiki-e/pin-project"
-homepage = "https://github.com/taiki-e/pin-project"
 documentation = "https://docs.rs/pin-project-internal"
 keywords = ["pin", "macros", "attribute"]
 categories = ["no-std", "rust-patterns"]
 description = """
-An internal crate to support pin_project - do not use directly
+Implementation detail of the `pin-project` crate.
 """
 
 [package.metadata.docs.rs]
@@ -25,5 +24,5 @@ quote = "1"
 syn = { version = "1.0.44", features = ["full", "visit-mut"] }
 
 [dev-dependencies]
-pin-project = { version = "0.4.27", path = ".." }
+pin-project = { path = ".." }
 rustversion = "1"
