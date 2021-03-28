@@ -67,9 +67,9 @@ const _: () = {
         }
     }
     #[forbid(safe_packed_borrows)]
-    fn __assert_not_repr_packed<T, U>(val: &TupleStruct<T, U>) {
-        &val.0;
-        &val.1;
+    fn __assert_not_repr_packed<T, U>(this: &TupleStruct<T, U>) {
+        let _ = &this.0;
+        let _ = &this.1;
     }
 };
 impl<T, U> ::pin_project::__private::PinnedDrop for TupleStruct<T, U> {

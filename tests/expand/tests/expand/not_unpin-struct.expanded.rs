@@ -71,9 +71,9 @@ const _: () = {
         unsafe fn drop(self: ::pin_project::__private::Pin<&mut Self>) {}
     }
     #[forbid(safe_packed_borrows)]
-    fn __assert_not_repr_packed<T, U>(val: &Struct<T, U>) {
-        &val.pinned;
-        &val.unpinned;
+    fn __assert_not_repr_packed<T, U>(this: &Struct<T, U>) {
+        let _ = &this.pinned;
+        let _ = &this.unpinned;
     }
 };
 fn main() {}
