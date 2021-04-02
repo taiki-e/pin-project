@@ -152,7 +152,7 @@ struct Context<'a> {
     /// The projected types.
     proj: ProjectedType,
     /// Types of the pinned fields.
-    pinned_fields: Vec<Type>,
+    pinned_fields: Vec<&'a Type>,
     /// Kind of the original type: struct or enum
     kind: TypeKind,
 
@@ -320,9 +320,9 @@ fn validate_enum(brace_token: token::Brace, variants: &Variants) -> Result<()> {
     }
 }
 
-fn parse_struct(
-    cx: &mut Context<'_>,
-    fields: &Fields,
+fn parse_struct<'a>(
+    cx: &mut Context<'a>,
+    fields: &'a Fields,
     generate: &mut GenerateTokens,
 ) -> Result<()> {
     // Do this first for a better error message.
@@ -402,9 +402,9 @@ fn parse_struct(
     Ok(())
 }
 
-fn parse_enum(
-    cx: &mut Context<'_>,
-    DataEnum { brace_token, variants, .. }: &DataEnum,
+fn parse_enum<'a>(
+    cx: &mut Context<'a>,
+    DataEnum { brace_token, variants, .. }: &'a DataEnum,
     generate: &mut GenerateTokens,
 ) -> Result<()> {
     if let ProjReplace::Unnamed { span } = &cx.project_replace {
@@ -483,7 +483,7 @@ fn parse_enum(
     Ok(())
 }
 
-fn visit_variants(cx: &mut Context<'_>, variants: &Variants) -> Result<ProjectedVariants> {
+fn visit_variants<'a>(cx: &mut Context<'a>, variants: &'a Variants) -> Result<ProjectedVariants> {
     let mut proj_variants = TokenStream::new();
     let mut proj_ref_variants = TokenStream::new();
     let mut proj_own_variants = TokenStream::new();
@@ -540,10 +540,10 @@ fn visit_variants(cx: &mut Context<'_>, variants: &Variants) -> Result<Projected
     })
 }
 
-fn visit_fields(
-    cx: &mut Context<'_>,
+fn visit_fields<'a>(
+    cx: &mut Context<'a>,
     variant_ident: Option<&Ident>,
-    fields: &Fields,
+    fields: &'a Fields,
     delim: Delimiter,
 ) -> Result<ProjectedFields> {
     fn surround(delim: Delimiter, tokens: TokenStream) -> TokenStream {
@@ -579,7 +579,7 @@ fn visit_fields(
                 #ident #colon_token ::pin_project::__private::PhantomData,
             });
 
-            cx.pinned_fields.push(ty.clone());
+            cx.pinned_fields.push(ty);
             pinned_bindings.push(binding);
         } else {
             let lifetime = &cx.proj.lifetime;
