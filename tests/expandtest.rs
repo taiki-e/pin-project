@@ -6,6 +6,8 @@ use std::{
     process::{Command, ExitStatus, Stdio},
 };
 
+const PATH: &str = "tests/expand/*/*.rs";
+
 #[rustversion::attr(not(nightly), ignore)]
 #[test]
 fn expandtest() {
@@ -18,12 +20,12 @@ fn expandtest() {
         return;
     }
 
-    let path = "tests/expand/*/*.rs";
+    let args = &["--all-features"];
     if is_ci {
-        macrotest::expand_without_refresh(path);
+        macrotest::expand_without_refresh_args(PATH, args);
     } else {
         env::set_var("MACROTEST", "overwrite");
-        macrotest::expand(path);
+        macrotest::expand_args(PATH, args);
     }
 }
 
