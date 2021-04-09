@@ -561,8 +561,8 @@ fn visit_fields<'a>(
     for (i, Field { attrs, vis, ident, colon_token, ty }) in fields.iter().enumerate() {
         let binding = ident.clone().unwrap_or_else(|| format_ident!("_{}", i));
         proj_pat.extend(quote!(#binding,));
+        let lifetime = &cx.proj.lifetime;
         if attrs.position_exact(PIN)?.is_some() {
-            let lifetime = &cx.proj.lifetime;
             proj_fields.extend(quote! {
                 #vis #ident #colon_token ::pin_project::__private::Pin<&#lifetime mut (#ty)>,
             });
@@ -582,7 +582,6 @@ fn visit_fields<'a>(
             cx.pinned_fields.push(ty);
             pinned_bindings.push(binding);
         } else {
-            let lifetime = &cx.proj.lifetime;
             proj_fields.extend(quote! {
                 #vis #ident #colon_token &#lifetime mut (#ty),
             });
