@@ -1,52 +1,11 @@
-error: internal compiler error: unrecognized representation hint
- --> $DIR/packed-name-value.rs:3:8
-  |
-3 | #[repr(packed = "")] //~ ERROR E0552
-  |        ^^^^^^^^^^^
-  |
-  = note: delayed at compiler/rustc_attr/src/builtin.rs:940:32
-
-error: internal compiler error: unrecognized representation hint
- --> $DIR/packed-name-value.rs:9:8
-  |
-9 | #[repr(packed = "")] //~ ERROR E0552
-  |        ^^^^^^^^^^^
-  |
-  = note: delayed at compiler/rustc_attr/src/builtin.rs:940:32
-
-error: internal compiler error: unrecognized representation hint
-  --> $DIR/packed-name-value.rs:14:8
+error: #[repr(packed)] attribute should not be name-value pair
+  --> $DIR/packed-name-value.rs:16:8
    |
-14 | #[repr(packed = "")] //~ ERROR E0552
+16 | #[repr(packed = "")] //~ ERROR attribute should not be name-value pair
    |        ^^^^^^^^^^^
+
+error: #[repr(packed)] attribute should not be name-value pair
+  --> $DIR/packed-name-value.rs:21:8
    |
-   = note: delayed at compiler/rustc_attr/src/builtin.rs:940:32
-
-thread 'rustc' panicked at 'no errors encountered even though `delay_span_bug` issued', compiler/rustc_errors/src/lib.rs:1018:13
-stack backtrace:
-   0: _rust_begin_unwind
-   1: std::panicking::begin_panic_fmt
-   2: rustc_errors::HandlerInner::flush_delayed
-   3: <rustc_errors::HandlerInner as core::ops::drop::Drop>::drop
-   4: core::ptr::drop_in_place<rustc_session::parse::ParseSess>
-   5: <alloc::rc::Rc<T> as core::ops::drop::Drop>::drop
-   6: core::ptr::drop_in_place<rustc_interface::interface::Compiler>
-   7: rustc_span::with_source_map
-   8: rustc_interface::interface::create_compiler_and_run
-   9: scoped_tls::ScopedKey<T>::set
-note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
-
-error: internal compiler error: unexpected panic
-
-note: the compiler unexpectedly panicked. this is a bug.
-
-note: we would appreciate a bug report: https://github.com/rust-lang/rust/issues/new?labels=C-bug%2C+I-ICE%2C+T-compiler&template=ice.md
-
-note: rustc 1.53.0-nightly (d0695c908 2021-04-12) running on x86_64-apple-darwin
-
-note: compiler flags: -C embed-bitcode=no -C split-debuginfo=unpacked -C debuginfo=2 --crate-type bin
-
-note: some of the compiler flags provided by cargo are hidden
-
-query stack during panic:
-end of query stack
+21 | #[repr(packed = "")] //~ ERROR attribute should not be name-value pair
+   |        ^^^^^^^^^^^
