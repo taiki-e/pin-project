@@ -3,7 +3,7 @@ use quote::{format_ident, quote, quote_spanned, ToTokens};
 use syn::{
     parse_quote, token, visit_mut::VisitMut, Attribute, Data, DataEnum, DeriveInput, Error, Field,
     Fields, FieldsNamed, FieldsUnnamed, Generics, Ident, Index, Lifetime, LifetimeDef, Meta,
-    MetaList, NestedMeta, Result, Token, Type, Variant, Visibility, WhereClause,
+    MetaList, MetaNameValue, NestedMeta, Result, Token, Type, Variant, Visibility, WhereClause,
 };
 
 use super::{
@@ -326,7 +326,7 @@ fn parse_struct<'a>(
     generate: &mut GenerateTokens,
 ) -> Result<()> {
     // Do this first for a better error message.
-    let packed_check = ensure_not_packed(&cx.orig, fields)?;
+    let packed_check = ensure_not_packed(&cx.orig, Some(fields))?;
 
     validate_struct(cx.orig.ident, fields)?;
 
@@ -414,8 +414,12 @@ fn parse_enum<'a>(
         ));
     }
 
-    // We don't need to check for `#[repr(packed)]`,
-    // since it does not apply to enums.
+    // #[repr(packed)] cannot be apply on enums and will be rejected by rustc.
+    // However, we should not rely on the behavior of rustc that rejects this.
+    // https://github.com/taiki-e/pin-project/pull/324#discussion_r612388001
+    //
+    // Do this first for a better error message.
+    ensure_not_packed(&cx.orig, None)?;
 
     validate_enum(*brace_token, variants)?;
 
@@ -996,7 +1000,7 @@ fn make_proj_impl(
 /// * Checks the attributes of structs to ensure there is no `[repr(packed)]`.
 /// * Generates a function that borrows fields without an unsafe block and
 ///   forbidding `unaligned_references` lint.
-fn ensure_not_packed(orig: &OriginalType<'_>, fields: &Fields) -> Result<TokenStream> {
+fn ensure_not_packed(orig: &OriginalType<'_>, fields: Option<&Fields>) -> Result<TokenStream> {
     for meta in orig.attrs.iter().filter_map(|attr| attr.parse_meta().ok()) {
         if let Meta::List(list) = meta {
             if list.path.is_ident("repr") {
@@ -1004,19 +1008,36 @@ fn ensure_not_packed(orig: &OriginalType<'_>, fields: &Fields) -> Result<TokenSt
                     match repr {
                         NestedMeta::Meta(Meta::Path(path))
                         | NestedMeta::Meta(Meta::List(MetaList { path, .. }))
-                            if path.is_ident("packed") =>
-                        {
-                            return Err(error!(
-                                repr,
-                                "#[pin_project] attribute may not be used on #[repr(packed)] types"
-                            ));
+                        | NestedMeta::Meta(Meta::NameValue(MetaNameValue { path, .. })) => {
+                            if path.is_ident("packed") {
+                                let msg = if fields.is_none() {
+                                    // #[repr(packed)] cannot be apply on enums and will be rejected by rustc.
+                                    // However, we should not rely on the behavior of rustc that rejects this.
+                                    // https://github.com/taiki-e/pin-project/pull/324#discussion_r612388001
+                                    "#[repr(packed)] attribute should be applied to a struct or union"
+                                } else if let NestedMeta::Meta(Meta::NameValue(..)) = repr {
+                                    // #[repr(packed = "")] is not valid format of #[repr(packed)] and will be
+                                    // rejected by rustc.
+                                    // However, we should not rely on the behavior of rustc that rejects this.
+                                    // https://github.com/taiki-e/pin-project/pull/324#discussion_r612388001
+                                    "#[repr(packed)] attribute should not be name-value pair"
+                                } else {
+                                    "#[pin_project] attribute may not be used on #[repr(packed)] types"
+                                };
+                                return Err(error!(repr, msg));
+                            }
                         }
-                        _ => {}
+                        NestedMeta::Lit(..) => {}
                     }
                 }
             }
         }
     }
+
+    let fields = match fields {
+        Some(fields) => fields,
+        None => return Ok(TokenStream::new()),
+    };
 
     // Workaround for https://github.com/taiki-e/pin-project/issues/32
     // Through the tricky use of proc macros, it's possible to bypass

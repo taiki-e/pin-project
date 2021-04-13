@@ -2,9 +2,8 @@ use auxiliary_macro::hidden_repr;
 use pin_project::pin_project;
 
 #[pin_project]
-#[hidden_repr(packed)]
+#[hidden_repr(packed)] //~ ERROR may not be used on #[repr(packed)] types
 struct S {
-    //~^ ERROR may not be used on #[repr(packed)] types
     #[cfg(any())]
     #[pin]
     f: u32,
