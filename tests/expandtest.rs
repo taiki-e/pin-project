@@ -6,7 +6,7 @@ use std::{
     process::{Command, ExitStatus, Stdio},
 };
 
-const PATH: &str = "tests/expand/*/*.rs";
+const PATH: &str = "tests/expand/**/*.rs";
 
 #[rustversion::attr(not(nightly), ignore)]
 #[test]
