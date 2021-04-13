@@ -135,6 +135,7 @@ const _: () = {
 // Users can implement [`Drop`] safely using `#[pinned_drop]` and can drop a
 // type that implements `PinnedDrop` using the [`drop`] function safely.
 // **Do not call or implement this trait directly.**
+#[doc(hidden)]
 impl<T> ::pin_project::__private::PinnedDrop for Struct<'_, T> {
     // Since calling it twice on the same object would be UB,
     // this method is unsafe.
