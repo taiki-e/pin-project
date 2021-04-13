@@ -1,4 +1,4 @@
-error[E0119]: conflicting implementations of trait `_::FooMustNotImplDrop` for type `Foo<_, _>`:
+error[E0119]: conflicting implementations of trait `_::FooMustNotImplDrop` for type `Foo<_, _>`
  --> $DIR/conflict-drop.rs:5:1
   |
 5 | #[pin_project] //~ ERROR E0119
@@ -9,7 +9,7 @@ error[E0119]: conflicting implementations of trait `_::FooMustNotImplDrop` for t
   |
   = note: this error originates in a derive macro (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error[E0119]: conflicting implementations of trait `std::ops::Drop` for type `Bar<_, _>`:
+error[E0119]: conflicting implementations of trait `std::ops::Drop` for type `Bar<_, _>`
   --> $DIR/conflict-drop.rs:16:15
    |
 16 | #[pin_project(PinnedDrop)] //~ ERROR E0119

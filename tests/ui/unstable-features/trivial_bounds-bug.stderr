@@ -3,3 +3,5 @@ error[E0277]: `PhantomPinned` cannot be unpinned
     |
 13  |     impl Unpin for A where PhantomPinned: Unpin {} //~ ERROR E0277
     |                                           ^^^^^ the trait `Unpin` is not implemented for `PhantomPinned`
+    |
+    = note: consider using `Box::pin`
