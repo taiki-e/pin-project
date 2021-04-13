@@ -189,6 +189,9 @@ fn expand_impl(item: &mut ItemImpl) {
         None
     }
 
+    // `PinnedDrop` is a private trait and should not appear in docs.
+    item.attrs.push(parse_quote!(#[doc(hidden)]));
+
     let path = &mut item.trait_.as_mut().unwrap().1;
     *path = parse_quote_spanned! { path.span() =>
         ::pin_project::__private::PinnedDrop

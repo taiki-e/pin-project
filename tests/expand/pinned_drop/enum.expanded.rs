@@ -130,6 +130,7 @@ const _: () = {
         }
     }
 };
+#[doc(hidden)]
 impl<T, U> ::pin_project::__private::PinnedDrop for Enum<T, U> {
     unsafe fn drop(self: Pin<&mut Self>) {
         #[allow(clippy::needless_pass_by_value)]
