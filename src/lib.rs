@@ -74,9 +74,8 @@
         allow(dead_code, unused_variables)
     )
 ))]
-#![warn(future_incompatible, rust_2018_idioms, single_use_lifetimes, unreachable_pub)]
-#![warn(missing_docs)]
-#![warn(clippy::all, clippy::default_trait_access)]
+#![warn(future_incompatible, missing_docs, rust_2018_idioms, single_use_lifetimes, unreachable_pub)]
+#![warn(clippy::default_trait_access)]
 #![allow(clippy::needless_doctest_main)]
 
 #[doc(inline)]

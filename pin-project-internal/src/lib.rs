@@ -9,7 +9,7 @@
 ))]
 #![warn(unsafe_code)]
 #![warn(future_incompatible, rust_2018_idioms, single_use_lifetimes, unreachable_pub)]
-#![warn(clippy::all, clippy::default_trait_access)]
+#![warn(clippy::default_trait_access)]
 #![allow(clippy::needless_doctest_main)]
 
 // older compilers require explicit `extern crate`.
