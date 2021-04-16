@@ -12,7 +12,7 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [1.0.7] - 2021-04-16
 
-- Fix compile error when using `self::` as prefix of path inside `#[pinned_drop]` impl.
+- [Fix compile error when using `self::` as prefix of path inside `#[pinned_drop]` impl.](https://github.com/taiki-e/pin-project/pull/326)
 
 ## [1.0.6] - 2021-03-25
 
