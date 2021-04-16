@@ -10,6 +10,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+## [1.0.7] - 2021-04-16
+
 - Fix compile error when using `self::` as prefix of path inside `#[pinned_drop]` impl.
 
 ## [1.0.6] - 2021-03-25
@@ -596,7 +598,8 @@ See also [tracking issue for 0.4 release](https://github.com/taiki-e/pin-project
 
 Initial release
 
-[Unreleased]: https://github.com/taiki-e/pin-project/compare/v1.0.6...HEAD
+[Unreleased]: https://github.com/taiki-e/pin-project/compare/v1.0.7...HEAD
+[1.0.7]: https://github.com/taiki-e/pin-project/compare/v1.0.6...v1.0.7
 [1.0.6]: https://github.com/taiki-e/pin-project/compare/v1.0.5...v1.0.6
 [1.0.5]: https://github.com/taiki-e/pin-project/compare/v1.0.4...v1.0.5
 [1.0.4]: https://github.com/taiki-e/pin-project/compare/v1.0.3...v1.0.4
