@@ -45,7 +45,7 @@ jobs:
         if: startsWith(matrix.rust, 'nightly')
       - name: Cache cargo-expand
         id: cache-cargo-expand
-        uses: actions/cache@v2
+        uses: actions/cache@v2.1.5
         with:
           path: ${{ runner.tool_cache }}/cargo-expand/bin
           key: cargo-expand-bin-${{ hashFiles('.github/caching/cargo-expand.lock') }}
