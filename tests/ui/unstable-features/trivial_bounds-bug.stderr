@@ -4,9 +4,3 @@ error[E0277]: `PhantomPinned` cannot be unpinned
 13  |     impl Unpin for A where PhantomPinned: Unpin {} //~ ERROR E0277
     |                                           ^^^^^ the trait `Unpin` is not implemented for `PhantomPinned`
     |
-   ::: $RUST/core/src/marker.rs
-    |
-    | pub auto trait Unpin {}
-    | -------------------- required by this bound in `Unpin`
-    |
-    = note: consider using `Box::pin`
