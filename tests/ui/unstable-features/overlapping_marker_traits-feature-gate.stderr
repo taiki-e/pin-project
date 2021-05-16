@@ -7,4 +7,4 @@ error[E0119]: conflicting implementations of trait `std::marker::Unpin` for type
 14 | impl<T> Unpin for Struct<T> {}
    | --------------------------- first implementation here
    |
-   = note: this error originates in a derive macro (in Nightly builds, run with -Z macro-backtrace for more info)
+   = note: this error originates in the derive macro `::pin_project::__private::__PinProjectInternalDerive` (in Nightly builds, run with -Z macro-backtrace for more info)

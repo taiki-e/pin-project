@@ -11,4 +11,4 @@ note: function defined here
    |
 10 | #[pinned_drop]
    | ^^^^^^^^^^^^^^
-   = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
+   = note: this error originates in the attribute macro `pinned_drop` (in Nightly builds, run with -Z macro-backtrace for more info)

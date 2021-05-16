@@ -10,4 +10,4 @@ error: #[pin_project] attribute may not be used on #[repr(packed)] types
 10 | | }
    | |_^
    |
-   = note: this error originates in a macro (in Nightly builds, run with -Z macro-backtrace for more info)
+   = note: this error originates in the macro `hidden_repr_macro` (in Nightly builds, run with -Z macro-backtrace for more info)

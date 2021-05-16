@@ -8,7 +8,7 @@ error: `self` parameter is only allowed in associated functions
    |             ----- in this macro invocation
    |
    = note: associated functions are those in `impl` or `trait` definitions
-   = note: this error originates in a macro (in Nightly builds, run with -Z macro-backtrace for more info)
+   = note: this error originates in the macro `t` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0434]: can't capture dynamic environment in a fn item
   --> $DIR/self.rs:16:29
@@ -20,7 +20,7 @@ error[E0434]: can't capture dynamic environment in a fn item
    |             ----- in this macro invocation
    |
    = help: use the `|| { ... }` closure form instead
-   = note: this error originates in a macro (in Nightly builds, run with -Z macro-backtrace for more info)
+   = note: this error originates in the macro `t` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0423]: expected value, found struct `S`
   --> $DIR/self.rs:40:27

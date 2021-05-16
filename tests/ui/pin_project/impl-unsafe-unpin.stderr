@@ -7,7 +7,7 @@ error[E0119]: conflicting implementations of trait `pin_project::UnsafeUnpin` fo
 10 | unsafe impl<T, U> UnsafeUnpin for Foo<T, U> where T: Unpin {}
    | ---------------------------------------------------------- first implementation here
    |
-   = note: this error originates in a derive macro (in Nightly builds, run with -Z macro-backtrace for more info)
+   = note: this error originates in the derive macro `::pin_project::__private::__PinProjectInternalDerive` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0119]: conflicting implementations of trait `pin_project::UnsafeUnpin` for type `Bar<_, _>`
   --> $DIR/impl-unsafe-unpin.rs:12:1
@@ -18,7 +18,7 @@ error[E0119]: conflicting implementations of trait `pin_project::UnsafeUnpin` fo
 19 | unsafe impl<T, U> UnsafeUnpin for Bar<T, U> {}
    | ------------------------------------------- first implementation here
    |
-   = note: this error originates in a derive macro (in Nightly builds, run with -Z macro-backtrace for more info)
+   = note: this error originates in the derive macro `::pin_project::__private::__PinProjectInternalDerive` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0119]: conflicting implementations of trait `pin_project::UnsafeUnpin` for type `Baz<_, _>`
   --> $DIR/impl-unsafe-unpin.rs:21:1
@@ -29,4 +29,4 @@ error[E0119]: conflicting implementations of trait `pin_project::UnsafeUnpin` fo
 28 | unsafe impl<T: Unpin, U: Unpin> UnsafeUnpin for Baz<T, U> {}
    | --------------------------------------------------------- first implementation here
    |
-   = note: this error originates in a derive macro (in Nightly builds, run with -Z macro-backtrace for more info)
+   = note: this error originates in the derive macro `::pin_project::__private::__PinProjectInternalDerive` (in Nightly builds, run with -Z macro-backtrace for more info)
