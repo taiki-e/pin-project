@@ -6,12 +6,11 @@
         allow(dead_code, unused_variables)
     )
 ))]
-#![cfg_attr(doctest, feature(external_doc))]
 
-// As `feature(external_doc)` and `doc-comment` do not work with `cfg(test)`,
+// As `doc = include_str!` and `doc-comment` do not work with `cfg(test)`,
 // and `cfg(doctest)` requires 1.40, these tests are split into this crate until
 // MSRV increases.
 
-#[cfg(doctest)]
-#[doc(include = "../../README.md")]
+// https://github.com/rust-lang/rust/issues/82768
+#[cfg_attr(doctest, cfg_attr(doctest, doc = include_str!("../../README.md")))]
 const _README: () = ();
