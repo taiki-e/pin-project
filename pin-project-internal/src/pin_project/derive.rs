@@ -889,7 +889,7 @@ fn make_drop_impl(cx: &Context<'_>) -> TokenStream {
             // Since the user did not pass `PinnedDrop` to `#[pin_project]`, any `PinnedDrop`
             // impl will not actually be called. Unfortunately, we can't detect this situation
             // directly from either the `#[pin_project]` or `#[pinned_drop]` attributes, since
-            // we don't know what other attirbutes/impl may exist.
+            // we don't know what other attributes/impl may exist.
             //
             // To ensure that users don't accidentally write a non-functional `PinnedDrop`
             // impls, we emit one ourselves. If the user ends up writing a `PinnedDrop` impl,
