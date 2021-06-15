@@ -55,7 +55,7 @@ pub fn remove_attr(args: TokenStream, input: TokenStream) -> TokenStream {
             if let Fields::Named(fields) = &mut item.fields { fields } else { unreachable!() }
                 .named
                 .iter_mut()
-                .for_each(|field| field.attrs.clear())
+                .for_each(|field| field.attrs.clear());
         }
         "struct_all" => item.attrs.clear(),
         "struct_pin" => {

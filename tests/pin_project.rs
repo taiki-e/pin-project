@@ -846,7 +846,7 @@ fn project_replace_panic() {
         fn drop(&mut self) {
             *self.0 = true;
             if self.1 {
-                panic!()
+                panic!();
             }
         }
     }

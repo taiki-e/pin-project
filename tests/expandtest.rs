@@ -15,7 +15,7 @@ fn expandtest() {
     let cargo = &*env::var("CARGO").unwrap_or_else(|_| "cargo".into());
     if !has_command(&[cargo, "expand"]) || !has_command(&[cargo, "fmt"]) {
         if is_ci {
-            panic!("expandtest requires rustfmt and cargo-expand")
+            panic!("expandtest requires rustfmt and cargo-expand");
         }
         return;
     }

@@ -261,7 +261,7 @@ impl ReplaceReceiver<'_> {
                                 match iter.peek() {
                                     Some(TokenTree::Punct(p)) if p.as_char() == ':' => {
                                         let span = ident.span();
-                                        out.extend(quote_spanned!(span=> <#self_ty>))
+                                        out.extend(quote_spanned!(span=> <#self_ty>));
                                     }
                                     _ => out.extend(quote!(#self_ty)),
                                 }
@@ -356,7 +356,7 @@ impl VisitMut for ReplaceReceiver<'_> {
         match item {
             // Visit `macro_rules!` because locally defined macros can refer to `self`.
             Item::Macro(item) if item.mac.path.is_ident("macro_rules") => {
-                self.visit_macro_mut(&mut item.mac)
+                self.visit_macro_mut(&mut item.mac);
             }
             // Otherwise, do not recurse into nested items.
             _ => {}
