@@ -1,14 +1,14 @@
+// Check interoperability with rustc and clippy lints.
+
 #![warn(nonstandard_style, rust_2018_idioms, unused)]
 // Note: This does not guarantee compatibility with forbidding these lints in the future.
 // If rustc adds a new lint, we may not be able to keep this.
-#![forbid(future_incompatible, rust_2018_compatibility)]
+#![forbid(future_incompatible)]
 #![allow(unknown_lints)] // for old compilers
 #![warn(
     box_pointers,
     deprecated_in_future,
     disjoint_capture_migration,
-    elided_lifetimes_in_paths,
-    explicit_outlives_requirements,
     macro_use_extern_crate,
     meta_variable_misuse,
     missing_abi,
@@ -17,29 +17,26 @@
     missing_docs,
     non_ascii_idents,
     noop_method_call,
-    or_patterns_back_compat,
     single_use_lifetimes,
     trivial_casts,
     trivial_numeric_casts,
     unreachable_pub,
-    unused_extern_crates,
     unused_import_braces,
     unused_lifetimes,
     unused_qualifications,
     unused_results,
     variant_size_differences
 )]
-// absolute_paths_not_starting_with_crate, anonymous_parameters, keyword_idents, pointer_structural_match, semicolon_in_expressions_from_macros: forbidden as a part of future_incompatible
-// unsafe_block_in_unsafe_fn: unstable: https://github.com/rust-lang/rust/issues/71668
-// unsafe_code: checked in forbid_unsafe module
-// unstable_features: deprecated: https://doc.rust-lang.org/beta/rustc/lints/listing/allowed-by-default.html#unstable-features
+// rust_2018_compatibility, rust_2021_compatibility, absolute_paths_not_starting_with_crate, etc.: forbidden as a part of future_incompatible
+// elided_lifetimes_in_paths, explicit_outlives_requirements, unused_extern_crates: warned as a part of rust_2018_idioms
+// unsafe_block_in_unsafe_fn: unsafe_block_in_unsafe_fn: requires Rust 1.52. and, we don't generate unsafe fn.
+// unstable_features: no way to generate #![feature(..)] by macros, expect for unstable inner attribute. and this lint is deprecated: https://doc.rust-lang.org/rustc/lints/listing/allowed-by-default.html#unstable-features
 // unused_crate_dependencies: unrelated
+// unsafe_code: checked in forbid_unsafe module
 #![warn(clippy::all, clippy::pedantic, clippy::nursery)]
 #![warn(clippy::restriction)]
 #![allow(clippy::blanket_clippy_restriction_lints)] // this is a test, so enable all restriction lints intentionally.
 #![allow(clippy::exhaustive_structs, clippy::exhaustive_enums)] // TODO
-
-// Check interoperability with rustc and clippy lints.
 
 pub mod basic {
     include!("include/basic.rs");
