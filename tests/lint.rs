@@ -1,11 +1,11 @@
 // Check interoperability with rustc and clippy lints.
 
+// for old compilers
+#![allow(unknown_lints)]
 #![warn(nonstandard_style, rust_2018_idioms, unused)]
 // Note: This does not guarantee compatibility with forbidding these lints in the future.
 // If rustc adds a new lint, we may not be able to keep this.
 #![forbid(future_incompatible, rust_2018_compatibility, rust_2021_compatibility)]
-// for old compilers
-#![allow(unknown_lints)]
 // lints forbidden as a part of future_incompatible, rust_2018_compatibility, and rust_2021_compatibility are not included in the list below.
 // elided_lifetimes_in_paths, explicit_outlives_requirements, unused_extern_crates:  as a part of rust_2018_idioms
 // unsafe_block_in_unsafe_fn: unsafe_block_in_unsafe_fn: requires Rust 1.52. and, we don't generate unsafe fn.
