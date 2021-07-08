@@ -3,12 +3,18 @@
 #![warn(nonstandard_style, rust_2018_idioms, unused)]
 // Note: This does not guarantee compatibility with forbidding these lints in the future.
 // If rustc adds a new lint, we may not be able to keep this.
-#![forbid(future_incompatible)]
-#![allow(unknown_lints)] // for old compilers
+#![forbid(future_incompatible, rust_2018_compatibility, rust_2021_compatibility)]
+// for old compilers
+#![allow(unknown_lints)]
+// lints forbidden as a part of future_incompatible, rust_2018_compatibility, and rust_2021_compatibility are not included in the list below.
+// elided_lifetimes_in_paths, explicit_outlives_requirements, unused_extern_crates:  as a part of rust_2018_idioms
+// unsafe_block_in_unsafe_fn: unsafe_block_in_unsafe_fn: requires Rust 1.52. and, we don't generate unsafe fn.
+// unstable_features: no way to generate #![feature(..)] by macros, expect for unstable inner attribute. and this lint is deprecated: https://doc.rust-lang.org/rustc/lints/listing/allowed-by-default.html#unstable-features
+// unused_crate_dependencies: unrelated
+// unsafe_code: checked in forbid_unsafe module
 #![warn(
     box_pointers,
     deprecated_in_future,
-    disjoint_capture_migration,
     macro_use_extern_crate,
     meta_variable_misuse,
     missing_abi,
@@ -27,14 +33,7 @@
     unused_results,
     variant_size_differences
 )]
-// rust_2018_compatibility, rust_2021_compatibility, absolute_paths_not_starting_with_crate, etc.: forbidden as a part of future_incompatible
-// elided_lifetimes_in_paths, explicit_outlives_requirements, unused_extern_crates: warned as a part of rust_2018_idioms
-// unsafe_block_in_unsafe_fn: unsafe_block_in_unsafe_fn: requires Rust 1.52. and, we don't generate unsafe fn.
-// unstable_features: no way to generate #![feature(..)] by macros, expect for unstable inner attribute. and this lint is deprecated: https://doc.rust-lang.org/rustc/lints/listing/allowed-by-default.html#unstable-features
-// unused_crate_dependencies: unrelated
-// unsafe_code: checked in forbid_unsafe module
-#![warn(clippy::all, clippy::pedantic, clippy::nursery)]
-#![warn(clippy::restriction)]
+#![warn(clippy::all, clippy::pedantic, clippy::nursery, clippy::restriction)]
 #![allow(clippy::blanket_clippy_restriction_lints)] // this is a test, so enable all restriction lints intentionally.
 #![allow(clippy::exhaustive_structs, clippy::exhaustive_enums)] // TODO
 
