@@ -13,4 +13,11 @@ note: required because it appears within the type `_::__S<'_, PhantomPinned>`
    |
 6  | struct S<T> {
    |        ^
-   = note: required because of the requirements on the impl of `Unpin` for `S<PhantomPinned>`
+note: required because of the requirements on the impl of `Unpin` for `S<PhantomPinned>`
+  --> $DIR/overlapping_unpin_struct.rs:5:1
+   |
+5  | #[pin_project]
+   | ^^^^^^^^^^^^^^
+6  | struct S<T> {
+   |        ^^^^
+   = note: this error originates in the derive macro `::pin_project::__private::__PinProjectInternalDerive` (in Nightly builds, run with -Z macro-backtrace for more info)

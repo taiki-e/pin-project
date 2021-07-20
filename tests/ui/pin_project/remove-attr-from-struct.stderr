@@ -51,18 +51,22 @@ note: required because it appears within the type `B`
    |        ^
 
 error[E0277]: `PhantomPinned` cannot be unpinned
-  --> $DIR/remove-attr-from-struct.rs:40:13
-   |
-40 |     let _ = Pin::new(&mut x).project(); //~ ERROR E0277,E0599
-   |             ^^^^^^^^ within `A`, the trait `Unpin` is not implemented for `PhantomPinned`
-   |
-   = note: consider using `Box::pin`
+   --> $DIR/remove-attr-from-struct.rs:40:13
+    |
+40  |     let _ = Pin::new(&mut x).project(); //~ ERROR E0277,E0599
+    |             ^^^^^^^^ within `A`, the trait `Unpin` is not implemented for `PhantomPinned`
+    |
+    = note: consider using `Box::pin`
 note: required because it appears within the type `A`
-  --> $DIR/remove-attr-from-struct.rs:10:8
-   |
-10 | struct A {
-   |        ^
-   = note: required by `Pin::<P>::new`
+   --> $DIR/remove-attr-from-struct.rs:10:8
+    |
+10  | struct A {
+    |        ^
+note: required by `Pin::<P>::new`
+   --> $DIR/pin.rs:484:5
+    |
+484 |     pub const fn new(pointer: P) -> Pin<P> {
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error[E0599]: no method named `project` found for struct `Pin<&mut A>` in the current scope
   --> $DIR/remove-attr-from-struct.rs:40:30
@@ -71,18 +75,22 @@ error[E0599]: no method named `project` found for struct `Pin<&mut A>` in the cu
    |                              ^^^^^^^ method not found in `Pin<&mut A>`
 
 error[E0277]: `PhantomPinned` cannot be unpinned
-  --> $DIR/remove-attr-from-struct.rs:43:13
-   |
-43 |     let _ = Pin::new(&mut x).project(); //~ ERROR E0277,E0599
-   |             ^^^^^^^^ within `B`, the trait `Unpin` is not implemented for `PhantomPinned`
-   |
-   = note: consider using `Box::pin`
+   --> $DIR/remove-attr-from-struct.rs:43:13
+    |
+43  |     let _ = Pin::new(&mut x).project(); //~ ERROR E0277,E0599
+    |             ^^^^^^^^ within `B`, the trait `Unpin` is not implemented for `PhantomPinned`
+    |
+    = note: consider using `Box::pin`
 note: required because it appears within the type `B`
-  --> $DIR/remove-attr-from-struct.rs:17:8
-   |
-17 | struct B {
-   |        ^
-   = note: required by `Pin::<P>::new`
+   --> $DIR/remove-attr-from-struct.rs:17:8
+    |
+17  | struct B {
+    |        ^
+note: required by `Pin::<P>::new`
+   --> $DIR/pin.rs:484:5
+    |
+484 |     pub const fn new(pointer: P) -> Pin<P> {
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error[E0599]: no method named `project` found for struct `Pin<&mut B>` in the current scope
   --> $DIR/remove-attr-from-struct.rs:43:30

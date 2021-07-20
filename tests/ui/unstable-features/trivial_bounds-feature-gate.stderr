@@ -23,7 +23,11 @@ error[E0277]: `PhantomPinned` cannot be unpinned
    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `Unpin` is not implemented for `PhantomPinned`
    |
    = note: consider using `Box::pin`
-   = note: required because of the requirements on the impl of `Unpin` for `phantom_pinned::Wrapper<PhantomPinned>`
+note: required because of the requirements on the impl of `Unpin` for `phantom_pinned::Wrapper<PhantomPinned>`
+  --> $DIR/trivial_bounds-feature-gate.rs:12:13
+   |
+12 |     impl<T> Unpin for Wrapper<T> where T: Unpin {}
+   |             ^^^^^     ^^^^^^^^^^
    = help: see issue #48214
    = help: add `#![feature(trivial_bounds)]` to the crate attributes to enable
 
@@ -54,6 +58,10 @@ note: required because it appears within the type `Inner`
    |
 30 |     struct Inner(PhantomPinned);
    |            ^^^^^
-   = note: required because of the requirements on the impl of `Unpin` for `inner::Wrapper<Inner>`
+note: required because of the requirements on the impl of `Unpin` for `inner::Wrapper<Inner>`
+  --> $DIR/trivial_bounds-feature-gate.rs:38:13
+   |
+38 |     impl<T> Unpin for Wrapper<T> where T: Unpin {}
+   |             ^^^^^     ^^^^^^^^^^
    = help: see issue #48214
    = help: add `#![feature(trivial_bounds)]` to the crate attributes to enable
