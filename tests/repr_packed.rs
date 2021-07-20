@@ -33,7 +33,7 @@ fn weird_repr_packed() {
         fn drop(&mut self) {
             FIELD_ADDR.with(|f| {
                 f.set(&self.field as *const u8 as usize);
-            })
+            });
         }
     }
 
@@ -48,5 +48,5 @@ fn weird_repr_packed() {
         let field_addr = &x.field as *const u8 as usize;
         field_addr
     };
-    assert_eq!(field_addr, FIELD_ADDR.with(|f| f.get()));
+    assert_eq!(field_addr, FIELD_ADDR.with(Cell::get));
 }
