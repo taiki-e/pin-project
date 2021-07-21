@@ -1,5 +1,6 @@
 #![cfg(nightly)]
 #![warn(rust_2018_idioms, single_use_lifetimes)]
+#![allow(clippy::pedantic)]
 
 use proc_macro::TokenStream;
 use quote::{format_ident, quote, ToTokens};

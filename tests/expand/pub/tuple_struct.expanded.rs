@@ -9,37 +9,21 @@ pub struct TupleStruct<T, U>(#[pin] pub T, pub U);
 #[allow(clippy::unknown_clippy_lints)]
 #[allow(clippy::pattern_type_mismatch)]
 #[allow(clippy::redundant_pub_crate)]
+#[allow(clippy::type_repetition_in_bounds)]
 #[allow(clippy::semicolon_if_nothing_returned)]
+#[allow(clippy::use_self)]
 #[allow(clippy::used_underscore_binding)]
 const _: () = {
-    #[allow(box_pointers)]
-    #[allow(deprecated)]
-    #[allow(explicit_outlives_requirements)]
-    #[allow(single_use_lifetimes)]
-    #[allow(unreachable_pub)]
-    #[allow(clippy::unknown_clippy_lints)]
-    #[allow(clippy::pattern_type_mismatch)]
-    #[allow(clippy::redundant_pub_crate)]
     #[allow(dead_code)]
     #[allow(clippy::mut_mut)]
-    #[allow(clippy::type_repetition_in_bounds)]
     pub(crate) struct __TupleStructProjection<'pin, T, U>(
         pub ::pin_project::__private::Pin<&'pin mut (T)>,
         pub &'pin mut (U),
     )
     where
         TupleStruct<T, U>: 'pin;
-    #[allow(box_pointers)]
-    #[allow(deprecated)]
-    #[allow(explicit_outlives_requirements)]
-    #[allow(single_use_lifetimes)]
-    #[allow(unreachable_pub)]
-    #[allow(clippy::unknown_clippy_lints)]
-    #[allow(clippy::pattern_type_mismatch)]
-    #[allow(clippy::redundant_pub_crate)]
     #[allow(dead_code)]
     #[allow(clippy::ref_option_ref)]
-    #[allow(clippy::type_repetition_in_bounds)]
     pub(crate) struct __TupleStructProjectionRef<'pin, T, U>(
         pub ::pin_project::__private::Pin<&'pin (T)>,
         pub &'pin (U),
