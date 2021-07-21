@@ -17,6 +17,7 @@ enum Enum<T, U> {
 #[allow(clippy::unknown_clippy_lints)]
 #[allow(clippy::pattern_type_mismatch)]
 #[allow(clippy::redundant_pub_crate)]
+#[allow(clippy::type_repetition_in_bounds)]
 #[allow(dead_code)]
 #[allow(variant_size_differences)]
 #[allow(clippy::large_enum_variant)]
@@ -36,7 +37,9 @@ enum EnumProjOwn<T, U> {
 #[allow(clippy::unknown_clippy_lints)]
 #[allow(clippy::pattern_type_mismatch)]
 #[allow(clippy::redundant_pub_crate)]
+#[allow(clippy::type_repetition_in_bounds)]
 #[allow(clippy::semicolon_if_nothing_returned)]
+#[allow(clippy::use_self)]
 #[allow(clippy::used_underscore_binding)]
 const _: () = {
     impl<T, U> Enum<T, U> {

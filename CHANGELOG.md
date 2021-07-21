@@ -10,6 +10,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+- [Suppress `clippy::use_self` and `clippy::type_repetition_in_bounds` lints in generated code.](https://github.com/taiki-e/pin-project/pull/331)
+
 ## [1.0.7] - 2021-04-16
 
 - [Fix compile error when using `self::` as prefix of path inside `#[pinned_drop]` impl.](https://github.com/taiki-e/pin-project/pull/326)

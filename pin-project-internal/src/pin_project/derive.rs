@@ -88,6 +88,7 @@ impl GenerateTokens {
             // * https://github.com/taiki-e/pin-project/pull/70
             #allowed_lints
             #[allow(clippy::semicolon_if_nothing_returned)]
+            #[allow(clippy::use_self)]
             #[allow(clippy::used_underscore_binding)]
             const _: () = {
                 #scoped
@@ -112,12 +113,13 @@ fn global_allowed_lints() -> TokenStream {
         #[allow(clippy::unknown_clippy_lints)]
         #[allow(clippy::pattern_type_mismatch)]
         #[allow(clippy::redundant_pub_crate)] // This lint warns `pub(crate)` field in private struct.
+        #[allow(clippy::type_repetition_in_bounds)] // https://github.com/rust-lang/rust-clippy/issues/4326
     }
 }
 
 /// Returns attributes used on projected types.
-fn proj_allowed_lints(kind: TypeKind) -> (TokenStream, TokenStream, TokenStream) {
-    let large_enum_variant = if kind == Enum {
+fn proj_allowed_lints(cx: &Context<'_>) -> (TokenStream, TokenStream, TokenStream) {
+    let large_enum_variant = if cx.kind == Enum {
         Some(quote! {
             #[allow(variant_size_differences)]
             #[allow(clippy::large_enum_variant)]
@@ -126,20 +128,22 @@ fn proj_allowed_lints(kind: TypeKind) -> (TokenStream, TokenStream, TokenStream)
         None
     };
     let global_allowed_lints = global_allowed_lints();
+    let proj_mut_allowed_lints = if cx.project { Some(&global_allowed_lints) } else { None };
     let proj_mut = quote! {
-        #global_allowed_lints
+        #proj_mut_allowed_lints
         #[allow(dead_code)] // This lint warns unused fields/variants.
         #[allow(clippy::mut_mut)] // This lint warns `&mut &mut <ty>`.
-        #[allow(clippy::type_repetition_in_bounds)] // https://github.com/rust-lang/rust-clippy/issues/4326}
     };
+    let proj_ref_allowed_lints = if cx.project_ref { Some(&global_allowed_lints) } else { None };
     let proj_ref = quote! {
-        #global_allowed_lints
+        #proj_ref_allowed_lints
         #[allow(dead_code)] // This lint warns unused fields/variants.
         #[allow(clippy::ref_option_ref)] // This lint warns `&Option<&<ty>>`.
-        #[allow(clippy::type_repetition_in_bounds)] // https://github.com/rust-lang/rust-clippy/issues/4326
     };
+    let proj_own_allowed_lints =
+        if cx.project_replace.ident().is_some() { Some(&global_allowed_lints) } else { None };
     let proj_own = quote! {
-        #global_allowed_lints
+        #proj_own_allowed_lints
         #[allow(dead_code)] // This lint warns unused fields/variants.
         #large_enum_variant
     };
@@ -368,7 +372,7 @@ fn parse_struct<'a>(
         Fields::Unit => unreachable!(),
     };
 
-    let (proj_attrs, proj_ref_attrs, proj_own_attrs) = proj_allowed_lints(cx.kind);
+    let (proj_attrs, proj_ref_attrs, proj_own_attrs) = proj_allowed_lints(cx);
     generate.extend(cx.project, quote! {
         #proj_attrs
         #vis struct #proj_ident #proj_generics #where_clause_fields
@@ -441,7 +445,7 @@ fn parse_enum<'a>(
     let proj_generics = &cx.proj.generics;
     let proj_where_clause = &cx.proj.where_clause;
 
-    let (proj_attrs, proj_ref_attrs, proj_own_attrs) = proj_allowed_lints(cx.kind);
+    let (proj_attrs, proj_ref_attrs, proj_own_attrs) = proj_allowed_lints(cx);
     if cx.project {
         generate.extend(true, quote! {
             #proj_attrs
@@ -611,7 +615,7 @@ fn visit_fields<'a>(
     let proj_own_fields = surround(delim, proj_own_fields);
 
     let proj_move = Group::new(delim, proj_move);
-    let proj_own_body = proj_own_body(cx, variant_ident, Some(proj_move), &pinned_bindings);
+    let proj_own_body = proj_own_body(cx, variant_ident, Some(&proj_move), &pinned_bindings);
 
     Ok(ProjectedFields {
         proj_pat,
@@ -629,7 +633,7 @@ fn visit_fields<'a>(
 fn proj_own_body(
     cx: &Context<'_>,
     variant_ident: Option<&Ident>,
-    proj_move: Option<Group>,
+    proj_move: Option<&Group>,
     pinned_fields: &[Ident],
 ) -> TokenStream {
     let ident = &cx.proj.own_ident;

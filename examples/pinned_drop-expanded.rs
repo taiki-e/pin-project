@@ -23,7 +23,7 @@
 // ```
 
 #![allow(dead_code, unused_imports, unused_parens, unknown_lints, renamed_and_removed_lints)]
-#![allow(clippy::needless_lifetimes)]
+#![allow(clippy::needless_lifetimes, clippy::mut_mut)]
 
 use std::pin::Pin;
 

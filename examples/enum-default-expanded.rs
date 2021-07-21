@@ -15,7 +15,11 @@
 // ```
 
 #![allow(dead_code, unused_imports, unused_parens, unknown_lints, renamed_and_removed_lints)]
-#![allow(clippy::needless_lifetimes, clippy::just_underscores_and_digits)]
+#![allow(
+    clippy::needless_lifetimes,
+    clippy::just_underscores_and_digits,
+    clippy::used_underscore_binding
+)]
 
 use pin_project::pin_project;
 

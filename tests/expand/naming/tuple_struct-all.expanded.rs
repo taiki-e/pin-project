@@ -9,9 +9,9 @@ struct TupleStruct<T, U>(#[pin] T, U);
 #[allow(clippy::unknown_clippy_lints)]
 #[allow(clippy::pattern_type_mismatch)]
 #[allow(clippy::redundant_pub_crate)]
+#[allow(clippy::type_repetition_in_bounds)]
 #[allow(dead_code)]
 #[allow(clippy::mut_mut)]
-#[allow(clippy::type_repetition_in_bounds)]
 struct Proj<'pin, T, U>(::pin_project::__private::Pin<&'pin mut (T)>, &'pin mut (U))
 where
     TupleStruct<T, U>: 'pin;
@@ -23,9 +23,9 @@ where
 #[allow(clippy::unknown_clippy_lints)]
 #[allow(clippy::pattern_type_mismatch)]
 #[allow(clippy::redundant_pub_crate)]
+#[allow(clippy::type_repetition_in_bounds)]
 #[allow(dead_code)]
 #[allow(clippy::ref_option_ref)]
-#[allow(clippy::type_repetition_in_bounds)]
 struct ProjRef<'pin, T, U>(::pin_project::__private::Pin<&'pin (T)>, &'pin (U))
 where
     TupleStruct<T, U>: 'pin;
@@ -37,6 +37,7 @@ where
 #[allow(clippy::unknown_clippy_lints)]
 #[allow(clippy::pattern_type_mismatch)]
 #[allow(clippy::redundant_pub_crate)]
+#[allow(clippy::type_repetition_in_bounds)]
 #[allow(dead_code)]
 struct ProjOwn<T, U>(::pin_project::__private::PhantomData<T>, U);
 #[allow(box_pointers)]
@@ -47,7 +48,9 @@ struct ProjOwn<T, U>(::pin_project::__private::PhantomData<T>, U);
 #[allow(clippy::unknown_clippy_lints)]
 #[allow(clippy::pattern_type_mismatch)]
 #[allow(clippy::redundant_pub_crate)]
+#[allow(clippy::type_repetition_in_bounds)]
 #[allow(clippy::semicolon_if_nothing_returned)]
+#[allow(clippy::use_self)]
 #[allow(clippy::used_underscore_binding)]
 const _: () = {
     impl<T, U> TupleStruct<T, U> {

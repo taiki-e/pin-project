@@ -13,9 +13,9 @@ struct Struct<T, U> {
 #[allow(clippy::unknown_clippy_lints)]
 #[allow(clippy::pattern_type_mismatch)]
 #[allow(clippy::redundant_pub_crate)]
+#[allow(clippy::type_repetition_in_bounds)]
 #[allow(dead_code)]
 #[allow(clippy::mut_mut)]
-#[allow(clippy::type_repetition_in_bounds)]
 struct Proj<'pin, T, U>
 where
     Struct<T, U>: 'pin,
@@ -31,9 +31,9 @@ where
 #[allow(clippy::unknown_clippy_lints)]
 #[allow(clippy::pattern_type_mismatch)]
 #[allow(clippy::redundant_pub_crate)]
+#[allow(clippy::type_repetition_in_bounds)]
 #[allow(dead_code)]
 #[allow(clippy::ref_option_ref)]
-#[allow(clippy::type_repetition_in_bounds)]
 struct ProjRef<'pin, T, U>
 where
     Struct<T, U>: 'pin,
@@ -49,6 +49,7 @@ where
 #[allow(clippy::unknown_clippy_lints)]
 #[allow(clippy::pattern_type_mismatch)]
 #[allow(clippy::redundant_pub_crate)]
+#[allow(clippy::type_repetition_in_bounds)]
 #[allow(dead_code)]
 struct ProjOwn<T, U> {
     pinned: ::pin_project::__private::PhantomData<T>,
@@ -62,7 +63,9 @@ struct ProjOwn<T, U> {
 #[allow(clippy::unknown_clippy_lints)]
 #[allow(clippy::pattern_type_mismatch)]
 #[allow(clippy::redundant_pub_crate)]
+#[allow(clippy::type_repetition_in_bounds)]
 #[allow(clippy::semicolon_if_nothing_returned)]
+#[allow(clippy::use_self)]
 #[allow(clippy::used_underscore_binding)]
 const _: () = {
     impl<T, U> Struct<T, U> {

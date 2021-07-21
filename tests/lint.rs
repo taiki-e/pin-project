@@ -1077,6 +1077,45 @@ pub mod clippy_type_repetition_in_bounds {
     }
 }
 
+pub mod clippy_use_self {
+    use pin_project::pin_project;
+
+    pub trait Trait {
+        type Assoc;
+    }
+
+    #[pin_project(project_replace)]
+    #[derive(Debug)]
+    pub struct Generics<T: Trait<Assoc = Self>>
+    where
+        Self: Trait<Assoc = Self>,
+    {
+        _f: T,
+    }
+
+    pub mod inside_macro {
+        use pin_project::pin_project;
+
+        use super::Trait;
+
+        #[rustfmt::skip]
+        macro_rules! mac {
+            () => {
+                #[pin_project(project_replace)]
+                #[derive(Debug)]
+                pub struct Generics<T: Trait<Assoc = Self>>
+                where
+                    Self: Trait<Assoc = Self>,
+                {
+                    _f: T,
+                }
+            };
+        }
+
+        mac!();
+    }
+}
+
 pub mod clippy_used_underscore_binding {
     use pin_project::pin_project;
 

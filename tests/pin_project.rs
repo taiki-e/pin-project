@@ -94,7 +94,7 @@ fn projection() {
         EnumProj::Struct { f1, f2 } => {
             let _: Pin<&mut i32> = f1;
             let _: &mut i32 = f2;
-            unreachable!()
+            unreachable!();
         }
         EnumProj::Unit => unreachable!(),
     }
@@ -108,7 +108,7 @@ fn projection() {
         EnumProj::Tuple(x, y) => {
             let _: Pin<&mut i32> = x;
             let _: &mut i32 = y;
-            unreachable!()
+            unreachable!();
         }
         EnumProj::Struct { f1, f2 } => {
             let _: Pin<&mut i32> = f1;
@@ -723,6 +723,7 @@ fn parse_self() {
         type Assoc;
     }
 
+    #[allow(clippy::type_repetition_in_bounds)]
     #[pin_project(project_replace)]
     pub struct Generics<T: Trait<Assoc = Self>>
     where
