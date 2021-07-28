@@ -53,48 +53,41 @@ fn validate_impl(item: &ItemImpl) -> Result<()> {
         "#[pinned_drop] may only be used on implementation for the `PinnedDrop` trait";
 
     if let Some(attr) = item.attrs.find("pinned_drop") {
-        return Err(error!(attr, "duplicate #[pinned_drop] attribute"));
+        bail!(attr, "duplicate #[pinned_drop] attribute");
     }
 
     if let Some((_, path, _)) = &item.trait_ {
         if !path.is_ident("PinnedDrop") {
-            return Err(error!(path, INVALID_ITEM));
+            bail!(path, INVALID_ITEM);
         }
     } else {
-        return Err(error!(item.self_ty, INVALID_ITEM));
+        bail!(item.self_ty, INVALID_ITEM);
     }
 
     if item.unsafety.is_some() {
-        return Err(error!(item.unsafety, "implementing the trait `PinnedDrop` is not unsafe"));
+        bail!(item.unsafety, "implementing the trait `PinnedDrop` is not unsafe");
     }
     if item.items.is_empty() {
-        return Err(error!(item, "not all trait items implemented, missing: `drop`"));
+        bail!(item, "not all trait items implemented, missing: `drop`");
     }
 
     match &*item.self_ty {
         Type::Path(_) => {}
         ty => {
-            return Err(error!(
-                ty,
-                "implementing the trait `PinnedDrop` on this type is unsupported"
-            ));
+            bail!(ty, "implementing the trait `PinnedDrop` on this type is unsupported");
         }
     }
 
     item.items.iter().enumerate().try_for_each(|(i, item)| match item {
         ImplItem::Const(item) => {
-            Err(error!(item, "const `{}` is not a member of trait `PinnedDrop`", item.ident))
+            bail!(item, "const `{}` is not a member of trait `PinnedDrop`", item.ident)
         }
         ImplItem::Type(item) => {
-            Err(error!(item, "type `{}` is not a member of trait `PinnedDrop`", item.ident))
+            bail!(item, "type `{}` is not a member of trait `PinnedDrop`", item.ident)
         }
         ImplItem::Method(method) => {
             validate_sig(&method.sig)?;
-            if i == 0 {
-                Ok(())
-            } else {
-                Err(error!(method, "duplicate definitions with name `drop`"))
-            }
+            if i == 0 { Ok(()) } else { bail!(method, "duplicate definitions with name `drop`") }
         }
         _ => unreachable!("unexpected ImplItem"),
     })
@@ -111,23 +104,20 @@ fn validate_sig(sig: &Signature) -> Result<()> {
     const INVALID_ARGUMENT: &str = "method `drop` must take an argument `self: Pin<&mut Self>`";
 
     if sig.ident != "drop" {
-        return Err(error!(
-            sig.ident,
-            "method `{}` is not a member of trait `PinnedDrop", sig.ident,
-        ));
+        bail!(sig.ident, "method `{}` is not a member of trait `PinnedDrop", sig.ident,);
     }
 
     if let ReturnType::Type(_, ty) = &sig.output {
         match &**ty {
             Type::Tuple(ty) if ty.elems.is_empty() => {}
-            _ => return Err(error!(ty, "method `drop` must return the unit type")),
+            _ => bail!(ty, "method `drop` must return the unit type"),
         }
     }
 
     match sig.inputs.len() {
         1 => {}
         0 => return Err(Error::new(sig.paren_token.span, INVALID_ARGUMENT)),
-        _ => return Err(error!(sig.inputs, INVALID_ARGUMENT)),
+        _ => bail!(sig.inputs, INVALID_ARGUMENT),
     }
 
     if let Some(FnArg::Typed(arg)) = sig.receiver() {
@@ -148,10 +138,7 @@ fn validate_sig(sig: &Signature) -> Result<()> {
                         && get_ty_path(elem).map_or(false, |path| path.is_ident("Self"))
                     {
                         if sig.unsafety.is_some() {
-                            return Err(error!(
-                                sig.unsafety,
-                                "implementing the method `drop` is not unsafe"
-                            ));
+                            bail!(sig.unsafety, "implementing the method `drop` is not unsafe");
                         }
                         return Ok(());
                     }
@@ -160,7 +147,7 @@ fn validate_sig(sig: &Signature) -> Result<()> {
         }
     }
 
-    Err(error!(sig.inputs[0], INVALID_ARGUMENT))
+    bail!(sig.inputs[0], INVALID_ARGUMENT)
 }
 
 // from:

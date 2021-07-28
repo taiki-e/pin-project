@@ -38,10 +38,7 @@ pub(super) fn parse_derive(input: TokenStream) -> Result<TokenStream> {
             parse_enum(&mut cx, data, &mut generate)?;
         }
         Data::Union(_) => {
-            return Err(error!(
-                input,
-                "#[pin_project] attribute may only be used on structs or enums"
-            ));
+            bail!(input, "#[pin_project] attribute may only be used on structs or enums");
         }
     }
 
@@ -188,7 +185,7 @@ impl<'a> Context<'a> {
             .filter_map(Option::as_ref)
             .find(|name| **name == ident)
         {
-            return Err(error!(name, "name `{}` is the same as the original type name", name));
+            bail!(name, "name `{}` is the same as the original type name", name);
         }
 
         let mut lifetime_name = String::from("'pin");
@@ -293,10 +290,12 @@ struct ProjectedFields {
 fn validate_struct(ident: &Ident, fields: &Fields) -> Result<()> {
     if fields.is_empty() {
         let msg = "#[pin_project] attribute may not be used on structs with zero fields";
-        if let Fields::Unit = fields { Err(error!(ident, msg)) } else { Err(error!(fields, msg)) }
-    } else {
-        Ok(())
+        if let Fields::Unit = fields {
+            bail!(ident, msg)
+        }
+        bail!(fields, msg)
     }
+    Ok(())
 }
 
 fn validate_enum(brace_token: token::Brace, variants: &Variants) -> Result<()> {
@@ -308,9 +307,9 @@ fn validate_enum(brace_token: token::Brace, variants: &Variants) -> Result<()> {
     }
     let has_field = variants.iter().try_fold(false, |has_field, v| {
         if let Some((_, e)) = &v.discriminant {
-            Err(error!(e, "#[pin_project] attribute may not be used on enums with discriminants"))
+            bail!(e, "#[pin_project] attribute may not be used on enums with discriminants");
         } else if let Some(attr) = v.attrs.find(PIN) {
-            Err(error!(attr, "#[pin] attribute may only be used on fields of structs or variants"))
+            bail!(attr, "#[pin] attribute may only be used on fields of structs or variants");
         } else if v.fields.is_empty() {
             Ok(has_field)
         } else {
@@ -320,7 +319,7 @@ fn validate_enum(brace_token: token::Brace, variants: &Variants) -> Result<()> {
     if has_field {
         Ok(())
     } else {
-        Err(error!(variants, "#[pin_project] attribute may not be used on enums with zero fields"))
+        bail!(variants, "#[pin_project] attribute may not be used on enums with zero fields");
     }
 }
 
@@ -1028,7 +1027,7 @@ fn ensure_not_packed(orig: &OriginalType<'_>, fields: Option<&Fields>) -> Result
                                 } else {
                                     "#[pin_project] attribute may not be used on #[repr(packed)] types"
                                 };
-                                return Err(error!(repr, msg));
+                                bail!(repr, msg);
                             }
                         }
                         NestedMeta::Lit(..) => {}

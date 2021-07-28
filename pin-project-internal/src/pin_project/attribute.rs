@@ -51,16 +51,15 @@ impl Parse for Input {
         if !ahead.peek(Token![struct]) && !ahead.peek(Token![enum]) {
             // If we check this only on proc-macro-derive, it may generate unhelpful error
             // messages. So it is preferable to be able to detect it here.
-            Err(error!(
+            bail!(
                 input.parse::<TokenStream>()?,
                 "#[pin_project] attribute may only be used on structs or enums"
-            ))
+            );
         } else if let Some(attr) = attrs.find(PIN) {
-            Err(error!(attr, "#[pin] attribute may only be used on fields of structs or variants"))
+            bail!(attr, "#[pin] attribute may only be used on fields of structs or variants");
         } else if let Some(attr) = attrs.find("pin_project") {
-            Err(error!(attr, "duplicate #[pin_project] attribute"))
-        } else {
-            Ok(Self { attrs, body: input.parse()? })
+            bail!(attr, "duplicate #[pin_project] attribute");
         }
+        Ok(Self { attrs, body: input.parse()? })
     }
 }
