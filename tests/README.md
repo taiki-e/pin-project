@@ -4,7 +4,7 @@ There are many types of tests in pin-project.
 
 This section describes some of them.
 
-To run this test, run the following command:
+To run all tests, run the following command:
 
 ```sh
 cargo +nightly test --all
