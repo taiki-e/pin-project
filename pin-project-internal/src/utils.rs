@@ -104,7 +104,11 @@ pub(crate) fn determine_visibility(vis: &Visibility) -> Visibility {
 /// This is almost equivalent to `syn::parse2::<Nothing>()`, but produces
 /// a better error message and does not require ownership of `tokens`.
 pub(crate) fn parse_as_empty(tokens: &TokenStream) -> Result<()> {
-    if tokens.is_empty() { Ok(()) } else { bail!(tokens, "unexpected token: {}", tokens) }
+    if tokens.is_empty() {
+        Ok(())
+    } else {
+        bail!(tokens, "unexpected token: {}", tokens)
+    }
 }
 
 pub(crate) fn respan<T>(node: &T, span: Span) -> T

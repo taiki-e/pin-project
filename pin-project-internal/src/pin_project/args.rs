@@ -245,6 +245,10 @@ impl ProjReplace {
     }
 
     pub(super) fn ident(&self) -> Option<&Ident> {
-        if let Self::Named { ident, .. } = self { Some(ident) } else { None }
+        if let Self::Named { ident, .. } = self {
+            Some(ident)
+        } else {
+            None
+        }
     }
 }

@@ -87,7 +87,11 @@ fn validate_impl(item: &ItemImpl) -> Result<()> {
         }
         ImplItem::Method(method) => {
             validate_sig(&method.sig)?;
-            if i == 0 { Ok(()) } else { bail!(method, "duplicate definitions with name `drop`") }
+            if i == 0 {
+                Ok(())
+            } else {
+                bail!(method, "duplicate definitions with name `drop`")
+            }
         }
         _ => unreachable!("unexpected ImplItem"),
     })
@@ -98,7 +102,11 @@ fn validate_impl(item: &ItemImpl) -> Result<()> {
 /// The correct signature is: `(mut) self: (<path>::)Pin<&mut Self>`
 fn validate_sig(sig: &Signature) -> Result<()> {
     fn get_ty_path(ty: &Type) -> Option<&Path> {
-        if let Type::Path(TypePath { qself: None, path }) = ty { Some(path) } else { None }
+        if let Type::Path(TypePath { qself: None, path }) = ty {
+            Some(path)
+        } else {
+            None
+        }
     }
 
     const INVALID_ARGUMENT: &str = "method `drop` must take an argument `self: Pin<&mut Self>`";
