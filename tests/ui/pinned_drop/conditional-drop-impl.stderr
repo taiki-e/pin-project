@@ -32,4 +32,4 @@ note: required by `pin_project::__private::PinnedDrop::drop`
 help: consider restricting type parameter `T`
     |
 17  | struct PinnedDropImpl<T: std::marker::Unpin> {
-    |                        ^^^^^^^^^^^^^^^^^^^^
+    |                        ++++++++++++++++++++

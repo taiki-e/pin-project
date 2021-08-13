@@ -14,12 +14,13 @@ note: required because it appears within the type `Struct<T>`
   = help: unsized fn params are gated as an unstable feature
 help: consider removing the `?Sized` bound to make the type parameter `Sized`
   |
-4 | struct Struct<T> {
-  |               --
+4 - struct Struct<T: ?Sized> {
+4 + struct Struct<T> {
+  |
 help: function arguments must have a statically known size, borrowed types always have a known size
   |
 3 | #[pin_project(&project_replace)] //~ ERROR E0277
-  |               ^
+  |               +
 
 error[E0277]: the size for values of type `T` cannot be known at compilation time
    --> $DIR/project_replace_unsized.rs:3:1
@@ -42,8 +43,9 @@ note: required by `UnsafeOverwriteGuard`
     = note: this error originates in the derive macro `::pin_project::__private::__PinProjectInternalDerive` (in Nightly builds, run with -Z macro-backtrace for more info)
 help: consider removing the `?Sized` bound to make the type parameter `Sized`
     |
-4   | struct Struct<T> {
-    |               --
+4   - struct Struct<T: ?Sized> {
+4   + struct Struct<T> {
+    |
 
 error[E0277]: the size for values of type `T` cannot be known at compilation time
    --> $DIR/project_replace_unsized.rs:5:5
@@ -60,8 +62,9 @@ error[E0277]: the size for values of type `T` cannot be known at compilation tim
     |
 help: consider removing the `?Sized` bound to make the type parameter `Sized`
     |
-4   | struct Struct<T> {
-    |               --
+4   - struct Struct<T: ?Sized> {
+4   + struct Struct<T> {
+    |
 
 error[E0277]: the size for values of type `T` cannot be known at compilation time
  --> $DIR/project_replace_unsized.rs:8:15
@@ -79,12 +82,13 @@ note: required because it appears within the type `TupleStruct<T>`
   = help: unsized fn params are gated as an unstable feature
 help: consider removing the `?Sized` bound to make the type parameter `Sized`
   |
-9 | struct TupleStruct<T>(T);
-  |                    --
+9 - struct TupleStruct<T: ?Sized>(T);
+9 + struct TupleStruct<T>(T);
+  |
 help: function arguments must have a statically known size, borrowed types always have a known size
   |
 8 | #[pin_project(&project_replace)] //~ ERROR E0277
-  |               ^
+  |               +
 
 error[E0277]: the size for values of type `T` cannot be known at compilation time
    --> $DIR/project_replace_unsized.rs:8:1
@@ -107,8 +111,9 @@ note: required by `UnsafeOverwriteGuard`
     = note: this error originates in the derive macro `::pin_project::__private::__PinProjectInternalDerive` (in Nightly builds, run with -Z macro-backtrace for more info)
 help: consider removing the `?Sized` bound to make the type parameter `Sized`
     |
-9   | struct TupleStruct<T>(T);
-    |                    --
+9   - struct TupleStruct<T: ?Sized>(T);
+9   + struct TupleStruct<T>(T);
+    |
 
 error[E0277]: the size for values of type `T` cannot be known at compilation time
  --> $DIR/project_replace_unsized.rs:9:8
@@ -122,5 +127,6 @@ error[E0277]: the size for values of type `T` cannot be known at compilation tim
   = help: unsized fn params are gated as an unstable feature
 help: consider removing the `?Sized` bound to make the type parameter `Sized`
   |
-9 | struct TupleStruct<T>(T);
-  |                    --
+9 - struct TupleStruct<T: ?Sized>(T);
+9 + struct TupleStruct<T>(T);
+  |
