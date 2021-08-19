@@ -1,9 +1,6 @@
 error[E0277]: `PhantomPinned` cannot be unpinned
   --> $DIR/overlapping_unpin_struct.rs:18:5
    |
-15 | fn is_unpin<T: Unpin>() {}
-   |                ----- required by this bound in `is_unpin`
-...
 18 |     is_unpin::<S<PhantomPinned>>(); //~ ERROR E0277
    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ within `_::__S<'_, PhantomPinned>`, the trait `Unpin` is not implemented for `PhantomPinned`
    |
@@ -20,4 +17,9 @@ note: required because of the requirements on the impl of `Unpin` for `S<Phantom
    | ^^^^^^^^^^^^^^
 6  | struct S<T> {
    |        ^^^^
+note: required by a bound in `is_unpin`
+  --> $DIR/overlapping_unpin_struct.rs:15:16
+   |
+15 | fn is_unpin<T: Unpin>() {}
+   |                ^^^^^ required by this bound in `is_unpin`
    = note: this error originates in the derive macro `::pin_project::__private::__PinProjectInternalDerive` (in Nightly builds, run with -Z macro-backtrace for more info)

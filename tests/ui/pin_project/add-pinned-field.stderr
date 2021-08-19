@@ -1,9 +1,6 @@
 error[E0277]: `PhantomPinned` cannot be unpinned
   --> $DIR/add-pinned-field.rs:21:5
    |
-4  | fn is_unpin<T: Unpin>() {}
-   |                ----- required by this bound in `is_unpin`
-...
 21 |     is_unpin::<Foo>(); //~ ERROR E0277
    |     ^^^^^^^^^^^^^^^ within `__Foo<'_>`, the trait `Unpin` is not implemented for `PhantomPinned`
    |
@@ -21,14 +18,16 @@ note: required because of the requirements on the impl of `Unpin` for `Foo`
 7  | #[add_pinned_field]
 8  | struct Foo {
    |        ^^^
+note: required by a bound in `is_unpin`
+  --> $DIR/add-pinned-field.rs:4:16
+   |
+4  | fn is_unpin<T: Unpin>() {}
+   |                ^^^^^ required by this bound in `is_unpin`
    = note: this error originates in the derive macro `::pin_project::__private::__PinProjectInternalDerive` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0277]: `PhantomPinned` cannot be unpinned
   --> $DIR/add-pinned-field.rs:22:5
    |
-4  | fn is_unpin<T: Unpin>() {}
-   |                ----- required by this bound in `is_unpin`
-...
 22 |     is_unpin::<Bar>(); //~ ERROR E0277
    |     ^^^^^^^^^^^^^^^ within `__Bar<'_>`, the trait `Unpin` is not implemented for `PhantomPinned`
    |
@@ -45,4 +44,9 @@ note: required because of the requirements on the impl of `Unpin` for `Bar`
    | ^^^^^^^^^^^^^^
 15 | struct Bar {
    |        ^^^
+note: required by a bound in `is_unpin`
+  --> $DIR/add-pinned-field.rs:4:16
+   |
+4  | fn is_unpin<T: Unpin>() {}
+   |                ^^^^^ required by this bound in `is_unpin`
    = note: this error originates in the derive macro `::pin_project::__private::__PinProjectInternalDerive` (in Nightly builds, run with -Z macro-backtrace for more info)
