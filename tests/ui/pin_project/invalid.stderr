@@ -1,22 +1,22 @@
-error: unexpected token: ()
+error: unexpected token: `()`
  --> $DIR/invalid.rs:6:14
   |
 6 |         #[pin()] //~ ERROR unexpected token
   |              ^^
 
-error: unexpected token: (foo)
+error: unexpected token: `(foo)`
   --> $DIR/invalid.rs:11:29
    |
 11 |     struct TupleStruct(#[pin(foo)] ()); //~ ERROR unexpected token
    |                             ^^^^^
 
-error: unexpected token: (foo)
+error: unexpected token: `(foo)`
   --> $DIR/invalid.rs:15:16
    |
 15 |         V(#[pin(foo)] ()), //~ ERROR unexpected token
    |                ^^^^^
 
-error: unexpected token: (foo)
+error: unexpected token: `(foo)`
   --> $DIR/invalid.rs:21:18
    |
 21 |             #[pin(foo)] //~ ERROR unexpected token

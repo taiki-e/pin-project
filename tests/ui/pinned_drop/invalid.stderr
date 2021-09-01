@@ -1,4 +1,4 @@
-error: unexpected token: foo
+error: unexpected token: `foo`
  --> $DIR/invalid.rs:9:19
   |
 9 |     #[pinned_drop(foo)] //~ ERROR unexpected token

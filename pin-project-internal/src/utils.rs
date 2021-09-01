@@ -107,7 +107,7 @@ pub(crate) fn parse_as_empty(tokens: &TokenStream) -> Result<()> {
     if tokens.is_empty() {
         Ok(())
     } else {
-        bail!(tokens, "unexpected token: {}", tokens)
+        bail!(tokens, "unexpected token: `{}`", tokens)
     }
 }
 
