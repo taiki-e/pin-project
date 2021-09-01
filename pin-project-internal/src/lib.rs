@@ -29,9 +29,9 @@ use proc_macro::TokenStream;
 ///
 /// This attribute creates projection types according to the following rules:
 ///
-/// * For the fields that use `#[pin]` attribute, create the pinned reference to
+/// - For the fields that use `#[pin]` attribute, create the pinned reference to
 ///   the field.
-/// * For the other fields, create a normal reference to the field.
+/// - For the other fields, create a normal reference to the field.
 ///
 /// And the following methods are implemented on the original type:
 ///
@@ -351,8 +351,8 @@ use proc_macro::TokenStream;
 /// This impl block acts just like a normal [`Drop`] impl,
 /// except for the following two:
 ///
-/// * `drop` method takes [`Pin`]`<&mut Self>`
-/// * Name of the trait is `PinnedDrop`.
+/// - `drop` method takes [`Pin`]`<&mut Self>`
+/// - Name of the trait is `PinnedDrop`.
 ///
 /// ```rust
 /// # use std::pin::Pin;
@@ -495,8 +495,8 @@ pub fn pin_project(args: TokenStream, input: TokenStream) -> TokenStream {
 /// The impl block annotated with this attribute acts just like a normal
 /// [`Drop`] impl, except for the following two:
 ///
-/// * `drop` method takes [`Pin`]`<&mut Self>`
-/// * Name of the trait is `PinnedDrop`.
+/// - `drop` method takes [`Pin`]`<&mut Self>`
+/// - Name of the trait is `PinnedDrop`.
 ///
 /// ```rust
 /// # use std::pin::Pin;

@@ -6,9 +6,9 @@
 // `core`, `core::prelude::*`, etc.
 //
 // Note:
-// * pin-project depends on core's items and is not really usable
+// - pin-project depends on core's items and is not really usable
 //   in a no-core environment.
-// * If the procedural macro crate does not have its own items, it may be
+// - If the procedural macro crate does not have its own items, it may be
 //   preferable not to support this for compatibility with reexport.
 
 extern crate core as _core;

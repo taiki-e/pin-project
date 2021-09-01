@@ -141,8 +141,8 @@ pub(crate) trait SliceExt {
 impl SliceExt for [Attribute] {
     /// # Errors
     ///
-    /// * There are multiple specified attributes.
-    /// * The `Attribute::tokens` field of the specified attribute is not empty.
+    /// - There are multiple specified attributes.
+    /// - The `Attribute::tokens` field of the specified attribute is not empty.
     fn position_exact(&self, ident: &str) -> Result<Option<usize>> {
         self.iter()
             .try_fold((0, None), |(i, mut prev), attr| {

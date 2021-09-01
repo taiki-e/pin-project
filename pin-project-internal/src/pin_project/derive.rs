@@ -80,9 +80,9 @@ impl GenerateTokens {
             // but it is now removed.
             //
             // Refs:
-            // * https://github.com/rust-lang/rust/issues/63281
-            // * https://github.com/taiki-e/pin-project/pull/53#issuecomment-525906867
-            // * https://github.com/taiki-e/pin-project/pull/70
+            // - https://github.com/rust-lang/rust/issues/63281
+            // - https://github.com/taiki-e/pin-project/pull/53#issuecomment-525906867
+            // - https://github.com/taiki-e/pin-project/pull/70
             #allowed_lints
             #[allow(clippy::semicolon_if_nothing_returned)]
             #[allow(clippy::use_self)]
@@ -669,9 +669,9 @@ fn proj_own_body(
 /// Creates `Unpin` implementation for the original type.
 ///
 /// The kind of `Unpin` impl generated depends on `unpin_impl` field:
-/// * `UnpinImpl::Unsafe` - Implements `Unpin` via `UnsafeUnpin` impl.
-/// * `UnpinImpl::Negative` - Generates `Unpin` impl with bounds that will never be true.
-/// * `UnpinImpl::Default` - Generates `Unpin` impl that requires `Unpin` for all pinned fields.
+/// - `UnpinImpl::Unsafe` - Implements `Unpin` via `UnsafeUnpin` impl.
+/// - `UnpinImpl::Negative` - Generates `Unpin` impl with bounds that will never be true.
+/// - `UnpinImpl::Default` - Generates `Unpin` impl that requires `Unpin` for all pinned fields.
 fn make_unpin_impl(cx: &Context<'_>) -> TokenStream {
     match cx.unpin_impl {
         UnpinImpl::Unsafe(span) => {
@@ -830,8 +830,8 @@ fn make_unpin_impl(cx: &Context<'_>) -> TokenStream {
 /// Creates `Drop` implementation for the original type.
 ///
 /// The kind of `Drop` impl generated depends on `pinned_drop` field:
-/// * `Some` - implements `Drop` via `PinnedDrop` impl.
-/// * `None` - generates code that ensures that `Drop` trait is not implemented,
+/// - `Some` - implements `Drop` via `PinnedDrop` impl.
+/// - `None` - generates code that ensures that `Drop` trait is not implemented,
 ///            instead of generating `Drop` impl.
 fn make_drop_impl(cx: &Context<'_>) -> TokenStream {
     let ident = cx.orig.ident;
@@ -1000,8 +1000,8 @@ fn make_proj_impl(
 /// Checks that the `[repr(packed)]` attribute is not included.
 ///
 /// This currently does two checks:
-/// * Checks the attributes of structs to ensure there is no `[repr(packed)]`.
-/// * Generates a function that borrows fields without an unsafe block and
+/// - Checks the attributes of structs to ensure there is no `[repr(packed)]`.
+/// - Generates a function that borrows fields without an unsafe block and
 ///   forbidding `unaligned_references` lint.
 fn ensure_not_packed(orig: &OriginalType<'_>, fields: Option<&Fields>) -> Result<TokenStream> {
     for meta in orig.attrs.iter().filter_map(|attr| attr.parse_meta().ok()) {

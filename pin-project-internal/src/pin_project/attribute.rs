@@ -17,9 +17,9 @@ use crate::utils::SliceExt;
 //
 // At this stage, only attributes are parsed and the following attributes are
 // added to the attributes of the item.
-// * `#[derive(InternalDerive)]` - An internal helper macro that does the above
+// - `#[derive(InternalDerive)]` - An internal helper macro that does the above
 //   processing.
-// * `#[pin(__private(#args))]` - Pass the argument of `#[pin_project]` to
+// - `#[pin(__private(#args))]` - Pass the argument of `#[pin_project]` to
 //   proc-macro-derive (`InternalDerive`).
 
 pub(super) fn parse_attribute(args: &TokenStream, input: TokenStream) -> Result<TokenStream> {
