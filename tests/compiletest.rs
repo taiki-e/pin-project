@@ -3,7 +3,7 @@
 
 use std::env;
 
-#[rustversion::attr(before(2021-08-31), ignore)] // Note: This date is commit-date and the day before the toolchain date.
+#[rustversion::attr(not(nightly), ignore)]
 #[test]
 fn ui() {
     if env::var_os("CI").is_none() {
