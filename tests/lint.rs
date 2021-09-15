@@ -772,7 +772,7 @@ pub mod single_use_lifetimes {
         for<'pin, 'pin_, 'pin__> &'pin &'pin_ &'pin__ T: Unpin,
     {
         #[pin]
-        f: &'pin___ mut T,
+        _f: &'pin___ mut T,
     }
 
     pub mod inside_macro {
@@ -795,7 +795,7 @@ pub mod single_use_lifetimes {
                     for<'pin, 'pin_, 'pin__> &'pin &'pin_ &'pin__ T: Unpin,
                 {
                     #[pin]
-                    f: &'pin___ mut T,
+                    _f: &'pin___ mut T,
                 }
             };
         }
