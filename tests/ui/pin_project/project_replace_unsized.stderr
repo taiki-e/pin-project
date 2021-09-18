@@ -50,6 +50,8 @@ help: consider removing the `?Sized` bound to make the type parameter `Sized`
 error[E0277]: the size for values of type `T` cannot be known at compilation time
    --> $DIR/project_replace_unsized.rs:5:5
     |
+3   | #[pin_project(project_replace)] //~ ERROR E0277
+    | ------------------------------- required by a bound introduced by this call
 4   | struct Struct<T: ?Sized> {
     |               - this type parameter needs to be `std::marker::Sized`
 5   |     f: T,
@@ -114,19 +116,3 @@ help: consider removing the `?Sized` bound to make the type parameter `Sized`
 9   - struct TupleStruct<T: ?Sized>(T);
 9   + struct TupleStruct<T>(T);
     |
-
-error[E0277]: the size for values of type `T` cannot be known at compilation time
- --> $DIR/project_replace_unsized.rs:9:8
-  |
-9 | struct TupleStruct<T: ?Sized>(T);
-  |        ^^^^^^^^^^^ - this type parameter needs to be `std::marker::Sized`
-  |        |
-  |        doesn't have a size known at compile-time
-  |
-  = note: all function arguments must have a statically known size
-  = help: unsized fn params are gated as an unstable feature
-help: consider removing the `?Sized` bound to make the type parameter `Sized`
-  |
-9 - struct TupleStruct<T: ?Sized>(T);
-9 + struct TupleStruct<T>(T);
-  |
