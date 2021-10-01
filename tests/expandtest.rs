@@ -1,5 +1,6 @@
 #![cfg(not(miri))]
 #![warn(rust_2018_idioms, single_use_lifetimes)]
+#![allow(clippy::if_then_panic)]
 
 use std::{
     env,
