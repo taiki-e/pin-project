@@ -3,6 +3,7 @@ name = "pin-project"
 version = "1.0.8"
 authors = ["Taiki Endo <te316e89@gmail.com>"]
 edition = "2018"
+rust-version = "1.37"
 license = "Apache-2.0 OR MIT"
 repository = "https://github.com/taiki-e/pin-project"
 keywords = ["pin", "macros", "attribute"]
