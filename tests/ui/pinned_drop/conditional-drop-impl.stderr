@@ -25,9 +25,9 @@ note: required because of the requirements on the impl of `PinnedDrop` for `Pinn
 23  | impl<T: Unpin> PinnedDrop for PinnedDropImpl<T> {
     |                ^^^^^^^^^^     ^^^^^^^^^^^^^^^^^
 note: required by `pin_project::__private::PinnedDrop::drop`
-   --> src/lib.rs:186:9
+   --> src/lib.rs:188:9
     |
-186 |         unsafe fn drop(self: Pin<&mut Self>);
+188 |         unsafe fn drop(self: Pin<&mut Self>);
     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 help: consider restricting type parameter `T`
     |

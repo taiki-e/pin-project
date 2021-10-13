@@ -5,7 +5,7 @@ error[E0277]: the trait bound `Struct: PinnedDrop` is not satisfied
     |               ^^^^^^^^^^ the trait `PinnedDrop` is not implemented for `Struct`
     |
 note: required by `pin_project::__private::PinnedDrop::drop`
-   --> src/lib.rs:186:9
+   --> src/lib.rs:188:9
     |
-186 |         unsafe fn drop(self: Pin<&mut Self>);
+188 |         unsafe fn drop(self: Pin<&mut Self>);
     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
