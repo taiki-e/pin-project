@@ -1,5 +1,5 @@
 error[E0446]: private type `PrivateEnum` in public interface
- --> $DIR/private_in_public-enum.rs:6:7
+ --> tests/ui/pin_project/private_in_public-enum.rs:6:7
   |
 6 |     V(PrivateEnum), //~ ERROR E0446
   |       ^^^^^^^^^^^ can't leak private type
@@ -8,7 +8,7 @@ error[E0446]: private type `PrivateEnum` in public interface
   | ---------------- `PrivateEnum` declared as private
 
 error[E0446]: private type `foo::PrivateEnum` in public interface
-  --> $DIR/private_in_public-enum.rs:15:11
+  --> tests/ui/pin_project/private_in_public-enum.rs:15:11
    |
 15 |         V(PrivateEnum), //~ ERROR E0446
    |           ^^^^^^^^^^^ can't leak private type
