@@ -88,6 +88,8 @@ pub use pin_project_internal::pinned_drop;
 /// This trait is used in conjunction with the `UnsafeUnpin` argument to
 /// the [`#[pin_project]`][macro@pin_project] attribute.
 ///
+/// # Safety
+///
 /// The Rust [`Unpin`] trait is safe to implement - by itself,
 /// implementing it cannot lead to [undefined behavior][undefined-behavior].
 /// Undefined behavior can only occur when other unsafe code is used.
