@@ -5,7 +5,7 @@ error: `self` parameter is only allowed in associated functions
    |                          ^^^^ not semantically valid as function parameter
 ...
 21 |             t!();
-   |             ----- in this macro invocation
+   |             ---- in this macro invocation
    |
    = note: associated functions are those in `impl` or `trait` definitions
    = note: this error originates in the macro `t` (in Nightly builds, run with -Z macro-backtrace for more info)
@@ -17,7 +17,7 @@ error[E0434]: can't capture dynamic environment in a fn item
    |                             ^^^^
 ...
 21 |             t!();
-   |             ----- in this macro invocation
+   |             ---- in this macro invocation
    |
    = help: use the `|| { ... }` closure form instead
    = note: this error originates in the macro `t` (in Nightly builds, run with -Z macro-backtrace for more info)
