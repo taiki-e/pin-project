@@ -20,7 +20,7 @@ warn() {
 # Decide Rust toolchain. Nightly is used by default.
 toolchain="+nightly"
 if [[ "${1:-}" == "+"* ]]; then
-    toolchain="${1}"
+    toolchain="$1"
     shift
 fi
 # Make sure toolchain is installed.
