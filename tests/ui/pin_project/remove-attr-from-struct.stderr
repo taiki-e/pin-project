@@ -55,10 +55,12 @@ note: required by a bound in `is_unpin`
    |                ^^^^^ required by this bound in `is_unpin`
 
 error[E0277]: `PhantomPinned` cannot be unpinned
-   --> tests/ui/pin_project/remove-attr-from-struct.rs:40:13
+   --> tests/ui/pin_project/remove-attr-from-struct.rs:40:22
     |
 40  |     let _ = Pin::new(&mut x).project(); //~ ERROR E0277,E0599
-    |             ^^^^^^^^ within `A`, the trait `Unpin` is not implemented for `PhantomPinned`
+    |             -------- ^^^^^^ within `A`, the trait `Unpin` is not implemented for `PhantomPinned`
+    |             |
+    |             required by a bound introduced by this call
     |
     = note: consider using `Box::pin`
 note: required because it appears within the type `A`
@@ -79,10 +81,12 @@ error[E0599]: no method named `project` found for struct `Pin<&mut A>` in the cu
    |                              ^^^^^^^ method not found in `Pin<&mut A>`
 
 error[E0277]: `PhantomPinned` cannot be unpinned
-   --> tests/ui/pin_project/remove-attr-from-struct.rs:43:13
+   --> tests/ui/pin_project/remove-attr-from-struct.rs:43:22
     |
 43  |     let _ = Pin::new(&mut x).project(); //~ ERROR E0277,E0599
-    |             ^^^^^^^^ within `B`, the trait `Unpin` is not implemented for `PhantomPinned`
+    |             -------- ^^^^^^ within `B`, the trait `Unpin` is not implemented for `PhantomPinned`
+    |             |
+    |             required by a bound introduced by this call
     |
     = note: consider using `Box::pin`
 note: required because it appears within the type `B`
