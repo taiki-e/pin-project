@@ -19,10 +19,8 @@ struct PackedN {
 
 fn main() {
     let a = Packed { f: 1 };
-    &a.f;
     let _ = &a.f;
 
     let b = PackedN { f: 1 };
-    &b.f;
     let _ = &b.f;
 }

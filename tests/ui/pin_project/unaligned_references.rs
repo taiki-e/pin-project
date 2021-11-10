@@ -14,10 +14,8 @@ struct PackedN {
 
 fn main() {
     let a = Packed { f: 1 };
-    &a.f; //~ ERROR reference to packed field is unaligned
     let _ = &a.f; //~ ERROR reference to packed field is unaligned
 
     let b = PackedN { f: 1 };
-    &b.f; //~ ERROR reference to packed field is unaligned
     let _ = &b.f; //~ ERROR reference to packed field is unaligned
 }
