@@ -11,16 +11,14 @@ on:
       - staging
       - v[0-9]+.[0-9]+
   schedule:
-    - cron: '0 1 * * *'
+    - cron: '40 1 * * *'
   workflow_dispatch:
 
 env:
   CARGO_INCREMENTAL: 0
-  CARGO_NET_RETRY: 10
   CARGO_TERM_COLOR: always
-  RUST_BACKTRACE: 1
   RUSTFLAGS: -D warnings
-  RUSTUP_MAX_RETRIES: 10
+  RUST_BACKTRACE: 1
 
 defaults:
   run:
@@ -44,10 +42,11 @@ jobs:
       - uses: taiki-e/github-actions/install-rust@main
         with:
           toolchain: ${{ matrix.rust }}
+          component: rustfmt,rust-src
       - name: Pre Cache cargo-expand
         run: |
           mkdir -p .github/caching
-          curl -fsSL --retry 3 https://api.github.com/repos/dtolnay/cargo-expand/releases/latest \
+          curl -LsSf https://api.github.com/repos/dtolnay/cargo-expand/releases/latest \
             | jq -r '.tag_name' > .github/caching/cargo-expand.lock
           echo "${{ runner.tool_cache }}/cargo-expand/bin" >> "${GITHUB_PATH}"
         if: startsWith(matrix.rust, 'nightly')
@@ -101,7 +100,7 @@ jobs:
           persist-credentials: false
       - uses: taiki-e/github-actions/install-rust@main
         with:
-          component: clippy
+          component: clippy,rustfmt
       - run: cargo install cargo-hack --debug
       - run: cargo fmt --all -- --check
         if: always()
