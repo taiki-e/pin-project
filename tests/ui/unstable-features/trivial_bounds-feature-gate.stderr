@@ -1,18 +1,18 @@
 error[E0277]: `PhantomPinned` cannot be unpinned
- --> tests/ui/unstable-features/trivial_bounds-feature-gate.rs:8:5
+ --> tests/ui/unstable-features/trivial_bounds-feature-gate.rs:8:28
   |
 8 |     impl Unpin for A where PhantomPinned: Unpin {} //~ ERROR E0277
-  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `Unpin` is not implemented for `PhantomPinned`
+  |                            ^^^^^^^^^^^^^^^^^^^^ the trait `Unpin` is not implemented for `PhantomPinned`
   |
   = note: consider using `Box::pin`
   = help: see issue #48214
   = help: add `#![feature(trivial_bounds)]` to the crate attributes to enable
 
 error[E0277]: `PhantomPinned` cannot be unpinned
-  --> tests/ui/unstable-features/trivial_bounds-feature-gate.rs:16:5
+  --> tests/ui/unstable-features/trivial_bounds-feature-gate.rs:16:28
    |
 16 |     impl Unpin for B where Wrapper<PhantomPinned>: Unpin {} //~ ERROR E0277
-   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `Unpin` is not implemented for `PhantomPinned`
+   |                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `Unpin` is not implemented for `PhantomPinned`
    |
    = note: consider using `Box::pin`
 note: required because of the requirements on the impl of `Unpin` for `phantom_pinned::Wrapper<PhantomPinned>`
@@ -24,10 +24,10 @@ note: required because of the requirements on the impl of `Unpin` for `phantom_p
    = help: add `#![feature(trivial_bounds)]` to the crate attributes to enable
 
 error[E0277]: `PhantomPinned` cannot be unpinned
-  --> tests/ui/unstable-features/trivial_bounds-feature-gate.rs:34:5
+  --> tests/ui/unstable-features/trivial_bounds-feature-gate.rs:34:28
    |
 34 |     impl Unpin for A where Inner: Unpin {} //~ ERROR E0277
-   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ within `Inner`, the trait `Unpin` is not implemented for `PhantomPinned`
+   |                            ^^^^^^^^^^^^ within `Inner`, the trait `Unpin` is not implemented for `PhantomPinned`
    |
    = note: consider using `Box::pin`
 note: required because it appears within the type `Inner`
@@ -39,10 +39,10 @@ note: required because it appears within the type `Inner`
    = help: add `#![feature(trivial_bounds)]` to the crate attributes to enable
 
 error[E0277]: `PhantomPinned` cannot be unpinned
-  --> tests/ui/unstable-features/trivial_bounds-feature-gate.rs:42:5
+  --> tests/ui/unstable-features/trivial_bounds-feature-gate.rs:42:28
    |
 42 |     impl Unpin for B where Wrapper<Inner>: Unpin {} //~ ERROR E0277
-   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ within `Inner`, the trait `Unpin` is not implemented for `PhantomPinned`
+   |                            ^^^^^^^^^^^^^^^^^^^^^ within `Inner`, the trait `Unpin` is not implemented for `PhantomPinned`
    |
    = note: consider using `Box::pin`
 note: required because it appears within the type `Inner`
