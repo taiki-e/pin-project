@@ -48,7 +48,7 @@ jobs:
       - name: Pre Cache cargo-expand
         run: |
           mkdir -p .github/caching
-          curl -fsSL --retry 3 https://api.github.com/repos/dtolnay/cargo-expand/releases/latest \            | jq -r '.tag_name' > .github/caching/cargo-expand.lock
+          curl -fsSL --retry 3 https://api.github.com/repos/dtolnay/cargo-expand/releases/latest \
             | jq -r '.tag_name' > .github/caching/cargo-expand.lock
           echo "${{ runner.tool_cache }}/cargo-expand/bin" >> "${GITHUB_PATH}"
         if: startsWith(matrix.rust, 'nightly')
