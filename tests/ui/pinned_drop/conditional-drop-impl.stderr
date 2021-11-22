@@ -13,23 +13,18 @@ note: the implementor must specify the same requirement
    | |_^
 
 error[E0277]: `T` cannot be unpinned
-   --> tests/ui/pinned_drop/conditional-drop-impl.rs:16:15
-    |
-16  | #[pin_project(PinnedDrop)] //~ ERROR E0277
-    |               ^^^^^^^^^^ the trait `Unpin` is not implemented for `T`
-    |
-    = note: consider using `Box::pin`
+  --> tests/ui/pinned_drop/conditional-drop-impl.rs:16:15
+   |
+16 | #[pin_project(PinnedDrop)] //~ ERROR E0277
+   |               ^^^^^^^^^^ the trait `Unpin` is not implemented for `T`
+   |
+   = note: consider using `Box::pin`
 note: required because of the requirements on the impl of `PinnedDrop` for `PinnedDropImpl<T>`
-   --> tests/ui/pinned_drop/conditional-drop-impl.rs:23:16
-    |
-23  | impl<T: Unpin> PinnedDrop for PinnedDropImpl<T> {
-    |                ^^^^^^^^^^     ^^^^^^^^^^^^^^^^^
-note: required by `pin_project::__private::PinnedDrop::drop`
-   --> src/lib.rs:188:9
-    |
-188 |         unsafe fn drop(self: Pin<&mut Self>);
-    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  --> tests/ui/pinned_drop/conditional-drop-impl.rs:23:16
+   |
+23 | impl<T: Unpin> PinnedDrop for PinnedDropImpl<T> {
+   |                ^^^^^^^^^^     ^^^^^^^^^^^^^^^^^
 help: consider restricting type parameter `T`
-    |
-17  | struct PinnedDropImpl<T: std::marker::Unpin> {
-    |                        ++++++++++++++++++++
+   |
+17 | struct PinnedDropImpl<T: std::marker::Unpin> {
+   |                        ++++++++++++++++++++
