@@ -1,11 +1,10 @@
 [package]
 name = "pin-project-internal"
-version = "0.4.28"
-authors = ["Taiki Endo <te316e89@gmail.com>"]
+version = "0.4.29"
 edition = "2018"
+rust-version = "1.34"
 license = "Apache-2.0 OR MIT"
 repository = "https://github.com/taiki-e/pin-project"
-documentation = "https://docs.rs/pin-project-internal"
 keywords = ["pin", "macros", "attribute"]
 categories = ["no-std", "rust-patterns"]
 description = """

@@ -37,7 +37,7 @@ jobs:
       - uses: taiki-e/github-actions/install-rust@main
         with:
           toolchain: ${{ matrix.rust }}
-          component: rustfmt
+          component: rustfmt,rust-src
       - name: Pre Cache cargo-expand
         run: |
           mkdir -p .github/caching
