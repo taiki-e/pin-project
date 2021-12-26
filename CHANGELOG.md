@@ -40,13 +40,13 @@ NOTE: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [1.0.1] - 2020-10-15
 
-**NOTE:** This release has been yanked because it failed to compile with syn 1.0.84 and later.
+**NOTE:** This release has been yanked because it [failed to compile with syn 1.0.84 and later](https://github.com/taiki-e/pin-project/commit/ddcd88079ba2d82857c365f2a3543ad146ade54c).
 
 - [Fix warnings when `#[pin_project]` attribute used within `macro_rules!` macros.](https://github.com/taiki-e/pin-project/pull/298)
 
 ## [1.0.0] - 2020-10-13
 
-**NOTE:** This release has been yanked because it failed to compile with syn 1.0.84 and later.
+**NOTE:** This release has been yanked because it [failed to compile with syn 1.0.84 and later](https://github.com/taiki-e/pin-project/commit/ddcd88079ba2d82857c365f2a3543ad146ade54c).
 
 - [Remove deprecated `#[project]`, `#[project_ref]`, and `#[project_replace]` attributes.](https://github.com/taiki-e/pin-project/pull/265)
 
@@ -307,7 +307,7 @@ See also [tracking issue for 1.0 release](https://github.com/taiki-e/pin-project
 
 ## [0.4.11] - 2020-05-07
 
-**NOTE: This release has been yanked.** See [#206](https://github.com/taiki-e/pin-project/issues/206) for details.
+**NOTE:** This release has been yanked. See [#206](https://github.com/taiki-e/pin-project/issues/206) for details.
 
 - [Fix an issue that `#[project]` on non-statement expression does not work without unstable features.](https://github.com/taiki-e/pin-project/pull/197)
 
@@ -361,7 +361,7 @@ See also [tracking issue for 1.0 release](https://github.com/taiki-e/pin-project
 
 ## [0.4.3] - 2019-10-15
 
-**NOTE: This release has been yanked.** See [#148](https://github.com/taiki-e/pin-project/pull/148) for details.
+**NOTE:** This release has been yanked. See [#148](https://github.com/taiki-e/pin-project/pull/148) for details.
 
 - [`#[pin_project]` can now interoperate with `#[cfg_attr()]`.](https://github.com/taiki-e/pin-project/pull/135)
 
@@ -373,19 +373,19 @@ See also [tracking issue for 1.0 release](https://github.com/taiki-e/pin-project
 
 ## [0.4.2] - 2019-09-29
 
-**NOTE: This release has been yanked.** See [#148](https://github.com/taiki-e/pin-project/pull/148) for details.
+**NOTE:** This release has been yanked. See [#148](https://github.com/taiki-e/pin-project/pull/148) for details.
 
 - [Fix support for DSTs(Dynamically Sized Types).](https://github.com/taiki-e/pin-project/pull/113)
 
 ## [0.4.1] - 2019-09-26
 
-**NOTE: This release has been yanked.** See [#148](https://github.com/taiki-e/pin-project/pull/148) for details.
+**NOTE:** This release has been yanked. See [#148](https://github.com/taiki-e/pin-project/pull/148) for details.
 
 - [Fix an issue that caused an error when using `#[pin_project]` on a type that has `#[pin]` + `!Unpin` field with no generics or lifetime.](https://github.com/taiki-e/pin-project/pull/111)
 
 ## [0.4.0] - 2019-09-25
 
-**NOTE: This release has been yanked.** See [#148](https://github.com/taiki-e/pin-project/pull/148) for details.
+**NOTE:** This release has been yanked. See [#148](https://github.com/taiki-e/pin-project/pull/148) for details.
 
 - [**Pin projection has become a safe operation.**](https://github.com/taiki-e/pin-project/pull/18) In the absence of other unsafe code that you write, it is impossible to cause undefined behavior.
 
@@ -528,7 +528,7 @@ See also [tracking issue for 0.4 release](https://github.com/taiki-e/pin-project
 
 ## [0.3.3] - 2019-07-15
 
-**NOTE: This release has been yanked.** See [#16](https://github.com/taiki-e/pin-project/issues/16) for details.
+**NOTE:** This release has been yanked. See [#16](https://github.com/taiki-e/pin-project/issues/16) for details.
 
 - Diagnostic improvements.
 
@@ -602,7 +602,7 @@ See also [tracking issue for 0.4 release](https://github.com/taiki-e/pin-project
 
 ## [0.1.0] - 2019-01-08
 
-**NOTE: This release has been yanked.**
+**NOTE:** This release has been yanked.
 
 Initial release
 
