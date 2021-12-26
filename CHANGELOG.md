@@ -10,6 +10,10 @@ NOTE: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+## [1.0.9] - 2021-12-26
+
+- [Prevent abuse of private module.](https://github.com/taiki-e/pin-project/pull/336)
+
 ## [1.0.8] - 2021-07-21
 
 - [Suppress `clippy::use_self` and `clippy::type_repetition_in_bounds` lints in generated code.](https://github.com/taiki-e/pin-project/pull/331)
@@ -117,6 +121,10 @@ Changes since the 1.0.0-alpha.1 release:
 - Diagnostic improvements.
 
 See also [tracking issue for 1.0 release](https://github.com/taiki-e/pin-project/issues/264).
+
+## [0.4.29] - 2021-12-26
+
+- [Fix compile error with `syn` 1.0.84 and later.](https://github.com/taiki-e/pin-project/pull/335)
 
 ## [0.4.28] - 2021-03-28
 
@@ -606,7 +614,8 @@ See also [tracking issue for 0.4 release](https://github.com/taiki-e/pin-project
 
 Initial release
 
-[Unreleased]: https://github.com/taiki-e/pin-project/compare/v1.0.8...HEAD
+[Unreleased]: https://github.com/taiki-e/pin-project/compare/v1.0.9...HEAD
+[1.0.9]: https://github.com/taiki-e/pin-project/compare/v1.0.8...v1.0.9
 [1.0.8]: https://github.com/taiki-e/pin-project/compare/v1.0.7...v1.0.8
 [1.0.7]: https://github.com/taiki-e/pin-project/compare/v1.0.6...v1.0.7
 [1.0.6]: https://github.com/taiki-e/pin-project/compare/v1.0.5...v1.0.6
@@ -617,6 +626,7 @@ Initial release
 [1.0.1]: https://github.com/taiki-e/pin-project/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/taiki-e/pin-project/compare/v1.0.0-alpha.1...v1.0.0
 [1.0.0-alpha.1]: https://github.com/taiki-e/pin-project/compare/v0.4.23...v1.0.0-alpha.1
+[0.4.29]: https://github.com/taiki-e/pin-project/compare/v0.4.28...v0.4.29
 [0.4.28]: https://github.com/taiki-e/pin-project/compare/v0.4.27...v0.4.28
 [0.4.27]: https://github.com/taiki-e/pin-project/compare/v0.4.26...v0.4.27
 [0.4.26]: https://github.com/taiki-e/pin-project/compare/v0.4.25...v0.4.26
