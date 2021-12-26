@@ -173,10 +173,8 @@ const _: () = {
         ) -> EnumProjOwn<T, U> {
             unsafe {
                 let __self_ptr: *mut Self = self.get_unchecked_mut();
-                let __guard = _pin_project::__private::UnsafeOverwriteGuard {
-                    target: __self_ptr,
-                    value: _pin_project::__private::ManuallyDrop::new(__replacement),
-                };
+                let __guard =
+                    _pin_project::__private::UnsafeOverwriteGuard::new(__self_ptr, __replacement);
                 match &mut *__self_ptr {
                     Self::Struct {
                         pinned1,
@@ -191,8 +189,10 @@ const _: () = {
                             unpinned2: _pin_project::__private::ptr::read(unpinned2),
                         };
                         {
-                            let __guard = _pin_project::__private::UnsafeDropInPlaceGuard(pinned2);
-                            let __guard = _pin_project::__private::UnsafeDropInPlaceGuard(pinned1);
+                            let __guard =
+                                _pin_project::__private::UnsafeDropInPlaceGuard::new(pinned2);
+                            let __guard =
+                                _pin_project::__private::UnsafeDropInPlaceGuard::new(pinned1);
                         }
                         __result
                     }
@@ -204,8 +204,8 @@ const _: () = {
                             _pin_project::__private::ptr::read(_3),
                         );
                         {
-                            let __guard = _pin_project::__private::UnsafeDropInPlaceGuard(_1);
-                            let __guard = _pin_project::__private::UnsafeDropInPlaceGuard(_0);
+                            let __guard = _pin_project::__private::UnsafeDropInPlaceGuard::new(_1);
+                            let __guard = _pin_project::__private::UnsafeDropInPlaceGuard::new(_0);
                         }
                         __result
                     }

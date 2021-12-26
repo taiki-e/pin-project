@@ -32,11 +32,11 @@ note: required because it appears within the type `Struct<T>`
     |
 6   | struct Struct<T: ?Sized> {
     |        ^^^^^^
-note: required by a bound in `UnsafeOverwriteGuard`
+note: required by a bound in `UnsafeOverwriteGuard::<T>::new`
    --> src/lib.rs
     |
-    |     pub struct UnsafeOverwriteGuard<T> {
-    |                                     ^ required by this bound in `UnsafeOverwriteGuard`
+    |     impl<T> UnsafeOverwriteGuard<T> {
+    |          ^ required by this bound in `UnsafeOverwriteGuard::<T>::new`
     = note: this error originates in the derive macro `::pin_project::__private::__PinProjectInternalDerive` (in Nightly builds, run with -Z macro-backtrace for more info)
 help: consider removing the `?Sized` bound to make the type parameter `Sized`
     |
@@ -99,11 +99,11 @@ note: required because it appears within the type `TupleStruct<T>`
     |
 11  | struct TupleStruct<T: ?Sized>(T);
     |        ^^^^^^^^^^^
-note: required by a bound in `UnsafeOverwriteGuard`
+note: required by a bound in `UnsafeOverwriteGuard::<T>::new`
    --> src/lib.rs
     |
-    |     pub struct UnsafeOverwriteGuard<T> {
-    |                                     ^ required by this bound in `UnsafeOverwriteGuard`
+    |     impl<T> UnsafeOverwriteGuard<T> {
+    |          ^ required by this bound in `UnsafeOverwriteGuard::<T>::new`
     = note: this error originates in the derive macro `::pin_project::__private::__PinProjectInternalDerive` (in Nightly builds, run with -Z macro-backtrace for more info)
 help: consider removing the `?Sized` bound to make the type parameter `Sized`
     |

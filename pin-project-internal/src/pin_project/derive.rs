@@ -661,7 +661,7 @@ fn proj_own_body(
         // if any of the destructors panic.
         {
             #(
-                let __guard = _pin_project::__private::UnsafeDropInPlaceGuard(#pinned_fields);
+                let __guard = _pin_project::__private::UnsafeDropInPlaceGuard::new(#pinned_fields);
             )*
         }
 
@@ -969,10 +969,10 @@ fn make_proj_impl(
 
                     // Destructors will run in reverse order, so next create a guard to overwrite
                     // `self` with the replacement value without calling destructors.
-                    let __guard = _pin_project::__private::UnsafeOverwriteGuard {
-                        target: __self_ptr,
-                        value: _pin_project::__private::ManuallyDrop::new(__replacement),
-                    };
+                    let __guard = _pin_project::__private::UnsafeOverwriteGuard::new(
+                        __self_ptr,
+                        __replacement,
+                    );
 
                     #proj_own_body
                 }

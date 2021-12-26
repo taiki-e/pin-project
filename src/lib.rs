@@ -148,10 +148,10 @@ pub unsafe trait UnsafeUnpin {}
 // Not public API.
 #[doc(hidden)]
 pub mod __private {
+    use core::mem::ManuallyDrop;
     #[doc(hidden)]
     pub use core::{
         marker::{PhantomData, PhantomPinned, Unpin},
-        mem::ManuallyDrop,
         ops::Drop,
         pin::Pin,
         ptr,
@@ -255,7 +255,14 @@ pub mod __private {
 
     // This is an internal helper used to ensure a value is dropped.
     #[doc(hidden)]
-    pub struct UnsafeDropInPlaceGuard<T: ?Sized>(pub *mut T);
+    pub struct UnsafeDropInPlaceGuard<T: ?Sized>(*mut T);
+
+    impl<T: ?Sized> UnsafeDropInPlaceGuard<T> {
+        #[doc(hidden)]
+        pub unsafe fn new(ptr: *mut T) -> Self {
+            Self(ptr)
+        }
+    }
 
     impl<T: ?Sized> Drop for UnsafeDropInPlaceGuard<T> {
         fn drop(&mut self) {
@@ -269,8 +276,15 @@ pub mod __private {
     // its destructor being called.
     #[doc(hidden)]
     pub struct UnsafeOverwriteGuard<T> {
-        pub value: ManuallyDrop<T>,
-        pub target: *mut T,
+        target: *mut T,
+        value: ManuallyDrop<T>,
+    }
+
+    impl<T> UnsafeOverwriteGuard<T> {
+        #[doc(hidden)]
+        pub unsafe fn new(target: *mut T, value: T) -> Self {
+            Self { target, value: ManuallyDrop::new(value) }
+        }
     }
 
     impl<T> Drop for UnsafeOverwriteGuard<T> {

@@ -79,10 +79,8 @@ const _: () = {
 
                 // Destructors will run in reverse order, so next create a guard to overwrite
                 // `self` with the replacement value without calling destructors.
-                let __guard = ::pin_project::__private::UnsafeOverwriteGuard {
-                    target: __self_ptr,
-                    value: ::pin_project::__private::ManuallyDrop::new(__replacement),
-                };
+                let __guard =
+                    ::pin_project::__private::UnsafeOverwriteGuard::new(__self_ptr, __replacement);
 
                 let Self { pinned, unpinned } = &mut *__self_ptr;
 
@@ -98,7 +96,7 @@ const _: () = {
                 // this must be in its own scope, or else `__result` will not be dropped
                 // if any of the destructors panic.
                 {
-                    let __guard = ::pin_project::__private::UnsafeDropInPlaceGuard(pinned);
+                    let __guard = ::pin_project::__private::UnsafeDropInPlaceGuard::new(pinned);
                 }
 
                 // Finally, return the result
