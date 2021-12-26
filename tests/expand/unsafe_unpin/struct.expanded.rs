@@ -14,10 +14,13 @@ struct Struct<T, U> {
 #[allow(clippy::pattern_type_mismatch)]
 #[allow(clippy::redundant_pub_crate)]
 #[allow(clippy::type_repetition_in_bounds)]
+#[allow(unused_qualifications)]
 #[allow(clippy::semicolon_if_nothing_returned)]
 #[allow(clippy::use_self)]
 #[allow(clippy::used_underscore_binding)]
 const _: () = {
+    #[allow(unused_extern_crates)]
+    extern crate pin_project as _pin_project;
     #[allow(dead_code)]
     #[allow(clippy::mut_mut)]
     struct __StructProjection<'pin, T, U>
@@ -38,24 +41,24 @@ const _: () = {
     }
     impl<T, U> Struct<T, U> {
         fn project<'pin>(
-            self: ::pin_project::__private::Pin<&'pin mut Self>,
+            self: _pin_project::__private::Pin<&'pin mut Self>,
         ) -> __StructProjection<'pin, T, U> {
             unsafe {
                 let Self { pinned, unpinned } = self.get_unchecked_mut();
                 __StructProjection {
-                    pinned: ::pin_project::__private::Pin::new_unchecked(pinned),
+                    pinned: _pin_project::__private::Pin::new_unchecked(pinned),
                     unpinned,
                 }
             }
         }
         #[allow(clippy::missing_const_for_fn)]
         fn project_ref<'pin>(
-            self: ::pin_project::__private::Pin<&'pin Self>,
+            self: _pin_project::__private::Pin<&'pin Self>,
         ) -> __StructProjectionRef<'pin, T, U> {
             unsafe {
                 let Self { pinned, unpinned } = self.get_ref();
                 __StructProjectionRef {
-                    pinned: ::pin_project::__private::Pin::new_unchecked(pinned),
+                    pinned: _pin_project::__private::Pin::new_unchecked(pinned),
                     unpinned,
                 }
             }
@@ -66,17 +69,17 @@ const _: () = {
         let _ = &this.pinned;
         let _ = &this.unpinned;
     }
-    impl<'pin, T, U> ::pin_project::__private::Unpin for Struct<T, U> where
-        ::pin_project::__private::Wrapper<'pin, Self>: ::pin_project::UnsafeUnpin
+    impl<'pin, T, U> _pin_project::__private::Unpin for Struct<T, U> where
+        _pin_project::__private::Wrapper<'pin, Self>: _pin_project::UnsafeUnpin
     {
     }
     trait StructMustNotImplDrop {}
     #[allow(clippy::drop_bounds, drop_bounds)]
-    impl<T: ::pin_project::__private::Drop> StructMustNotImplDrop for T {}
+    impl<T: _pin_project::__private::Drop> StructMustNotImplDrop for T {}
     impl<T, U> StructMustNotImplDrop for Struct<T, U> {}
     #[doc(hidden)]
-    impl<T, U> ::pin_project::__private::PinnedDrop for Struct<T, U> {
-        unsafe fn drop(self: ::pin_project::__private::Pin<&mut Self>) {}
+    impl<T, U> _pin_project::__private::PinnedDrop for Struct<T, U> {
+        unsafe fn drop(self: _pin_project::__private::Pin<&mut Self>) {}
     }
 };
 unsafe impl<T: Unpin, U> UnsafeUnpin for Struct<T, U> {}

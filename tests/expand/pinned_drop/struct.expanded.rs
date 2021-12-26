@@ -15,10 +15,13 @@ struct Struct<T, U> {
 #[allow(clippy::pattern_type_mismatch)]
 #[allow(clippy::redundant_pub_crate)]
 #[allow(clippy::type_repetition_in_bounds)]
+#[allow(unused_qualifications)]
 #[allow(clippy::semicolon_if_nothing_returned)]
 #[allow(clippy::use_self)]
 #[allow(clippy::used_underscore_binding)]
 const _: () = {
+    #[allow(unused_extern_crates)]
+    extern crate pin_project as _pin_project;
     #[allow(dead_code)]
     #[allow(clippy::mut_mut)]
     struct __StructProjection<'pin, T, U>
@@ -39,24 +42,24 @@ const _: () = {
     }
     impl<T, U> Struct<T, U> {
         fn project<'pin>(
-            self: ::pin_project::__private::Pin<&'pin mut Self>,
+            self: _pin_project::__private::Pin<&'pin mut Self>,
         ) -> __StructProjection<'pin, T, U> {
             unsafe {
                 let Self { pinned, unpinned } = self.get_unchecked_mut();
                 __StructProjection {
-                    pinned: ::pin_project::__private::Pin::new_unchecked(pinned),
+                    pinned: _pin_project::__private::Pin::new_unchecked(pinned),
                     unpinned,
                 }
             }
         }
         #[allow(clippy::missing_const_for_fn)]
         fn project_ref<'pin>(
-            self: ::pin_project::__private::Pin<&'pin Self>,
+            self: _pin_project::__private::Pin<&'pin Self>,
         ) -> __StructProjectionRef<'pin, T, U> {
             unsafe {
                 let Self { pinned, unpinned } = self.get_ref();
                 __StructProjectionRef {
-                    pinned: ::pin_project::__private::Pin::new_unchecked(pinned),
+                    pinned: _pin_project::__private::Pin::new_unchecked(pinned),
                     unpinned,
                 }
             }
@@ -69,29 +72,29 @@ const _: () = {
     }
     #[allow(missing_debug_implementations)]
     struct __Struct<'pin, T, U> {
-        __pin_project_use_generics: ::pin_project::__private::AlwaysUnpin<
+        __pin_project_use_generics: _pin_project::__private::AlwaysUnpin<
             'pin,
             (
-                ::pin_project::__private::PhantomData<T>,
-                ::pin_project::__private::PhantomData<U>,
+                _pin_project::__private::PhantomData<T>,
+                _pin_project::__private::PhantomData<U>,
             ),
         >,
         __field0: T,
     }
-    impl<'pin, T, U> ::pin_project::__private::Unpin for Struct<T, U> where
-        __Struct<'pin, T, U>: ::pin_project::__private::Unpin
+    impl<'pin, T, U> _pin_project::__private::Unpin for Struct<T, U> where
+        __Struct<'pin, T, U>: _pin_project::__private::Unpin
     {
     }
     #[doc(hidden)]
-    unsafe impl<'pin, T, U> ::pin_project::UnsafeUnpin for Struct<T, U> where
-        __Struct<'pin, T, U>: ::pin_project::__private::Unpin
+    unsafe impl<'pin, T, U> _pin_project::UnsafeUnpin for Struct<T, U> where
+        __Struct<'pin, T, U>: _pin_project::__private::Unpin
     {
     }
-    impl<T, U> ::pin_project::__private::Drop for Struct<T, U> {
+    impl<T, U> _pin_project::__private::Drop for Struct<T, U> {
         fn drop(&mut self) {
             unsafe {
-                let __pinned_self = ::pin_project::__private::Pin::new_unchecked(self);
-                ::pin_project::__private::PinnedDrop::drop(__pinned_self);
+                let __pinned_self = _pin_project::__private::Pin::new_unchecked(self);
+                _pin_project::__private::PinnedDrop::drop(__pinned_self);
             }
         }
     }

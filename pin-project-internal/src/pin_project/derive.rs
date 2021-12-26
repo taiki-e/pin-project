@@ -85,10 +85,13 @@ impl GenerateTokens {
             // - https://github.com/taiki-e/pin-project/pull/53#issuecomment-525906867
             // - https://github.com/taiki-e/pin-project/pull/70
             #allowed_lints
+            #[allow(unused_qualifications)]
             #[allow(clippy::semicolon_if_nothing_returned)]
             #[allow(clippy::use_self)]
             #[allow(clippy::used_underscore_binding)]
             const _: () = {
+                #[allow(unused_extern_crates)]
+                extern crate pin_project as _pin_project;
                 #scoped
                 #unpin_impl
                 #drop_impl
@@ -581,10 +584,10 @@ fn visit_fields<'a>(
                 #vis #ident #colon_token ::pin_project::__private::PhantomData<#ty>,
             });
             proj_body.extend(quote! {
-                #ident #colon_token ::pin_project::__private::Pin::new_unchecked(#binding),
+                #ident #colon_token _pin_project::__private::Pin::new_unchecked(#binding),
             });
             proj_move.extend(quote! {
-                #ident #colon_token ::pin_project::__private::PhantomData,
+                #ident #colon_token _pin_project::__private::PhantomData,
             });
 
             cx.pinned_fields.push(ty);
@@ -603,7 +606,7 @@ fn visit_fields<'a>(
                 #binding,
             });
             proj_move.extend(quote! {
-                #ident #colon_token ::pin_project::__private::ptr::read(#binding),
+                #ident #colon_token _pin_project::__private::ptr::read(#binding),
             });
         }
     }
@@ -658,7 +661,7 @@ fn proj_own_body(
         // if any of the destructors panic.
         {
             #(
-                let __guard = ::pin_project::__private::UnsafeDropInPlaceGuard(#pinned_fields);
+                let __guard = _pin_project::__private::UnsafeDropInPlaceGuard(#pinned_fields);
             )*
         }
 
@@ -682,14 +685,14 @@ fn make_unpin_impl(cx: &Context<'_>) -> TokenStream {
 
             // Make the error message highlight `UnsafeUnpin` argument.
             proj_generics.make_where_clause().predicates.push(parse_quote_spanned! { span =>
-                ::pin_project::__private::Wrapper<#lifetime, Self>: ::pin_project::UnsafeUnpin
+                _pin_project::__private::Wrapper<#lifetime, Self>: _pin_project::UnsafeUnpin
             });
 
             let (impl_generics, _, where_clause) = proj_generics.split_for_impl();
             let ty_generics = cx.orig.generics.split_for_impl().1;
 
             quote_spanned! { span =>
-                impl #impl_generics ::pin_project::__private::Unpin for #orig_ident #ty_generics
+                impl #impl_generics _pin_project::__private::Unpin for #orig_ident #ty_generics
                 #where_clause
                 {
                 }
@@ -701,9 +704,9 @@ fn make_unpin_impl(cx: &Context<'_>) -> TokenStream {
             let lifetime = &cx.proj.lifetime;
 
             proj_generics.make_where_clause().predicates.push(parse_quote! {
-                ::pin_project::__private::Wrapper<
-                    #lifetime, ::pin_project::__private::PhantomPinned
-                >: ::pin_project::__private::Unpin
+                _pin_project::__private::Wrapper<
+                    #lifetime, _pin_project::__private::PhantomPinned
+                >: _pin_project::__private::Unpin
             });
 
             let (proj_impl_generics, _, proj_where_clause) = proj_generics.split_for_impl();
@@ -713,7 +716,7 @@ fn make_unpin_impl(cx: &Context<'_>) -> TokenStream {
             // call-site span.
             let unsafety = <Token![unsafe]>::default();
             quote_spanned! { span =>
-                impl #proj_impl_generics ::pin_project::__private::Unpin
+                impl #proj_impl_generics _pin_project::__private::Unpin
                     for #orig_ident #ty_generics
                 #proj_where_clause
                 {
@@ -726,7 +729,7 @@ fn make_unpin_impl(cx: &Context<'_>) -> TokenStream {
                 // impl, they'll get a "conflicting implementations of trait" error when
                 // coherence checks are run.
                 #[doc(hidden)]
-                #unsafety impl #proj_impl_generics ::pin_project::UnsafeUnpin
+                #unsafety impl #proj_impl_generics _pin_project::UnsafeUnpin
                     for #orig_ident #ty_generics
                 #proj_where_clause
                 {
@@ -781,7 +784,7 @@ fn make_unpin_impl(cx: &Context<'_>) -> TokenStream {
             let (_, ty_generics, where_clause) = cx.orig.generics.split_for_impl();
 
             full_where_clause.predicates.push(parse_quote! {
-                #struct_ident #proj_ty_generics: ::pin_project::__private::Unpin
+                #struct_ident #proj_ty_generics: _pin_project::__private::Unpin
             });
 
             quote! {
@@ -797,15 +800,15 @@ fn make_unpin_impl(cx: &Context<'_>) -> TokenStream {
                 // this 'public' type by creating this type in the inside of `const`.
                 #[allow(missing_debug_implementations)]
                 #vis struct #struct_ident #proj_generics #where_clause {
-                    __pin_project_use_generics: ::pin_project::__private::AlwaysUnpin<
-                        #lifetime, (#(::pin_project::__private::PhantomData<#type_params>),*)
+                    __pin_project_use_generics: _pin_project::__private::AlwaysUnpin<
+                        #lifetime, (#(_pin_project::__private::PhantomData<#type_params>),*)
                     >,
 
                     #(#fields,)*
                     #(#lifetime_fields,)*
                 }
 
-                impl #proj_impl_generics ::pin_project::__private::Unpin
+                impl #proj_impl_generics _pin_project::__private::Unpin
                     for #orig_ident #ty_generics
                 #full_where_clause
                 {
@@ -818,7 +821,7 @@ fn make_unpin_impl(cx: &Context<'_>) -> TokenStream {
                 // impl, they'll get a "conflicting implementations of trait" error when
                 // coherence checks are run.
                 #[doc(hidden)]
-                unsafe impl #proj_impl_generics ::pin_project::UnsafeUnpin
+                unsafe impl #proj_impl_generics _pin_project::UnsafeUnpin
                     for #orig_ident #ty_generics
                 #full_where_clause
                 {
@@ -843,18 +846,18 @@ fn make_drop_impl(cx: &Context<'_>) -> TokenStream {
         // call-site span.
         let unsafety = <Token![unsafe]>::default();
         quote_spanned! { span =>
-            impl #impl_generics ::pin_project::__private::Drop for #ident #ty_generics
+            impl #impl_generics _pin_project::__private::Drop for #ident #ty_generics
             #where_clause
             {
                 fn drop(&mut self) {
                     #unsafety {
                         // Safety - we're in 'drop', so we know that 'self' will
                         // never move again.
-                        let __pinned_self = ::pin_project::__private::Pin::new_unchecked(self);
+                        let __pinned_self = _pin_project::__private::Pin::new_unchecked(self);
                         // We call `pinned_drop` only once. Since `PinnedDrop::drop`
                         // is an unsafe method and a private API, it is never called again in safe
                         // code *unless the user uses a maliciously crafted macro*.
-                        ::pin_project::__private::PinnedDrop::drop(__pinned_self);
+                        _pin_project::__private::PinnedDrop::drop(__pinned_self);
                     }
                 }
             }
@@ -886,7 +889,7 @@ fn make_drop_impl(cx: &Context<'_>) -> TokenStream {
             // This will result in a compilation error, which is exactly what we want.
             trait #trait_ident {}
             #[allow(clippy::drop_bounds, drop_bounds)]
-            impl<T: ::pin_project::__private::Drop> #trait_ident for T {}
+            impl<T: _pin_project::__private::Drop> #trait_ident for T {}
             impl #impl_generics #trait_ident for #ident #ty_generics #where_clause {}
 
             // Generate a dummy impl of `PinnedDrop`, to ensure that the user cannot implement it.
@@ -900,10 +903,10 @@ fn make_drop_impl(cx: &Context<'_>) -> TokenStream {
             // they'll get a "conflicting implementations of trait" error when coherence
             // checks are run.
             #[doc(hidden)]
-            impl #impl_generics ::pin_project::__private::PinnedDrop for #ident #ty_generics
+            impl #impl_generics _pin_project::__private::PinnedDrop for #ident #ty_generics
             #where_clause
             {
-                unsafe fn drop(self: ::pin_project::__private::Pin<&mut Self>) {}
+                unsafe fn drop(self: _pin_project::__private::Pin<&mut Self>) {}
             }
         }
     }
@@ -934,7 +937,7 @@ fn make_proj_impl(
 
     let mut project = Some(quote! {
         #vis fn project<#lifetime>(
-            self: ::pin_project::__private::Pin<&#lifetime mut Self>,
+            self: _pin_project::__private::Pin<&#lifetime mut Self>,
         ) -> #proj_ident #proj_ty_generics {
             unsafe {
                 #proj_body
@@ -944,7 +947,7 @@ fn make_proj_impl(
     let mut project_ref = Some(quote! {
         #[allow(clippy::missing_const_for_fn)]
         #vis fn project_ref<#lifetime>(
-            self: ::pin_project::__private::Pin<&#lifetime Self>,
+            self: _pin_project::__private::Pin<&#lifetime Self>,
         ) -> #proj_ref_ident #proj_ty_generics {
             unsafe {
                 #proj_ref_body
@@ -955,7 +958,7 @@ fn make_proj_impl(
         // It is enough to only set the span of the signature.
         let sig = quote_spanned! { span =>
             #vis fn project_replace(
-                self: ::pin_project::__private::Pin<&mut Self>,
+                self: _pin_project::__private::Pin<&mut Self>,
                 __replacement: Self,
             ) -> #proj_own_ident #orig_ty_generics
         };
@@ -966,9 +969,9 @@ fn make_proj_impl(
 
                     // Destructors will run in reverse order, so next create a guard to overwrite
                     // `self` with the replacement value without calling destructors.
-                    let __guard = ::pin_project::__private::UnsafeOverwriteGuard {
+                    let __guard = _pin_project::__private::UnsafeOverwriteGuard {
                         target: __self_ptr,
-                        value: ::pin_project::__private::ManuallyDrop::new(__replacement),
+                        value: _pin_project::__private::ManuallyDrop::new(__replacement),
                     };
 
                     #proj_own_body
