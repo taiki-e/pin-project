@@ -93,6 +93,8 @@ jobs:
         with:
           component: miri
       - run: cargo miri test
+        env:
+          MIRIFLAGS: -Zmiri-tag-raw-pointers
 
   tidy:
     runs-on: ubuntu-latest
