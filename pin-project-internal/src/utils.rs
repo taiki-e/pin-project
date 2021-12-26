@@ -4,7 +4,7 @@ use proc_macro2::{Group, Spacing, Span, TokenStream, TokenTree};
 use quote::{quote, quote_spanned, ToTokens};
 use syn::{
     parse::{Parse, ParseBuffer, ParseStream},
-    parse_quote,
+    parse_quote, parse_quote_spanned,
     punctuated::Punctuated,
     token,
     visit_mut::{self, VisitMut},
@@ -27,12 +27,6 @@ macro_rules! format_err {
 macro_rules! bail {
     ($($tt:tt)*) => {
         return Err(format_err!($($tt)*))
-    };
-}
-
-macro_rules! parse_quote_spanned {
-    ($span:expr => $($tt:tt)*) => {
-        syn::parse2(quote::quote_spanned!($span => $($tt)*)).unwrap_or_else(|e| panic!("{}", e))
     };
 }
 

@@ -1,9 +1,10 @@
 use proc_macro2::{Delimiter, Group, Span, TokenStream};
 use quote::{format_ident, quote, quote_spanned, ToTokens};
 use syn::{
-    parse_quote, token, visit_mut::VisitMut, Attribute, Data, DataEnum, DeriveInput, Error, Field,
-    Fields, FieldsNamed, FieldsUnnamed, Generics, Ident, Index, Lifetime, LifetimeDef, Meta,
-    MetaList, MetaNameValue, NestedMeta, Result, Token, Type, Variant, Visibility, WhereClause,
+    parse_quote, parse_quote_spanned, token, visit_mut::VisitMut, Attribute, Data, DataEnum,
+    DeriveInput, Error, Field, Fields, FieldsNamed, FieldsUnnamed, Generics, Ident, Index,
+    Lifetime, LifetimeDef, Meta, MetaList, MetaNameValue, NestedMeta, Result, Token, Type, Variant,
+    Visibility, WhereClause,
 };
 
 use super::{
