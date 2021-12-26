@@ -62,22 +62,25 @@ where
 #[allow(clippy::pattern_type_mismatch)]
 #[allow(clippy::redundant_pub_crate)]
 #[allow(clippy::type_repetition_in_bounds)]
+#[allow(unused_qualifications)]
 #[allow(clippy::semicolon_if_nothing_returned)]
 #[allow(clippy::use_self)]
 #[allow(clippy::used_underscore_binding)]
 const _: () = {
+    #[allow(unused_extern_crates)]
+    extern crate pin_project as _pin_project;
     impl<T, U> Enum<T, U> {
         fn project<'pin>(
-            self: ::pin_project::__private::Pin<&'pin mut Self>,
+            self: _pin_project::__private::Pin<&'pin mut Self>,
         ) -> EnumProj<'pin, T, U> {
             unsafe {
                 match self.get_unchecked_mut() {
                     Self::Struct { pinned, unpinned } => EnumProj::Struct {
-                        pinned: ::pin_project::__private::Pin::new_unchecked(pinned),
+                        pinned: _pin_project::__private::Pin::new_unchecked(pinned),
                         unpinned,
                     },
                     Self::Tuple(_0, _1) => {
-                        EnumProj::Tuple(::pin_project::__private::Pin::new_unchecked(_0), _1)
+                        EnumProj::Tuple(_pin_project::__private::Pin::new_unchecked(_0), _1)
                     }
                     Self::Unit => EnumProj::Unit,
                 }
@@ -85,40 +88,40 @@ const _: () = {
         }
         #[allow(clippy::missing_const_for_fn)]
         fn project_ref<'pin>(
-            self: ::pin_project::__private::Pin<&'pin Self>,
+            self: _pin_project::__private::Pin<&'pin Self>,
         ) -> EnumProjRef<'pin, T, U> {
             unsafe {
                 match self.get_ref() {
                     Self::Struct { pinned, unpinned } => EnumProjRef::Struct {
-                        pinned: ::pin_project::__private::Pin::new_unchecked(pinned),
+                        pinned: _pin_project::__private::Pin::new_unchecked(pinned),
                         unpinned,
                     },
                     Self::Tuple(_0, _1) => {
-                        EnumProjRef::Tuple(::pin_project::__private::Pin::new_unchecked(_0), _1)
+                        EnumProjRef::Tuple(_pin_project::__private::Pin::new_unchecked(_0), _1)
                     }
                     Self::Unit => EnumProjRef::Unit,
                 }
             }
         }
     }
-    impl<'pin, T, U> ::pin_project::__private::Unpin for Enum<T, U> where
-        ::pin_project::__private::Wrapper<'pin, ::pin_project::__private::PhantomPinned>:
-            ::pin_project::__private::Unpin
+    impl<'pin, T, U> _pin_project::__private::Unpin for Enum<T, U> where
+        _pin_project::__private::Wrapper<'pin, _pin_project::__private::PhantomPinned>:
+            _pin_project::__private::Unpin
     {
     }
     #[doc(hidden)]
-    unsafe impl<'pin, T, U> ::pin_project::UnsafeUnpin for Enum<T, U> where
-        ::pin_project::__private::Wrapper<'pin, ::pin_project::__private::PhantomPinned>:
-            ::pin_project::__private::Unpin
+    unsafe impl<'pin, T, U> _pin_project::UnsafeUnpin for Enum<T, U> where
+        _pin_project::__private::Wrapper<'pin, _pin_project::__private::PhantomPinned>:
+            _pin_project::__private::Unpin
     {
     }
     trait EnumMustNotImplDrop {}
     #[allow(clippy::drop_bounds, drop_bounds)]
-    impl<T: ::pin_project::__private::Drop> EnumMustNotImplDrop for T {}
+    impl<T: _pin_project::__private::Drop> EnumMustNotImplDrop for T {}
     impl<T, U> EnumMustNotImplDrop for Enum<T, U> {}
     #[doc(hidden)]
-    impl<T, U> ::pin_project::__private::PinnedDrop for Enum<T, U> {
-        unsafe fn drop(self: ::pin_project::__private::Pin<&mut Self>) {}
+    impl<T, U> _pin_project::__private::PinnedDrop for Enum<T, U> {
+        unsafe fn drop(self: _pin_project::__private::Pin<&mut Self>) {}
     }
 };
 fn main() {}
