@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](https://semver.org).
 
 <!--
-Note: In this file, do not use the hard wrap in the middle of a sentence for compatibility with GitHub comment style markdown rendering.
+NOTE: In this file, do not use the hard wrap in the middle of a sentence for compatibility with GitHub comment style markdown rendering.
 -->
 
 ## [Unreleased]
@@ -40,9 +40,13 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [1.0.1] - 2020-10-15
 
+**NOTE:** This release has been yanked because it failed to compile with syn 1.0.84 and later.
+
 - [Fix warnings when `#[pin_project]` attribute used within `macro_rules!` macros.](https://github.com/taiki-e/pin-project/pull/298)
 
 ## [1.0.0] - 2020-10-13
+
+**NOTE:** This release has been yanked because it failed to compile with syn 1.0.84 and later.
 
 - [Remove deprecated `#[project]`, `#[project_ref]`, and `#[project_replace]` attributes.](https://github.com/taiki-e/pin-project/pull/265)
 
@@ -118,7 +122,7 @@ See also [tracking issue for 1.0 release](https://github.com/taiki-e/pin-project
 
 - [Fix `unused_must_use` warning on unused borrows, which will be added to rustc in the future.](https://github.com/taiki-e/pin-project/pull/322) See [#322](https://github.com/taiki-e/pin-project/pull/322) for more details.
 
-  (Note: 1.0 does not have this problem.)
+  (NOTE: 1.0 does not have this problem.)
 
 ## [0.4.27] - 2020-10-11
 
@@ -132,13 +136,13 @@ See also [tracking issue for 1.0 release](https://github.com/taiki-e/pin-project
 
 - [Suppress `drop_bounds` lint, which will be added to rustc in the future.](https://github.com/taiki-e/pin-project/pull/273) See [#272](https://github.com/taiki-e/pin-project/issues/272) for more details.
 
-  (Note: 1.0.0-alpha.1 already contains this change.)
+  (NOTE: 1.0.0-alpha.1 already contains this change.)
 
 ## [0.4.24] - 2020-09-26
 
 - [Fix compatibility of generated code with `forbid(future_incompatible)`.](https://github.com/taiki-e/pin-project/pull/282)
 
-  Note: This does not guarantee compatibility with `forbid(future_incompatible)` in the future.
+  NOTE: This does not guarantee compatibility with `forbid(future_incompatible)` in the future.
   If rustc adds a new lint, we may not be able to keep this.
 
 ## [0.4.23] - 2020-07-27
@@ -269,7 +273,7 @@ See also [tracking issue for 1.0 release](https://github.com/taiki-e/pin-project
   }
   ```
 
-  *[Note: This raises the minimum supported Rust version of this crate from Rust 1.33 to Rust 1.34.](https://github.com/taiki-e/pin-project/pull/219#pullrequestreview-408644187)*
+  *[NOTE: This raises the minimum supported Rust version of this crate from Rust 1.33 to Rust 1.34.](https://github.com/taiki-e/pin-project/pull/219#pullrequestreview-408644187)*
 
 - [Fix an issue where duplicate `#[project]` attributes were ignored.](https://github.com/taiki-e/pin-project/pull/218)
 
@@ -303,7 +307,7 @@ See also [tracking issue for 1.0 release](https://github.com/taiki-e/pin-project
 
 ## [0.4.11] - 2020-05-07
 
-**Note: This release has been yanked.** See [#206](https://github.com/taiki-e/pin-project/issues/206) for details.
+**NOTE: This release has been yanked.** See [#206](https://github.com/taiki-e/pin-project/issues/206) for details.
 
 - [Fix an issue that `#[project]` on non-statement expression does not work without unstable features.](https://github.com/taiki-e/pin-project/pull/197)
 
@@ -357,7 +361,7 @@ See also [tracking issue for 1.0 release](https://github.com/taiki-e/pin-project
 
 ## [0.4.3] - 2019-10-15
 
-**Note: This release has been yanked.** See [#148](https://github.com/taiki-e/pin-project/pull/148) for details.
+**NOTE: This release has been yanked.** See [#148](https://github.com/taiki-e/pin-project/pull/148) for details.
 
 - [`#[pin_project]` can now interoperate with `#[cfg_attr()]`.](https://github.com/taiki-e/pin-project/pull/135)
 
@@ -369,19 +373,19 @@ See also [tracking issue for 1.0 release](https://github.com/taiki-e/pin-project
 
 ## [0.4.2] - 2019-09-29
 
-**Note: This release has been yanked.** See [#148](https://github.com/taiki-e/pin-project/pull/148) for details.
+**NOTE: This release has been yanked.** See [#148](https://github.com/taiki-e/pin-project/pull/148) for details.
 
 - [Fix support for DSTs(Dynamically Sized Types).](https://github.com/taiki-e/pin-project/pull/113)
 
 ## [0.4.1] - 2019-09-26
 
-**Note: This release has been yanked.** See [#148](https://github.com/taiki-e/pin-project/pull/148) for details.
+**NOTE: This release has been yanked.** See [#148](https://github.com/taiki-e/pin-project/pull/148) for details.
 
 - [Fix an issue that caused an error when using `#[pin_project]` on a type that has `#[pin]` + `!Unpin` field with no generics or lifetime.](https://github.com/taiki-e/pin-project/pull/111)
 
 ## [0.4.0] - 2019-09-25
 
-**Note: This release has been yanked.** See [#148](https://github.com/taiki-e/pin-project/pull/148) for details.
+**NOTE: This release has been yanked.** See [#148](https://github.com/taiki-e/pin-project/pull/148) for details.
 
 - [**Pin projection has become a safe operation.**](https://github.com/taiki-e/pin-project/pull/18) In the absence of other unsafe code that you write, it is impossible to cause undefined behavior.
 
@@ -524,7 +528,7 @@ See also [tracking issue for 0.4 release](https://github.com/taiki-e/pin-project
 
 ## [0.3.3] - 2019-07-15
 
-**Note: This release has been yanked.** See [#16](https://github.com/taiki-e/pin-project/issues/16) for details.
+**NOTE: This release has been yanked.** See [#16](https://github.com/taiki-e/pin-project/issues/16) for details.
 
 - Diagnostic improvements.
 
@@ -598,7 +602,7 @@ See also [tracking issue for 0.4 release](https://github.com/taiki-e/pin-project
 
 ## [0.1.0] - 2019-01-08
 
-**Note: This release has been yanked.**
+**NOTE: This release has been yanked.**
 
 Initial release
 
