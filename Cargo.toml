@@ -33,3 +33,7 @@ pin-project-internal = { version = "=0.4.28", path = "pin-project-internal", def
 pin-project-auxiliary-macro = { path = "tests/ui/auxiliary" }
 rustversion = "1.0"
 trybuild = "1.0"
+
+# For test on MSRV.
+ryu = "=1.0.6"
+serde_json = "=1.0.72"
