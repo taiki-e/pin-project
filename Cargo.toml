@@ -1,6 +1,6 @@
 [package]
 name = "pin-project"
-version = "0.4.28"
+version = "0.4.29"
 edition = "2018"
 rust-version = "1.34"
 license = "Apache-2.0 OR MIT"
@@ -27,7 +27,7 @@ members = [
 ]
 
 [dependencies]
-pin-project-internal = { version = "=0.4.28", path = "pin-project-internal", default-features = false }
+pin-project-internal = { version = "=0.4.29", path = "pin-project-internal", default-features = false }
 
 [dev-dependencies]
 pin-project-auxiliary-macro = { path = "tests/ui/auxiliary" }
