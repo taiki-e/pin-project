@@ -14,6 +14,8 @@ NOTE: In this file, do not use the hard wrap in the middle of a sentence for com
 
 - [Prevent abuse of private module.](https://github.com/taiki-e/pin-project/pull/336)
 
+- Update minimal version of `syn` to 1.0.84.
+
 ## [1.0.8] - 2021-07-21
 
 - [Suppress `clippy::use_self` and `clippy::type_repetition_in_bounds` lints in generated code.](https://github.com/taiki-e/pin-project/pull/331)
@@ -87,7 +89,7 @@ Changes since the 1.0.0-alpha.1 release:
 
 - [Fix drop order of pinned fields in `project_replace`.](https://github.com/taiki-e/pin-project/pull/287)
 
-- Update minimal version of `syn` to 1.0.44
+- Update minimal version of `syn` to 1.0.44.
 
 ## [1.0.0-alpha.1] - 2020-09-22
 
@@ -128,25 +130,35 @@ See also [tracking issue for 1.0 release](https://github.com/taiki-e/pin-project
 
 ## [0.4.28] - 2021-03-28
 
+**NOTE:** This release has been yanked because it [failed to compile with syn 1.0.84 and later](https://github.com/taiki-e/pin-project/pull/335).
+
 - [Fix `unused_must_use` warning on unused borrows, which will be added to rustc in the future.](https://github.com/taiki-e/pin-project/pull/322) See [#322](https://github.com/taiki-e/pin-project/pull/322) for more details.
 
   (NOTE: 1.0 does not have this problem.)
 
 ## [0.4.27] - 2020-10-11
 
-- Update minimal version of `syn` to 1.0.44
+**NOTE:** This release has been yanked because it [failed to compile with syn 1.0.84 and later](https://github.com/taiki-e/pin-project/pull/335).
+
+- Update minimal version of `syn` to 1.0.44.
 
 ## [0.4.26] - 2020-10-04
+
+**NOTE:** This release has been yanked because it [failed to compile with syn 1.0.84 and later](https://github.com/taiki-e/pin-project/pull/335).
 
 - [Fix drop order of pinned fields in `project_replace`.](https://github.com/taiki-e/pin-project/pull/287)
 
 ## [0.4.25] - 2020-10-01
+
+**NOTE:** This release has been yanked because it [failed to compile with syn 1.0.84 and later](https://github.com/taiki-e/pin-project/pull/335).
 
 - [Suppress `drop_bounds` lint, which will be added to rustc in the future.](https://github.com/taiki-e/pin-project/pull/273) See [#272](https://github.com/taiki-e/pin-project/issues/272) for more details.
 
   (NOTE: 1.0.0-alpha.1 already contains this change.)
 
 ## [0.4.24] - 2020-09-26
+
+**NOTE:** This release has been yanked because it [failed to compile with syn 1.0.84 and later](https://github.com/taiki-e/pin-project/pull/335).
 
 - [Fix compatibility of generated code with `forbid(future_incompatible)`.](https://github.com/taiki-e/pin-project/pull/282)
 
@@ -155,13 +167,19 @@ See also [tracking issue for 1.0 release](https://github.com/taiki-e/pin-project
 
 ## [0.4.23] - 2020-07-27
 
+**NOTE:** This release has been yanked because it [failed to compile with syn 1.0.84 and later](https://github.com/taiki-e/pin-project/pull/335).
+
 - [Fix compile error with `?Sized` type parameters.](https://github.com/taiki-e/pin-project/pull/263)
 
 ## [0.4.22] - 2020-06-14
 
+**NOTE:** This release has been yanked because it [failed to compile with syn 1.0.84 and later](https://github.com/taiki-e/pin-project/pull/335).
+
 - Documentation improvements.
 
 ## [0.4.21] - 2020-06-13
+
+**NOTE:** This release has been yanked because it [failed to compile with syn 1.0.84 and later](https://github.com/taiki-e/pin-project/pull/335).
 
 - [Deprecated `#[project]`, `#[project_ref]`, and `#[project_replace]` attributes due to some unfixable limitations.](https://github.com/taiki-e/pin-project/pull/244)
 
@@ -192,6 +210,8 @@ See also [tracking issue for 1.0 release](https://github.com/taiki-e/pin-project
 
 ## [0.4.20] - 2020-06-07
 
+**NOTE:** This release has been yanked because it [failed to compile with syn 1.0.84 and later](https://github.com/taiki-e/pin-project/pull/335).
+
 - [You can now use `project_replace` argument without Replace argument.](https://github.com/taiki-e/pin-project/pull/243)
   This used to require you to specify both.
 
@@ -218,9 +238,13 @@ See also [tracking issue for 1.0 release](https://github.com/taiki-e/pin-project
 
 ## [0.4.19] - 2020-06-04
 
+**NOTE:** This release has been yanked because it [failed to compile with syn 1.0.84 and later](https://github.com/taiki-e/pin-project/pull/335).
+
 - [Suppress `unused_results` lint in generated code.](https://github.com/taiki-e/pin-project/pull/239)
 
 ## [0.4.18] - 2020-06-04
+
+**NOTE:** This release has been yanked because it [failed to compile with syn 1.0.84 and later](https://github.com/taiki-e/pin-project/pull/335).
 
 - [Support `Self` in more syntax positions inside `#[pinned_drop]` impl.](https://github.com/taiki-e/pin-project/pull/230)
 
@@ -231,6 +255,8 @@ See also [tracking issue for 1.0 release](https://github.com/taiki-e/pin-project
 - Diagnostic improvements.
 
 ## [0.4.17] - 2020-05-18
+
+**NOTE:** This release has been yanked because it [failed to compile with syn 1.0.84 and later](https://github.com/taiki-e/pin-project/pull/335).
 
 - [Support naming the projection types.](https://github.com/taiki-e/pin-project/pull/202)
 
@@ -253,13 +279,19 @@ See also [tracking issue for 1.0 release](https://github.com/taiki-e/pin-project
 
 ## [0.4.16] - 2020-05-11
 
+**NOTE:** This release has been yanked because it [failed to compile with syn 1.0.84 and later](https://github.com/taiki-e/pin-project/pull/335).
+
 - [Fix an issue that users can call internal function generated by `#[pinned_drop]`.](https://github.com/taiki-e/pin-project/pull/223)
 
 ## [0.4.15] - 2020-05-10
 
+**NOTE:** This release has been yanked because it [failed to compile with syn 1.0.84 and later](https://github.com/taiki-e/pin-project/pull/335).
+
 - [`#[project]` attribute can now handle all `project*` attributes in that scope with one wrapper attribute.](https://github.com/taiki-e/pin-project/pull/220)
 
 ## [0.4.14] - 2020-05-09
+
+**NOTE:** This release has been yanked because it [failed to compile with syn 1.0.84 and later](https://github.com/taiki-e/pin-project/pull/335).
 
 - [Add `!Unpin` option to `#[pin_project]` attribute for guarantee the type is `!Unpin`.](https://github.com/taiki-e/pin-project/pull/219)
 
@@ -295,6 +327,8 @@ See also [tracking issue for 1.0 release](https://github.com/taiki-e/pin-project
 
 ## [0.4.13] - 2020-05-07
 
+**NOTE:** This release has been yanked because it [failed to compile with syn 1.0.84 and later](https://github.com/taiki-e/pin-project/pull/335).
+
 - [Fix a regression in 0.4.11.](https://github.com/taiki-e/pin-project/pull/207)
 
   Changes from [0.4.10](https://github.com/taiki-e/pin-project/releases/tag/v0.4.10) and [0.4.12](https://github.com/taiki-e/pin-project/releases/tag/v0.4.12):
@@ -310,6 +344,8 @@ See also [tracking issue for 1.0 release](https://github.com/taiki-e/pin-project
   - Diagnostic improvements.
 
 ## [0.4.12] - 2020-05-07
+
+**NOTE:** This release has been yanked because it [failed to compile with syn 1.0.84 and later](https://github.com/taiki-e/pin-project/pull/335).
 
 - A release to avoid [a regression in 0.4.11](https://github.com/taiki-e/pin-project/issues/206). No code changes from [0.4.10](https://github.com/taiki-e/pin-project/releases/tag/v0.4.10).
 
@@ -329,6 +365,8 @@ See also [tracking issue for 1.0 release](https://github.com/taiki-e/pin-project
 
 ## [0.4.10] - 2020-05-04
 
+**NOTE:** This release has been yanked because it [failed to compile with syn 1.0.84 and later](https://github.com/taiki-e/pin-project/pull/335).
+
 - [Add `project_replace` method and `#[project_replace]` attribute.](https://github.com/taiki-e/pin-project/pull/194)
   `project_replace` method is optional and can be enabled by passing the `Replace` argument to `#[pin_project]` attribute.
   See [the documentation](https://docs.rs/pin-project/0.4/pin_project/attr.pin_project.html#project_replace) for more details.
@@ -339,6 +377,8 @@ See also [tracking issue for 1.0 release](https://github.com/taiki-e/pin-project
 
 ## [0.4.9] - 2020-04-14
 
+**NOTE:** This release has been yanked because it [failed to compile with syn 1.0.84 and later](https://github.com/taiki-e/pin-project/pull/335).
+
 - [Fix lifetime inference error when associated types are used in fields.](https://github.com/taiki-e/pin-project/pull/188)
 
 - [Fix compile error with tuple structs with `where` clauses.](https://github.com/taiki-e/pin-project/pull/186)
@@ -347,23 +387,33 @@ See also [tracking issue for 1.0 release](https://github.com/taiki-e/pin-project
 
 ## [0.4.8] - 2020-01-27
 
+**NOTE:** This release has been yanked because it [failed to compile with syn 1.0.84 and later](https://github.com/taiki-e/pin-project/pull/335).
+
 - [Ensure that users cannot implement `PinnedDrop` without proper attribute argument.](https://github.com/taiki-e/pin-project/pull/180)
 
 - [Fix use of `Self` in expression position inside `#[pinned_drop]` impl.](https://github.com/taiki-e/pin-project/pull/177)
 
 ## [0.4.7] - 2020-01-20
 
+**NOTE:** This release has been yanked because it [failed to compile with syn 1.0.84 and later](https://github.com/taiki-e/pin-project/pull/335).
+
 - [Fix support for lifetime bounds.](https://github.com/taiki-e/pin-project/pull/176)
 
 ## [0.4.6] - 2019-11-20
+
+**NOTE:** This release has been yanked because it [failed to compile with syn 1.0.84 and later](https://github.com/taiki-e/pin-project/pull/335).
 
 - [Fix compile error when there is `Self` in the where clause.](https://github.com/taiki-e/pin-project/pull/169)
 
 ## [0.4.5] - 2019-10-21
 
+**NOTE:** This release has been yanked because it [failed to compile with syn 1.0.84 and later](https://github.com/taiki-e/pin-project/pull/335).
+
 - [Fix compile error with `dyn` types.](https://github.com/taiki-e/pin-project/pull/158)
 
 ## [0.4.4] - 2019-10-17
+
+**NOTE:** This release has been yanked because it [failed to compile with syn 1.0.84 and later](https://github.com/taiki-e/pin-project/pull/335).
 
 - [Fix an issue where `PinnedDrop` implementations can call unsafe code without an unsafe block.](https://github.com/taiki-e/pin-project/pull/149)
 
