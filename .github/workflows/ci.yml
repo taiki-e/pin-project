@@ -8,6 +8,7 @@ on:
   push:
     branches:
       - main
+      - dev
       - staging
       - v[0-9]+.[0-9]+
   schedule:
@@ -45,43 +46,22 @@ jobs:
         with:
           toolchain: ${{ matrix.rust }}
           component: rustfmt,rust-src
-      - name: Pre Cache cargo-expand
-        run: |
-          mkdir -p .github/caching
-          curl -fsSL --retry 3 https://api.github.com/repos/dtolnay/cargo-expand/releases/latest \
-            | jq -r '.tag_name' > .github/caching/cargo-expand.lock
-          echo "${{ runner.tool_cache }}/cargo-expand/bin" >> "${GITHUB_PATH}"
+          target: thumbv7m-none-eabi
+      - uses: dtolnay/install@cargo-expand
         if: startsWith(matrix.rust, 'nightly')
-      - name: Cache cargo-expand
-        id: cache-cargo-expand
-        uses: actions/cache@v2
-        with:
-          path: ${{ runner.tool_cache }}/cargo-expand/bin
-          key: cargo-expand-bin-${{ hashFiles('.github/caching/cargo-expand.lock') }}
-        if: startsWith(matrix.rust, 'nightly')
-      - name: Install cargo-expand
-        run: cargo install -f cargo-expand --debug --root ${{ runner.tool_cache }}/cargo-expand
-        if: startsWith(matrix.rust, 'nightly') && steps.cache-cargo-expand.outputs.cache-hit != 'true'
-      - run: rustup target add thumbv7m-none-eabi
       - run: cargo test --all --all-features
       - run: cargo build --manifest-path tests/no-std/Cargo.toml --target thumbv7m-none-eabi
       - run: cargo build --manifest-path tests/rust-2015/Cargo.toml --target thumbv7m-none-eabi
 
   build:
-    strategy:
-      matrix:
-        range:
-          # This is the minimum supported Rust version of this crate.
-          # When updating this, the reminder to update the minimum supported
-          # Rust version in README.md, Cargo.toml, and .clippy.toml.
-          - 1.37..
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
         with:
           persist-credentials: false
-      - run: cargo install cargo-hack --debug
-      - run: cargo hack build --all --ignore-private --no-dev-deps --version-range ${{ matrix.range }} --version-step 2
+      - uses: taiki-e/github-actions/install-rust@main
+      - uses: taiki-e/install-action@cargo-hack
+      - run: cargo hack build --workspace --ignore-private --no-dev-deps --version-range .. --version-step 2
 
   miri:
     runs-on: ubuntu-latest
@@ -92,7 +72,7 @@ jobs:
       - uses: taiki-e/github-actions/install-rust@main
         with:
           component: miri
-      - run: cargo miri test
+      - run: cargo miri test --workspace
         env:
           MIRIFLAGS: -Zmiri-tag-raw-pointers
 
@@ -105,14 +85,16 @@ jobs:
       - uses: taiki-e/github-actions/install-rust@main
         with:
           component: clippy,rustfmt
-      - run: cargo install cargo-hack --debug
+      - uses: taiki-e/install-action@cargo-hack
+      - uses: taiki-e/install-action@cargo-minimal-versions
+      - uses: taiki-e/install-action@shellcheck
       - run: cargo fmt --all -- --check
         if: always()
-      - run: cargo clippy --all --all-features --all-targets
+      - run: cargo clippy --workspace --all-features --all-targets
         if: always()
-      - run: tools/check-minimal-versions.sh
+      - run: cargo minimal-versions build --workspace --all-features --ignore-private
         if: always()
-      - run: shellcheck **/*.sh
+      - run: shellcheck $(git ls-files '*.sh')
         if: always()
 
   docs:
@@ -122,7 +104,7 @@ jobs:
         with:
           persist-credentials: false
       - uses: taiki-e/github-actions/install-rust@main
-      - run: cargo doc --no-deps --all --all-features
+      - run: cargo doc --workspace --all-features
         env:
           RUSTDOCFLAGS: -D warnings
 
