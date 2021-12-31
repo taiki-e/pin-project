@@ -1,6 +1,6 @@
 [package]
 name = "pin-project-internal"
-version = "1.0.9"
+version = "1.0.10"
 edition = "2018"
 license = "Apache-2.0 OR MIT"
 repository = "https://github.com/taiki-e/pin-project"

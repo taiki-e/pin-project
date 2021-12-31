@@ -51,6 +51,10 @@ echo "============== CHANGELOG =============="
 parse-changelog CHANGELOG.md "${version}"
 echo "======================================="
 
+if ! grep <CHANGELOG.md -E "^\\[${version//./\\.}\\]: " >/dev/null; then
+    bail "not found link to [${version}] in CHANGELOG.md"
+fi
+
 # Make sure the same release has not been created in the past.
 if gh release view "${tag}" &>/dev/null; then
     bail "tag '${tag}' has already been created and pushed"
