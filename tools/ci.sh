@@ -1,20 +1,20 @@
 #!/bin/bash
-
-# Run a simplified version of the checks done by CI.
-#
-# Usage:
-#     ./tools/ci.sh [+toolchain]
-#
-# Note: This script requires nightly Rust, rustfmt, clippy, and cargo-expand
-
 set -euo pipefail
 IFS=$'\n\t'
 
-error() {
-    echo "error: $*" >&2
+# Run a simplified version of the checks done by CI.
+#
+# USAGE:
+#     ./tools/ci.sh [+toolchain]
+#
+# NOTE: This script requires nightly Rust, rustfmt, clippy, and cargo-expand
+
+bail() {
+    echo >&2 "error: $*"
+    exit 1
 }
 warn() {
-    echo "warning: $*" >&2
+    echo >&2 "warning: $*"
 }
 
 # Decide Rust toolchain. Nightly is used by default.
@@ -29,8 +29,7 @@ if ! cargo "${toolchain}" -V &>/dev/null; then
 fi
 
 if [[ "${toolchain:-+nightly}" != "+nightly"* ]]; then
-    error "ci.sh requires nightly Rust"
-    exit 1
+    bail "ci.sh requires nightly Rust"
 fi
 if ! rustup "${toolchain}" component add rustfmt &>/dev/null \
     || ! cargo expand -V &>/dev/null; then

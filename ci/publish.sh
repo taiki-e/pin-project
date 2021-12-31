@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -euo pipefail
+set -euxo pipefail
 IFS=$'\n\t'
 
 # A list of paths to the crate to be published.
@@ -11,8 +11,6 @@ MEMBERS=(
 )
 
 cd "$(cd "$(dirname "$0")" && pwd)"/..
-
-set -x
 
 for i in "${!MEMBERS[@]}"; do
     (
