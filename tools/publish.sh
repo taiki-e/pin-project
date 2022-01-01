@@ -21,7 +21,7 @@ if [[ $# -gt 0 ]]; then
     bail "invalid argument '$1'"
 fi
 
-# Make sure that the version number of publishable workspace members matches the specified version.
+# Make sure that the version number of all publishable workspace members matches.
 metadata="$(cargo metadata --format-version=1 --all-features --no-deps)"
 for id in $(jq <<<"${metadata}" '.workspace_members[]'); do
     pkg="$(jq <<<"${metadata}" ".packages[] | select(.id == ${id})")"
