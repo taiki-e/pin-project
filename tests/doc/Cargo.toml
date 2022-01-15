@@ -7,8 +7,5 @@ publish = false
 [lib]
 path = "lib.rs"
 
-[build-dependencies]
-rustversion = "1"
-
 [dev-dependencies]
 pin-project = { path = "../.." }
