@@ -9,6 +9,9 @@ name = "auxiliary_macro"
 path = "lib.rs"
 proc-macro = true
 
+[build-dependencies]
+rustversion = "1"
+
 [dependencies]
 proc-macro2 = "1"
 quote = "1"
