@@ -26,7 +26,7 @@
 
 - [example](project_replace.rs)
 - [generated code](project_replace-expanded.rs)
-- [`project_replace()` documentation](https://docs.rs/pin-project/1/pin_project/attr.pin_project.html#project_replace)
+- [`project_replace()` documentation](https://docs.rs/pin-project/1/pin_project/attr.pin_project.html#project_replace-method)
 
 ### Ensure `!Unpin` by `#[pin_project(!Unpin)]`
 
