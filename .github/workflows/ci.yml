@@ -72,9 +72,9 @@ jobs:
       - uses: taiki-e/github-actions/install-rust@main
         with:
           component: miri
-      - run: cargo miri test --workspace
+      - run: cargo miri test --workspace --all-features
         env:
-          MIRIFLAGS: -Zmiri-tag-raw-pointers
+          MIRIFLAGS: -Zmiri-check-number-validity -Zmiri-symbolic-alignment-check -Zmiri-tag-raw-pointers
 
   tidy:
     runs-on: ubuntu-latest
