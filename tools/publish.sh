@@ -1,6 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 IFS=$'\n\t'
+cd "$(dirname "$0")"/..
 
 # Publish a new release.
 #
@@ -9,8 +10,6 @@ IFS=$'\n\t'
 #
 # NOTE:
 # - This script requires parse-changelog <https://github.com/taiki-e/parse-changelog>
-
-cd "$(cd "$(dirname "$0")" && pwd)"/..
 
 bail() {
     echo >&2 "error: $*"
@@ -51,6 +50,9 @@ echo "============== CHANGELOG =============="
 parse-changelog CHANGELOG.md "${version}"
 echo "======================================="
 
+if ! grep <CHANGELOG.md -E "^## \\[${version//./\\.}\\] - $(date --utc '+%Y-%m-%d')$" >/dev/null; then
+    bail "not found section '[${version}] - $(date --utc '+%Y-%m-%d')' in CHANGELOG.md"
+fi
 if ! grep <CHANGELOG.md -E "^\\[${version//./\\.}\\]: " >/dev/null; then
     bail "not found link to [${version}] in CHANGELOG.md"
 fi
@@ -62,5 +64,6 @@ fi
 
 set -x
 
+git push origin main
 git tag "${tag}"
 git push origin --tags
