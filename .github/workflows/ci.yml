@@ -74,6 +74,7 @@ jobs:
       - run: cargo miri test --workspace --all-features
         env:
           MIRIFLAGS: -Zmiri-check-number-validity -Zmiri-symbolic-alignment-check -Zmiri-tag-raw-pointers
+          RUSTFLAGS: ${{ env.RUSTFLAGS }} -Z randomize-layout
 
   tidy:
     runs-on: ubuntu-latest
