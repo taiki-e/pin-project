@@ -7,7 +7,7 @@ IFS=$'\n\t'
 # USAGE:
 #     ./tools/ci.sh [+toolchain]
 #
-# NOTE: This script requires nightly Rust, rustfmt, clippy, and cargo-expand
+# Note: This script requires nightly Rust, rustfmt, clippy, and cargo-expand
 
 bail() {
     echo >&2 "error: $*"

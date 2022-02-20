@@ -10,6 +10,6 @@ IFS=$'\n\t'
 #    ./tools/update-version.sh minor
 #    ./tools/update-version.sh prerelease --pre-id alpha
 #
-# NOTE: This script requires cargo-workspaces <https://github.com/pksunkara/cargo-workspaces>
+# Note: This script requires cargo-workspaces <https://github.com/pksunkara/cargo-workspaces>
 
 cargo workspaces version --force '*' --no-git-commit --exact -y "$@"
