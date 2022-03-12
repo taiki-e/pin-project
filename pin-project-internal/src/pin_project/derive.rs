@@ -1084,12 +1084,6 @@ fn ensure_not_packed(orig: &OriginalType<'_>, fields: Option<&Fields>) -> Result
     // See also https://github.com/taiki-e/pin-project/pull/34.
     //
     // Note:
-    // - pin-project v0.4.3 or later (#135, v0.4.0-v0.4.2 are already yanked for
-    //   another reason) is internally proc-macro-derive, so they are not
-    //   affected by the problem that the struct definition is rewritten by
-    //   another macro after the #[pin_project] is expanded.
-    //   So this is probably no longer necessary, but it keeps it for now.
-    //
     // - Lint-based tricks aren't perfect, but they're much better than nothing:
     //   https://github.com/taiki-e/pin-project-lite/issues/26
     //

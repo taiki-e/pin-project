@@ -12,8 +12,17 @@ fn tokens2(tokens: TokenStream) -> proc_macro2::TokenStream {
 
 #[proc_macro_attribute]
 pub fn hidden_repr(args: TokenStream, input: TokenStream) -> TokenStream {
-    let (args, input) = (tokens2(args), tokens2(input));
-    quote!(#[repr(#args)] #input).into()
+    let args = tokens2(args);
+    let mut item = syn::parse_macro_input!(input as ItemStruct);
+    item.attrs.push(parse_quote!(#[repr(#args)]));
+    quote!(#item).into()
+}
+
+#[proc_macro_attribute]
+pub fn hidden_repr2(_args: TokenStream, input: TokenStream) -> TokenStream {
+    let mut item = syn::parse_macro_input!(input as ItemStruct);
+    item.attrs.push(parse_quote!(#[auxiliary_macro::hidden_repr(packed)] ));
+    quote!(#item).into()
 }
 
 #[proc_macro]
