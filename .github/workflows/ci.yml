@@ -20,6 +20,7 @@ env:
   CARGO_NET_RETRY: 10
   CARGO_TERM_COLOR: always
   RUST_BACKTRACE: full
+  RUSTDOCFLAGS: -D warnings
   RUSTFLAGS: -D warnings
   RUSTUP_MAX_RETRIES: 10
 
@@ -39,7 +40,7 @@ jobs:
           - nightly
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           persist-credentials: false
       - uses: taiki-e/github-actions/install-rust@main
@@ -53,10 +54,10 @@ jobs:
       - run: cargo build --manifest-path tests/no-std/Cargo.toml --target thumbv7m-none-eabi
       - run: cargo build --manifest-path tests/rust-2015/Cargo.toml --target thumbv7m-none-eabi
 
-  build:
+  msrv:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           persist-credentials: false
       - uses: taiki-e/install-action@cargo-hack
@@ -65,7 +66,7 @@ jobs:
   miri:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           persist-credentials: false
       - uses: taiki-e/github-actions/install-rust@main
@@ -73,13 +74,13 @@ jobs:
           component: miri
       - run: cargo miri test --workspace --all-features
         env:
-          MIRIFLAGS: -Zmiri-check-number-validity -Zmiri-symbolic-alignment-check -Zmiri-tag-raw-pointers
+          MIRIFLAGS: -Zmiri-strict-provenance -Zmiri-symbolic-alignment-check
           RUSTFLAGS: ${{ env.RUSTFLAGS }} -Z randomize-layout
 
   tidy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           persist-credentials: false
       - uses: taiki-e/github-actions/install-rust@main
@@ -100,13 +101,11 @@ jobs:
   docs:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           persist-credentials: false
       - uses: taiki-e/github-actions/install-rust@main
       - run: cargo doc --workspace --all-features
-        env:
-          RUSTDOCFLAGS: -D warnings
 
   # This job doesn't actually test anything, but they're used to tell bors the
   # build completed, as there is no practical way to detect when a workflow is
@@ -119,7 +118,7 @@ jobs:
     if: github.event_name == 'push' && success()
     needs:
       - test
-      - build
+      - msrv
       - miri
       - tidy
       - docs
