@@ -955,6 +955,7 @@ mod clippy_redundant_pub_crate {
     pub mod inside_macro {
         use pin_project::pin_project;
 
+        #[allow(clippy::redundant_pub_crate)]
         #[rustfmt::skip]
         macro_rules! mac {
             () => {
