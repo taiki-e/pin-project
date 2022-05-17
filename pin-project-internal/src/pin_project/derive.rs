@@ -514,7 +514,7 @@ fn visit_variants<'a>(cx: &mut Context<'a>, variants: &'a Variants) -> Result<Pr
             Fields::Unnamed(_) => visit_fields(cx, Some(ident), fields, Delimiter::Parenthesis)?,
             Fields::Unit => ProjectedFields {
                 proj_own_body: proj_own_body(cx, Some(ident), None, &[]),
-                ..ProjectedFields::default()
+                ..Default::default()
             },
         };
 
