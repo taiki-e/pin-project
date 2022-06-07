@@ -34,3 +34,6 @@ macrotest = { git = "https://github.com/taiki-e/macrotest.git", rev = "4a9f0da" 
 rustversion = "1"
 static_assertions = "1"
 trybuild = "1.0.49"
+
+[patch.crates-io]
+prettyplease = { git = "https://github.com/taiki-e/prettyplease.git", branch = "dev" } # lower MSRV
