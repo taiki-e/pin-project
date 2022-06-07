@@ -58,12 +58,8 @@ const _: () = {
             self: _pin_project::__private::Pin<&'pin mut Self>,
         ) -> __StructProjection<'pin, T, U> {
             unsafe {
-                let Self {
-                    pinned1,
-                    pinned2,
-                    unpinned1,
-                    unpinned2,
-                } = self.get_unchecked_mut();
+                let Self { pinned1, pinned2, unpinned1, unpinned2 } = self
+                    .get_unchecked_mut();
                 __StructProjection {
                     pinned1: _pin_project::__private::Pin::new_unchecked(pinned1),
                     pinned2: _pin_project::__private::Pin::new_unchecked(pinned2),
@@ -77,12 +73,7 @@ const _: () = {
             self: _pin_project::__private::Pin<&'pin Self>,
         ) -> __StructProjectionRef<'pin, T, U> {
             unsafe {
-                let Self {
-                    pinned1,
-                    pinned2,
-                    unpinned1,
-                    unpinned2,
-                } = self.get_ref();
+                let Self { pinned1, pinned2, unpinned1, unpinned2 } = self.get_ref();
                 __StructProjectionRef {
                     pinned1: _pin_project::__private::Pin::new_unchecked(pinned1),
                     pinned2: _pin_project::__private::Pin::new_unchecked(pinned2),
@@ -97,14 +88,11 @@ const _: () = {
         ) -> __StructProjectionOwned<T, U> {
             unsafe {
                 let __self_ptr: *mut Self = self.get_unchecked_mut();
-                let __guard =
-                    _pin_project::__private::UnsafeOverwriteGuard::new(__self_ptr, __replacement);
-                let Self {
-                    pinned1,
-                    pinned2,
-                    unpinned1,
-                    unpinned2,
-                } = &mut *__self_ptr;
+                let __guard = _pin_project::__private::UnsafeOverwriteGuard::new(
+                    __self_ptr,
+                    __replacement,
+                );
+                let Self { pinned1, pinned2, unpinned1, unpinned2 } = &mut *__self_ptr;
                 let __result = __StructProjectionOwned {
                     pinned1: _pin_project::__private::PhantomData,
                     pinned2: _pin_project::__private::PhantomData,
@@ -112,8 +100,12 @@ const _: () = {
                     unpinned2: _pin_project::__private::ptr::read(unpinned2),
                 };
                 {
-                    let __guard = _pin_project::__private::UnsafeDropInPlaceGuard::new(pinned2);
-                    let __guard = _pin_project::__private::UnsafeDropInPlaceGuard::new(pinned1);
+                    let __guard = _pin_project::__private::UnsafeDropInPlaceGuard::new(
+                        pinned2,
+                    );
+                    let __guard = _pin_project::__private::UnsafeDropInPlaceGuard::new(
+                        pinned1,
+                    );
                 }
                 __result
             }
@@ -138,15 +130,15 @@ const _: () = {
         __field0: T,
         __field1: T,
     }
-    impl<'pin, T, U> _pin_project::__private::Unpin for Struct<T, U> where
-        __Struct<'pin, T, U>: _pin_project::__private::Unpin
-    {
-    }
+    impl<'pin, T, U> _pin_project::__private::Unpin for Struct<T, U>
+    where
+        __Struct<'pin, T, U>: _pin_project::__private::Unpin,
+    {}
     #[doc(hidden)]
-    unsafe impl<'pin, T, U> _pin_project::UnsafeUnpin for Struct<T, U> where
-        __Struct<'pin, T, U>: _pin_project::__private::Unpin
-    {
-    }
+    unsafe impl<'pin, T, U> _pin_project::UnsafeUnpin for Struct<T, U>
+    where
+        __Struct<'pin, T, U>: _pin_project::__private::Unpin,
+    {}
     trait StructMustNotImplDrop {}
     #[allow(clippy::drop_bounds, drop_bounds)]
     impl<T: _pin_project::__private::Drop> StructMustNotImplDrop for T {}

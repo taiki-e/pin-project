@@ -1,5 +1,5 @@
 use pin_project::pin_project;
-# [pin (__private (! Unpin))]
+#[pin(__private(!Unpin))]
 struct TupleStruct<T, U>(#[pin] T, U);
 #[allow(box_pointers)]
 #[allow(deprecated)]
@@ -39,7 +39,10 @@ const _: () = {
         ) -> __TupleStructProjection<'pin, T, U> {
             unsafe {
                 let Self(_0, _1) = self.get_unchecked_mut();
-                __TupleStructProjection(_pin_project::__private::Pin::new_unchecked(_0), _1)
+                __TupleStructProjection(
+                    _pin_project::__private::Pin::new_unchecked(_0),
+                    _1,
+                )
             }
         }
         #[allow(clippy::missing_const_for_fn)]
@@ -48,7 +51,10 @@ const _: () = {
         ) -> __TupleStructProjectionRef<'pin, T, U> {
             unsafe {
                 let Self(_0, _1) = self.get_ref();
-                __TupleStructProjectionRef(_pin_project::__private::Pin::new_unchecked(_0), _1)
+                __TupleStructProjectionRef(
+                    _pin_project::__private::Pin::new_unchecked(_0),
+                    _1,
+                )
             }
         }
     }
@@ -57,17 +63,21 @@ const _: () = {
         let _ = &this.0;
         let _ = &this.1;
     }
-    impl<'pin, T, U> _pin_project::__private::Unpin for TupleStruct<T, U> where
-        _pin_project::__private::Wrapper<'pin, _pin_project::__private::PhantomPinned>:
-            _pin_project::__private::Unpin
-    {
-    }
+    impl<'pin, T, U> _pin_project::__private::Unpin for TupleStruct<T, U>
+    where
+        _pin_project::__private::Wrapper<
+            'pin,
+            _pin_project::__private::PhantomPinned,
+        >: _pin_project::__private::Unpin,
+    {}
     #[doc(hidden)]
-    unsafe impl<'pin, T, U> _pin_project::UnsafeUnpin for TupleStruct<T, U> where
-        _pin_project::__private::Wrapper<'pin, _pin_project::__private::PhantomPinned>:
-            _pin_project::__private::Unpin
-    {
-    }
+    unsafe impl<'pin, T, U> _pin_project::UnsafeUnpin for TupleStruct<T, U>
+    where
+        _pin_project::__private::Wrapper<
+            'pin,
+            _pin_project::__private::PhantomPinned,
+        >: _pin_project::__private::Unpin,
+    {}
     trait TupleStructMustNotImplDrop {}
     #[allow(clippy::drop_bounds, drop_bounds)]
     impl<T: _pin_project::__private::Drop> TupleStructMustNotImplDrop for T {}

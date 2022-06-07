@@ -80,15 +80,15 @@ const _: () = {
         >,
         __field0: T,
     }
-    impl<'pin, T, U> _pin_project::__private::Unpin for Struct<T, U> where
-        __Struct<'pin, T, U>: _pin_project::__private::Unpin
-    {
-    }
+    impl<'pin, T, U> _pin_project::__private::Unpin for Struct<T, U>
+    where
+        __Struct<'pin, T, U>: _pin_project::__private::Unpin,
+    {}
     #[doc(hidden)]
-    unsafe impl<'pin, T, U> _pin_project::UnsafeUnpin for Struct<T, U> where
-        __Struct<'pin, T, U>: _pin_project::__private::Unpin
-    {
-    }
+    unsafe impl<'pin, T, U> _pin_project::UnsafeUnpin for Struct<T, U>
+    where
+        __Struct<'pin, T, U>: _pin_project::__private::Unpin,
+    {}
     trait StructMustNotImplDrop {}
     #[allow(clippy::drop_bounds, drop_bounds)]
     impl<T: _pin_project::__private::Drop> StructMustNotImplDrop for T {}

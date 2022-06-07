@@ -1,5 +1,5 @@
 use pin_project::pin_project;
-# [pin (__private (project_replace = ProjOwn))]
+#[pin(__private(project_replace = ProjOwn))]
 struct TupleStruct<T, U>(#[pin] T, U);
 #[allow(box_pointers)]
 #[allow(deprecated)]
@@ -50,7 +50,10 @@ const _: () = {
         ) -> __TupleStructProjection<'pin, T, U> {
             unsafe {
                 let Self(_0, _1) = self.get_unchecked_mut();
-                __TupleStructProjection(_pin_project::__private::Pin::new_unchecked(_0), _1)
+                __TupleStructProjection(
+                    _pin_project::__private::Pin::new_unchecked(_0),
+                    _1,
+                )
             }
         }
         #[allow(clippy::missing_const_for_fn)]
@@ -59,7 +62,10 @@ const _: () = {
         ) -> __TupleStructProjectionRef<'pin, T, U> {
             unsafe {
                 let Self(_0, _1) = self.get_ref();
-                __TupleStructProjectionRef(_pin_project::__private::Pin::new_unchecked(_0), _1)
+                __TupleStructProjectionRef(
+                    _pin_project::__private::Pin::new_unchecked(_0),
+                    _1,
+                )
             }
         }
         fn project_replace(
@@ -68,15 +74,19 @@ const _: () = {
         ) -> ProjOwn<T, U> {
             unsafe {
                 let __self_ptr: *mut Self = self.get_unchecked_mut();
-                let __guard =
-                    _pin_project::__private::UnsafeOverwriteGuard::new(__self_ptr, __replacement);
+                let __guard = _pin_project::__private::UnsafeOverwriteGuard::new(
+                    __self_ptr,
+                    __replacement,
+                );
                 let Self(_0, _1) = &mut *__self_ptr;
                 let __result = ProjOwn(
                     _pin_project::__private::PhantomData,
                     _pin_project::__private::ptr::read(_1),
                 );
                 {
-                    let __guard = _pin_project::__private::UnsafeDropInPlaceGuard::new(_0);
+                    let __guard = _pin_project::__private::UnsafeDropInPlaceGuard::new(
+                        _0,
+                    );
                 }
                 __result
             }
@@ -98,15 +108,15 @@ const _: () = {
         >,
         __field0: T,
     }
-    impl<'pin, T, U> _pin_project::__private::Unpin for TupleStruct<T, U> where
-        __TupleStruct<'pin, T, U>: _pin_project::__private::Unpin
-    {
-    }
+    impl<'pin, T, U> _pin_project::__private::Unpin for TupleStruct<T, U>
+    where
+        __TupleStruct<'pin, T, U>: _pin_project::__private::Unpin,
+    {}
     #[doc(hidden)]
-    unsafe impl<'pin, T, U> _pin_project::UnsafeUnpin for TupleStruct<T, U> where
-        __TupleStruct<'pin, T, U>: _pin_project::__private::Unpin
-    {
-    }
+    unsafe impl<'pin, T, U> _pin_project::UnsafeUnpin for TupleStruct<T, U>
+    where
+        __TupleStruct<'pin, T, U>: _pin_project::__private::Unpin,
+    {}
     trait TupleStructMustNotImplDrop {}
     #[allow(clippy::drop_bounds, drop_bounds)]
     impl<T: _pin_project::__private::Drop> TupleStructMustNotImplDrop for T {}

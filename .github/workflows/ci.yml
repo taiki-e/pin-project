@@ -46,7 +46,7 @@ jobs:
       - uses: taiki-e/github-actions/install-rust@main
         with:
           toolchain: ${{ matrix.rust }}
-          component: rustfmt,rust-src
+          component: rust-src
           target: thumbv7m-none-eabi
       - uses: dtolnay/install@cargo-expand
         if: startsWith(matrix.rust, 'nightly')

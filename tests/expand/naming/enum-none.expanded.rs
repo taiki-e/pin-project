@@ -1,11 +1,7 @@
 use pin_project::pin_project;
 #[pin(__private())]
 enum Enum<T, U> {
-    Struct {
-        #[pin]
-        pinned: T,
-        unpinned: U,
-    },
+    Struct { #[pin] pinned: T, unpinned: U },
     Tuple(#[pin] T, U),
     Unit,
 }
@@ -38,15 +34,15 @@ const _: () = {
         __field0: T,
         __field1: T,
     }
-    impl<'pin, T, U> _pin_project::__private::Unpin for Enum<T, U> where
-        __Enum<'pin, T, U>: _pin_project::__private::Unpin
-    {
-    }
+    impl<'pin, T, U> _pin_project::__private::Unpin for Enum<T, U>
+    where
+        __Enum<'pin, T, U>: _pin_project::__private::Unpin,
+    {}
     #[doc(hidden)]
-    unsafe impl<'pin, T, U> _pin_project::UnsafeUnpin for Enum<T, U> where
-        __Enum<'pin, T, U>: _pin_project::__private::Unpin
-    {
-    }
+    unsafe impl<'pin, T, U> _pin_project::UnsafeUnpin for Enum<T, U>
+    where
+        __Enum<'pin, T, U>: _pin_project::__private::Unpin,
+    {}
     trait EnumMustNotImplDrop {}
     #[allow(clippy::drop_bounds, drop_bounds)]
     impl<T: _pin_project::__private::Drop> EnumMustNotImplDrop for T {}

@@ -1,14 +1,13 @@
 use pin_project::pin_project;
-# [pin (__private (project = EnumProj , project_ref = EnumProjRef , project_replace = EnumProjOwn))]
+#[pin(
+    __private(
+        project = EnumProj,
+        project_ref = EnumProjRef,
+        project_replace = EnumProjOwn
+    )
+)]
 enum Enum<T, U> {
-    Struct {
-        #[pin]
-        pinned1: T,
-        #[pin]
-        pinned2: T,
-        unpinned1: U,
-        unpinned2: U,
-    },
+    Struct { #[pin] pinned1: T, #[pin] pinned2: T, unpinned1: U, unpinned2: U },
     Tuple(#[pin] T, #[pin] T, U, U),
     Unit,
 }
@@ -119,23 +118,26 @@ const _: () = {
         ) -> EnumProj<'pin, T, U> {
             unsafe {
                 match self.get_unchecked_mut() {
-                    Self::Struct {
-                        pinned1,
-                        pinned2,
-                        unpinned1,
-                        unpinned2,
-                    } => EnumProj::Struct {
-                        pinned1: _pin_project::__private::Pin::new_unchecked(pinned1),
-                        pinned2: _pin_project::__private::Pin::new_unchecked(pinned2),
-                        unpinned1,
-                        unpinned2,
-                    },
-                    Self::Tuple(_0, _1, _2, _3) => EnumProj::Tuple(
-                        _pin_project::__private::Pin::new_unchecked(_0),
-                        _pin_project::__private::Pin::new_unchecked(_1),
-                        _2,
-                        _3,
-                    ),
+                    Self::Struct { pinned1, pinned2, unpinned1, unpinned2 } => {
+                        EnumProj::Struct {
+                            pinned1: _pin_project::__private::Pin::new_unchecked(
+                                pinned1,
+                            ),
+                            pinned2: _pin_project::__private::Pin::new_unchecked(
+                                pinned2,
+                            ),
+                            unpinned1,
+                            unpinned2,
+                        }
+                    }
+                    Self::Tuple(_0, _1, _2, _3) => {
+                        EnumProj::Tuple(
+                            _pin_project::__private::Pin::new_unchecked(_0),
+                            _pin_project::__private::Pin::new_unchecked(_1),
+                            _2,
+                            _3,
+                        )
+                    }
                     Self::Unit => EnumProj::Unit,
                 }
             }
@@ -146,23 +148,26 @@ const _: () = {
         ) -> EnumProjRef<'pin, T, U> {
             unsafe {
                 match self.get_ref() {
-                    Self::Struct {
-                        pinned1,
-                        pinned2,
-                        unpinned1,
-                        unpinned2,
-                    } => EnumProjRef::Struct {
-                        pinned1: _pin_project::__private::Pin::new_unchecked(pinned1),
-                        pinned2: _pin_project::__private::Pin::new_unchecked(pinned2),
-                        unpinned1,
-                        unpinned2,
-                    },
-                    Self::Tuple(_0, _1, _2, _3) => EnumProjRef::Tuple(
-                        _pin_project::__private::Pin::new_unchecked(_0),
-                        _pin_project::__private::Pin::new_unchecked(_1),
-                        _2,
-                        _3,
-                    ),
+                    Self::Struct { pinned1, pinned2, unpinned1, unpinned2 } => {
+                        EnumProjRef::Struct {
+                            pinned1: _pin_project::__private::Pin::new_unchecked(
+                                pinned1,
+                            ),
+                            pinned2: _pin_project::__private::Pin::new_unchecked(
+                                pinned2,
+                            ),
+                            unpinned1,
+                            unpinned2,
+                        }
+                    }
+                    Self::Tuple(_0, _1, _2, _3) => {
+                        EnumProjRef::Tuple(
+                            _pin_project::__private::Pin::new_unchecked(_0),
+                            _pin_project::__private::Pin::new_unchecked(_1),
+                            _2,
+                            _3,
+                        )
+                    }
                     Self::Unit => EnumProjRef::Unit,
                 }
             }
@@ -173,15 +178,12 @@ const _: () = {
         ) -> EnumProjOwn<T, U> {
             unsafe {
                 let __self_ptr: *mut Self = self.get_unchecked_mut();
-                let __guard =
-                    _pin_project::__private::UnsafeOverwriteGuard::new(__self_ptr, __replacement);
+                let __guard = _pin_project::__private::UnsafeOverwriteGuard::new(
+                    __self_ptr,
+                    __replacement,
+                );
                 match &mut *__self_ptr {
-                    Self::Struct {
-                        pinned1,
-                        pinned2,
-                        unpinned1,
-                        unpinned2,
-                    } => {
+                    Self::Struct { pinned1, pinned2, unpinned1, unpinned2 } => {
                         let __result = EnumProjOwn::Struct {
                             pinned1: _pin_project::__private::PhantomData,
                             pinned2: _pin_project::__private::PhantomData,
@@ -189,10 +191,12 @@ const _: () = {
                             unpinned2: _pin_project::__private::ptr::read(unpinned2),
                         };
                         {
-                            let __guard =
-                                _pin_project::__private::UnsafeDropInPlaceGuard::new(pinned2);
-                            let __guard =
-                                _pin_project::__private::UnsafeDropInPlaceGuard::new(pinned1);
+                            let __guard = _pin_project::__private::UnsafeDropInPlaceGuard::new(
+                                pinned2,
+                            );
+                            let __guard = _pin_project::__private::UnsafeDropInPlaceGuard::new(
+                                pinned1,
+                            );
                         }
                         __result
                     }
@@ -204,8 +208,12 @@ const _: () = {
                             _pin_project::__private::ptr::read(_3),
                         );
                         {
-                            let __guard = _pin_project::__private::UnsafeDropInPlaceGuard::new(_1);
-                            let __guard = _pin_project::__private::UnsafeDropInPlaceGuard::new(_0);
+                            let __guard = _pin_project::__private::UnsafeDropInPlaceGuard::new(
+                                _1,
+                            );
+                            let __guard = _pin_project::__private::UnsafeDropInPlaceGuard::new(
+                                _0,
+                            );
                         }
                         __result
                     }
@@ -232,15 +240,15 @@ const _: () = {
         __field2: T,
         __field3: T,
     }
-    impl<'pin, T, U> _pin_project::__private::Unpin for Enum<T, U> where
-        __Enum<'pin, T, U>: _pin_project::__private::Unpin
-    {
-    }
+    impl<'pin, T, U> _pin_project::__private::Unpin for Enum<T, U>
+    where
+        __Enum<'pin, T, U>: _pin_project::__private::Unpin,
+    {}
     #[doc(hidden)]
-    unsafe impl<'pin, T, U> _pin_project::UnsafeUnpin for Enum<T, U> where
-        __Enum<'pin, T, U>: _pin_project::__private::Unpin
-    {
-    }
+    unsafe impl<'pin, T, U> _pin_project::UnsafeUnpin for Enum<T, U>
+    where
+        __Enum<'pin, T, U>: _pin_project::__private::Unpin,
+    {}
     trait EnumMustNotImplDrop {}
     #[allow(clippy::drop_bounds, drop_bounds)]
     impl<T: _pin_project::__private::Drop> EnumMustNotImplDrop for T {}

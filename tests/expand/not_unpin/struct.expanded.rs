@@ -1,5 +1,5 @@
 use pin_project::pin_project;
-# [pin (__private (! Unpin))]
+#[pin(__private(!Unpin))]
 struct Struct<T, U> {
     #[pin]
     pinned: T,
@@ -69,17 +69,21 @@ const _: () = {
         let _ = &this.pinned;
         let _ = &this.unpinned;
     }
-    impl<'pin, T, U> _pin_project::__private::Unpin for Struct<T, U> where
-        _pin_project::__private::Wrapper<'pin, _pin_project::__private::PhantomPinned>:
-            _pin_project::__private::Unpin
-    {
-    }
+    impl<'pin, T, U> _pin_project::__private::Unpin for Struct<T, U>
+    where
+        _pin_project::__private::Wrapper<
+            'pin,
+            _pin_project::__private::PhantomPinned,
+        >: _pin_project::__private::Unpin,
+    {}
     #[doc(hidden)]
-    unsafe impl<'pin, T, U> _pin_project::UnsafeUnpin for Struct<T, U> where
-        _pin_project::__private::Wrapper<'pin, _pin_project::__private::PhantomPinned>:
-            _pin_project::__private::Unpin
-    {
-    }
+    unsafe impl<'pin, T, U> _pin_project::UnsafeUnpin for Struct<T, U>
+    where
+        _pin_project::__private::Wrapper<
+            'pin,
+            _pin_project::__private::PhantomPinned,
+        >: _pin_project::__private::Unpin,
+    {}
     trait StructMustNotImplDrop {}
     #[allow(clippy::drop_bounds, drop_bounds)]
     impl<T: _pin_project::__private::Drop> StructMustNotImplDrop for T {}

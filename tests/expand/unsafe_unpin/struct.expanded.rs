@@ -69,10 +69,10 @@ const _: () = {
         let _ = &this.pinned;
         let _ = &this.unpinned;
     }
-    impl<'pin, T, U> _pin_project::__private::Unpin for Struct<T, U> where
-        _pin_project::__private::Wrapper<'pin, Self>: _pin_project::UnsafeUnpin
-    {
-    }
+    impl<'pin, T, U> _pin_project::__private::Unpin for Struct<T, U>
+    where
+        _pin_project::__private::Wrapper<'pin, Self>: _pin_project::UnsafeUnpin,
+    {}
     trait StructMustNotImplDrop {}
     #[allow(clippy::drop_bounds, drop_bounds)]
     impl<T: _pin_project::__private::Drop> StructMustNotImplDrop for T {}
