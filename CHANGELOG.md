@@ -130,6 +130,10 @@ Changes since the 1.0.0-alpha.1 release:
 
 See also [tracking issue for 1.0 release](https://github.com/taiki-e/pin-project/issues/264).
 
+## [0.4.30] - 2022-07-02
+
+- [Suppress `dead_code` lint in generated code.](https://github.com/taiki-e/pin-project/pull/347)
+
 ## [0.4.29] - 2021-12-26
 
 - [Fix compile error with `syn` 1.0.84 and later.](https://github.com/taiki-e/pin-project/pull/335)
