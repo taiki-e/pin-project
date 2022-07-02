@@ -39,6 +39,7 @@ const _: () = {
     #[allow(unused_extern_crates)]
     extern crate pin_project as _pin_project;
     impl<T, U> Enum<T, U> {
+        #[allow(dead_code)]
         fn project_replace(
             self: _pin_project::__private::Pin<&mut Self>,
             __replacement: Self,

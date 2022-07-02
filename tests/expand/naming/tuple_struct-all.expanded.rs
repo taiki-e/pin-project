@@ -63,6 +63,7 @@ const _: () = {
     #[allow(unused_extern_crates)]
     extern crate pin_project as _pin_project;
     impl<T, U> TupleStruct<T, U> {
+        #[allow(dead_code)]
         fn project<'pin>(
             self: _pin_project::__private::Pin<&'pin mut Self>,
         ) -> Proj<'pin, T, U> {
@@ -71,6 +72,7 @@ const _: () = {
                 Proj(_pin_project::__private::Pin::new_unchecked(_0), _1)
             }
         }
+        #[allow(dead_code)]
         #[allow(clippy::missing_const_for_fn)]
         fn project_ref<'pin>(
             self: _pin_project::__private::Pin<&'pin Self>,
@@ -80,6 +82,7 @@ const _: () = {
                 ProjRef(_pin_project::__private::Pin::new_unchecked(_0), _1)
             }
         }
+        #[allow(dead_code)]
         fn project_replace(
             self: _pin_project::__private::Pin<&mut Self>,
             __replacement: Self,

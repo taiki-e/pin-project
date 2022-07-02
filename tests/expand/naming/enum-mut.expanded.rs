@@ -44,6 +44,7 @@ const _: () = {
     #[allow(unused_extern_crates)]
     extern crate pin_project as _pin_project;
     impl<T, U> Enum<T, U> {
+        #[allow(dead_code)]
         fn project<'pin>(
             self: _pin_project::__private::Pin<&'pin mut Self>,
         ) -> Proj<'pin, T, U> {
