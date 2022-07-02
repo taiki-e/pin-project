@@ -8,4 +8,8 @@ publish = false
 
 [dev-dependencies]
 pin-project = { path = "../.." }
-macrotest = "1.0.2"
+macrotest = "1.0.9"
+prettyplease = "=0.1.15"
+
+# For test on MSRV.
+diff = "=0.1.12"
