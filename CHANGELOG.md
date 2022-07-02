@@ -10,6 +10,8 @@ NOTE: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+- [Suppress `dead_code` lint in generated code.](https://github.com/taiki-e/pin-project/pull/347)
+
 ## [0.4.29] - 2021-12-26
 
 - [Fix compile error with `syn` 1.0.84 and later.](https://github.com/taiki-e/pin-project/pull/335)

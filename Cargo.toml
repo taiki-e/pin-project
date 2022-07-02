@@ -32,8 +32,12 @@ pin-project-internal = { version = "=0.4.29", path = "pin-project-internal", def
 [dev-dependencies]
 pin-project-auxiliary-macro = { path = "tests/ui/auxiliary" }
 rustversion = "1.0"
-trybuild = "1.0"
+trybuild = "=1.0.53"
 
 # For test on MSRV.
 ryu = "=1.0.6"
 serde_json = "=1.0.72"
+toml = "=0.5.8"
+
+[patch.crates-io]
+prettyplease = { git = "https://github.com/taiki-e/prettyplease.git", rev = "9f9e8ff07baf63d53cd28977be60ac6991805861" } # lower MSRV

@@ -34,6 +34,7 @@ where
 #[allow(clippy::used_underscore_binding)]
 const _: () = {
     impl<T, U> Struct<T, U> {
+        #[allow(dead_code)]
         fn project<'pin>(
             self: ::pin_project::__private::Pin<&'pin mut Self>,
         ) -> __StructProjection<'pin, T, U> {
@@ -45,6 +46,7 @@ const _: () = {
                 }
             }
         }
+        #[allow(dead_code)]
         fn project_ref<'pin>(
             self: ::pin_project::__private::Pin<&'pin Self>,
         ) -> __StructProjectionRef<'pin, T, U> {
@@ -57,10 +59,10 @@ const _: () = {
             }
         }
     }
-    impl<'pin, T, U> ::pin_project::__private::Unpin for Struct<T, U> where
-        ::pin_project::__private::Wrapper<'pin, Self>: ::pin_project::UnsafeUnpin
-    {
-    }
+    impl<'pin, T, U> ::pin_project::__private::Unpin for Struct<T, U>
+    where
+        ::pin_project::__private::Wrapper<'pin, Self>: ::pin_project::UnsafeUnpin,
+    {}
     trait StructMustNotImplDrop {}
     #[allow(clippy::drop_bounds, drop_bounds)]
     impl<T: ::pin_project::__private::Drop> StructMustNotImplDrop for T {}

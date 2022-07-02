@@ -1106,12 +1106,18 @@ impl<'a> Context<'a> {
         let orig_ty_generics = self.orig.generics.split_for_impl().1;
         let proj_ty_generics = self.proj.generics.split_for_impl().1;
         let (impl_generics, ty_generics, where_clause) = self.orig.generics.split_for_impl();
+        // TODO: For enums and project_replace, dead_code warnings should not be
+        // allowed because methods are not generated unless explicitly specified.
+        // However, there is currently no good way to allow warnings for generated
+        // code, so we allow warnings for all methods for now.
+        let allow_dead_code = quote! { #[allow(dead_code)] };
 
         let replace_impl = self.project_replace.span().map(|span| {
             // For interoperability with `forbid(unsafe_code)`, `unsafe` token should be
             // call-site span.
             let unsafety = <Token![unsafe]>::default();
             quote_spanned! { span =>
+                #allow_dead_code
                 #vis fn project_replace(
                     self: ::pin_project::__private::Pin<&mut Self>,
                     __replacement: Self,
@@ -1125,6 +1131,7 @@ impl<'a> Context<'a> {
 
         quote! {
             impl #impl_generics #orig_ident #ty_generics #where_clause {
+                #allow_dead_code
                 #vis fn project<#lifetime>(
                     self: ::pin_project::__private::Pin<&#lifetime mut Self>,
                 ) -> #proj_ident #proj_ty_generics {
@@ -1132,6 +1139,7 @@ impl<'a> Context<'a> {
                         #proj_body
                     }
                 }
+                #allow_dead_code
                 #vis fn project_ref<#lifetime>(
                     self: ::pin_project::__private::Pin<&#lifetime Self>,
                 ) -> #proj_ref_ident #proj_ty_generics {

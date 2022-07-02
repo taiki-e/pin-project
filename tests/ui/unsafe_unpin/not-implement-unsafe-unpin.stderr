@@ -4,6 +4,7 @@ error[E0277]: the trait bound `Struct<(), ()>: UnsafeUnpin` is not satisfied
 13 |     is_unpin::<Struct<(), ()>>(); //~ ERROR E0277
    |                ^^^^^^^^^^^^^^ the trait `UnsafeUnpin` is not implemented for `Struct<(), ()>`
    |
+   = help: the trait `UnsafeUnpin` is implemented for `Wrapper<'_, T>`
    = note: required because of the requirements on the impl of `UnsafeUnpin` for `Wrapper<'_, Struct<(), ()>>`
 note: required because of the requirements on the impl of `Unpin` for `Struct<(), ()>`
   --> tests/ui/unsafe_unpin/not-implement-unsafe-unpin.rs:3:15

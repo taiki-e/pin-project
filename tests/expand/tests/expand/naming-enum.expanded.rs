@@ -1,11 +1,7 @@
 use pin_project::pin_project;
-# [pin (__private (project = Proj , project_ref = ProjRef , project_replace = ProjOwn))]
+#[pin(__private(project = Proj, project_ref = ProjRef, project_replace = ProjOwn))]
 enum Enum<T, U> {
-    Struct {
-        #[pin]
-        pinned: T,
-        unpinned: U,
-    },
+    Struct { #[pin] pinned: T, unpinned: U },
     Tuple(#[pin] T, U),
     Unit,
 }
@@ -31,10 +27,7 @@ enum ProjRef<'pin, T, U>
 where
     Enum<T, U>: 'pin,
 {
-    Struct {
-        pinned: ::pin_project::__private::Pin<&'pin (T)>,
-        unpinned: &'pin (U),
-    },
+    Struct { pinned: ::pin_project::__private::Pin<&'pin (T)>, unpinned: &'pin (U) },
     Tuple(::pin_project::__private::Pin<&'pin (T)>, &'pin (U)),
     Unit,
 }
@@ -42,10 +35,7 @@ where
 #[allow(single_use_lifetimes)]
 #[allow(unreachable_pub)]
 enum ProjOwn<T, U> {
-    Struct {
-        pinned: ::pin_project::__private::PhantomData<T>,
-        unpinned: U,
-    },
+    Struct { pinned: ::pin_project::__private::PhantomData<T>, unpinned: U },
     Tuple(::pin_project::__private::PhantomData<T>, U),
     Unit,
 }
@@ -55,13 +45,18 @@ enum ProjOwn<T, U> {
 #[allow(clippy::used_underscore_binding)]
 const _: () = {
     impl<T, U> Enum<T, U> {
-        fn project<'pin>(self: ::pin_project::__private::Pin<&'pin mut Self>) -> Proj<'pin, T, U> {
+        #[allow(dead_code)]
+        fn project<'pin>(
+            self: ::pin_project::__private::Pin<&'pin mut Self>,
+        ) -> Proj<'pin, T, U> {
             unsafe {
                 match self.get_unchecked_mut() {
-                    Enum::Struct { pinned, unpinned } => Proj::Struct {
-                        pinned: ::pin_project::__private::Pin::new_unchecked(pinned),
-                        unpinned,
-                    },
+                    Enum::Struct { pinned, unpinned } => {
+                        Proj::Struct {
+                            pinned: ::pin_project::__private::Pin::new_unchecked(pinned),
+                            unpinned,
+                        }
+                    }
                     Enum::Tuple(_0, _1) => {
                         Proj::Tuple(::pin_project::__private::Pin::new_unchecked(_0), _1)
                     }
@@ -69,22 +64,29 @@ const _: () = {
                 }
             }
         }
+        #[allow(dead_code)]
         fn project_ref<'pin>(
             self: ::pin_project::__private::Pin<&'pin Self>,
         ) -> ProjRef<'pin, T, U> {
             unsafe {
                 match self.get_ref() {
-                    Enum::Struct { pinned, unpinned } => ProjRef::Struct {
-                        pinned: ::pin_project::__private::Pin::new_unchecked(pinned),
-                        unpinned,
-                    },
+                    Enum::Struct { pinned, unpinned } => {
+                        ProjRef::Struct {
+                            pinned: ::pin_project::__private::Pin::new_unchecked(pinned),
+                            unpinned,
+                        }
+                    }
                     Enum::Tuple(_0, _1) => {
-                        ProjRef::Tuple(::pin_project::__private::Pin::new_unchecked(_0), _1)
+                        ProjRef::Tuple(
+                            ::pin_project::__private::Pin::new_unchecked(_0),
+                            _1,
+                        )
                     }
                     Enum::Unit => ProjRef::Unit,
                 }
             }
         }
+        #[allow(dead_code)]
         fn project_replace(
             self: ::pin_project::__private::Pin<&mut Self>,
             __replacement: Self,
@@ -99,10 +101,14 @@ const _: () = {
                         };
                         let __guard = ::pin_project::__private::UnsafeOverwriteGuard {
                             target: __self_ptr,
-                            value: ::pin_project::__private::ManuallyDrop::new(__replacement),
+                            value: ::pin_project::__private::ManuallyDrop::new(
+                                __replacement,
+                            ),
                         };
                         {
-                            let __guard = ::pin_project::__private::UnsafeDropInPlaceGuard(pinned);
+                            let __guard = ::pin_project::__private::UnsafeDropInPlaceGuard(
+                                pinned,
+                            );
                         }
                         __result
                     }
@@ -113,10 +119,14 @@ const _: () = {
                         );
                         let __guard = ::pin_project::__private::UnsafeOverwriteGuard {
                             target: __self_ptr,
-                            value: ::pin_project::__private::ManuallyDrop::new(__replacement),
+                            value: ::pin_project::__private::ManuallyDrop::new(
+                                __replacement,
+                            ),
                         };
                         {
-                            let __guard = ::pin_project::__private::UnsafeDropInPlaceGuard(_0);
+                            let __guard = ::pin_project::__private::UnsafeDropInPlaceGuard(
+                                _0,
+                            );
                         }
                         __result
                     }
@@ -124,7 +134,9 @@ const _: () = {
                         let __result = ProjOwn::Unit;
                         let __guard = ::pin_project::__private::UnsafeOverwriteGuard {
                             target: __self_ptr,
-                            value: ::pin_project::__private::ManuallyDrop::new(__replacement),
+                            value: ::pin_project::__private::ManuallyDrop::new(
+                                __replacement,
+                            ),
                         };
                         {}
                         __result
@@ -144,10 +156,10 @@ const _: () = {
         __field0: T,
         __field1: T,
     }
-    impl<'pin, T, U> ::pin_project::__private::Unpin for Enum<T, U> where
-        __Enum<'pin, T, U>: ::pin_project::__private::Unpin
-    {
-    }
+    impl<'pin, T, U> ::pin_project::__private::Unpin for Enum<T, U>
+    where
+        __Enum<'pin, T, U>: ::pin_project::__private::Unpin,
+    {}
     unsafe impl<T, U> ::pin_project::UnsafeUnpin for Enum<T, U> {}
     trait EnumMustNotImplDrop {}
     #[allow(clippy::drop_bounds, drop_bounds)]

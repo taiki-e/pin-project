@@ -1,5 +1,5 @@
 use pin_project::pin_project;
-# [pin (__private (project = Proj , project_ref = ProjRef , project_replace = ProjOwn))]
+#[pin(__private(project = Proj, project_ref = ProjRef, project_replace = ProjOwn))]
 struct Struct<T, U> {
     #[pin]
     pinned: T,
@@ -39,7 +39,10 @@ struct ProjOwn<T, U> {
 #[allow(clippy::used_underscore_binding)]
 const _: () = {
     impl<T, U> Struct<T, U> {
-        fn project<'pin>(self: ::pin_project::__private::Pin<&'pin mut Self>) -> Proj<'pin, T, U> {
+        #[allow(dead_code)]
+        fn project<'pin>(
+            self: ::pin_project::__private::Pin<&'pin mut Self>,
+        ) -> Proj<'pin, T, U> {
             unsafe {
                 let Self { pinned, unpinned } = self.get_unchecked_mut();
                 Proj {
@@ -48,6 +51,7 @@ const _: () = {
                 }
             }
         }
+        #[allow(dead_code)]
         fn project_ref<'pin>(
             self: ::pin_project::__private::Pin<&'pin Self>,
         ) -> ProjRef<'pin, T, U> {
@@ -59,6 +63,7 @@ const _: () = {
                 }
             }
         }
+        #[allow(dead_code)]
         fn project_replace(
             self: ::pin_project::__private::Pin<&mut Self>,
             __replacement: Self,
@@ -75,7 +80,9 @@ const _: () = {
                     value: ::pin_project::__private::ManuallyDrop::new(__replacement),
                 };
                 {
-                    let __guard = ::pin_project::__private::UnsafeDropInPlaceGuard(pinned);
+                    let __guard = ::pin_project::__private::UnsafeDropInPlaceGuard(
+                        pinned,
+                    );
                 }
                 __result
             }
@@ -91,10 +98,10 @@ const _: () = {
         >,
         __field0: T,
     }
-    impl<'pin, T, U> ::pin_project::__private::Unpin for Struct<T, U> where
-        __Struct<'pin, T, U>: ::pin_project::__private::Unpin
-    {
-    }
+    impl<'pin, T, U> ::pin_project::__private::Unpin for Struct<T, U>
+    where
+        __Struct<'pin, T, U>: ::pin_project::__private::Unpin,
+    {}
     unsafe impl<T, U> ::pin_project::UnsafeUnpin for Struct<T, U> {}
     trait StructMustNotImplDrop {}
     #[allow(clippy::drop_bounds, drop_bounds)]

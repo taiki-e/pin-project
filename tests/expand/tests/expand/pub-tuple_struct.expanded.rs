@@ -28,20 +28,28 @@ where
 #[allow(clippy::used_underscore_binding)]
 const _: () = {
     impl<T, U> TupleStruct<T, U> {
+        #[allow(dead_code)]
         pub(crate) fn project<'pin>(
             self: ::pin_project::__private::Pin<&'pin mut Self>,
         ) -> __TupleStructProjection<'pin, T, U> {
             unsafe {
                 let Self(_0, _1) = self.get_unchecked_mut();
-                __TupleStructProjection(::pin_project::__private::Pin::new_unchecked(_0), _1)
+                __TupleStructProjection(
+                    ::pin_project::__private::Pin::new_unchecked(_0),
+                    _1,
+                )
             }
         }
+        #[allow(dead_code)]
         pub(crate) fn project_ref<'pin>(
             self: ::pin_project::__private::Pin<&'pin Self>,
         ) -> __TupleStructProjectionRef<'pin, T, U> {
             unsafe {
                 let Self(_0, _1) = self.get_ref();
-                __TupleStructProjectionRef(::pin_project::__private::Pin::new_unchecked(_0), _1)
+                __TupleStructProjectionRef(
+                    ::pin_project::__private::Pin::new_unchecked(_0),
+                    _1,
+                )
             }
         }
     }
@@ -55,10 +63,10 @@ const _: () = {
         >,
         __field0: T,
     }
-    impl<'pin, T, U> ::pin_project::__private::Unpin for TupleStruct<T, U> where
-        __TupleStruct<'pin, T, U>: ::pin_project::__private::Unpin
-    {
-    }
+    impl<'pin, T, U> ::pin_project::__private::Unpin for TupleStruct<T, U>
+    where
+        __TupleStruct<'pin, T, U>: ::pin_project::__private::Unpin,
+    {}
     unsafe impl<T, U> ::pin_project::UnsafeUnpin for TupleStruct<T, U> {}
     trait TupleStructMustNotImplDrop {}
     #[allow(clippy::drop_bounds, drop_bounds)]
