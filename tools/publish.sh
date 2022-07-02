@@ -113,5 +113,5 @@ if [[ -n "${tags}" ]]; then
 fi
 
 x git tag "${tag}"
-x git push origin main
+x git push origin v0.4
 x git push origin --tags
