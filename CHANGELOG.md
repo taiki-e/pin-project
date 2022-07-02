@@ -10,6 +10,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+## [1.0.11] - 2022-07-02
+
 - [Suppress `dead_code` lint in generated code.](https://github.com/taiki-e/pin-project/pull/346)
 
 ## [1.0.10] - 2021-12-31
@@ -674,7 +676,8 @@ See also [tracking issue for 0.4 release](https://github.com/taiki-e/pin-project
 
 Initial release
 
-[Unreleased]: https://github.com/taiki-e/pin-project/compare/v1.0.10...HEAD
+[Unreleased]: https://github.com/taiki-e/pin-project/compare/v1.0.11...HEAD
+[1.0.11]: https://github.com/taiki-e/pin-project/compare/v1.0.10...v1.0.11
 [1.0.10]: https://github.com/taiki-e/pin-project/compare/v1.0.9...v1.0.10
 [1.0.9]: https://github.com/taiki-e/pin-project/compare/v1.0.8...v1.0.9
 [1.0.8]: https://github.com/taiki-e/pin-project/compare/v1.0.7...v1.0.8
