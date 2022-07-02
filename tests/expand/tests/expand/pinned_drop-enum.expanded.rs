@@ -2,11 +2,7 @@ use pin_project::{pin_project, pinned_drop};
 use std::pin::Pin;
 #[pin(__private(PinnedDrop))]
 enum Enum<T, U> {
-    Struct {
-        #[pin]
-        pinned: T,
-        unpinned: U,
-    },
+    Struct { #[pin] pinned: T, unpinned: U },
     Tuple(#[pin] T, U),
     Unit,
 }
@@ -34,10 +30,7 @@ enum __EnumProjectionRef<'pin, T, U>
 where
     Enum<T, U>: 'pin,
 {
-    Struct {
-        pinned: ::pin_project::__private::Pin<&'pin (T)>,
-        unpinned: &'pin (U),
-    },
+    Struct { pinned: ::pin_project::__private::Pin<&'pin (T)>, unpinned: &'pin (U) },
     Tuple(::pin_project::__private::Pin<&'pin (T)>, &'pin (U)),
     Unit,
 }
@@ -47,36 +40,46 @@ where
 #[allow(clippy::used_underscore_binding)]
 const _: () = {
     impl<T, U> Enum<T, U> {
+        #[allow(dead_code)]
         fn project<'pin>(
             self: ::pin_project::__private::Pin<&'pin mut Self>,
         ) -> __EnumProjection<'pin, T, U> {
             unsafe {
                 match self.get_unchecked_mut() {
-                    Enum::Struct { pinned, unpinned } => __EnumProjection::Struct {
-                        pinned: ::pin_project::__private::Pin::new_unchecked(pinned),
-                        unpinned,
-                    },
-                    Enum::Tuple(_0, _1) => __EnumProjection::Tuple(
-                        ::pin_project::__private::Pin::new_unchecked(_0),
-                        _1,
-                    ),
+                    Enum::Struct { pinned, unpinned } => {
+                        __EnumProjection::Struct {
+                            pinned: ::pin_project::__private::Pin::new_unchecked(pinned),
+                            unpinned,
+                        }
+                    }
+                    Enum::Tuple(_0, _1) => {
+                        __EnumProjection::Tuple(
+                            ::pin_project::__private::Pin::new_unchecked(_0),
+                            _1,
+                        )
+                    }
                     Enum::Unit => __EnumProjection::Unit,
                 }
             }
         }
+        #[allow(dead_code)]
         fn project_ref<'pin>(
             self: ::pin_project::__private::Pin<&'pin Self>,
         ) -> __EnumProjectionRef<'pin, T, U> {
             unsafe {
                 match self.get_ref() {
-                    Enum::Struct { pinned, unpinned } => __EnumProjectionRef::Struct {
-                        pinned: ::pin_project::__private::Pin::new_unchecked(pinned),
-                        unpinned,
-                    },
-                    Enum::Tuple(_0, _1) => __EnumProjectionRef::Tuple(
-                        ::pin_project::__private::Pin::new_unchecked(_0),
-                        _1,
-                    ),
+                    Enum::Struct { pinned, unpinned } => {
+                        __EnumProjectionRef::Struct {
+                            pinned: ::pin_project::__private::Pin::new_unchecked(pinned),
+                            unpinned,
+                        }
+                    }
+                    Enum::Tuple(_0, _1) => {
+                        __EnumProjectionRef::Tuple(
+                            ::pin_project::__private::Pin::new_unchecked(_0),
+                            _1,
+                        )
+                    }
                     Enum::Unit => __EnumProjectionRef::Unit,
                 }
             }
@@ -93,14 +96,16 @@ const _: () = {
         __field0: T,
         __field1: T,
     }
-    impl<'pin, T, U> ::pin_project::__private::Unpin for Enum<T, U> where
-        __Enum<'pin, T, U>: ::pin_project::__private::Unpin
-    {
-    }
+    impl<'pin, T, U> ::pin_project::__private::Unpin for Enum<T, U>
+    where
+        __Enum<'pin, T, U>: ::pin_project::__private::Unpin,
+    {}
     unsafe impl<T, U> ::pin_project::UnsafeUnpin for Enum<T, U> {}
     impl<T, U> ::pin_project::__private::Drop for Enum<T, U> {
         fn drop(&mut self) {
-            let pinned_self = unsafe { ::pin_project::__private::Pin::new_unchecked(self) };
+            let pinned_self = unsafe {
+                ::pin_project::__private::Pin::new_unchecked(self)
+            };
             unsafe {
                 ::pin_project::__private::PinnedDrop::drop(pinned_self);
             }

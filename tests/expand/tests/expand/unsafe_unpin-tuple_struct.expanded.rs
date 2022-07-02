@@ -16,7 +16,10 @@ where
 #[allow(dead_code)]
 #[allow(single_use_lifetimes)]
 #[allow(clippy::type_repetition_in_bounds)]
-struct __TupleStructProjectionRef<'pin, T, U>(::pin_project::__private::Pin<&'pin (T)>, &'pin (U))
+struct __TupleStructProjectionRef<'pin, T, U>(
+    ::pin_project::__private::Pin<&'pin (T)>,
+    &'pin (U),
+)
 where
     TupleStruct<T, U>: 'pin;
 #[doc(hidden)]
@@ -25,27 +28,35 @@ where
 #[allow(clippy::used_underscore_binding)]
 const _: () = {
     impl<T, U> TupleStruct<T, U> {
+        #[allow(dead_code)]
         fn project<'pin>(
             self: ::pin_project::__private::Pin<&'pin mut Self>,
         ) -> __TupleStructProjection<'pin, T, U> {
             unsafe {
                 let Self(_0, _1) = self.get_unchecked_mut();
-                __TupleStructProjection(::pin_project::__private::Pin::new_unchecked(_0), _1)
+                __TupleStructProjection(
+                    ::pin_project::__private::Pin::new_unchecked(_0),
+                    _1,
+                )
             }
         }
+        #[allow(dead_code)]
         fn project_ref<'pin>(
             self: ::pin_project::__private::Pin<&'pin Self>,
         ) -> __TupleStructProjectionRef<'pin, T, U> {
             unsafe {
                 let Self(_0, _1) = self.get_ref();
-                __TupleStructProjectionRef(::pin_project::__private::Pin::new_unchecked(_0), _1)
+                __TupleStructProjectionRef(
+                    ::pin_project::__private::Pin::new_unchecked(_0),
+                    _1,
+                )
             }
         }
     }
-    impl<'pin, T, U> ::pin_project::__private::Unpin for TupleStruct<T, U> where
-        ::pin_project::__private::Wrapper<'pin, Self>: ::pin_project::UnsafeUnpin
-    {
-    }
+    impl<'pin, T, U> ::pin_project::__private::Unpin for TupleStruct<T, U>
+    where
+        ::pin_project::__private::Wrapper<'pin, Self>: ::pin_project::UnsafeUnpin,
+    {}
     trait TupleStructMustNotImplDrop {}
     #[allow(clippy::drop_bounds, drop_bounds)]
     impl<T: ::pin_project::__private::Drop> TupleStructMustNotImplDrop for T {}
