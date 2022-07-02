@@ -64,6 +64,7 @@ const _: () = {
     #[allow(unused_extern_crates)]
     extern crate pin_project as _pin_project;
     impl<T, U> Enum<T, U> {
+        #[allow(dead_code)]
         fn project<'pin>(
             self: _pin_project::__private::Pin<&'pin mut Self>,
         ) -> EnumProj<'pin, T, U> {
@@ -85,6 +86,7 @@ const _: () = {
                 }
             }
         }
+        #[allow(dead_code)]
         #[allow(clippy::missing_const_for_fn)]
         fn project_ref<'pin>(
             self: _pin_project::__private::Pin<&'pin Self>,

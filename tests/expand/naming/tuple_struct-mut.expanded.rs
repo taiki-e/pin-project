@@ -43,6 +43,7 @@ const _: () = {
     where
         TupleStruct<T, U>: 'pin;
     impl<T, U> TupleStruct<T, U> {
+        #[allow(dead_code)]
         fn project<'pin>(
             self: _pin_project::__private::Pin<&'pin mut Self>,
         ) -> Proj<'pin, T, U> {
@@ -51,6 +52,7 @@ const _: () = {
                 Proj(_pin_project::__private::Pin::new_unchecked(_0), _1)
             }
         }
+        #[allow(dead_code)]
         #[allow(clippy::missing_const_for_fn)]
         fn project_ref<'pin>(
             self: _pin_project::__private::Pin<&'pin Self>,
