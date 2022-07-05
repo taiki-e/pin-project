@@ -690,6 +690,7 @@ Initial release
 [1.0.1]: https://github.com/taiki-e/pin-project/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/taiki-e/pin-project/compare/v1.0.0-alpha.1...v1.0.0
 [1.0.0-alpha.1]: https://github.com/taiki-e/pin-project/compare/v0.4.23...v1.0.0-alpha.1
+[0.4.30]: https://github.com/taiki-e/pin-project/compare/v0.4.29...v0.4.30
 [0.4.29]: https://github.com/taiki-e/pin-project/compare/v0.4.28...v0.4.29
 [0.4.28]: https://github.com/taiki-e/pin-project/compare/v0.4.27...v0.4.28
 [0.4.27]: https://github.com/taiki-e/pin-project/compare/v0.4.26...v0.4.27
