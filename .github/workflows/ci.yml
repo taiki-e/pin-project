@@ -43,10 +43,10 @@ jobs:
       - uses: actions/checkout@v3
         with:
           persist-credentials: false
-      - uses: taiki-e/github-actions/install-rust@main
+      - uses: dtolnay/rust-toolchain@v1
         with:
           toolchain: ${{ matrix.rust }}
-          component: rust-src
+          components: rust-src
           target: thumbv7m-none-eabi
       - uses: dtolnay/install@cargo-expand
         if: startsWith(matrix.rust, 'nightly')
@@ -69,9 +69,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           persist-credentials: false
-      - uses: taiki-e/github-actions/install-rust@main
-        with:
-          component: miri
+      - uses: dtolnay/rust-toolchain@miri
       - run: cargo miri test --workspace --all-features
         env:
           MIRIFLAGS: -Zmiri-strict-provenance -Zmiri-symbolic-alignment-check
@@ -83,9 +81,9 @@ jobs:
       - uses: actions/checkout@v3
         with:
           persist-credentials: false
-      - uses: taiki-e/github-actions/install-rust@main
+      - uses: dtolnay/rust-toolchain@nightly
         with:
-          component: clippy,rustfmt
+          components: clippy,rustfmt
       - uses: taiki-e/install-action@cargo-hack
       - uses: taiki-e/install-action@cargo-minimal-versions
       - uses: taiki-e/install-action@shellcheck
@@ -104,7 +102,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           persist-credentials: false
-      - uses: taiki-e/github-actions/install-rust@main
+      - uses: dtolnay/rust-toolchain@nightly
       - run: cargo doc --workspace --all-features
 
   # This job doesn't actually test anything, but they're used to tell bors the
