@@ -75,7 +75,7 @@
     )
 ))]
 #![warn(missing_docs, rust_2018_idioms, single_use_lifetimes, unreachable_pub)]
-#![warn(clippy::default_trait_access, clippy::wildcard_imports)]
+#![warn(clippy::pedantic)]
 #![allow(clippy::needless_doctest_main)]
 
 #[doc(inline)]
@@ -243,7 +243,7 @@ pub mod __private {
     #[doc(hidden)]
     pub struct Wrapper<'a, T: ?Sized>(PhantomData<&'a ()>, T);
 
-    unsafe impl<T: ?Sized> UnsafeUnpin for Wrapper<'_, T> where T: UnsafeUnpin {}
+    unsafe impl<T: ?Sized + UnsafeUnpin> UnsafeUnpin for Wrapper<'_, T> {}
 
     // This is an internal helper struct used by `pin-project-internal`.
     //
