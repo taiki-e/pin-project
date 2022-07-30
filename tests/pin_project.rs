@@ -861,7 +861,7 @@ fn project_replace_panic() {
         // called, so this is unreachable.
         unreachable!();
     }));
-    assert!(res.is_err());
+    res.unwrap_err();
     assert!(a);
     assert!(b);
     assert!(c);
@@ -879,7 +879,7 @@ fn project_replace_panic() {
         }
         unreachable!();
     }));
-    assert!(res.is_err());
+    res.unwrap_err();
     assert!(a);
     assert!(b);
     assert!(c);
