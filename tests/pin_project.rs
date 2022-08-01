@@ -1,5 +1,6 @@
 #![warn(rust_2018_idioms, single_use_lifetimes)]
 #![allow(dead_code)]
+#![allow(clippy::assertions_on_result_states)]
 
 #[macro_use]
 mod auxiliary;
