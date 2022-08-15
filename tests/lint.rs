@@ -34,6 +34,7 @@
     unused_lifetimes,
     unused_qualifications,
     unused_results,
+    unused_tuple_struct_fields,
     variant_size_differences
 )]
 #![warn(clippy::all, clippy::pedantic, clippy::nursery, clippy::restriction)]

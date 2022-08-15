@@ -10,6 +10,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+- Suppress `unused_tuple_struct_fields` lint in generated code.
+
 ## [1.0.11] - 2022-07-02
 
 - [Suppress `dead_code` lint in generated code.](https://github.com/taiki-e/pin-project/pull/346)
