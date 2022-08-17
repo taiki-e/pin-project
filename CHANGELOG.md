@@ -10,6 +10,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+- Work around [the issue of rustdoc generating confusing documentation for negative `Unpin` implementations](https://github.com/rust-lang/rust/issues/80481).
+
 ## [1.0.12] - 2022-08-15
 
 - Suppress `unused_tuple_struct_fields` lint in generated code.
