@@ -72,7 +72,6 @@ const _: () = {
         let _ = &this.pinned;
         let _ = &this.unpinned;
     }
-    #[doc(hidden)]
     impl<'pin, T, U> _pin_project::__private::Unpin for Struct<T, U>
     where
         _pin_project::__private::Wrapper<
