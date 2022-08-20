@@ -10,7 +10,7 @@ note: required because it appears within the type `_::__S<'_, PhantomPinned>`
    |
 6  | struct S<T> {
    |        ^
-note: required because of the requirements on the impl of `Unpin` for `S<PhantomPinned>`
+note: required for `S<PhantomPinned>` to implement `Unpin`
   --> tests/ui/pin_project/overlapping_unpin_struct.rs:5:1
    |
 5  | #[pin_project]

@@ -17,7 +17,7 @@ error[E0277]: `T` cannot be unpinned
    |               ^^^^^^^^^^ the trait `Unpin` is not implemented for `T`
    |
    = note: consider using `Box::pin`
-note: required because of the requirements on the impl of `PinnedDrop` for `PinnedDropImpl<T>`
+note: required for `PinnedDropImpl<T>` to implement `PinnedDrop`
   --> tests/ui/pinned_drop/conditional-drop-impl.rs:23:16
    |
 23 | impl<T: Unpin> PinnedDrop for PinnedDropImpl<T> {
