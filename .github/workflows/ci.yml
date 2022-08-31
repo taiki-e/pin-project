@@ -89,6 +89,18 @@ jobs:
       - uses: dtolnay/rust-toolchain@nightly
       - run: cargo doc --workspace --all-features --document-private-items
 
+  check-external-types:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@v1
+        with:
+          toolchain: nightly-2022-07-26
+      - run: cargo install cargo-check-external-types --locked --version 0.1.3
+      - run: cargo check-external-types --all-features --config .external-types.toml
+
   tidy:
     runs-on: ubuntu-latest
     steps:
@@ -118,7 +130,7 @@ jobs:
   ci-success:
     name: ci
     if: github.event_name == 'push' && success()
-    needs: [test, msrv, miri, docs, tidy] # tidy:needs
+    needs: [test, msrv, miri, docs, check-external-types, tidy] # tidy:needs
     runs-on: ubuntu-latest
     steps:
       - name: Mark the job as a success
