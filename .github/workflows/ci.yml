@@ -77,7 +77,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@miri
       - run: cargo miri test --workspace --all-features
         env:
-          MIRIFLAGS: -Zmiri-strict-provenance -Zmiri-symbolic-alignment-check
+          MIRIFLAGS: -Zmiri-strict-provenance -Zmiri-symbolic-alignment-check -Zmiri-retag-fields
           RUSTFLAGS: ${{ env.RUSTFLAGS }} -Z randomize-layout
 
   docs:
