@@ -36,8 +36,7 @@ jobs:
           changelog: CHANGELOG.md
           title: $version
           branch: main
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
       - run: ci/publish.sh
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
