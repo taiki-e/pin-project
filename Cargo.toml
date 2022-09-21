@@ -35,5 +35,8 @@ rustversion = "1"
 static_assertions = "1"
 trybuild = "1.0.49"
 
+# For test on MSRV.
+once_cell = "=1.14"
+
 [patch.crates-io]
 prettyplease = { git = "https://github.com/taiki-e/prettyplease.git", branch = "dev" } # lower MSRV
