@@ -6,6 +6,9 @@ updates:
       interval: daily
     commit-message:
       prefix: ''
+    ignore:
+      # For test on MSRV.
+      - dependency-name: once_cell
     labels: []
   - package-ecosystem: github-actions
     directory: /
