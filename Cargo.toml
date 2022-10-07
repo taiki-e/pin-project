@@ -33,7 +33,7 @@ pin-project-auxiliary-macro = { path = "tests/auxiliary/macro" }
 macrotest = "1.0.9"
 rustversion = "1"
 static_assertions = "1"
-trybuild = "1.0.49"
+trybuild = "=1.0.67"
 
 # For test on MSRV.
 once_cell = "=1.14"
