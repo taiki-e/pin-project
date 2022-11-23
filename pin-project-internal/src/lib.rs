@@ -488,7 +488,8 @@ use proc_macro::TokenStream;
 /// [repr-packed]: https://doc.rust-lang.org/nomicon/other-reprs.html#reprpacked
 /// [undefined-behavior]: https://doc.rust-lang.org/reference/behavior-considered-undefined.html
 /// [unsafe-unpin]: macro@pin_project#unsafeunpin
-#[allow(clippy::unnecessary_safety_doc)] // we use the "Safety" section to describe how to ensure the safety requirements for pin projection.
+// we use the "Safety" section to describe how to ensure the safety requirements for pin projection.
+#[allow(clippy::unnecessary_safety_doc)]
 #[proc_macro_attribute]
 pub fn pin_project(args: TokenStream, input: TokenStream) -> TokenStream {
     pin_project::attribute(&args.into(), input.into()).into()
