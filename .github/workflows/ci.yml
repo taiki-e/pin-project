@@ -90,6 +90,8 @@ jobs:
       - run: cargo doc --workspace --all-features --document-private-items
 
   check-external-types:
+    env:
+      CARGO_CHECK_EXTERNAL_TYPES_VERSION: 0.1.6
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -97,8 +99,21 @@ jobs:
           persist-credentials: false
       - uses: dtolnay/rust-toolchain@v1
         with:
-          toolchain: nightly-2022-07-26
-      - run: cargo install cargo-check-external-types --locked --version 0.1.5
+          toolchain: nightly-2022-11-16
+      - name: Pre Cache cargo-check-external-types
+        run: |
+          mkdir -p .github/caching
+          echo "${CARGO_CHECK_EXTERNAL_TYPES_VERSION}" > .github/caching/cargo-check-external-types.lock
+          echo "${{ runner.tool_cache }}/cargo-check-external-types/bin" >> "${GITHUB_PATH}"
+      - name: Cache cargo-check-external-types
+        id: cache-cargo-check-external-types
+        uses: actions/cache@v3
+        with:
+          path: ${{ runner.tool_cache }}/cargo-check-external-types/bin
+          key: cargo-check-external-types-bin-${{ hashFiles('.github/caching/cargo-check-external-types.lock') }}
+      - name: Install cargo-check-external-types
+        run: cargo install -f cargo-check-external-types --root ${{ runner.tool_cache }}/cargo-check-external-types --locked --version "${CARGO_CHECK_EXTERNAL_TYPES_VERSION}"
+        if: steps.cache-cargo-check-external-types.outputs.cache-hit != 'true'
       - run: cargo check-external-types --all-features --config .external-types.toml
 
   tidy:
