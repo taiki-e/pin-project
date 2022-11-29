@@ -116,6 +116,19 @@ jobs:
         if: steps.cache-cargo-check-external-types.outputs.cache-hit != 'true'
       - run: cargo check-external-types --all-features --config .external-types.toml
 
+  deny:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@nightly
+      - uses: taiki-e/install-action@cargo-hack
+      - uses: taiki-e/install-action@cargo-deny
+      # Workaround for https://github.com/EmbarkStudios/cargo-deny/issues/413
+      - run: cargo hack --remove-dev-deps --workspace
+      - run: cargo deny check licenses advisories --config .deny.toml
+
   tidy:
     runs-on: ubuntu-latest
     steps:
@@ -145,7 +158,7 @@ jobs:
   ci-success:
     name: ci
     if: github.event_name == 'push' && success()
-    needs: [test, msrv, miri, docs, check-external-types, tidy] # tidy:needs
+    needs: [test, msrv, miri, docs, check-external-types, deny, tidy] # tidy:needs
     runs-on: ubuntu-latest
     steps:
       - name: Mark the job as a success
