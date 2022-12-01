@@ -141,6 +141,7 @@ jobs:
       - uses: taiki-e/install-action@cargo-hack
       - uses: taiki-e/install-action@cargo-minimal-versions
       - uses: taiki-e/install-action@shellcheck
+      - uses: taiki-e/install-action@shfmt
       - run: pip3 install yq
       - run: cargo fmt --all --check
         if: always()
@@ -148,9 +149,7 @@ jobs:
         if: always()
       - run: cargo minimal-versions build --workspace --all-features --ignore-private
         if: always()
-      - run: shellcheck $(git ls-files '*.sh')
-        if: always()
-      - run: tools/check-workflow.sh
+      - run: tools/tidy.sh
         if: always()
 
   # ALL THE PREVIOUS JOBS NEEDS TO BE ADDED TO THE `needs` SECTION OF THIS JOB!
@@ -158,6 +157,7 @@ jobs:
   ci-success:
     name: ci
     if: github.event_name == 'push' && success()
+    # prettier-ignore
     needs: [test, msrv, miri, docs, check-external-types, deny, tidy] # tidy:needs
     runs-on: ubuntu-latest
     steps:
