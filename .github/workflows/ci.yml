@@ -29,12 +29,25 @@ defaults:
     shell: bash
 
 jobs:
+  check-external-types:
+    uses: taiki-e/workflows/.github/workflows/check-external-types.yml@main
+  deny:
+    uses: taiki-e/workflows/.github/workflows/deny.yml@main
+  docs:
+    uses: taiki-e/workflows/.github/workflows/docs.yml@main
+  msrv:
+    uses: taiki-e/workflows/.github/workflows/msrv.yml@main
+    with:
+      event_name: ${{ github.event_name }}
+  tidy:
+    uses: taiki-e/workflows/.github/workflows/tidy-rust.yml@main
+
   test:
     strategy:
       fail-fast: false
       matrix:
         rust:
-          - 1.37
+          - '1.37'
           - stable
           - beta
           - nightly
@@ -43,30 +56,19 @@ jobs:
       - uses: actions/checkout@v3
         with:
           persist-credentials: false
-      - uses: dtolnay/rust-toolchain@v1
-        with:
-          toolchain: ${{ matrix.rust }}
-          components: rust-src
-          target: thumbv7m-none-eabi
+      - name: Install Rust
+        run: rustup toolchain add ${{ matrix.rust }} --no-self-update --component rust-src && rustup default ${{ matrix.rust }}
+      - run: rustup toolchain add nightly --no-self-update
+      - run: rustup target add thumbv6m-none-eabi
+      - uses: taiki-e/install-action@cargo-hack
+      - uses: taiki-e/install-action@cargo-minimal-versions
       - uses: dtolnay/install@cargo-expand
         if: startsWith(matrix.rust, 'nightly')
       - run: cargo test --all --all-features
-      - run: cargo build --manifest-path tests/no-std/Cargo.toml --target thumbv7m-none-eabi
-      - run: cargo build --manifest-path tests/rust-2015/Cargo.toml --target thumbv7m-none-eabi
-
-  msrv:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          persist-credentials: false
-      - uses: taiki-e/install-action@cargo-hack
-      # Make sure this crate can be built with MSRV and all later versions.
-      # However, this takes time, so for PR, set the version interval.
-      - run: cargo hack build --workspace --ignore-private --no-dev-deps --version-range ..
-        if: github.event_name != 'pull_request'
-      - run: cargo hack build --workspace --ignore-private --no-dev-deps --version-range .. --version-step 2
-        if: github.event_name == 'pull_request'
+      - run: cargo build --manifest-path tests/no-std/Cargo.toml --target thumbv6m-none-eabi
+      - run: cargo build --manifest-path tests/rust-2015/Cargo.toml --target thumbv6m-none-eabi
+      - run: cargo minimal-versions build --workspace --all-features --ignore-private
+        if: matrix.rust != '1.37'
 
   miri:
     runs-on: ubuntu-latest
@@ -74,83 +76,12 @@ jobs:
       - uses: actions/checkout@v3
         with:
           persist-credentials: false
-      - uses: dtolnay/rust-toolchain@miri
+      - name: Install Rust
+        run: rustup toolchain add nightly --no-self-update --component miri && rustup default nightly
       - run: cargo miri test --workspace --all-features
         env:
           MIRIFLAGS: -Zmiri-strict-provenance -Zmiri-symbolic-alignment-check -Zmiri-retag-fields
           RUSTFLAGS: ${{ env.RUSTFLAGS }} -Z randomize-layout
-
-  docs:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          persist-credentials: false
-      - uses: dtolnay/rust-toolchain@nightly
-      - run: cargo doc --workspace --all-features --document-private-items
-
-  check-external-types:
-    env:
-      CARGO_CHECK_EXTERNAL_TYPES_VERSION: 0.1.6
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          persist-credentials: false
-      - uses: dtolnay/rust-toolchain@v1
-        with:
-          toolchain: nightly-2022-11-16
-      - name: Pre Cache cargo-check-external-types
-        run: |
-          mkdir -p .github/caching
-          echo "${CARGO_CHECK_EXTERNAL_TYPES_VERSION}" > .github/caching/cargo-check-external-types.lock
-          echo "${{ runner.tool_cache }}/cargo-check-external-types/bin" >> "${GITHUB_PATH}"
-      - name: Cache cargo-check-external-types
-        id: cache-cargo-check-external-types
-        uses: actions/cache@v3
-        with:
-          path: ${{ runner.tool_cache }}/cargo-check-external-types/bin
-          key: cargo-check-external-types-bin-${{ hashFiles('.github/caching/cargo-check-external-types.lock') }}
-      - name: Install cargo-check-external-types
-        run: cargo install -f cargo-check-external-types --root ${{ runner.tool_cache }}/cargo-check-external-types --locked --version "${CARGO_CHECK_EXTERNAL_TYPES_VERSION}"
-        if: steps.cache-cargo-check-external-types.outputs.cache-hit != 'true'
-      - run: cargo check-external-types --all-features --config .external-types.toml
-
-  deny:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          persist-credentials: false
-      - uses: dtolnay/rust-toolchain@nightly
-      - uses: taiki-e/install-action@cargo-hack
-      - uses: taiki-e/install-action@cargo-deny
-      # Workaround for https://github.com/EmbarkStudios/cargo-deny/issues/413
-      - run: cargo hack --remove-dev-deps --workspace
-      - run: cargo deny check licenses advisories --config .deny.toml
-
-  tidy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          persist-credentials: false
-      - uses: dtolnay/rust-toolchain@nightly
-        with:
-          components: clippy,rustfmt
-      - uses: taiki-e/install-action@cargo-hack
-      - uses: taiki-e/install-action@cargo-minimal-versions
-      - uses: taiki-e/install-action@shellcheck
-      - uses: taiki-e/install-action@shfmt
-      - run: pip3 install yq
-      - run: cargo fmt --all --check
-        if: always()
-      - run: cargo clippy --workspace --all-features --all-targets
-        if: always()
-      - run: cargo minimal-versions build --workspace --all-features --ignore-private
-        if: always()
-      - run: tools/tidy.sh
-        if: always()
 
   # ALL THE PREVIOUS JOBS NEEDS TO BE ADDED TO THE `needs` SECTION OF THIS JOB!
 
@@ -158,7 +89,7 @@ jobs:
     name: ci
     if: github.event_name == 'push' && success()
     # prettier-ignore
-    needs: [test, msrv, miri, docs, check-external-types, deny, tidy] # tidy:needs
+    needs: [check-external-types, deny, docs, msrv, tidy, test, miri] # tidy:needs
     runs-on: ubuntu-latest
     steps:
       - name: Mark the job as a success

@@ -25,7 +25,7 @@ if [[ "${1:-}" == "+"* ]]; then
 fi
 # Make sure toolchain is installed.
 if ! cargo "${toolchain}" -V &>/dev/null; then
-    rustup toolchain install "${toolchain#+}" --no-self-update --profile minimal
+    rustup toolchain add "${toolchain#+}" --no-self-update --profile minimal
 fi
 
 if [[ "${toolchain:-+nightly}" != "+nightly"* ]]; then
