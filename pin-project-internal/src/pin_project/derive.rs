@@ -1063,10 +1063,10 @@ fn ensure_not_packed(orig: &OriginalType<'_>, fields: Option<&Fields>) -> Result
     // ```rust
     // #[forbid(unaligned_references)]
     // fn assert_not_repr_packed(val: &MyStruct) {
-    //     let _field1 = &val.field1;
-    //     let _field2 = &val.field2;
+    //     let _field_1 = &val.field_1;
+    //     let _field_2 = &val.field_2;
     //     ...
-    //     let _fieldn = &val.fieldn;
+    //     let _field_n = &val.field_n;
     // }
     // ```
     //
