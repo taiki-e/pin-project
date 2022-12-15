@@ -9,6 +9,7 @@ updates:
     ignore:
       # For test on MSRV.
       - dependency-name: once_cell
+      - dependency-name: toml
       - dependency-name: trybuild
     labels: []
   - package-ecosystem: github-actions

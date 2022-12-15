@@ -13,4 +13,5 @@ project
 quote
 rustversion
 static
+toml
 trybuild
