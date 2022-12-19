@@ -25,6 +25,9 @@ members = [
     "tests/rust-2015",
 ]
 
+[lib]
+doc-scrape-examples = false
+
 [dependencies]
 pin-project-internal = { version = "=1.0.12", path = "pin-project-internal" }
 
