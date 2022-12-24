@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euxo pipefail
+set -euo pipefail
 IFS=$'\n\t'
 cd "$(dirname "$0")"/..
 
@@ -15,6 +15,7 @@ MEMBERS=(
 
 for i in "${!MEMBERS[@]}"; do
     (
+        set -x
         cd "${MEMBERS[${i}]}"
         cargo publish
     )
