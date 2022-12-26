@@ -12,10 +12,3 @@ updates:
       - dependency-name: toml
       - dependency-name: trybuild
     labels: []
-  - package-ecosystem: github-actions
-    directory: /
-    schedule:
-      interval: daily
-    commit-message:
-      prefix: ''
-    labels: []
