@@ -43,6 +43,8 @@ jobs:
     uses: taiki-e/workflows/.github/workflows/tidy-rust.yml@main
 
   test:
+    env:
+      CARGO_CAREFUL_VERSION: 0.3.0
     strategy:
       fail-fast: false
       matrix:
@@ -64,7 +66,28 @@ jobs:
       - uses: taiki-e/install-action@cargo-minimal-versions
       - uses: dtolnay/install@cargo-expand
         if: startsWith(matrix.rust, 'nightly')
+      - name: Pre Cache cargo-careful
+        run: |
+          mkdir -p .github/caching
+          echo "${CARGO_CAREFUL_VERSION}" > .github/caching/cargo-careful.lock
+          echo "${{ runner.tool_cache }}/cargo-careful/bin" >> "${GITHUB_PATH}"
+        if: startsWith(matrix.rust, 'nightly')
+      - name: Cache cargo-careful
+        id: cache-cargo-careful
+        uses: actions/cache@v3
+        with:
+          path: ${{ runner.tool_cache }}/cargo-careful/bin
+          key: cargo-careful-bin-${{ hashFiles('.github/caching/cargo-careful.lock') }}
+        if: startsWith(matrix.rust, 'nightly')
+      - name: Install cargo-careful
+        run: cargo install -f cargo-careful --root "${{ runner.tool_cache }}/cargo-careful" --locked --version "${CARGO_CAREFUL_VERSION}"
+        if: startsWith(matrix.rust, 'nightly') && steps.cache-cargo-careful.outputs.cache-hit != 'true'
       - run: cargo test --all --all-features
+      - run: cargo careful test --all --all-features
+        env:
+          RUSTDOCFLAGS: ${{ env.RUSTDOCFLAGS }} -Z randomize-layout
+          RUSTFLAGS: ${{ env.RUSTFLAGS }} -Z randomize-layout
+        if: startsWith(matrix.rust, 'nightly')
       - run: cargo build --manifest-path tests/no-std/Cargo.toml --target thumbv6m-none-eabi
       - run: cargo build --manifest-path tests/rust-2015/Cargo.toml --target thumbv6m-none-eabi
       - run: cargo minimal-versions build --workspace --all-features --ignore-private
@@ -81,6 +104,7 @@ jobs:
       - run: cargo miri test --workspace --all-features
         env:
           MIRIFLAGS: -Zmiri-strict-provenance -Zmiri-symbolic-alignment-check -Zmiri-retag-fields
+          RUSTDOCFLAGS: ${{ env.RUSTDOCFLAGS }} -Z randomize-layout
           RUSTFLAGS: ${{ env.RUSTFLAGS }} -Z randomize-layout
 
   # ALL THE PREVIOUS JOBS NEEDS TO BE ADDED TO THE `needs` SECTION OF THIS JOB!
