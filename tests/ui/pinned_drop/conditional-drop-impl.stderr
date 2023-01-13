@@ -21,7 +21,9 @@ note: required for `PinnedDropImpl<T>` to implement `PinnedDrop`
   --> tests/ui/pinned_drop/conditional-drop-impl.rs:23:16
    |
 23 | impl<T: Unpin> PinnedDrop for PinnedDropImpl<T> {
-   |                ^^^^^^^^^^     ^^^^^^^^^^^^^^^^^
+   |         -----  ^^^^^^^^^^     ^^^^^^^^^^^^^^^^^
+   |         |
+   |         unsatisfied trait bound introduced here
 help: consider restricting type parameter `T`
    |
 17 | struct PinnedDropImpl<T: std::marker::Unpin> {

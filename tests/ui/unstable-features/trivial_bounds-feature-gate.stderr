@@ -19,7 +19,7 @@ note: required for `phantom_pinned::Wrapper<PhantomPinned>` to implement `Unpin`
   --> tests/ui/unstable-features/trivial_bounds-feature-gate.rs:12:13
    |
 12 |     impl<T> Unpin for Wrapper<T> where T: Unpin {}
-   |             ^^^^^     ^^^^^^^^^^
+   |             ^^^^^     ^^^^^^^^^^          ----- unsatisfied trait bound introduced here
    = help: see issue #48214
    = help: add `#![feature(trivial_bounds)]` to the crate attributes to enable
 
@@ -54,6 +54,6 @@ note: required for `inner::Wrapper<Inner>` to implement `Unpin`
   --> tests/ui/unstable-features/trivial_bounds-feature-gate.rs:38:13
    |
 38 |     impl<T> Unpin for Wrapper<T> where T: Unpin {}
-   |             ^^^^^     ^^^^^^^^^^
+   |             ^^^^^     ^^^^^^^^^^          ----- unsatisfied trait bound introduced here
    = help: see issue #48214
    = help: add `#![feature(trivial_bounds)]` to the crate attributes to enable
