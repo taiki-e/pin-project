@@ -43,8 +43,6 @@ jobs:
     uses: taiki-e/workflows/.github/workflows/tidy-rust.yml@main
 
   test:
-    env:
-      CARGO_CAREFUL_VERSION: 0.3.0
     strategy:
       fail-fast: false
       matrix:
@@ -65,24 +63,14 @@ jobs:
       - run: rustup target add thumbv6m-none-eabi
       - uses: taiki-e/install-action@cargo-hack
       - uses: taiki-e/install-action@cargo-minimal-versions
-      - uses: dtolnay/install@cargo-expand
-        if: startsWith(matrix.rust, 'nightly')
-      - name: Pre Cache cargo-careful
-        run: |
-          mkdir -p .github/caching
-          echo "${CARGO_CAREFUL_VERSION}" > .github/caching/cargo-careful.lock
-          echo "${{ runner.tool_cache }}/cargo-careful/bin" >> "${GITHUB_PATH}"
-        if: startsWith(matrix.rust, 'nightly')
-      - name: Cache cargo-careful
-        id: cache-cargo-careful
-        uses: actions/cache@v3
+      - uses: taiki-e/cache-cargo-install-action@v1
         with:
-          path: ${{ runner.tool_cache }}/cargo-careful/bin
-          key: cargo-careful-bin-${{ hashFiles('.github/caching/cargo-careful.lock') }}
+          tool: cargo-expand
         if: startsWith(matrix.rust, 'nightly')
-      - name: Install cargo-careful
-        run: cargo install -f cargo-careful --root "${{ runner.tool_cache }}/cargo-careful" --locked --version "${CARGO_CAREFUL_VERSION}"
-        if: startsWith(matrix.rust, 'nightly') && steps.cache-cargo-careful.outputs.cache-hit != 'true'
+      - uses: taiki-e/cache-cargo-install-action@v1
+        with:
+          tool: cargo-careful
+        if: startsWith(matrix.rust, 'nightly')
       - run: cargo test --all --all-features
       - run: cargo careful test --all --all-features
         env:
