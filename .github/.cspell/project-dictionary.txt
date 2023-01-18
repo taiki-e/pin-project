@@ -3,7 +3,6 @@ elems
 expandtest
 HRTB
 idents
-impls
 prettyplease
 projectable
 qself
@@ -16,4 +15,3 @@ unfixable
 unnested
 unparseable
 unsafeunpin
-unsized
