@@ -235,7 +235,7 @@ impl<'a> Context<'a> {
     }
 }
 
-#[derive(Copy, Clone, Eq, PartialEq)]
+#[derive(Copy, Clone, PartialEq)]
 enum TypeKind {
     Enum,
     Struct,
