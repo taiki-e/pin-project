@@ -12,9 +12,12 @@ pub struct TupleStruct<T, U>(#[pin] pub T, pub U);
 #[allow(clippy::redundant_pub_crate)]
 #[allow(clippy::type_repetition_in_bounds)]
 #[allow(unused_qualifications)]
-#[allow(clippy::semicolon_if_nothing_returned)]
-#[allow(clippy::use_self)]
-#[allow(clippy::used_underscore_binding)]
+#[allow(
+    clippy::multiple_unsafe_ops_per_block,
+    clippy::semicolon_if_nothing_returned,
+    clippy::use_self,
+    clippy::used_underscore_binding,
+)]
 const _: () = {
     #[allow(unused_extern_crates)]
     extern crate pin_project as _pin_project;

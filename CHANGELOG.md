@@ -10,6 +10,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+- Suppress `clippy::multiple_unsafe_ops_per_block` lint in generated code.
+
 ## [1.0.12] - 2022-08-15
 
 - Suppress `unused_tuple_struct_fields` lint in generated code.
