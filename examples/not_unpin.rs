@@ -1,6 +1,7 @@
 // See ./not_unpin-expanded.rs for generated code.
 
 #![allow(dead_code)]
+#![allow(clippy::extra_unused_type_parameters)] // https://github.com/rust-lang/rust-clippy/issues/10319
 
 use pin_project::pin_project;
 
