@@ -1,6 +1,5 @@
 #![warn(rust_2018_idioms, single_use_lifetimes)]
 #![allow(dead_code)]
-#![allow(clippy::extra_unused_type_parameters)] // https://github.com/rust-lang/rust-clippy/issues/10318
 
 #[macro_use]
 mod auxiliary;

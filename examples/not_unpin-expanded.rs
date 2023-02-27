@@ -20,7 +20,6 @@
 
 #![allow(dead_code, unused_imports, unused_parens, unknown_lints, renamed_and_removed_lints)]
 #![allow(clippy::needless_lifetimes)]
-#![allow(clippy::extra_unused_type_parameters)] // https://github.com/rust-lang/rust-clippy/issues/10319
 
 use pin_project::pin_project;
 
