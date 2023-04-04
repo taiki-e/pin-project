@@ -54,7 +54,7 @@ jobs:
       fail-fast: false
       matrix:
         rust:
-          - '1.37'
+          - '1.56'
           - stable
           - beta
           - nightly
