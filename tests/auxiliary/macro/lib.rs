@@ -4,7 +4,7 @@
 
 use proc_macro::TokenStream;
 use quote::{format_ident, quote, ToTokens};
-use syn::{parse_quote, Field, Fields, ItemStruct, Token, Visibility};
+use syn::{parse_quote, Field, FieldMutability, Fields, ItemStruct, Token, Visibility};
 
 fn tokens2(tokens: TokenStream) -> proc_macro2::TokenStream {
     tokens.into()
@@ -52,6 +52,7 @@ pub fn add_pinned_field(_: TokenStream, input: TokenStream) -> TokenStream {
         ident: Some(format_ident!("__field")),
         colon_token: Some(<Token![:]>::default()),
         ty: parse_quote!(::std::marker::PhantomPinned),
+        mutability: FieldMutability::None,
     });
 
     item.into_token_stream().into()
@@ -72,7 +73,7 @@ pub fn remove_attr(args: TokenStream, input: TokenStream) -> TokenStream {
             while item
                 .attrs
                 .iter()
-                .position(|a| a.path.is_ident("pin"))
+                .position(|a| a.path().is_ident("pin"))
                 .map(|i| item.attrs.remove(i))
                 .is_some()
             {}
