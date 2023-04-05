@@ -29,6 +29,7 @@ Zmiri
 
 // Rust target triple
 aarch
+amdgpu
 androideabi
 armeb
 armebv
@@ -61,10 +62,12 @@ musleabi
 musleabihf
 newlibeabihf
 nvptx
+ohos
 openwrt
 riscv
 softfloat
 sparcv
+spirv
 thumbeb
 thumbebv
 thumbv
@@ -87,12 +90,14 @@ bools
 builtins
 bytecount
 canonicalize
+concat
 consts
 ctypes
 dealloc
 deque
 docsrs
 doctest
+doctests
 hasher
 impls
 inlateout
@@ -144,7 +149,9 @@ objdump
 pipefail
 powerset
 proto
+ranlib
 readelf
+shellcheckrc
 SIGABRT
 SIGILL
 SIGINT
