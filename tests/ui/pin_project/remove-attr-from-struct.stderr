@@ -76,6 +76,9 @@ note: required by a bound in `Pin::<P>::new`
    |
    | impl<P: Deref<Target: Unpin>> Pin<P> {
    |                       ^^^^^ required by this bound in `Pin::<P>::new`
+...
+   |     pub const fn new(pointer: P) -> Pin<P> {
+   |                  --- required by a bound in this associated function
 
 error[E0599]: no method named `project` found for struct `Pin<&mut A>` in the current scope
   --> tests/ui/pin_project/remove-attr-from-struct.rs:40:30
@@ -103,6 +106,9 @@ note: required by a bound in `Pin::<P>::new`
    |
    | impl<P: Deref<Target: Unpin>> Pin<P> {
    |                       ^^^^^ required by this bound in `Pin::<P>::new`
+...
+   |     pub const fn new(pointer: P) -> Pin<P> {
+   |                  --- required by a bound in this associated function
 
 error[E0599]: no method named `project` found for struct `Pin<&mut B>` in the current scope
   --> tests/ui/pin_project/remove-attr-from-struct.rs:43:30
