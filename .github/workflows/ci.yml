@@ -77,7 +77,6 @@ jobs:
       - uses: taiki-e/cache-cargo-install-action@v1
         with:
           tool: cargo-careful
-          locked: false # TODO: remove once https://github.com/RalfJung/cargo-careful/pull/18 is released.
         if: startsWith(matrix.rust, 'nightly')
       - run: cargo test --all --all-features
       - run: cargo careful test --all --all-features
