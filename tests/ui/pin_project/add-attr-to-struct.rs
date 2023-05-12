@@ -4,9 +4,9 @@ use auxiliary_macro::add_pin_attr;
 use pin_project::pin_project;
 
 #[pin_project]
+#[add_pin_attr(struct)] //~ ERROR duplicate #[pin] attribute
 struct Foo {
     #[pin]
-    #[pin] //~ ERROR duplicate #[pin] attribute
     f: PhantomPinned,
 }
 
