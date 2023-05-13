@@ -11,7 +11,7 @@ Add this to your `Cargo.toml`:
 pin-project = "1"
 ```
 
-*Compiler support: requires rustc 1.37+*
+*Compiler support: requires rustc 1.56+*
 
 ## Examples
 
