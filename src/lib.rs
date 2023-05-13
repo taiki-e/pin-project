@@ -95,7 +95,13 @@ see [examples] directory for more examples and generated code.
         allow(dead_code, unused_variables)
     )
 ))]
-#![warn(missing_docs, rust_2018_idioms, single_use_lifetimes, unreachable_pub)]
+#![warn(
+    missing_docs,
+    rust_2018_idioms,
+    single_use_lifetimes,
+    unreachable_pub,
+    unsafe_op_in_unsafe_fn
+)]
 #![warn(
     clippy::pedantic,
     // lints for public library

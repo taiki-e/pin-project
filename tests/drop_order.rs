@@ -39,14 +39,12 @@ struct TupleUnpinned<'a>(D<'a>, D<'a>);
 
 #[pin_project(project_replace = EnumProj)]
 enum Enum<'a> {
-    #[allow(dead_code)] // false positive that fixed in Rust 1.38
     StructPinned {
         #[pin]
         f1: D<'a>,
         #[pin]
         f2: D<'a>,
     },
-    #[allow(dead_code)] // false positive that fixed in Rust 1.38
     StructUnpinned {
         f1: D<'a>,
         f2: D<'a>,

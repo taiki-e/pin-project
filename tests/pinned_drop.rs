@@ -150,7 +150,6 @@ fn self_inside_macro_containing_fn() {
 }
 
 // See also `ui/pinned_drop/self.rs`.
-#[rustversion::since(1.40)] // https://github.com/rust-lang/rust/pull/64690
 #[test]
 fn self_inside_macro_def() {
     #[pin_project(PinnedDrop)]

@@ -36,7 +36,6 @@ pub(super) fn parse_attribute(args: &TokenStream, input: TokenStream) -> Result<
     })
 }
 
-#[allow(dead_code)] // false positive that fixed in Rust 1.39
 struct Input {
     attrs: Vec<Attribute>,
     body: TokenStream,
