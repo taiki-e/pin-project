@@ -10,6 +10,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+- Update `syn` dependency to 2. This increase the minimum supported Rust version from Rust 1.37 to Rust 1.56. ([#352](https://github.com/taiki-e/pin-project/pull/352), [#354](https://github.com/taiki-e/pin-project/pull/354), thanks @maurer and @daxpedda)
+
 ## [1.0.12] - 2022-08-15
 
 - Suppress `unused_tuple_struct_fields` lint in generated code.
