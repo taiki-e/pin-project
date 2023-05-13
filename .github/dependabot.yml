@@ -6,10 +6,4 @@ updates:
       interval: daily
     commit-message:
       prefix: ''
-    ignore:
-      # For test on MSRV.
-      - dependency-name: once_cell
-      - dependency-name: serde
-      - dependency-name: toml
-      - dependency-name: trybuild
     labels: []

@@ -87,7 +87,6 @@ jobs:
       - run: cargo build --manifest-path tests/no-std/Cargo.toml --target thumbv6m-none-eabi
       - run: cargo build --manifest-path tests/rust-2015/Cargo.toml --target thumbv6m-none-eabi
       - run: cargo minimal-versions build --workspace --all-features --ignore-private
-        if: matrix.rust != '1.56'
 
   miri:
     runs-on: ubuntu-latest
