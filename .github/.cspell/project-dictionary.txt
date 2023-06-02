@@ -2,14 +2,11 @@ compiletest
 elems
 expandtest
 HRTB
-idents
-prettyplease
 projectable
 qself
 reborrow
 respan
 respanned
-structs
 subpat
 unfixable
 unsafeunpin

@@ -36,6 +36,3 @@ macrotest = "1.0.9"
 rustversion = "1"
 static_assertions = "1"
 trybuild = "1.0.67"
-
-[patch.crates-io]
-prettyplease = { git = "https://github.com/taiki-e/prettyplease.git", branch = "dev" } # lower MSRV
