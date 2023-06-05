@@ -7,7 +7,7 @@ license = "Apache-2.0 OR MIT"
 repository = "https://github.com/taiki-e/pin-project"
 keywords = ["pin", "macros", "attribute"]
 categories = ["no-std", "rust-patterns"]
-exclude = ["/.*", "/ci", "/tools"]
+exclude = ["/.*", "/ci", "/tools", "/DEVELOPMENT.md"]
 description = """
 A crate for safe and ergonomic pin-projection.
 """
