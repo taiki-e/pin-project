@@ -4,7 +4,7 @@ error[E0277]: the size for values of type `T` cannot be known at compilation tim
 3 | #[pin_project(project_replace)] //~ ERROR E0277
   |               ^^^^^^^^^^^^^^^ doesn't have a size known at compile-time
 4 | struct Struct<T: ?Sized> {
-  |               - this type parameter needs to be `std::marker::Sized`
+  |               - this type parameter needs to be `Sized`
   |
 note: required because it appears within the type `Struct<T>`
  --> tests/ui/pin_project/project_replace_unsized.rs:4:8
@@ -28,7 +28,7 @@ error[E0277]: the size for values of type `T` cannot be known at compilation tim
 3 | #[pin_project(project_replace)] //~ ERROR E0277
   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ doesn't have a size known at compile-time
 4 | struct Struct<T: ?Sized> {
-  |               - this type parameter needs to be `std::marker::Sized`
+  |               - this type parameter needs to be `Sized`
   |
 note: required because it appears within the type `Struct<T>`
  --> tests/ui/pin_project/project_replace_unsized.rs:4:8
@@ -56,7 +56,7 @@ error[E0277]: the size for values of type `T` cannot be known at compilation tim
 3 | #[pin_project(project_replace)] //~ ERROR E0277
   | ------------------------------- required by a bound introduced by this call
 4 | struct Struct<T: ?Sized> {
-  |               - this type parameter needs to be `std::marker::Sized`
+  |               - this type parameter needs to be `Sized`
 5 |     f: T,
   |     ^ doesn't have a size known at compile-time
   |
@@ -77,7 +77,7 @@ error[E0277]: the size for values of type `T` cannot be known at compilation tim
 8 | #[pin_project(project_replace)] //~ ERROR E0277
   |               ^^^^^^^^^^^^^^^ doesn't have a size known at compile-time
 9 | struct TupleStruct<T: ?Sized>(T);
-  |                    - this type parameter needs to be `std::marker::Sized`
+  |                    - this type parameter needs to be `Sized`
   |
 note: required because it appears within the type `TupleStruct<T>`
  --> tests/ui/pin_project/project_replace_unsized.rs:9:8
@@ -101,7 +101,7 @@ error[E0277]: the size for values of type `T` cannot be known at compilation tim
 8 | #[pin_project(project_replace)] //~ ERROR E0277
   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ doesn't have a size known at compile-time
 9 | struct TupleStruct<T: ?Sized>(T);
-  |                    - this type parameter needs to be `std::marker::Sized`
+  |                    - this type parameter needs to be `Sized`
   |
 note: required because it appears within the type `TupleStruct<T>`
  --> tests/ui/pin_project/project_replace_unsized.rs:9:8
