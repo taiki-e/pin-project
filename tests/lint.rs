@@ -27,9 +27,12 @@
     missing_docs,
     non_ascii_idents,
     noop_method_call,
+    private_bounds,
+    private_interfaces,
     single_use_lifetimes,
     trivial_casts,
     trivial_numeric_casts,
+    // unnameable_types, // TODO
     unreachable_pub,
     unused_import_braces,
     unused_lifetimes,
