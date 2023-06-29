@@ -10,6 +10,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+## [1.1.1] - 2023-06-29
+
 - Fix build error from dependency when built with `-Z minimal-versions`.
 
 ## [1.1.0] - 2023-05-13
@@ -686,7 +688,8 @@ See also [tracking issue for 0.4 release](https://github.com/taiki-e/pin-project
 
 Initial release
 
-[Unreleased]: https://github.com/taiki-e/pin-project/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/taiki-e/pin-project/compare/v1.1.1...HEAD
+[1.1.1]: https://github.com/taiki-e/pin-project/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/taiki-e/pin-project/compare/v1.0.12...v1.1.0
 [1.0.12]: https://github.com/taiki-e/pin-project/compare/v1.0.11...v1.0.12
 [1.0.11]: https://github.com/taiki-e/pin-project/compare/v1.0.10...v1.0.11
