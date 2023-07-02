@@ -47,6 +47,7 @@ const _: () = {
     }
     impl<T, U> Struct<T, U> {
         #[allow(dead_code)]
+        #[inline]
         fn project<'pin>(
             self: _pin_project::__private::Pin<&'pin mut Self>,
         ) -> __StructProjection<'pin, T, U> {
@@ -60,6 +61,7 @@ const _: () = {
         }
         #[allow(dead_code)]
         #[allow(clippy::missing_const_for_fn)]
+        #[inline]
         fn project_ref<'pin>(
             self: _pin_project::__private::Pin<&'pin Self>,
         ) -> __StructProjectionRef<'pin, T, U> {
@@ -72,6 +74,7 @@ const _: () = {
             }
         }
         #[allow(dead_code)]
+        #[inline]
         fn project_replace(
             self: _pin_project::__private::Pin<&mut Self>,
             __replacement: Self,

@@ -45,6 +45,7 @@ const _: () = {
     impl<T, U> Enum<T, U> {
         #[allow(dead_code)]
         #[allow(clippy::missing_const_for_fn)]
+        #[inline]
         fn project_ref<'pin>(
             self: _pin_project::__private::Pin<&'pin Self>,
         ) -> ProjRef<'pin, T, U> {

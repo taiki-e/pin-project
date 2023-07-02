@@ -47,6 +47,7 @@ const _: () = {
     extern crate pin_project as _pin_project;
     impl<T, U> Enum<T, U> {
         #[allow(dead_code)]
+        #[inline]
         fn project<'pin>(
             self: _pin_project::__private::Pin<&'pin mut Self>,
         ) -> Proj<'pin, T, U> {

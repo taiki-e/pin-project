@@ -46,6 +46,7 @@ const _: () = {
         TupleStruct<T, U>: 'pin;
     impl<T, U> TupleStruct<T, U> {
         #[allow(dead_code)]
+        #[inline]
         fn project<'pin>(
             self: _pin_project::__private::Pin<&'pin mut Self>,
         ) -> Proj<'pin, T, U> {
@@ -56,6 +57,7 @@ const _: () = {
         }
         #[allow(dead_code)]
         #[allow(clippy::missing_const_for_fn)]
+        #[inline]
         fn project_ref<'pin>(
             self: _pin_project::__private::Pin<&'pin Self>,
         ) -> __TupleStructProjectionRef<'pin, T, U> {
