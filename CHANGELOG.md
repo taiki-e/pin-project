@@ -10,6 +10,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+## [1.1.2] - 2023-07-02
+
 - Inline project methods.
 
 ## [1.1.1] - 2023-06-29
@@ -690,7 +692,8 @@ See also [tracking issue for 0.4 release](https://github.com/taiki-e/pin-project
 
 Initial release
 
-[Unreleased]: https://github.com/taiki-e/pin-project/compare/v1.1.1...HEAD
+[Unreleased]: https://github.com/taiki-e/pin-project/compare/v1.1.2...HEAD
+[1.1.2]: https://github.com/taiki-e/pin-project/compare/v1.1.1...v1.1.2
 [1.1.1]: https://github.com/taiki-e/pin-project/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/taiki-e/pin-project/compare/v1.0.12...v1.1.0
 [1.0.12]: https://github.com/taiki-e/pin-project/compare/v1.0.11...v1.0.12
