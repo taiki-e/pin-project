@@ -9,7 +9,7 @@
 // lints forbidden as a part of future_incompatible, rust_2018_compatibility, and rust_2021_compatibility are not included in the list below.
 // elided_lifetimes_in_paths, explicit_outlives_requirements, unused_extern_crates:  as a part of rust_2018_idioms
 // unsafe_op_in_unsafe_fn: requires Rust 1.52. and, we don't generate unsafe fn.
-// non_exhaustive_omitted_patterns: unstable
+// non_exhaustive_omitted_patterns, multiple_supertrait_upcastable: unstable
 // unstable_features: no way to generate #![feature(..)] by macros, expect for unstable inner attribute. and this lint is deprecated: https://doc.rust-lang.org/rustc/lints/listing/allowed-by-default.html#unstable-features
 // unused_crate_dependencies, must_not_suspend: unrelated
 // unsafe_code: checked in forbid_unsafe module
