@@ -41,6 +41,6 @@ jobs:
           title: $version
           branch: main
           token: ${{ secrets.GITHUB_TOKEN }}
-      - run: ci/publish.sh
+      - run: tools/ci/publish.sh
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
