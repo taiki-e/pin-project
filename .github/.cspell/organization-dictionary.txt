@@ -38,6 +38,7 @@ asmjs
 atmega
 bpfeb
 bpfel
+csky
 cuda
 eabi
 eabihf
@@ -45,6 +46,7 @@ emscripten
 espidf
 fortanix
 gnuabi
+gnuabiv
 gnueabi
 gnueabihf
 gnullvm
@@ -115,6 +117,7 @@ nonoverlapping
 noreturn
 nostack
 peekable
+powf
 punct
 rclass
 repr
@@ -164,7 +167,5 @@ readelf
 shellcheckrc
 SIGABRT
 SIGILL
-SIGINT
-SIGTERM
 subcmd
 tlsv
