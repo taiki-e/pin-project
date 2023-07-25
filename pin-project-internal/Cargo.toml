@@ -6,7 +6,7 @@ rust-version = "1.56"
 license = "Apache-2.0 OR MIT"
 repository = "https://github.com/taiki-e/pin-project"
 keywords = ["pin", "macros", "attribute"]
-categories = ["no-std", "rust-patterns"]
+categories = ["no-std", "no-std::no-alloc", "rust-patterns"]
 description = """
 Implementation detail of the `pin-project` crate.
 """
