@@ -43,7 +43,14 @@
 )]
 #![warn(clippy::all, clippy::pedantic, clippy::nursery, clippy::restriction)]
 #![allow(clippy::blanket_clippy_restriction_lints)] // this is a test, so enable all restriction lints intentionally.
-#![allow(clippy::exhaustive_structs, clippy::exhaustive_enums, clippy::single_char_lifetime_names)] // TODO
+#![allow(
+    clippy::exhaustive_enums,
+    clippy::exhaustive_structs,
+    clippy::min_ident_chars,
+    clippy::pub_with_shorthand,
+    clippy::single_call_fn,
+    clippy::single_char_lifetime_names
+)] // TODO
 
 pub mod basic {
     include!("include/basic.rs");
