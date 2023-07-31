@@ -70,13 +70,11 @@ jobs:
       - run: rustup target add thumbv6m-none-eabi
       - uses: taiki-e/install-action@cargo-hack
       - uses: taiki-e/install-action@cargo-minimal-versions
-      - uses: taiki-e/cache-cargo-install-action@v1
-        with:
-          tool: cargo-expand
+      - uses: taiki-e/install-action@cargo-careful
         if: startsWith(matrix.rust, 'nightly')
       - uses: taiki-e/cache-cargo-install-action@v1
         with:
-          tool: cargo-careful
+          tool: cargo-expand
         if: startsWith(matrix.rust, 'nightly')
       - run: cargo test --workspace --all-features
       - run: cargo careful test --workspace --all-features
