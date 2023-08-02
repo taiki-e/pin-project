@@ -17,6 +17,7 @@
     box_pointers,
     deprecated_in_future,
     fuzzy_provenance_casts,
+    invalid_reference_casting,
     let_underscore_drop,
     lossy_provenance_casts,
     macro_use_extern_crate,
@@ -44,6 +45,7 @@
 #![warn(clippy::all, clippy::pedantic, clippy::nursery, clippy::restriction)]
 #![allow(clippy::blanket_clippy_restriction_lints)] // this is a test, so enable all restriction lints intentionally.
 #![allow(
+    clippy::absolute_paths,
     clippy::exhaustive_enums,
     clippy::exhaustive_structs,
     clippy::min_ident_chars,
