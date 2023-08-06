@@ -68,6 +68,7 @@ const _: () = {
         let _ = &this.0;
         let _ = &this.1;
     }
+    #[doc(hidden)]
     impl<'pin, T, U> _pin_project::__private::Unpin for TupleStruct<T, U>
     where
         _pin_project::__private::Wrapper<

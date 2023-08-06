@@ -718,6 +718,7 @@ fn make_unpin_impl(cx: &Context<'_>) -> TokenStream {
             // call-site span.
             let unsafety = <Token![unsafe]>::default();
             quote_spanned! { span =>
+                #[doc(hidden)]
                 impl #proj_impl_generics _pin_project::__private::Unpin
                     for #orig_ident #ty_generics
                 #proj_where_clause
