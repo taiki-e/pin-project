@@ -114,6 +114,7 @@ const _: () = {
             }
         }
     }
+    #[doc(hidden)]
     impl<'pin, T, U> _pin_project::__private::Unpin for Enum<T, U>
     where
         _pin_project::__private::Wrapper<
