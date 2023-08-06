@@ -10,6 +10,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+- Hide documentation of the `Unpin` implementation for `!Unpin` option to work around [rustdoc issue](https://github.com/rust-lang/rust/issues/80481). ([#355](https://github.com/taiki-e/pin-project/pull/355), thanks @matheus-consoli)
+
 ## [1.1.2] - 2023-07-02
 
 - Inline project methods.
