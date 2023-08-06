@@ -10,6 +10,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+## [1.1.3] - 2023-08-06
+
 - Hide documentation of the `Unpin` implementation for `!Unpin` option to work around [rustdoc issue](https://github.com/rust-lang/rust/issues/80481). ([#355](https://github.com/taiki-e/pin-project/pull/355), thanks @matheus-consoli)
 
 ## [1.1.2] - 2023-07-02
@@ -694,7 +696,8 @@ See also [tracking issue for 0.4 release](https://github.com/taiki-e/pin-project
 
 Initial release
 
-[Unreleased]: https://github.com/taiki-e/pin-project/compare/v1.1.2...HEAD
+[Unreleased]: https://github.com/taiki-e/pin-project/compare/v1.1.3...HEAD
+[1.1.3]: https://github.com/taiki-e/pin-project/compare/v1.1.2...v1.1.3
 [1.1.2]: https://github.com/taiki-e/pin-project/compare/v1.1.1...v1.1.2
 [1.1.1]: https://github.com/taiki-e/pin-project/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/taiki-e/pin-project/compare/v1.0.12...v1.1.0
