@@ -33,7 +33,7 @@ pin-project-internal = { version = "=1.1.3", path = "pin-project-internal" }
 
 [dev-dependencies]
 pin-project-auxiliary-macro = { path = "tests/auxiliary/macro" }
-macrotest = "1.0.9"
+macrotest = { git = "https://github.com/taiki-e/macrotest.git", branch = "dev" } # 2021 edition support + syn 2.0
 rustversion = "1"
 static_assertions = "1"
 trybuild = "1.0.67"
