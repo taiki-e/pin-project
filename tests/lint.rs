@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0 OR MIT
+
 // Check interoperability with rustc and clippy lints.
 
 // for old compilers

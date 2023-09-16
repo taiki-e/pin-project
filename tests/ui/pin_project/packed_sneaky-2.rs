@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0 OR MIT
+
 use auxiliary_macro::hidden_repr_macro;
 use pin_project::pin_project;
 

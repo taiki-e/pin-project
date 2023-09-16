@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0 OR MIT
+
 #![warn(rust_2018_idioms, single_use_lifetimes)]
 // unaligned_references did not exist in older compilers and safe_packed_borrows was removed in the latest compilers.
 // https://github.com/rust-lang/rust/pull/82525

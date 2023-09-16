@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0 OR MIT
+
 // Note: If you change this test, change 'marker_trait_attr.rs' at the same time.
 
 use std::marker::PhantomPinned;

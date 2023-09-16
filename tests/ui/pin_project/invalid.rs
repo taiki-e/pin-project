@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0 OR MIT
+
 mod pin_argument {
     use pin_project::pin_project;
 

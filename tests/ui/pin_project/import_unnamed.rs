@@ -1,5 +1,7 @@
-/// Only named projected types can be imported.
-/// See visibility.rs for named projected types.
+// SPDX-License-Identifier: Apache-2.0 OR MIT
+
+// Only named projected types can be imported.
+// See visibility.rs for named projected types.
 
 mod pub_ {
     use pin_project::pin_project;

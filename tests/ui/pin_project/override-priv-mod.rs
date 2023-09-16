@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0 OR MIT
+
 // https://discord.com/channels/273534239310479360/512792629516173323/870075511009857617
 
 #![allow(hidden_glob_reexports)]

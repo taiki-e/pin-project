@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0 OR MIT
+
 use std::pin::Pin;
 
 #[cfg_attr(any(), pin_project::pin_project)]

@@ -1,19 +1,19 @@
 error: lint `safe_packed_borrows` has been removed: converted into hard error, see issue #82523 <https://github.com/rust-lang/rust/issues/82523> for more information
- --> tests/ui/pin_project/safe_packed_borrows.rs:2:9
+ --> tests/ui/pin_project/safe_packed_borrows.rs:4:9
   |
-2 | #![deny(safe_packed_borrows)] //~ ERROR has been renamed to `unaligned_references`
+4 | #![deny(safe_packed_borrows)] //~ ERROR has been renamed to `unaligned_references`
   |         ^^^^^^^^^^^^^^^^^^^
   |
 note: the lint level is defined here
- --> tests/ui/pin_project/safe_packed_borrows.rs:1:9
+ --> tests/ui/pin_project/safe_packed_borrows.rs:3:9
   |
-1 | #![deny(renamed_and_removed_lints)]
+3 | #![deny(renamed_and_removed_lints)]
   |         ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error[E0793]: reference to packed field is unaligned
-  --> tests/ui/pin_project/safe_packed_borrows.rs:21:13
+  --> tests/ui/pin_project/safe_packed_borrows.rs:23:13
    |
-21 |     let _ = &a.f;
+23 |     let _ = &a.f;
    |             ^^^^
    |
    = note: packed structs are only aligned by one byte, and many modern architectures penalize unaligned field accesses
@@ -21,9 +21,9 @@ error[E0793]: reference to packed field is unaligned
    = help: copy the field contents to a local variable, or replace the reference with a raw pointer and use `read_unaligned`/`write_unaligned` (loads and stores via `*p` must be properly aligned even when using raw pointers)
 
 error[E0793]: reference to packed field is unaligned
-  --> tests/ui/pin_project/safe_packed_borrows.rs:24:13
+  --> tests/ui/pin_project/safe_packed_borrows.rs:26:13
    |
-24 |     let _ = &b.f;
+26 |     let _ = &b.f;
    |             ^^^^
    |
    = note: packed structs are only aligned by one byte, and many modern architectures penalize unaligned field accesses

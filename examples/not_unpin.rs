@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0 OR MIT
+
 // See ./not_unpin-expanded.rs for generated code.
 
 #![allow(dead_code)]

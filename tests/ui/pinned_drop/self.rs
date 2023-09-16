@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0 OR MIT
+
 pub mod self_in_macro_def {
     use std::pin::Pin;
 

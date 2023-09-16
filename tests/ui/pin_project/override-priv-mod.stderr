@@ -1,7 +1,7 @@
 error[E0119]: conflicting implementations of trait `SMustNotImplDrop` for type `S`
-  --> tests/ui/pin_project/override-priv-mod.rs:16:1
+  --> tests/ui/pin_project/override-priv-mod.rs:18:1
    |
-16 | #[pin_project] //~ ERROR conflicting implementations of trait `_::FooMustNotImplDrop`
+18 | #[pin_project] //~ ERROR conflicting implementations of trait `_::FooMustNotImplDrop`
    | ^^^^^^^^^^^^^^
    | |
    | first implementation here

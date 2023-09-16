@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0 OR MIT
+
 #![cfg(nightly)]
 #![no_core]
 #![feature(no_core)]

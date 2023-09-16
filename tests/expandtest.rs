@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0 OR MIT
+
 #![cfg(not(miri))]
 #![cfg(not(careful))]
 #![warn(rust_2018_idioms, single_use_lifetimes)]

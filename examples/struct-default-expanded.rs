@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0 OR MIT
+
 // Original code (./struct-default.rs):
 //
 // ```rust

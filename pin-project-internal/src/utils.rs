@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0 OR MIT
+
 use std::mem;
 
 use proc_macro2::{Group, Spacing, Span, TokenStream, TokenTree};

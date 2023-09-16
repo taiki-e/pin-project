@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0 OR MIT
+
 // See ./struct-default-expanded.rs for generated code.
 
 #![allow(dead_code)]

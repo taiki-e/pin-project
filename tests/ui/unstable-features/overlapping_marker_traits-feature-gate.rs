@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0 OR MIT
+
 // Note: If you change this test, change 'overlapping_marker_traits.rs' at the same time.
 
 use std::marker::PhantomPinned;

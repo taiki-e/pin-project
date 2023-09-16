@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0 OR MIT
+
 use std::{marker::PhantomPinned, pin::Pin};
 
 use auxiliary_macro::remove_attr;

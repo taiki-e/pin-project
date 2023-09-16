@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0 OR MIT
+
 use pin_project::pin_project;
 
 // #[repr(packed = "")] is not valid format of #[repr(packed)] and will be

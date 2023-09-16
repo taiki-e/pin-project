@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0 OR MIT
+
 include!("basic-safe-part.rs");
 
 #[allow(clippy::undocumented_unsafe_blocks)]

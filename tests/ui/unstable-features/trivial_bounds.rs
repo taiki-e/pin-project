@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0 OR MIT
+
 // Note: If you change this test, change 'trivial_bounds-feature-gate.rs' at the same time.
 
 // trivial_bounds

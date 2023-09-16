@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0 OR MIT
+
 // by-ref binding `ref (mut) self` and sub-patterns `@` are not allowed in receivers (rejected by rustc).
 
 use std::pin::Pin;

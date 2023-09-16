@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0 OR MIT
+
 // Refs: https://github.com/rust-lang/rust/issues/82523
 
 #[repr(packed)]

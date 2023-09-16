@@ -1,42 +1,42 @@
 error: #[repr(packed)] attribute should be applied to a struct or union
-  --> tests/ui/pin_project/packed-enum.rs:13:8
+  --> tests/ui/pin_project/packed-enum.rs:15:8
    |
-13 | #[repr(packed)] //~ ERROR E0517
+15 | #[repr(packed)] //~ ERROR E0517
    |        ^^^^^^
 
 error: #[repr(packed)] attribute should be applied to a struct or union
-  --> tests/ui/pin_project/packed-enum.rs:18:8
+  --> tests/ui/pin_project/packed-enum.rs:20:8
    |
-18 | #[repr(packed)] //~ ERROR E0517
+20 | #[repr(packed)] //~ ERROR E0517
    |        ^^^^^^
 
 error[E0517]: attribute should be applied to a struct or union
-  --> tests/ui/pin_project/packed-enum.rs:7:8
+  --> tests/ui/pin_project/packed-enum.rs:9:8
    |
-7  |   #[repr(packed)] //~ ERROR E0517
+9  |   #[repr(packed)] //~ ERROR E0517
    |          ^^^^^^
-8  | / enum E1 {
-9  | |     V(()),
-10 | | }
+10 | / enum E1 {
+11 | |     V(()),
+12 | | }
    | |_- not a struct or union
 
 error[E0517]: attribute should be applied to a struct or union
-  --> tests/ui/pin_project/packed-enum.rs:13:8
+  --> tests/ui/pin_project/packed-enum.rs:15:8
    |
-13 |   #[repr(packed)] //~ ERROR E0517
+15 |   #[repr(packed)] //~ ERROR E0517
    |          ^^^^^^
-14 | / enum E2 {
-15 | |     V(()),
-16 | | }
+16 | / enum E2 {
+17 | |     V(()),
+18 | | }
    | |_- not a struct or union
 
 error[E0517]: attribute should be applied to a struct or union
-  --> tests/ui/pin_project/packed-enum.rs:18:8
+  --> tests/ui/pin_project/packed-enum.rs:20:8
    |
-18 |   #[repr(packed)] //~ ERROR E0517
+20 |   #[repr(packed)] //~ ERROR E0517
    |          ^^^^^^
-19 |   #[pin_project]
-20 | / enum E3 {
-21 | |     V(()),
-22 | | }
+21 |   #[pin_project]
+22 | / enum E3 {
+23 | |     V(()),
+24 | | }
    | |_- not a struct or union

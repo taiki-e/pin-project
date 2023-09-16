@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0 OR MIT
+
 #![feature(negative_impls)]
 #![deny(suspicious_auto_trait_impls)]
 

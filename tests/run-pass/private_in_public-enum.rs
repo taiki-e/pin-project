@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0 OR MIT
+
 // Even if allows private_in_public, these are errors.
 
 #![allow(private_interfaces, dead_code)]

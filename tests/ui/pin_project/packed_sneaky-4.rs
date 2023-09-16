@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0 OR MIT
+
 // https://github.com/taiki-e/pin-project/issues/342
 
 use auxiliary_macro::hidden_repr2;

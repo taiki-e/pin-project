@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0 OR MIT
+
 #![warn(rust_2018_idioms, single_use_lifetimes)]
 
 use std::{env, process::Command};
