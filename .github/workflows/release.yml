@@ -41,6 +41,9 @@ jobs:
           title: $version
           branch: main
           token: ${{ secrets.GITHUB_TOKEN }}
-      - run: tools/ci/publish.sh
+      - run: cd pin-project-internal && cargo publish
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+      - run: cargo publish
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
