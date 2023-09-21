@@ -10,8 +10,7 @@
     )
 ))]
 #![forbid(unsafe_code)]
-#![warn(rust_2018_idioms, single_use_lifetimes, unreachable_pub)]
-#![warn(clippy::pedantic)]
+#![warn(rust_2018_idioms, single_use_lifetimes, unreachable_pub, clippy::pedantic)]
 #![allow(
     clippy::needless_doctest_main,
     clippy::similar_names,
