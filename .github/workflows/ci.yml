@@ -34,20 +34,20 @@ concurrency:
 
 jobs:
   check-external-types:
-    uses: taiki-e/workflows/.github/workflows/check-external-types.yml@main
+    uses: taiki-e/github-actions/.github/workflows/check-external-types.yml@main
   deny:
-    uses: taiki-e/workflows/.github/workflows/deny.yml@main
+    uses: taiki-e/github-actions/.github/workflows/deny.yml@main
   docs:
-    uses: taiki-e/workflows/.github/workflows/docs.yml@main
+    uses: taiki-e/github-actions/.github/workflows/docs.yml@main
     # https://github.com/rust-lang/rust/issues/107950
     with:
       rust: nightly-2023-02-11
   msrv:
-    uses: taiki-e/workflows/.github/workflows/msrv.yml@main
+    uses: taiki-e/github-actions/.github/workflows/msrv.yml@main
     with:
       event_name: ${{ github.event_name }}
   tidy:
-    uses: taiki-e/workflows/.github/workflows/tidy.yml@main
+    uses: taiki-e/github-actions/.github/workflows/tidy.yml@main
 
   test:
     strategy:
