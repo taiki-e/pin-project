@@ -17,21 +17,6 @@ use syn::{
 
 pub(crate) type Variants = Punctuated<Variant, Token![,]>;
 
-macro_rules! format_err {
-    ($span:expr, $msg:expr $(,)?) => {
-        syn::Error::new_spanned(&$span as &dyn quote::ToTokens, &$msg as &dyn std::fmt::Display)
-    };
-    ($span:expr, $($tt:tt)*) => {
-        format_err!($span, format!($($tt)*))
-    };
-}
-
-macro_rules! bail {
-    ($($tt:tt)*) => {
-        return Err(format_err!($($tt)*))
-    };
-}
-
 macro_rules! parse_quote_spanned {
     ($span:expr => $($tt:tt)*) => {
         syn::parse2(quote::quote_spanned!($span => $($tt)*)).unwrap_or_else(|e| panic!("{}", e))

@@ -23,6 +23,9 @@
 extern crate proc_macro;
 
 #[macro_use]
+mod error;
+
+#[macro_use]
 mod utils;
 
 mod pin_project;
