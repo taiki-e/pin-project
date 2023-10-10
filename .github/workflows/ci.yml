@@ -11,7 +11,7 @@ on:
       - dev
       - v[0-9]+.[0-9]+
   schedule:
-    - cron: '0 1 * * *'
+    - cron: '0 2 * * *'
   workflow_dispatch:
 
 env:
