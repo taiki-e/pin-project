@@ -18,10 +18,6 @@
     clippy::too_many_lines
 )]
 
-// older compilers require explicit `extern crate`.
-#[allow(unused_extern_crates)]
-extern crate proc_macro;
-
 #[macro_use]
 mod error;
 
