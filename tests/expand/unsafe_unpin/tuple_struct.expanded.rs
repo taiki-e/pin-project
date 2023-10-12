@@ -81,5 +81,5 @@ const _: () = {
         unsafe fn drop(self: _pin_project::__private::Pin<&mut Self>) {}
     }
 };
-unsafe impl<T: Unpin, U> UnsafeUnpin for Struct<T, U> {}
+unsafe impl<T: Unpin, U> UnsafeUnpin for TupleStruct<T, U> {}
 fn main() {}
