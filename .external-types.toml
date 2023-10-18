@@ -1,7 +1,0 @@
-# cargo-check-external-types configuration
-# https://crates.io/crates/cargo-check-external-types
-
-# The following are external types that are allowed to be exposed in our public API.
-allowed_external_types = [
-    "pin_project_internal::*",
-]
