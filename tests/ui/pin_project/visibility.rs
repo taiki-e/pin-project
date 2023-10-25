@@ -3,6 +3,8 @@
 // Only named projected types can be imported.
 // See import_unnamed.rs for unnamed projected types.
 
+#![allow(unused_imports)]
+
 mod pub_ {
     use pin_project::pin_project;
 
