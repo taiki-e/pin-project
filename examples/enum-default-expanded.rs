@@ -16,10 +16,15 @@
 // fn main() {}
 // ```
 
-#![allow(dead_code, unused_imports, unused_parens, unknown_lints, renamed_and_removed_lints)]
 #![allow(
-    clippy::needless_lifetimes,
+    dead_code,
+    unused_imports,
+    unused_parens,
+    unknown_lints,
+    renamed_and_removed_lints,
     clippy::just_underscores_and_digits,
+    clippy::needless_lifetimes,
+    clippy::undocumented_unsafe_blocks,
     clippy::used_underscore_binding
 )]
 

@@ -31,7 +31,6 @@ pub mod pub_use {
 }
 pub mod pub_use2 {
     // Ok
-    #[allow(unused_imports)]
     pub(crate) use crate::pub_::{DProj, DProjRef, RProj, RProjOwn, RProjRef};
 }
 
@@ -46,7 +45,6 @@ mod pub_crate {
 }
 pub mod pub_crate_use {
     // Ok
-    #[allow(unused_imports)]
     pub(crate) use crate::pub_crate::{DProj, DProjRef, RProj, RProjOwn, RProjRef};
 }
 

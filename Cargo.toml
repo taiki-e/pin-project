@@ -21,6 +21,22 @@ allowed_external_types = [
     "pin_project_internal::*",
 ]
 
+[lib]
+doc-scrape-examples = false
+
+[dependencies]
+pin-project-internal = { version = "=1.1.3", path = "pin-project-internal" }
+
+[dev-dependencies]
+pin-project-auxiliary-macro = { path = "tests/auxiliary/macro" }
+macrotest = { git = "https://github.com/taiki-e/macrotest.git", branch = "dev" } # 2021 edition support + syn 2.0 + no cargo-expand + adjust overwrite behavior
+rustversion = "1"
+static_assertions = "1"
+trybuild = { git = "https://github.com/taiki-e/trybuild.git", branch = "dev" } # adjust overwrite behavior
+
+[lints]
+workspace = true
+
 [workspace]
 resolver = "2"
 members = [
@@ -31,15 +47,37 @@ members = [
     "tests/rust-2015",
 ]
 
-[lib]
-doc-scrape-examples = false
-
-[dependencies]
-pin-project-internal = { version = "=1.1.3", path = "pin-project-internal" }
-
-[dev-dependencies]
-pin-project-auxiliary-macro = { path = "tests/auxiliary/macro" }
-macrotest = { git = "https://github.com/taiki-e/macrotest.git", branch = "dev" } # 2021 edition support + syn 2.0 + no cargo-expand
-rustversion = "1"
-static_assertions = "1"
-trybuild = "1.0.67"
+# This table is shared by projects under https://github.com/taiki-e.
+# It is not intended for manual editing.
+[workspace.lints.rust]
+improper_ctypes = "warn"
+improper_ctypes_definitions = "warn"
+non_ascii_idents = "warn"
+rust_2018_idioms = "warn"
+single_use_lifetimes = "warn"
+unreachable_pub = "warn"
+# unsafe_op_in_unsafe_fn = "warn" # Set at crate-level instead since https://github.com/rust-lang/rust/pull/100081 is not available on MSRV
+[workspace.lints.clippy]
+all = "warn" # Downgrade deny-by-default lints
+pedantic = "warn"
+as_ptr_cast_mut = "warn"
+default_union_representation = "warn"
+inline_asm_x86_att_syntax = "warn"
+trailing_empty_array = "warn"
+transmute_undefined_repr = "warn"
+undocumented_unsafe_blocks = "warn"
+# Suppress buggy or noisy clippy lints
+borrow_as_ptr = { level = "allow", priority = 1 } # https://github.com/rust-lang/rust-clippy/issues/8286
+doc_markdown = { level = "allow", priority = 1 }
+float_cmp = { level = "allow", priority = 1 } # https://github.com/rust-lang/rust-clippy/issues/7725
+manual_assert = { level = "allow", priority = 1 }
+manual_range_contains = { level = "allow", priority = 1 } # https://github.com/rust-lang/rust-clippy/issues/6455#issuecomment-1225966395
+missing_errors_doc = { level = "allow", priority = 1 }
+module_name_repetitions = { level = "allow", priority = 1 }
+similar_names = { level = "allow", priority = 1 }
+single_match = { level = "allow", priority = 1 }
+single_match_else = { level = "allow", priority = 1 }
+struct_excessive_bools = { level = "allow", priority = 1 }
+too_many_arguments = { level = "allow", priority = 1 }
+too_many_lines = { level = "allow", priority = 1 }
+type_complexity = { level = "allow", priority = 1 }

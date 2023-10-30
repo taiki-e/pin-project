@@ -20,8 +20,15 @@
 // }
 // ```
 
-#![allow(dead_code, unused_imports, unused_parens, unknown_lints, renamed_and_removed_lints)]
-#![allow(clippy::needless_lifetimes)]
+#![allow(
+    dead_code,
+    unused_imports,
+    unused_parens,
+    unknown_lints,
+    renamed_and_removed_lints,
+    clippy::needless_lifetimes,
+    clippy::undocumented_unsafe_blocks
+)]
 
 use pin_project::pin_project;
 

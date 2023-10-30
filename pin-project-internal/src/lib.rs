@@ -10,14 +10,7 @@
     )
 ))]
 #![forbid(unsafe_code)]
-#![warn(rust_2018_idioms, single_use_lifetimes, unreachable_pub, clippy::pedantic)]
-#![allow(
-    clippy::needless_doctest_main,
-    clippy::similar_names,
-    clippy::single_match_else,
-    clippy::struct_field_names,
-    clippy::too_many_lines
-)]
+#![allow(clippy::needless_doctest_main, clippy::struct_field_names)]
 
 #[macro_use]
 mod error;

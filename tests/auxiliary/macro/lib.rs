@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 #![cfg(nightly)]
-#![warn(rust_2018_idioms, single_use_lifetimes)]
-#![allow(clippy::pedantic)]
+#![allow(clippy::missing_panics_doc)]
 
 use proc_macro::TokenStream;
 use quote::{format_ident, quote, ToTokens};
@@ -47,7 +46,7 @@ pub fn hidden_repr_cfg_not_any(args: TokenStream, input: TokenStream) -> TokenSt
 #[proc_macro_attribute]
 pub fn add_pinned_field(_: TokenStream, input: TokenStream) -> TokenStream {
     let mut item: ItemStruct = syn::parse_macro_input!(input);
-    let fields = if let Fields::Named(fields) = &mut item.fields { fields } else { unreachable!() };
+    let Fields::Named(fields) = &mut item.fields else { unreachable!() };
     fields.named.push(Field {
         attrs: vec![parse_quote!(#[pin])],
         vis: Visibility::Inherited,

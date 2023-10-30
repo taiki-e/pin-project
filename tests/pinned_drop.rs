@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-#![warn(rust_2018_idioms, single_use_lifetimes)]
+#![allow(unreachable_pub, clippy::match_same_arms)]
 
 use std::pin::Pin;
 
@@ -91,10 +91,10 @@ fn self_ty() {
 
             // pat
             match *self {
-                Self(_) => {}
+                Self(()) => {}
             }
-            if let Self(_) = *self {}
-            let Self(_) = *self;
+            if let Self(()) = *self {}
+            let Self(()) = *self;
         }
     }
 
@@ -116,11 +116,11 @@ fn self_ty() {
             // pat
             match *self {
                 Self::Struct { f: () } => {}
-                Self::Tuple(_) => {}
+                Self::Tuple(()) => {}
                 Self::Unit => {}
             }
             if let Self::Struct { f: () } = *self {}
-            if let Self::Tuple(_) = *self {}
+            if let Self::Tuple(()) = *self {}
             if let Self::Unit = *self {}
         }
     }

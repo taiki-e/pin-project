@@ -2,7 +2,7 @@
 
 // See ./unsafe_unpin-expanded.rs for generated code.
 
-#![allow(dead_code)]
+#![allow(dead_code, clippy::undocumented_unsafe_blocks)]
 
 use pin_project::{pin_project, UnsafeUnpin};
 

@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-#![warn(rust_2018_idioms, single_use_lifetimes)]
 // unaligned_references did not exist in older compilers and safe_packed_borrows was removed in the latest compilers.
 // https://github.com/rust-lang/rust/pull/82525
 #![allow(unknown_lints, renamed_and_removed_lints)]
@@ -39,7 +38,6 @@ fn weird_repr_packed() {
         }
     }
 
-    #[allow(clippy::let_and_return)]
     let field_addr = {
         // We let this field drop by going out of scope,
         // rather than explicitly calling drop(foo).
@@ -47,8 +45,7 @@ fn weird_repr_packed() {
         // into the 'drop' function, resulting in a different
         // address.
         let x = Struct { field: 27 };
-        let field_addr = &x.field as *const u8 as usize;
-        field_addr
+        &x.field as *const u8 as usize
     };
     assert_eq!(field_addr, FIELD_ADDR.with(Cell::get));
 }

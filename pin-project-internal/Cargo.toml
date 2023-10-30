@@ -24,3 +24,6 @@ syn = { version = "2.0.1", features = ["full", "visit-mut"] }
 
 [dev-dependencies]
 pin-project = { path = ".." }
+
+[lints]
+workspace = true
