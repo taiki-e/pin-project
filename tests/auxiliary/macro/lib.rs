@@ -64,10 +64,8 @@ pub fn remove_attr(args: TokenStream, input: TokenStream) -> TokenStream {
     let mut item: ItemStruct = syn::parse_macro_input!(input);
     match &*args.to_string() {
         "field_all" => {
-            if let Fields::Named(fields) = &mut item.fields { fields } else { unreachable!() }
-                .named
-                .iter_mut()
-                .for_each(|field| field.attrs.clear());
+            let Fields::Named(fields) = &mut item.fields else { unreachable!() };
+            fields.named.iter_mut().for_each(|field| field.attrs.clear());
         }
         "struct_all" => item.attrs.clear(),
         "struct_pin" => {
