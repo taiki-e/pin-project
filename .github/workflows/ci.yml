@@ -39,9 +39,6 @@ jobs:
     uses: taiki-e/github-actions/.github/workflows/deny.yml@main
   docs:
     uses: taiki-e/github-actions/.github/workflows/docs.yml@main
-    # https://github.com/rust-lang/rust/issues/107950
-    with:
-      rust: nightly-2023-02-11
   msrv:
     uses: taiki-e/github-actions/.github/workflows/msrv.yml@main
     with:
