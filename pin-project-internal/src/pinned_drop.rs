@@ -201,7 +201,7 @@ fn expand_impl(item: &mut ItemImpl) {
         drop_inner.sig.generics = item.generics.clone();
         let receiver = drop_inner.sig.receiver().expect("drop() should have a receiver").clone();
         let pat = Box::new(Pat::Ident(PatIdent {
-            attrs: Vec::new(),
+            attrs: vec![],
             by_ref: None,
             mutability: receiver.mutability,
             ident: Ident::new("__self", receiver.self_token.span()),

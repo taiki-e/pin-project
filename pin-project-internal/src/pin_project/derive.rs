@@ -232,7 +232,7 @@ impl<'a> Context<'a> {
                 where_clause,
             },
             orig: OriginalType { attrs, vis, ident, generics },
-            pinned_fields: Vec::new(),
+            pinned_fields: vec![],
         })
     }
 }

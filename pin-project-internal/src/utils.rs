@@ -36,7 +36,7 @@ pub(crate) fn determine_lifetime_name(lifetime_name: &mut String, generics: &mut
 
     debug_assert!(lifetime_name.starts_with('\''));
 
-    let mut lifetimes = CollectLifetimes(Vec::new());
+    let mut lifetimes = CollectLifetimes(vec![]);
     lifetimes.visit_generics_mut(generics);
 
     while lifetimes.0.iter().any(|name| name.starts_with(&**lifetime_name)) {
@@ -228,7 +228,7 @@ impl ReplaceReceiver<'_> {
     }
 
     fn visit_token_stream(&self, tokens: &mut TokenStream) -> bool {
-        let mut out = Vec::new();
+        let mut out = vec![];
         let mut modified = false;
         let mut iter = tokens.clone().into_iter().peekable();
         while let Some(tt) = iter.next() {
