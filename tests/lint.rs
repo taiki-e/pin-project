@@ -35,6 +35,7 @@
     single_use_lifetimes,
     trivial_casts,
     trivial_numeric_casts,
+    unit_bindings,
     // unnameable_types, // TODO
     unreachable_pub,
     unused_import_braces,
