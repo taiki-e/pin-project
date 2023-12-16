@@ -6,7 +6,7 @@ error[E0277]: `PhantomPinned` cannot be unpinned
    |
    = note: consider using the `pin!` macro
            consider using `Box::pin` if you need to access the pinned value outside of the current scope
-note: required because it appears within the type `__S<'_, PhantomPinned>`
+note: required because it appears within the type `_::__S<'_, PhantomPinned>`
   --> tests/ui/pin_project/overlapping_unpin_struct.rs:8:8
    |
 8  | struct S<T> {
