@@ -34,7 +34,7 @@ use proc_macro::TokenStream;
 ///
 /// And the following methods are implemented on the original type:
 ///
-/// ```rust
+/// ```
 /// # use std::pin::Pin;
 /// # type Projection<'a> = &'a ();
 /// # type ProjectionRef<'a> = &'a ();
@@ -48,7 +48,7 @@ use proc_macro::TokenStream;
 /// you can name the projection type returned from the method. This allows you
 /// to use pattern matching on the projected types.
 ///
-/// ```rust
+/// ```
 /// # use pin_project::pin_project;
 /// # use std::pin::Pin;
 /// #[pin_project(project = EnumProj)]
@@ -109,7 +109,7 @@ use proc_macro::TokenStream;
 ///
 ///    To enforce this, this attribute will generate code like this:
 ///
-///    ```rust
+///    ```
 ///    struct MyStruct {}
 ///    trait MyStructMustNotImplDrop {}
 ///    # #[allow(unknown_lints, drop_bounds)]
@@ -159,7 +159,7 @@ use proc_macro::TokenStream;
 ///
 /// `#[pin_project]` can be used on structs and enums.
 ///
-/// ```rust
+/// ```
 /// use std::pin::Pin;
 ///
 /// use pin_project::pin_project;
@@ -180,7 +180,7 @@ use proc_macro::TokenStream;
 /// }
 /// ```
 ///
-/// ```rust
+/// ```
 /// use std::pin::Pin;
 ///
 /// use pin_project::pin_project;
@@ -200,7 +200,7 @@ use proc_macro::TokenStream;
 /// To use `#[pin_project]` on enums, you need to name the projection type
 /// returned from the method.
 ///
-/// ```rust
+/// ```
 /// use std::pin::Pin;
 ///
 /// use pin_project::pin_project;
@@ -234,7 +234,7 @@ use proc_macro::TokenStream;
 /// and the `project_ref` method is not generated.
 /// (When `#[pin_project]` is used on structs, both methods are always generated.)
 ///
-/// ```rust,compile_fail,E0599
+/// ```compile_fail,E0599
 /// # use pin_project::pin_project;
 /// # use std::pin::Pin;
 /// #
@@ -257,7 +257,7 @@ use proc_macro::TokenStream;
 /// original [`Pin`] type, it needs to use [`.as_mut()`][`Pin::as_mut`] to avoid
 /// consuming the [`Pin`].
 ///
-/// ```rust
+/// ```
 /// use std::pin::Pin;
 ///
 /// use pin_project::pin_project;
@@ -282,7 +282,7 @@ use proc_macro::TokenStream;
 /// If you want to ensure that [`Unpin`] is not implemented, use the `!Unpin`
 /// argument to `#[pin_project]`.
 ///
-/// ```rust
+/// ```
 /// use pin_project::pin_project;
 ///
 /// #[pin_project(!Unpin)]
@@ -294,7 +294,7 @@ use proc_macro::TokenStream;
 /// This is equivalent to using `#[pin]` attribute for the [`PhantomPinned`]
 /// field.
 ///
-/// ```rust
+/// ```
 /// use std::marker::PhantomPinned;
 ///
 /// use pin_project::pin_project;
@@ -314,7 +314,7 @@ use proc_macro::TokenStream;
 /// If you want to implement [`Unpin`] manually, you must use the `UnsafeUnpin`
 /// argument to `#[pin_project]`.
 ///
-/// ```rust
+/// ```
 /// use pin_project::{pin_project, UnsafeUnpin};
 ///
 /// #[pin_project(UnsafeUnpin)]
@@ -353,7 +353,7 @@ use proc_macro::TokenStream;
 /// - `drop` method takes [`Pin`]`<&mut Self>`
 /// - Name of the trait is `PinnedDrop`.
 ///
-/// ```rust
+/// ```
 /// # use std::pin::Pin;
 /// pub trait PinnedDrop {
 ///     fn drop(self: Pin<&mut Self>);
@@ -369,7 +369,7 @@ use proc_macro::TokenStream;
 ///
 /// For example:
 ///
-/// ```rust
+/// ```
 /// use std::{fmt::Debug, pin::Pin};
 ///
 /// use pin_project::{pin_project, pinned_drop};
@@ -404,7 +404,7 @@ use proc_macro::TokenStream;
 /// equivalent to [`Pin::set`], except that the unpinned fields are moved and
 /// returned, instead of being dropped in-place.
 ///
-/// ```rust
+/// ```
 /// # use std::pin::Pin;
 /// # type ProjectionOwned = ();
 /// # trait Dox {
@@ -422,7 +422,7 @@ use proc_macro::TokenStream;
 ///
 /// For example:
 ///
-/// ```rust
+/// ```
 /// use std::{marker::PhantomData, pin::Pin};
 ///
 /// use pin_project::pin_project;
@@ -448,7 +448,7 @@ use proc_macro::TokenStream;
 /// destructuring the return type of the `project_replace` method, and work in exactly
 /// the same way as the `project` and `project_ref` arguments.
 ///
-/// ```rust
+/// ```
 /// use pin_project::pin_project;
 ///
 /// #[pin_project(project_replace = EnumProjOwn)]
@@ -497,7 +497,7 @@ pub fn pin_project(args: TokenStream, input: TokenStream) -> TokenStream {
 /// - `drop` method takes [`Pin`]`<&mut Self>`
 /// - Name of the trait is `PinnedDrop`.
 ///
-/// ```rust
+/// ```
 /// # use std::pin::Pin;
 /// pub trait PinnedDrop {
 ///     fn drop(self: Pin<&mut Self>);
@@ -513,7 +513,7 @@ pub fn pin_project(args: TokenStream, input: TokenStream) -> TokenStream {
 ///
 /// # Examples
 ///
-/// ```rust
+/// ```
 /// use std::pin::Pin;
 ///
 /// use pin_project::{pin_project, pinned_drop};
@@ -549,7 +549,7 @@ pub fn pin_project(args: TokenStream, input: TokenStream) -> TokenStream {
 /// macros and replacing them with private traits like the following,
 /// this crate prevent users from calling `PinnedDrop::drop` in safe code.
 ///
-/// ```rust
+/// ```
 /// # use std::pin::Pin;
 /// pub trait PinnedDrop {
 ///     unsafe fn drop(self: Pin<&mut Self>);

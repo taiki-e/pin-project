@@ -762,7 +762,7 @@ fn make_unpin_impl(cx: &Context<'_>) -> TokenStream {
             // and lifetime used in the original struct. For type parameters,
             // we generate code like this:
             //
-            // ```rust
+            // ```
             // struct AlwaysUnpin<T: ?Sized>(PhantomData<T>) {}
             // impl<T: ?Sized> Unpin for AlwaysUnpin<T> {}
             //
@@ -1061,7 +1061,7 @@ fn ensure_not_packed(orig: &OriginalType<'_>, fields: Option<&Fields>) -> Result
     // To ensure that it's impossible to use pin projections on a `#[repr(packed)]`
     // struct, we generate code like this:
     //
-    // ```rust
+    // ```
     // #[forbid(unaligned_references)]
     // fn assert_not_repr_packed(val: &MyStruct) {
     //     let _field_1 = &val.field_1;

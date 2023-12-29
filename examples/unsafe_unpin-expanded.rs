@@ -2,7 +2,7 @@
 
 // Original code (./unsafe_unpin.rs):
 //
-// ```rust
+// ```
 // #![allow(dead_code)]
 //
 // use pin_project::{pin_project, UnsafeUnpin};

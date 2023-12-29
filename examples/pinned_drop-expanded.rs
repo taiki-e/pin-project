@@ -2,7 +2,7 @@
 
 // Original code (./pinned_drop.rs):
 //
-// ```rust
+// ```
 // #![allow(dead_code)]
 //
 // use std::pin::Pin;

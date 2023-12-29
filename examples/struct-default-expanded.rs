@@ -2,7 +2,7 @@
 
 // Original code (./struct-default.rs):
 //
-// ```rust
+// ```
 // #![allow(dead_code)]
 //
 // use pin_project::pin_project;
@@ -99,7 +99,7 @@ const _: () = {
     //
     // Basically this is equivalent to the following code:
     //
-    // ```rust
+    // ```
     // impl<T, U> Unpin for Struct<T, U> where T: Unpin {}
     // ```
     //
