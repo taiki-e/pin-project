@@ -2,7 +2,7 @@
 
 // See ./pinned_drop-expanded.rs for generated code.
 
-#![allow(dead_code)]
+#![allow(dead_code, missing_debug_implementations)]
 
 use std::pin::Pin;
 

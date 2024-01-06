@@ -8,7 +8,7 @@
 // use pin_project::pin_project;
 //
 // #[pin_project(!Unpin)]
-// pub struct Struct<T, U> {
+// struct Struct<T, U> {
 //     #[pin]
 //     pinned: T,
 //     unpinned: U,
@@ -33,21 +33,21 @@
 use pin_project::pin_project;
 
 // #[pin_project(!Unpin)]
-pub struct Struct<T, U> {
+struct Struct<T, U> {
     // #[pin]
     pinned: T,
     unpinned: U,
 }
 
 const _: () = {
-    pub(crate) struct __StructProjection<'pin, T, U>
+    struct __StructProjection<'pin, T, U>
     where
         Struct<T, U>: 'pin,
     {
         pinned: ::pin_project::__private::Pin<&'pin mut (T)>,
         unpinned: &'pin mut (U),
     }
-    pub(crate) struct __StructProjectionRef<'pin, T, U>
+    struct __StructProjectionRef<'pin, T, U>
     where
         Struct<T, U>: 'pin,
     {
@@ -56,7 +56,7 @@ const _: () = {
     }
 
     impl<T, U> Struct<T, U> {
-        pub(crate) fn project<'pin>(
+        fn project<'pin>(
             self: ::pin_project::__private::Pin<&'pin mut Self>,
         ) -> __StructProjection<'pin, T, U> {
             unsafe {
@@ -67,7 +67,7 @@ const _: () = {
                 }
             }
         }
-        pub(crate) fn project_ref<'pin>(
+        fn project_ref<'pin>(
             self: ::pin_project::__private::Pin<&'pin Self>,
         ) -> __StructProjectionRef<'pin, T, U> {
             unsafe {

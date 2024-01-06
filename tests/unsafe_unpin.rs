@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-#![allow(dead_code, unreachable_pub, clippy::undocumented_unsafe_blocks)]
+#![allow(dead_code, clippy::undocumented_unsafe_blocks)]
 
 #[macro_use]
 mod auxiliary;
@@ -10,7 +10,7 @@ use std::marker::PhantomPinned;
 use pin_project::{pin_project, UnsafeUnpin};
 
 #[pin_project(UnsafeUnpin)]
-pub struct Blah<T, U> {
+struct Blah<T, U> {
     f1: U,
     #[pin]
     f2: T,
@@ -42,7 +42,7 @@ assert_not_unpin!(OverlappingLifetimeNames<'_, PhantomPinned, PhantomPinned>);
 #[test]
 fn trivial_bounds() {
     #[pin_project(UnsafeUnpin)]
-    pub struct NotImplementUnsafeUnpin {
+    struct NotImplementUnsafeUnpin {
         #[pin]
         f: PhantomPinned,
     }

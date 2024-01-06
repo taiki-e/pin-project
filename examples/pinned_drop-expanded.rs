@@ -26,6 +26,7 @@
 
 #![allow(
     dead_code,
+    missing_debug_implementations,
     single_use_lifetimes,
     unused_imports,
     unused_parens,

@@ -7,7 +7,7 @@
 use pin_project::pin_project;
 
 #[pin_project(!Unpin)]
-pub struct Struct<T, U> {
+struct Struct<T, U> {
     #[pin]
     pinned: T,
     unpinned: U,

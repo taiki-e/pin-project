@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-#![allow(unreachable_pub, clippy::match_same_arms)]
+#![allow(clippy::match_same_arms)]
 
 use std::pin::Pin;
 
@@ -9,7 +9,7 @@ use pin_project::{pin_project, pinned_drop};
 #[test]
 fn safe_project() {
     #[pin_project(PinnedDrop)]
-    pub struct Struct<'a> {
+    struct Struct<'a> {
         was_dropped: &'a mut bool,
         #[pin]
         field: u8,
@@ -30,7 +30,7 @@ fn safe_project() {
 #[test]
 fn self_call() {
     #[pin_project(PinnedDrop)]
-    pub struct S<T>(T);
+    struct S<T>(T);
 
     trait Trait {
         fn self_ref(&self) {}
@@ -58,8 +58,8 @@ fn self_call() {
 #[test]
 fn self_ty() {
     #[pin_project(PinnedDrop)]
-    pub struct Struct {
-        pub f: (),
+    struct Struct {
+        f: (),
     }
 
     #[pinned_drop]
@@ -80,7 +80,7 @@ fn self_ty() {
     }
 
     #[pin_project(PinnedDrop)]
-    pub struct TupleStruct(());
+    struct TupleStruct(());
 
     #[pinned_drop]
     impl PinnedDrop for TupleStruct {
@@ -99,7 +99,7 @@ fn self_ty() {
     }
 
     #[pin_project(PinnedDrop, project = EnumProj, project_ref = EnumProjRef)]
-    pub enum Enum {
+    enum Enum {
         Struct { f: () },
         Tuple(()),
         Unit,
@@ -135,14 +135,14 @@ fn self_inside_macro_containing_fn() {
     }
 
     #[pin_project(PinnedDrop)]
-    pub struct S(());
+    struct S(());
 
     #[pinned_drop]
     impl PinnedDrop for S {
         fn drop(self: Pin<&mut Self>) {
             mac!({
                 impl S {
-                    pub fn _f(self) -> Self {
+                    fn _f(self) -> Self {
                         self
                     }
                 }
@@ -155,7 +155,7 @@ fn self_inside_macro_containing_fn() {
 #[test]
 fn self_inside_macro_def() {
     #[pin_project(PinnedDrop)]
-    pub struct S(());
+    struct S(());
 
     #[pinned_drop]
     impl PinnedDrop for S {
@@ -195,7 +195,7 @@ fn self_ty_inside_macro_call() {
     }
 
     #[pin_project(PinnedDrop)]
-    pub struct Struct<T: Send>
+    struct Struct<T: Send>
     where
         mac!(Self): Send,
     {
@@ -264,11 +264,11 @@ fn inside_macro() {
     mac!(1);
 }
 
-pub mod self_path {
+mod self_path {
     use super::*;
 
     #[pin_project(PinnedDrop)]
-    pub struct S<T: Unpin>(T);
+    struct S<T: Unpin>(T);
 
     fn f() {}
 
