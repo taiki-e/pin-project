@@ -1,4 +1,4 @@
-error[E0133]: call to unsafe function is unsafe and requires unsafe function or block
+error[E0133]: call to unsafe function `Pin::<&'a mut T>::get_unchecked_mut` is unsafe and requires unsafe function or block
   --> tests/ui/pinned_drop/unsafe-call.rs:16:9
    |
 13 | #[pinned_drop]
