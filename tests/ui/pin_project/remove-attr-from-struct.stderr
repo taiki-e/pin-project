@@ -71,13 +71,13 @@ note: required because it appears within the type `A`
    |
 12 | struct A {
    |        ^
-note: required by a bound in `Pin::<P>::new`
+note: required by a bound in `Pin::<Ptr>::new`
   --> $RUST/core/src/pin.rs
    |
-   | impl<P: Deref<Target: Unpin>> Pin<P> {
-   |                       ^^^^^ required by this bound in `Pin::<P>::new`
+   | impl<Ptr: Deref<Target: Unpin>> Pin<Ptr> {
+   |                         ^^^^^ required by this bound in `Pin::<Ptr>::new`
 ...
-   |     pub const fn new(pointer: P) -> Pin<P> {
+   |     pub const fn new(pointer: Ptr) -> Pin<Ptr> {
    |                  --- required by a bound in this associated function
 
 error[E0599]: no method named `project` found for struct `Pin<&mut A>` in the current scope
@@ -101,13 +101,13 @@ note: required because it appears within the type `B`
    |
 19 | struct B {
    |        ^
-note: required by a bound in `Pin::<P>::new`
+note: required by a bound in `Pin::<Ptr>::new`
   --> $RUST/core/src/pin.rs
    |
-   | impl<P: Deref<Target: Unpin>> Pin<P> {
-   |                       ^^^^^ required by this bound in `Pin::<P>::new`
+   | impl<Ptr: Deref<Target: Unpin>> Pin<Ptr> {
+   |                         ^^^^^ required by this bound in `Pin::<Ptr>::new`
 ...
-   |     pub const fn new(pointer: P) -> Pin<P> {
+   |     pub const fn new(pointer: Ptr) -> Pin<Ptr> {
    |                  --- required by a bound in this associated function
 
 error[E0599]: no method named `project` found for struct `Pin<&mut B>` in the current scope
