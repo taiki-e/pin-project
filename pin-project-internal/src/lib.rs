@@ -10,7 +10,7 @@
     )
 ))]
 #![forbid(unsafe_code)]
-#![allow(clippy::needless_doctest_main, clippy::struct_field_names)]
+#![allow(clippy::needless_doctest_main)]
 
 #[macro_use]
 mod error;

@@ -1,7 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-#![allow(clippy::match_same_arms)]
-
 use std::pin::Pin;
 
 use pin_project::{pin_project, pinned_drop};
@@ -115,9 +113,7 @@ fn self_ty() {
 
             // pat
             match *self {
-                Self::Struct { f: () } => {}
-                Self::Tuple(()) => {}
-                Self::Unit => {}
+                Self::Struct { f: () } | Self::Tuple(()) | Self::Unit => {}
             }
             if let Self::Struct { f: () } = *self {}
             if let Self::Tuple(()) = *self {}
