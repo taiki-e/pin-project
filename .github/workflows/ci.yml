@@ -79,3 +79,4 @@ jobs:
       - run: cargo build --manifest-path tests/no-std/Cargo.toml --target thumbv6m-none-eabi
       - run: cargo build --manifest-path tests/rust-2015/Cargo.toml --target thumbv6m-none-eabi
       - run: cargo minimal-versions build --workspace --no-private --detach-path-deps=skip-exact --all-features
+      - run: cargo minimal-versions build --workspace --no-private --detach-path-deps=skip-exact --all-features --direct
