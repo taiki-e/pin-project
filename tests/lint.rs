@@ -1131,6 +1131,7 @@ pub mod clippy_use_self {
 pub mod clippy_used_underscore_binding {
     use pin_project::pin_project;
 
+    #[allow(clippy::pub_underscore_fields)]
     #[pin_project(project_replace)]
     pub struct Struct<T, U> {
         #[pin]
@@ -1157,6 +1158,7 @@ pub mod clippy_used_underscore_binding {
         #[rustfmt::skip]
         macro_rules! mac {
             () => {
+                #[allow(clippy::pub_underscore_fields)]
                 #[pin_project(project_replace)]
                 pub struct Struct<T, U> {
                     #[pin]
@@ -1187,6 +1189,7 @@ pub mod clippy_used_underscore_binding {
 pub mod clippy_ref_option_ref {
     use pin_project::pin_project;
 
+    #[allow(clippy::pub_underscore_fields)]
     #[pin_project]
     pub struct Struct<'a> {
         #[pin]
