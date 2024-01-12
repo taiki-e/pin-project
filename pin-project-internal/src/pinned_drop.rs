@@ -116,7 +116,7 @@ fn validate_sig(sig: &Signature) -> Result<()> {
     const INVALID_ARGUMENT: &str = "method `drop` must take an argument `self: Pin<&mut Self>`";
 
     if sig.ident != "drop" {
-        bail!(sig.ident, "method `{}` is not a member of trait `PinnedDrop", sig.ident,);
+        bail!(sig.ident, "method `{}` is not a member of trait `PinnedDrop", sig.ident);
     }
 
     if let ReturnType::Type(_, ty) = &sig.output {
