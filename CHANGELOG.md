@@ -10,6 +10,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+- Suppress `clippy::missing_docs_in_private_items` and `clippy::missing_inline_in_public_items` lints in generated code. ([#356](https://github.com/taiki-e/pin-project/pull/356), thanks @daxpedda)
+
 ## [1.1.3] - 2023-08-06
 
 - Hide documentation of the `Unpin` implementation for `!Unpin` option to work around [rustdoc issue](https://github.com/rust-lang/rust/issues/80481). ([#355](https://github.com/taiki-e/pin-project/pull/355), thanks @matheus-consoli)
