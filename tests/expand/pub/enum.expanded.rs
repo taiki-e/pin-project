@@ -41,6 +41,7 @@ where
 #[allow(clippy::type_repetition_in_bounds)]
 #[allow(dead_code)]
 #[allow(clippy::ref_option_ref)]
+#[allow(clippy::missing_docs_in_private_items)]
 pub(crate) enum EnumProjRef<'pin, T, U>
 where
     Enum<T, U>: 'pin,

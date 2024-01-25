@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-// Check interoperability with rustc and clippy lints.
+//! Check interoperability with rustc and clippy lints.
 
 // for old compilers
 #![allow(unknown_lints)]
@@ -56,36 +56,47 @@
     clippy::single_char_lifetime_names
 )] // TODO
 
+/// Testing basic lints.
 pub mod basic {
-    include!("include/basic.rs");
+    include!("../include/basic.rs");
 
+    /// Module for macro.
     pub mod inside_macro {
+        /// Test lints from macro.
         #[rustfmt::skip]
         macro_rules! mac {
             () => {
+                /// Testing default struct.
                 #[::pin_project::pin_project]
                 #[derive(Debug)]
                 pub struct DefaultStruct<T, U> {
+                    /// Pinned field.
                     #[pin]
                     pub pinned: T,
+                    /// Unpinned field.
                     pub unpinned: U,
                 }
 
+                /// Testing named struct.
                 #[::pin_project::pin_project(
                     project = DefaultStructNamedProj,
                     project_ref = DefaultStructNamedProjRef,
                 )]
                 #[derive(Debug)]
                 pub struct DefaultStructNamed<T, U> {
+                    /// Pinned field.
                     #[pin]
                     pub pinned: T,
+                    /// Unpinned field.
                     pub unpinned: U,
                 }
 
+                /// Testing default tuple struct.
                 #[::pin_project::pin_project]
                 #[derive(Debug)]
                 pub struct DefaultTupleStruct<T, U>(#[pin] pub T, pub U);
 
+                /// Testing named tuple struct.
                 #[::pin_project::pin_project(
                     project = DefaultTupleStructNamedProj,
                     project_ref = DefaultTupleStructNamedProjRef,
@@ -93,26 +104,35 @@ pub mod basic {
                 #[derive(Debug)]
                 pub struct DefaultTupleStructNamed<T, U>(#[pin] pub T, pub U);
 
+                /// Testing enum.
                 #[::pin_project::pin_project(
                     project = DefaultEnumProj,
                     project_ref = DefaultEnumProjRef,
                 )]
                 #[derive(Debug)]
                 pub enum DefaultEnum<T, U> {
+                    /// Struct variant.
                     Struct {
+                        /// Pinned field.
                         #[pin]
                         pinned: T,
+                        /// Unpinned field.
                         unpinned: U,
                     },
+                    /// Tuple variant.
                     Tuple(#[pin] T, U),
+                    /// Unit variant.
                     Unit,
                 }
 
+                /// Testing pinned drop struct.
                 #[::pin_project::pin_project(PinnedDrop)]
                 #[derive(Debug)]
                 pub struct PinnedDropStruct<T, U> {
+                    /// Pinned field.
                     #[pin]
                     pub pinned: T,
+                    /// Unpinned field.
                     pub unpinned: U,
                 }
 
@@ -121,6 +141,7 @@ pub mod basic {
                     fn drop(self: ::pin_project::__private::Pin<&mut Self>) {}
                 }
 
+                /// Testing pinned drop tuple struct.
                 #[::pin_project::pin_project(PinnedDrop)]
                 #[derive(Debug)]
                 pub struct PinnedDropTupleStruct<T, U>(#[pin] pub T, pub U);
@@ -130,6 +151,7 @@ pub mod basic {
                     fn drop(self: ::pin_project::__private::Pin<&mut Self>) {}
                 }
 
+                /// Testing pinned drop enum.
                 #[::pin_project::pin_project(
                     PinnedDrop,
                     project = PinnedDropEnumProj,
@@ -137,12 +159,17 @@ pub mod basic {
                 )]
                 #[derive(Debug)]
                 pub enum PinnedDropEnum<T, U> {
+                    /// Struct variant.
                     Struct {
+                        /// Pinned field.
                         #[pin]
                         pinned: T,
+                        /// Unpinned field.
                         unpinned: U,
                     },
+                    /// Tuple variant.
                     Tuple(#[pin] T, U),
+                    /// Unit variant.
                     Unit,
                 }
 
@@ -151,14 +178,18 @@ pub mod basic {
                     fn drop(self: ::pin_project::__private::Pin<&mut Self>) {}
                 }
 
+                /// Testing default struct with replace.
                 #[::pin_project::pin_project(project_replace)]
                 #[derive(Debug)]
                 pub struct ReplaceStruct<T, U> {
+                    /// Pinned field.
                     #[pin]
                     pub pinned: T,
+                    /// Unpinned field.
                     pub unpinned: U,
                 }
 
+                /// Testing named struct with replace.
                 #[::pin_project::pin_project(
                     project = ReplaceStructNamedProj,
                     project_ref = ReplaceStructNamedProjRef,
@@ -166,15 +197,19 @@ pub mod basic {
                 )]
                 #[derive(Debug)]
                 pub struct ReplaceStructNamed<T, U> {
+                    /// Pinned field.
                     #[pin]
                     pub pinned: T,
+                    /// Unpinned field.
                     pub unpinned: U,
                 }
 
+                /// Testing default struct with replace.
                 #[::pin_project::pin_project(project_replace)]
                 #[derive(Debug)]
                 pub struct ReplaceTupleStruct<T, U>(#[pin] pub T, pub U);
 
+                /// Testing named struct with replace.
                 #[::pin_project::pin_project(
                     project = ReplaceTupleStructNamedProj,
                     project_ref = ReplaceTupleStructNamedProjRef,
@@ -183,6 +218,7 @@ pub mod basic {
                 #[derive(Debug)]
                 pub struct ReplaceTupleStructNamed<T, U>(#[pin] pub T, pub U);
 
+                /// Testing enum with replace.
                 #[::pin_project::pin_project(
                     project = ReplaceEnumProj,
                     project_ref = ReplaceEnumProjRef,
@@ -190,27 +226,37 @@ pub mod basic {
                 )]
                 #[derive(Debug)]
                 pub enum ReplaceEnum<T, U> {
+                    /// Struct variant.
                     Struct {
+                        /// Pinned field.
                         #[pin]
                         pinned: T,
+                        /// Unpinned field.
                         unpinned: U,
                     },
+                    /// Tuple variant.
                     Tuple(#[pin] T, U),
+                    /// Unit variant.
                     Unit,
                 }
 
+                /// Testing struct with unsafe `Unpin`.
                 #[::pin_project::pin_project(UnsafeUnpin)]
                 #[derive(Debug)]
                 pub struct UnsafeUnpinStruct<T, U> {
+                    /// Pinned field.
                     #[pin]
                     pub pinned: T,
+                    /// Unpinned field.
                     pub unpinned: U,
                 }
 
+                /// Testing tuple struct with unsafe `Unpin`.
                 #[::pin_project::pin_project(UnsafeUnpin)]
                 #[derive(Debug)]
                 pub struct UnsafeUnpinTupleStruct<T, U>(#[pin] pub T, pub U);
 
+                /// Testing enum unsafe `Unpin`.
                 #[::pin_project::pin_project(
                     UnsafeUnpin,
                     project = UnsafeUnpinEnumProj,
@@ -218,27 +264,38 @@ pub mod basic {
                 )]
                 #[derive(Debug)]
                 pub enum UnsafeUnpinEnum<T, U> {
+                    /// Struct variant.
                     Struct {
+                        /// Pinned field.
                         #[pin]
                         pinned: T,
+                        /// Unpinned field.
                         unpinned: U,
                     },
+                    /// Tuple variant.
                     Tuple(#[pin] T, U),
+                    /// Unit variant.
                     Unit,
                 }
 
+
+                /// Testing struct with `!Unpin`.
                 #[::pin_project::pin_project(!Unpin)]
                 #[derive(Debug)]
                 pub struct NotUnpinStruct<T, U> {
+                    /// Pinned field.
                     #[pin]
                     pub pinned: T,
+                    /// Unpinned field.
                     pub unpinned: U,
                 }
 
+                /// Testing tuple struct with `!Unpin`.
                 #[::pin_project::pin_project(!Unpin)]
                 #[derive(Debug)]
                 pub struct NotUnpinTupleStruct<T, U>(#[pin] pub T, pub U);
 
+                /// Testing enum with `!Unpin`.
                 #[::pin_project::pin_project(
                     !Unpin,
                     project = NotUnpinEnumProj,
@@ -246,12 +303,17 @@ pub mod basic {
                 )]
                 #[derive(Debug)]
                 pub enum NotUnpinEnum<T, U> {
+                    /// Struct variant.
                     Struct {
+                        /// Pinned field.
                         #[pin]
                         pinned: T,
+                        /// Unpinned field.
                         unpinned: U,
                     },
+                    /// Tuple variant.
                     Tuple(#[pin] T, U),
+                    /// Unit variant.
                     Unit,
                 }
 
@@ -277,38 +339,49 @@ pub mod basic {
     }
 }
 
+/// Testing `forbid(unsafe_code)`.
 pub mod forbid_unsafe {
     #![forbid(unsafe_code)]
 
-    include!("include/basic-safe-part.rs");
+    include!("../include/basic-safe-part.rs");
 
+    /// Module for macro.
     pub mod inside_macro {
+        /// Test lints from macro.
         #[rustfmt::skip]
         macro_rules! mac {
             () => {
+                /// Testing default struct.
                 #[::pin_project::pin_project]
                 #[derive(Debug)]
                 pub struct DefaultStruct<T, U> {
+                    /// Pinned field.
                     #[pin]
                     pub pinned: T,
+                    /// Unpinned field.
                     pub unpinned: U,
                 }
 
+                /// Testing named struct.
                 #[::pin_project::pin_project(
                     project = DefaultStructNamedProj,
                     project_ref = DefaultStructNamedProjRef,
                 )]
                 #[derive(Debug)]
                 pub struct DefaultStructNamed<T, U> {
+                    /// Pinned field.
                     #[pin]
                     pub pinned: T,
+                    /// Unpinned field.
                     pub unpinned: U,
                 }
 
+                /// Testing default tuple struct.
                 #[::pin_project::pin_project]
                 #[derive(Debug)]
                 pub struct DefaultTupleStruct<T, U>(#[pin] pub T, pub U);
 
+                /// Testing named tuple struct.
                 #[::pin_project::pin_project(
                     project = DefaultTupleStructNamedProj,
                     project_ref = DefaultTupleStructNamedProjRef,
@@ -316,26 +389,35 @@ pub mod forbid_unsafe {
                 #[derive(Debug)]
                 pub struct DefaultTupleStructNamed<T, U>(#[pin] pub T, pub U);
 
+                /// Testing enum.
                 #[::pin_project::pin_project(
                     project = DefaultEnumProj,
                     project_ref = DefaultEnumProjRef,
                 )]
                 #[derive(Debug)]
                 pub enum DefaultEnum<T, U> {
+                    /// Struct variant.
                     Struct {
+                        /// Pinned field.
                         #[pin]
                         pinned: T,
+                        /// Unpinned field.
                         unpinned: U,
                     },
+                    /// Tuple variant.
                     Tuple(#[pin] T, U),
+                    /// Unit variant.
                     Unit,
                 }
 
+                /// Testing pinned drop struct.
                 #[::pin_project::pin_project(PinnedDrop)]
                 #[derive(Debug)]
                 pub struct PinnedDropStruct<T, U> {
+                    /// Pinned field.
                     #[pin]
                     pub pinned: T,
+                    /// Unpinned field.
                     pub unpinned: U,
                 }
 
@@ -344,6 +426,7 @@ pub mod forbid_unsafe {
                     fn drop(self: ::pin_project::__private::Pin<&mut Self>) {}
                 }
 
+                /// Testing pinned drop tuple struct.
                 #[::pin_project::pin_project(PinnedDrop)]
                 #[derive(Debug)]
                 pub struct PinnedDropTupleStruct<T, U>(#[pin] pub T, pub U);
@@ -353,6 +436,7 @@ pub mod forbid_unsafe {
                     fn drop(self: ::pin_project::__private::Pin<&mut Self>) {}
                 }
 
+                /// Testing pinned drop enum.
                 #[::pin_project::pin_project(
                     PinnedDrop,
                     project = PinnedDropEnumProj,
@@ -360,12 +444,17 @@ pub mod forbid_unsafe {
                 )]
                 #[derive(Debug)]
                 pub enum PinnedDropEnum<T, U> {
+                    /// Struct variant.
                     Struct {
+                        /// Pinned field.
                         #[pin]
                         pinned: T,
+                        /// Unpinned field.
                         unpinned: U,
                     },
+                    /// Tuple variant.
                     Tuple(#[pin] T, U),
+                    /// Unit variant.
                     Unit,
                 }
 
@@ -374,14 +463,18 @@ pub mod forbid_unsafe {
                     fn drop(self: ::pin_project::__private::Pin<&mut Self>) {}
                 }
 
+                /// Testing default struct with replace.
                 #[::pin_project::pin_project(project_replace)]
                 #[derive(Debug)]
                 pub struct ReplaceStruct<T, U> {
+                    /// Pinned field.
                     #[pin]
                     pub pinned: T,
+                    /// Unpinned field.
                     pub unpinned: U,
                 }
 
+                /// Testing named struct with replace.
                 #[::pin_project::pin_project(
                     project = ReplaceStructNamedProj,
                     project_ref = ReplaceStructNamedProjRef,
@@ -389,15 +482,19 @@ pub mod forbid_unsafe {
                 )]
                 #[derive(Debug)]
                 pub struct ReplaceStructNamed<T, U> {
+                    /// Pinned field.
                     #[pin]
                     pub pinned: T,
+                    /// Unpinned field.
                     pub unpinned: U,
                 }
 
+                /// Testing default struct with replace.
                 #[::pin_project::pin_project(project_replace)]
                 #[derive(Debug)]
                 pub struct ReplaceTupleStruct<T, U>(#[pin] pub T, pub U);
 
+                /// Testing named struct with replace.
                 #[::pin_project::pin_project(
                     project = ReplaceTupleStructNamedProj,
                     project_ref = ReplaceTupleStructNamedProjRef,
@@ -406,6 +503,7 @@ pub mod forbid_unsafe {
                 #[derive(Debug)]
                 pub struct ReplaceTupleStructNamed<T, U>(#[pin] pub T, pub U);
 
+                /// Testing enum with replace.
                 #[::pin_project::pin_project(
                     project = ReplaceEnumProj,
                     project_ref = ReplaceEnumProjRef,
@@ -413,27 +511,37 @@ pub mod forbid_unsafe {
                 )]
                 #[derive(Debug)]
                 pub enum ReplaceEnum<T, U> {
+                    /// Struct variant.
                     Struct {
+                        /// Pinned field.
                         #[pin]
                         pinned: T,
+                        /// Unpinned field.
                         unpinned: U,
                     },
+                    /// Tuple variant.
                     Tuple(#[pin] T, U),
+                    /// Unit variant.
                     Unit,
                 }
 
+                /// Testing struct with unsafe `Unpin`.
                 #[::pin_project::pin_project(UnsafeUnpin)]
                 #[derive(Debug)]
                 pub struct UnsafeUnpinStruct<T, U> {
+                    /// Pinned field.
                     #[pin]
                     pub pinned: T,
+                    /// Unpinned field.
                     pub unpinned: U,
                 }
 
+                /// Testing tuple struct with unsafe `Unpin`.
                 #[::pin_project::pin_project(UnsafeUnpin)]
                 #[derive(Debug)]
                 pub struct UnsafeUnpinTupleStruct<T, U>(#[pin] pub T, pub U);
 
+                /// Testing enum unsafe `Unpin`.
                 #[::pin_project::pin_project(
                     UnsafeUnpin,
                     project = UnsafeUnpinEnumProj,
@@ -441,27 +549,37 @@ pub mod forbid_unsafe {
                 )]
                 #[derive(Debug)]
                 pub enum UnsafeUnpinEnum<T, U> {
+                    /// Struct variant.
                     Struct {
+                        /// Pinned field.
                         #[pin]
                         pinned: T,
+                        /// Unpinned field.
                         unpinned: U,
                     },
+                    /// Tuple variant.
                     Tuple(#[pin] T, U),
+                    /// Unit variant.
                     Unit,
                 }
 
+                /// Testing struct with `!Unpin`.
                 #[::pin_project::pin_project(!Unpin)]
                 #[derive(Debug)]
                 pub struct NotUnpinStruct<T, U> {
+                    /// Pinned field.
                     #[pin]
                     pub pinned: T,
+                    /// Unpinned field.
                     pub unpinned: U,
                 }
 
+                /// Testing tuple struct with `!Unpin`.
                 #[::pin_project::pin_project(!Unpin)]
                 #[derive(Debug)]
                 pub struct NotUnpinTupleStruct<T, U>(#[pin] pub T, pub U);
 
+                /// Testing enum with `!Unpin`.
                 #[::pin_project::pin_project(
                     !Unpin,
                     project = NotUnpinEnumProj,
@@ -469,12 +587,17 @@ pub mod forbid_unsafe {
                 )]
                 #[derive(Debug)]
                 pub enum NotUnpinEnum<T, U> {
+                    /// Struct variant.
                     Struct {
+                        /// Pinned field.
                         #[pin]
                         pinned: T,
+                        /// Unpinned field.
                         unpinned: U,
                     },
+                    /// Tuple variant.
                     Tuple(#[pin] T, U),
+                    /// Unit variant.
                     Unit,
                 }
             };
@@ -484,23 +607,29 @@ pub mod forbid_unsafe {
     }
 }
 
+/// Testing [`Box`].
 pub mod box_pointers {
     use pin_project::pin_project;
 
+    /// Testing struct.
     #[allow(box_pointers)] // for the type itself
     #[pin_project(project_replace)]
     #[derive(Debug)]
     pub struct Struct {
+        /// Pinned field.
         #[pin]
         pub p: Box<isize>,
+        /// Unpinned field.
         pub u: Box<isize>,
     }
 
+    /// Testing tuple struct.
     #[allow(box_pointers)] // for the type itself
     #[pin_project(project_replace)]
     #[derive(Debug)]
     pub struct TupleStruct(#[pin] pub Box<isize>, pub Box<isize>);
 
+    /// Testing enum.
     #[allow(box_pointers)] // for the type itself
     #[pin_project(
         project = EnumProj,
@@ -509,35 +638,47 @@ pub mod box_pointers {
     )]
     #[derive(Debug)]
     pub enum Enum {
+        /// Struct variant.
         Struct {
+            /// Pinned field.
             #[pin]
             p: Box<isize>,
+            /// Unpinned field.
             u: Box<isize>,
         },
+        /// Tuple variant.
         Tuple(#[pin] Box<isize>, Box<isize>),
+        /// Unit variant.
         Unit,
     }
 
+    /// Module for macro.
     pub mod inside_macro {
         use pin_project::pin_project;
 
+        /// Test lints from macro.
         #[rustfmt::skip]
         macro_rules! mac {
             () => {
+                /// Testing struct.
                 #[allow(box_pointers)] // for the type itself
                 #[pin_project(project_replace)]
                 #[derive(Debug)]
                 pub struct Struct {
+                    /// Pinned field.
                     #[pin]
                     pub p: Box<isize>,
+                    /// Unpinned field.
                     pub u: Box<isize>,
                 }
 
+                /// Testing tuple struct.
                 #[allow(box_pointers)] // for the type itself
                 #[pin_project(project_replace)]
                 #[derive(Debug)]
                 pub struct TupleStruct(#[pin] pub Box<isize>, pub Box<isize>);
 
+                /// Testing enum.
                 #[allow(box_pointers)] // for the type itself
                 #[pin_project(
                     project = EnumProj,
@@ -546,12 +687,17 @@ pub mod box_pointers {
                 )]
                 #[derive(Debug)]
                 pub enum Enum {
+                    /// Struct variant.
                     Struct {
+                        /// Pinned field.
                         #[pin]
                         p: Box<isize>,
+                        /// Unpinned field.
                         u: Box<isize>,
                     },
+                    /// Tuple variant.
                     Tuple(#[pin] Box<isize>, Box<isize>),
+                    /// Unit variant.
                     Unit,
                 }
             };
@@ -561,32 +707,41 @@ pub mod box_pointers {
     }
 }
 
+/// Testing `#[deprecated]`.
 pub mod deprecated {
     use pin_project::pin_project;
 
+    /// Testing struct.
     #[allow(deprecated)] // for the type itself
     #[pin_project(project_replace)]
     #[derive(Debug, Clone, Copy)]
     #[deprecated]
     pub struct Struct {
+        /// Pinned field.
         #[deprecated]
         #[pin]
         pub p: (),
+        /// Unpinned field.
         #[deprecated]
         pub u: (),
     }
 
+    /// Testing tuple struct.
     #[allow(deprecated)] // for the type itself
     #[pin_project(project_replace)]
     #[derive(Debug, Clone, Copy)]
     #[deprecated]
     pub struct TupleStruct(
+        /// Pinned field.
         #[deprecated]
         #[pin]
         pub (),
-        #[deprecated] pub (),
+        /// Unpinned field.
+        #[deprecated]
+        pub (),
     );
 
+    /// Testing enum.
     #[allow(deprecated)] // for the type itself
     #[pin_project(
         project = EnumProj,
@@ -596,14 +751,18 @@ pub mod deprecated {
     #[derive(Debug, Clone, Copy)]
     #[deprecated]
     pub enum Enum {
+        /// Struct variant.
         #[deprecated]
         Struct {
+            /// Pinned field.
             #[deprecated]
             #[pin]
             p: (),
+            /// Unpinned field.
             #[deprecated]
             u: (),
         },
+        /// Tuple variant.
         #[deprecated]
         Tuple(
             #[deprecated]
@@ -611,39 +770,50 @@ pub mod deprecated {
             (),
             #[deprecated] (),
         ),
+        /// Unit variant.
         #[deprecated]
         Unit,
     }
 
+    /// Module for macro.
     pub mod inside_macro {
         use pin_project::pin_project;
 
+        /// Test lints from macro.
         #[rustfmt::skip]
         macro_rules! mac {
             () => {
+                /// Testing struct.
                 #[allow(deprecated)] // for the type itself
                 #[pin_project(project_replace)]
                 #[derive(Debug, Clone, Copy)]
                 #[deprecated]
                 pub struct Struct {
+                    /// Pinned field.
                     #[deprecated]
                     #[pin]
                     pub p: (),
+                    /// Unpinned field.
                     #[deprecated]
                     pub u: (),
                 }
 
+                /// Testing tuple struct.
                 #[allow(deprecated)] // for the type itself
                 #[pin_project(project_replace)]
                 #[derive(Debug, Clone, Copy)]
                 #[deprecated]
                 pub struct TupleStruct(
+                    /// Pinned field.
                     #[deprecated]
                     #[pin]
                     pub (),
-                    #[deprecated] pub (),
+                    /// Unpinned field.
+                    #[deprecated]
+                    pub (),
                 );
 
+                /// Testing enum.
                 #[allow(deprecated)] // for the type itself
                 #[pin_project(
                     project = EnumProj,
@@ -653,14 +823,18 @@ pub mod deprecated {
                 #[derive(Debug, Clone, Copy)]
                 #[deprecated]
                 pub enum Enum {
+                    /// Struct variant.
                     #[deprecated]
                     Struct {
+                        /// Pinned field.
                         #[deprecated]
                         #[pin]
                         p: (),
+                        /// Unpinned field.
                         #[deprecated]
                         u: (),
                     },
+                    /// Tuple variant.
                     #[deprecated]
                     Tuple(
                         #[deprecated]
@@ -668,6 +842,7 @@ pub mod deprecated {
                         (),
                         #[deprecated] (),
                     ),
+                    /// Unit variant.
                     #[deprecated]
                     Unit,
                 }
@@ -678,9 +853,11 @@ pub mod deprecated {
     }
 }
 
+/// Testing `explicit_outlives_requirements`.
 pub mod explicit_outlives_requirements {
     use pin_project::pin_project;
 
+    /// Testing struct.
     #[allow(explicit_outlives_requirements)] // for the type itself: https://github.com/rust-lang/rust/issues/60993
     #[pin_project(project_replace)]
     #[derive(Debug)]
@@ -689,11 +866,14 @@ pub mod explicit_outlives_requirements {
         T: ?Sized,
         U: ?Sized,
     {
+        /// Pinned field.
         #[pin]
         pub pinned: &'a mut T,
+        /// Unpinned field.
         pub unpinned: &'a mut U,
     }
 
+    /// Testing tuple struct.
     #[allow(explicit_outlives_requirements)] // for the type itself: https://github.com/rust-lang/rust/issues/60993
     #[pin_project(project_replace)]
     #[derive(Debug)]
@@ -702,6 +882,7 @@ pub mod explicit_outlives_requirements {
         T: ?Sized,
         U: ?Sized;
 
+    /// Testing enum.
     #[allow(explicit_outlives_requirements)] // for the type itself: https://github.com/rust-lang/rust/issues/60993
     #[pin_project(
         project = EnumProj,
@@ -714,21 +895,29 @@ pub mod explicit_outlives_requirements {
         T: ?Sized,
         U: ?Sized,
     {
+        /// Struct variant.
         Struct {
+            /// Pinned field.
             #[pin]
             pinned: &'a mut T,
+            /// Unpinned field.
             unpinned: &'a mut U,
         },
+        /// Tuple variant.
         Tuple(#[pin] &'a mut T, &'a mut U),
+        /// Unit variant.
         Unit,
     }
 
+    /// Module for macro.
     pub mod inside_macro {
         use pin_project::pin_project;
 
+        /// Test lints from macro.
         #[rustfmt::skip]
         macro_rules! mac {
             () => {
+                /// Testing struct.
                 #[allow(explicit_outlives_requirements)] // for the type itself: https://github.com/rust-lang/rust/issues/60993
                 #[pin_project(project_replace)]
                 #[derive(Debug)]
@@ -737,11 +926,14 @@ pub mod explicit_outlives_requirements {
                     T: ?Sized,
                     U: ?Sized,
                 {
+                    /// Pinned field.
                     #[pin]
                     pub pinned: &'a mut T,
+                    /// Unpinned field.
                     pub unpinned: &'a mut U,
                 }
 
+                /// Testing tuple struct.
                 #[allow(explicit_outlives_requirements)] // for the type itself: https://github.com/rust-lang/rust/issues/60993
                 #[pin_project(project_replace)]
                 #[derive(Debug)]
@@ -750,6 +942,7 @@ pub mod explicit_outlives_requirements {
                     T: ?Sized,
                     U: ?Sized;
 
+                /// Testing enum.
                 #[allow(explicit_outlives_requirements)] // for the type itself: https://github.com/rust-lang/rust/issues/60993
                 #[pin_project(
                     project = EnumProj,
@@ -762,12 +955,17 @@ pub mod explicit_outlives_requirements {
                     T: ?Sized,
                     U: ?Sized,
                 {
+                    /// Struct variant.
                     Struct {
+                        /// Pinned field.
                         #[pin]
                         pinned: &'a mut T,
+                        /// Unpinned field.
                         unpinned: &'a mut U,
                     },
+                    /// Tuple variant.
                     Tuple(#[pin] &'a mut T, &'a mut U),
+                    /// Unit variant.
                     Unit,
                 }
             };
@@ -777,13 +975,16 @@ pub mod explicit_outlives_requirements {
     }
 }
 
+/// Testing `single_use_lifetimes`.
 #[allow(missing_debug_implementations)]
 pub mod single_use_lifetimes {
     use pin_project::pin_project;
 
+    /// Testing trait.
     #[allow(unused_lifetimes)]
     pub trait Trait<'a> {}
 
+    /// Testing HRTB.
     #[allow(unused_lifetimes)] // for the type itself
     #[allow(single_use_lifetimes)] // for the type itself: https://github.com/rust-lang/rust/issues/55058
     #[pin_project(project_replace)]
@@ -793,19 +994,24 @@ pub mod single_use_lifetimes {
         T: for<'pin> Trait<'pin>,
         for<'pin, 'pin_, 'pin__> &'pin &'pin_ &'pin__ T: Unpin,
     {
+        /// Pinned field.
         #[pin]
         _f: &'pin___ mut T,
     }
 
+    /// Module for macro.
     pub mod inside_macro {
         use pin_project::pin_project;
 
+        /// Test lints from macro.
         #[rustfmt::skip]
         macro_rules! mac {
             () => {
+                /// Testing trait.
                 #[allow(unused_lifetimes)]
                 pub trait Trait<'a> {}
 
+                /// Testing HRTB.
                 #[allow(unused_lifetimes)] // for the type itself
                 #[allow(single_use_lifetimes)] // for the type itself: https://github.com/rust-lang/rust/issues/55058
                 #[pin_project(project_replace)]
@@ -815,6 +1021,7 @@ pub mod single_use_lifetimes {
                     T: for<'pin> Trait<'pin>,
                     for<'pin, 'pin_, 'pin__> &'pin &'pin_ &'pin__ T: Unpin,
                 {
+                    /// Pinned field.
                     #[pin]
                     _f: &'pin___ mut T,
                 }
@@ -825,9 +1032,11 @@ pub mod single_use_lifetimes {
     }
 }
 
+/// Testing `variant_size_differences`.
 pub mod variant_size_differences {
     use pin_project::pin_project;
 
+    /// Testing enum.
     #[allow(missing_debug_implementations, missing_copy_implementations)] // https://github.com/rust-lang/rust/pull/74060
     #[allow(variant_size_differences)] // for the type itself
     #[allow(clippy::large_enum_variant)] // for the type itself
@@ -837,16 +1046,21 @@ pub mod variant_size_differences {
         project_replace = EnumProjOwn,
     )]
     pub enum Enum {
+        /// Small variant size.
         V1(u8),
+        /// Huge variant size.
         V2([u8; 1024]),
     }
 
+    /// Module for macro.
     pub mod inside_macro {
         use pin_project::pin_project;
 
+        /// Test lints from macro.
         #[rustfmt::skip]
         macro_rules! mac {
             () => {
+                /// Testing enum.
                 #[allow(missing_debug_implementations, missing_copy_implementations)] // https://github.com/rust-lang/rust/pull/74060
                 #[allow(variant_size_differences)] // for the type itself
                 #[allow(clippy::large_enum_variant)] // for the type itself
@@ -856,7 +1070,9 @@ pub mod variant_size_differences {
                     project_replace = EnumProjOwn,
                 )]
                 pub enum Enum {
+                    /// Small variant size.
                     V1(u8),
+                    /// Huge variant size.
                     V2([u8; 1024]),
                 }
             };
@@ -866,21 +1082,27 @@ pub mod variant_size_differences {
     }
 }
 
+/// Testing `clippy::mut_mut`.
 pub mod clippy_mut_mut {
     use pin_project::pin_project;
 
+    /// Testing struct.
     #[pin_project(project_replace)]
     #[derive(Debug)]
     pub struct Struct<'a, T, U> {
+        /// Pinned field.
         #[pin]
         pub pinned: &'a mut T,
+        /// Unpinned field.
         pub unpinned: &'a mut U,
     }
 
+    /// Testing tuple struct.
     #[pin_project(project_replace)]
     #[derive(Debug)]
     pub struct TupleStruct<'a, T, U>(#[pin] &'a mut T, &'a mut U);
 
+    /// Testing enum.
     #[pin_project(
         project = EnumProj,
         project_ref = EnumProjRef,
@@ -888,33 +1110,45 @@ pub mod clippy_mut_mut {
     )]
     #[derive(Debug)]
     pub enum Enum<'a, T, U> {
+        /// Struct variant.
         Struct {
+            /// Pinned field.
             #[pin]
             pinned: &'a mut T,
+            /// Unpinned field.
             unpinned: &'a mut U,
         },
+        /// Tuple variant.
         Tuple(#[pin] &'a mut T, &'a mut U),
+        /// Unit variant.
         Unit,
     }
 
+    /// Module for macro.
     pub mod inside_macro {
         use pin_project::pin_project;
 
+        /// Test lints from macro.
         #[rustfmt::skip]
         macro_rules! mac {
             () => {
+                /// Testing struct.
                 #[pin_project(project_replace)]
                 #[derive(Debug)]
                 pub struct Struct<'a, T, U> {
+                    /// Pinned field.
                     #[pin]
                     pub pinned: &'a mut T,
+                    /// Unpinned field.
                     pub unpinned: &'a mut U,
                 }
 
+                /// Testing tuple struct.
                 #[pin_project(project_replace)]
                 #[derive(Debug)]
                 pub struct TupleStruct<'a, T, U>(#[pin] &'a mut T, &'a mut U);
 
+                /// Testing enum.
                 #[pin_project(
                     project = EnumProj,
                     project_ref = EnumProjRef,
@@ -922,12 +1156,17 @@ pub mod clippy_mut_mut {
                 )]
                 #[derive(Debug)]
                 pub enum Enum<'a, T, U> {
+                    /// Struct variant.
                     Struct {
+                        /// Pinned field.
                         #[pin]
                         pinned: &'a mut T,
+                        /// Unpinned field.
                         unpinned: &'a mut U,
                     },
+                    /// Tuple variant.
                     Tuple(#[pin] &'a mut T, &'a mut U),
+                    /// Unit variant.
                     Unit,
                 }
             };
@@ -937,21 +1176,27 @@ pub mod clippy_mut_mut {
     }
 }
 
+/// Testing `redundant_pub_crate`.
 #[allow(missing_debug_implementations)]
 #[allow(unreachable_pub)]
 mod clippy_redundant_pub_crate {
     use pin_project::pin_project;
 
+    /// Testing struct.
     #[pin_project(project_replace)]
     pub struct Struct<T, U> {
+        /// Pinned field.
         #[pin]
         pub pinned: T,
+        /// Unpinned field.
         pub unpinned: U,
     }
 
+    /// Testing tuple struct.
     #[pin_project(project_replace)]
     pub struct TupleStruct<T, U>(#[pin] pub T, pub U);
 
+    /// Testing enum.
     #[allow(dead_code)]
     #[pin_project(
         project = EnumProj,
@@ -959,32 +1204,44 @@ mod clippy_redundant_pub_crate {
         project_replace = EnumProjOwn,
     )]
     pub enum Enum<T, U> {
+        /// Struct variant.
         Struct {
+            /// Pinned field.
             #[pin]
             pinned: T,
+            /// Unpinned field.
             unpinned: U,
         },
+        /// Tuple variant.
         Tuple(#[pin] T, U),
+        /// Unit variant.
         Unit,
     }
 
+    /// Module for macro.
     pub mod inside_macro {
         use pin_project::pin_project;
 
+        /// Test lints from macro.
         #[allow(clippy::redundant_pub_crate)]
         #[rustfmt::skip]
         macro_rules! mac {
             () => {
+                /// Testing struct.
                 #[pin_project(project_replace)]
                 pub struct Struct<T, U> {
+                    /// Pinned field.
                     #[pin]
                     pub pinned: T,
+                    /// Unpinned field.
                     pub unpinned: U,
                 }
 
+                /// Testing tuple struct.
                 #[pin_project(project_replace)]
                 pub struct TupleStruct<T, U>(#[pin] pub T, pub U);
 
+                /// Testing enum.
                 #[allow(dead_code)]
                 #[pin_project(
                     project = EnumProj,
@@ -992,12 +1249,17 @@ mod clippy_redundant_pub_crate {
                     project_replace = EnumProjOwn,
                 )]
                 pub enum Enum<T, U> {
+                    /// Struct variant.
                     Struct {
+                        /// Pinned field.
                         #[pin]
                         pinned: T,
+                        /// Unpinned field.
                         unpinned: U,
                     },
+                    /// Tuple variant.
                     Tuple(#[pin] T, U),
+                    /// Unit variant.
                     Unit,
                 }
             };
@@ -1007,25 +1269,31 @@ mod clippy_redundant_pub_crate {
     }
 }
 
+/// Testing `clippy::type_repetition_in_bounds`.
 #[allow(missing_debug_implementations)]
 pub mod clippy_type_repetition_in_bounds {
     use pin_project::pin_project;
 
+    /// Testing struct.
     #[pin_project(project_replace)]
     pub struct Struct<T, U>
     where
         Self: Sized,
     {
+        /// Pinned field.
         #[pin]
         pub pinned: T,
+        /// Unpinned field.
         pub unpinned: U,
     }
 
+    /// Testing tuple struct.
     #[pin_project(project_replace)]
     pub struct TupleStruct<T, U>(#[pin] T, U)
     where
         Self: Sized;
 
+    /// Testing enum.
     #[pin_project(
         project = EnumProj,
         project_ref = EnumProjRef,
@@ -1035,36 +1303,48 @@ pub mod clippy_type_repetition_in_bounds {
     where
         Self: Sized,
     {
+        /// Struct variant.
         Struct {
+            /// Pinned field.
             #[pin]
             pinned: T,
+            /// Unpinned field.
             unpinned: U,
         },
+        /// Tuple variant.
         Tuple(#[pin] T, U),
+        /// Unit variant.
         Unit,
     }
 
+    /// Module for macro.
     pub mod inside_macro {
         use pin_project::pin_project;
 
+        /// Test lints from macro.
         #[rustfmt::skip]
         macro_rules! mac {
             () => {
+                /// Testing struct.
                 #[pin_project(project_replace)]
                 pub struct Struct<T, U>
                 where
                     Self: Sized,
                 {
+                    /// Pinned field.
                     #[pin]
                     pub pinned: T,
+                    /// Unpinned field.
                     pub unpinned: U,
                 }
 
+                /// Testing tuple struct.
                 #[pin_project(project_replace)]
                 pub struct TupleStruct<T, U>(#[pin] T, U)
                 where
                     Self: Sized;
 
+                /// Testing enum.
                 #[pin_project(
                     project = EnumProj,
                     project_ref = EnumProjRef,
@@ -1074,12 +1354,17 @@ pub mod clippy_type_repetition_in_bounds {
                 where
                     Self: Sized,
                 {
+                    /// Struct variant.
                     Struct {
+                        /// Pinned field.
                         #[pin]
                         pinned: T,
+                        /// Unpinned field.
                         unpinned: U,
                     },
+                    /// Tuple variant.
                     Tuple(#[pin] T, U),
+                    /// Unit variant.
                     Unit,
                 }
             };
@@ -1089,35 +1374,44 @@ pub mod clippy_type_repetition_in_bounds {
     }
 }
 
+/// Testing `clippy::use_self`.
 #[allow(missing_debug_implementations)]
 pub mod clippy_use_self {
     use pin_project::pin_project;
 
+    /// Testing trait.
     pub trait Trait {
+        /// Associated type.
         type Assoc;
     }
 
+    /// Testing struct.
     #[pin_project(project_replace)]
     pub struct Generics<T: Trait<Assoc = Self>>
     where
         Self: Trait<Assoc = Self>,
     {
+        /// Field holding generic.
         _f: T,
     }
 
+    /// Module for macro.
     pub mod inside_macro {
         use pin_project::pin_project;
 
         use super::Trait;
 
+        /// Test lints from macro.
         #[rustfmt::skip]
         macro_rules! mac {
             () => {
+                /// Testing struct.
                 #[pin_project(project_replace)]
                 pub struct Generics<T: Trait<Assoc = Self>>
                 where
                     Self: Trait<Assoc = Self>,
                 {
+                    /// Field holding generic.
                     _f: T,
                 }
             };
@@ -1127,54 +1421,71 @@ pub mod clippy_use_self {
     }
 }
 
+/// Testing `clippy::used_underscore_binding`.
 #[allow(missing_debug_implementations)]
 pub mod clippy_used_underscore_binding {
     use pin_project::pin_project;
 
+    /// Testing struct.
     #[allow(clippy::pub_underscore_fields)]
     #[pin_project(project_replace)]
     pub struct Struct<T, U> {
+        /// Pinned field.
         #[pin]
         pub _pinned: T,
+        /// Unpinned field.
         pub _unpinned: U,
     }
 
+    /// Testing enum.
     #[pin_project(
         project = EnumProj,
         project_ref = EnumProjRef,
         project_replace = EnumProjOwn,
     )]
     pub enum Enum<T, U> {
+        /// Variant.
         Struct {
+            /// Pinned field.
             #[pin]
             _pinned: T,
+            /// Unpinned field.
             _unpinned: U,
         },
     }
 
+    /// Module for macro.
     pub mod inside_macro {
         use pin_project::pin_project;
 
+        /// Test lints from macro.
         #[rustfmt::skip]
         macro_rules! mac {
             () => {
+                /// Testing struct.
                 #[allow(clippy::pub_underscore_fields)]
                 #[pin_project(project_replace)]
                 pub struct Struct<T, U> {
+                    /// Pinned field.
                     #[pin]
                     pub _pinned: T,
+                    /// Unpinned field.
                     pub _unpinned: U,
                 }
 
+                /// Testing enum.
                 #[pin_project(
                     project = EnumProj,
                     project_ref = EnumProjRef,
                     project_replace = EnumProjOwn,
                 )]
                 pub enum Enum<T, U> {
+                    /// Variant.
                     Struct {
+                        /// Pinned field.
                         #[pin]
                         _pinned: T,
+                        /// Unpinned field.
                         _unpinned: U,
                     },
                 }
@@ -1185,23 +1496,31 @@ pub mod clippy_used_underscore_binding {
     }
 }
 
+/// Testing `clippy::ref_option_ref`.
 #[allow(missing_debug_implementations)]
 pub mod clippy_ref_option_ref {
     use pin_project::pin_project;
 
+    /// Testing struct.
     #[allow(clippy::pub_underscore_fields)]
     #[pin_project]
     pub struct Struct<'a> {
+        /// Pinned field.
         #[pin]
         pub _pinned: Option<&'a ()>,
+        /// Unpinned field.
         pub _unpinned: Option<&'a ()>,
     }
 
+    /// Testing enum.
     #[pin_project(project = EnumProj, project_ref = EnumProjRef)]
     pub enum Enum<'a> {
+        /// Variant.
         Struct {
+            /// Pinned field.
             #[pin]
             _pinned: Option<&'a ()>,
+            /// Unpinned field.
             _unpinned: Option<&'a ()>,
         },
     }

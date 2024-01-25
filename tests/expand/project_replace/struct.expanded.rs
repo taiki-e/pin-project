@@ -34,6 +34,7 @@ const _: () = {
     }
     #[allow(dead_code)]
     #[allow(clippy::ref_option_ref)]
+    #[allow(clippy::missing_docs_in_private_items)]
     struct __StructProjectionRef<'pin, T, U>
     where
         Struct<T, U>: 'pin,

@@ -13,6 +13,7 @@ struct TupleStruct<T, U>(#[pin] T, U);
 #[allow(clippy::type_repetition_in_bounds)]
 #[allow(dead_code)]
 #[allow(clippy::ref_option_ref)]
+#[allow(clippy::missing_docs_in_private_items)]
 struct ProjRef<'pin, T, U>(
     ::pin_project::__private::Pin<&'pin (T)>,
     &'pin (U),

@@ -44,6 +44,7 @@ members = [
     "tests/auxiliary/macro",
     "tests/no-core",
     "tests/no-std",
+    "tests/lint",
     "tests/rust-2015",
 ]
 
