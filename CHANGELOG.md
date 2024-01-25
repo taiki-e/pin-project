@@ -10,6 +10,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+## [1.1.4] - 2024-01-25
+
 - Suppress `clippy::missing_docs_in_private_items` and `clippy::missing_inline_in_public_items` lints in generated code. ([#356](https://github.com/taiki-e/pin-project/pull/356), thanks @daxpedda)
 
 ## [1.1.3] - 2023-08-06
@@ -698,7 +700,8 @@ See also [tracking issue for 0.4 release](https://github.com/taiki-e/pin-project
 
 Initial release
 
-[Unreleased]: https://github.com/taiki-e/pin-project/compare/v1.1.3...HEAD
+[Unreleased]: https://github.com/taiki-e/pin-project/compare/v1.1.4...HEAD
+[1.1.4]: https://github.com/taiki-e/pin-project/compare/v1.1.3...v1.1.4
 [1.1.3]: https://github.com/taiki-e/pin-project/compare/v1.1.2...v1.1.3
 [1.1.2]: https://github.com/taiki-e/pin-project/compare/v1.1.1...v1.1.2
 [1.1.1]: https://github.com/taiki-e/pin-project/compare/v1.1.0...v1.1.1
