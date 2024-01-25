@@ -16,6 +16,7 @@ struct Struct<T, U> {
 #[allow(clippy::redundant_pub_crate)]
 #[allow(clippy::type_repetition_in_bounds)]
 #[allow(dead_code)]
+#[allow(clippy::missing_docs_in_private_items)]
 struct ProjOwn<T, U> {
     pinned: ::pin_project::__private::PhantomData<T>,
     unpinned: U,
@@ -39,6 +40,7 @@ const _: () = {
     extern crate pin_project as _pin_project;
     #[allow(dead_code)]
     #[allow(clippy::mut_mut)]
+    #[allow(clippy::missing_docs_in_private_items)]
     struct __StructProjection<'pin, T, U>
     where
         Struct<T, U>: 'pin,

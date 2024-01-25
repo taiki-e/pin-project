@@ -136,6 +136,7 @@ fn proj_allowed_lints(cx: &Context<'_>) -> (TokenStream, TokenStream, TokenStrea
         #proj_mut_allowed_lints
         #[allow(dead_code)] // This lint warns unused fields/variants.
         #[allow(clippy::mut_mut)] // This lint warns `&mut &mut <ty>`.
+        #[allow(clippy::missing_docs_in_private_items)]
     };
     let proj_ref_allowed_lints = if cx.project_ref { Some(&global_allowed_lints) } else { None };
     let proj_ref = quote! {
@@ -148,6 +149,7 @@ fn proj_allowed_lints(cx: &Context<'_>) -> (TokenStream, TokenStream, TokenStrea
     let proj_own = quote! {
         #proj_own_allowed_lints
         #[allow(dead_code)] // This lint warns unused fields/variants.
+        #[allow(clippy::missing_docs_in_private_items)]
         #large_enum_variant
     };
     (proj_mut, proj_ref, proj_own)

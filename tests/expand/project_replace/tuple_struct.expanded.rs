@@ -20,6 +20,7 @@ const _: () = {
     extern crate pin_project as _pin_project;
     #[allow(dead_code)]
     #[allow(clippy::mut_mut)]
+    #[allow(clippy::missing_docs_in_private_items)]
     struct __TupleStructProjection<'pin, T, U>(
         ::pin_project::__private::Pin<&'pin mut (T)>,
         &'pin mut (U),
@@ -35,6 +36,7 @@ const _: () = {
     where
         TupleStruct<T, U>: 'pin;
     #[allow(dead_code)]
+    #[allow(clippy::missing_docs_in_private_items)]
     struct __TupleStructProjectionOwned<T, U>(
         ::pin_project::__private::PhantomData<T>,
         U,

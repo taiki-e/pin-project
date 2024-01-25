@@ -20,6 +20,7 @@ const _: () = {
     extern crate pin_project as _pin_project;
     #[allow(dead_code)]
     #[allow(clippy::mut_mut)]
+    #[allow(clippy::missing_docs_in_private_items)]
     pub(crate) struct __TupleStructProjection<'pin, T, U>(
         pub ::pin_project::__private::Pin<&'pin mut (T)>,
         pub &'pin mut (U),
