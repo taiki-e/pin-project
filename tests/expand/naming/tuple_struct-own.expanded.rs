@@ -12,6 +12,7 @@ struct TupleStruct<T, U>(#[pin] T, U);
 #[allow(clippy::redundant_pub_crate)]
 #[allow(clippy::type_repetition_in_bounds)]
 #[allow(dead_code)]
+#[allow(clippy::missing_docs_in_private_items)]
 struct ProjOwn<T, U>(::pin_project::__private::PhantomData<T>, U);
 #[allow(box_pointers)]
 #[allow(deprecated)]
@@ -32,6 +33,7 @@ const _: () = {
     extern crate pin_project as _pin_project;
     #[allow(dead_code)]
     #[allow(clippy::mut_mut)]
+    #[allow(clippy::missing_docs_in_private_items)]
     struct __TupleStructProjection<'pin, T, U>(
         ::pin_project::__private::Pin<&'pin mut (T)>,
         &'pin mut (U),

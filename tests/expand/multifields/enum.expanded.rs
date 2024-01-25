@@ -23,6 +23,7 @@ enum Enum<T, U> {
 #[allow(clippy::type_repetition_in_bounds)]
 #[allow(dead_code)]
 #[allow(clippy::mut_mut)]
+#[allow(clippy::missing_docs_in_private_items)]
 enum EnumProj<'pin, T, U>
 where
     Enum<T, U>: 'pin,
@@ -82,6 +83,7 @@ where
 #[allow(clippy::redundant_pub_crate)]
 #[allow(clippy::type_repetition_in_bounds)]
 #[allow(dead_code)]
+#[allow(clippy::missing_docs_in_private_items)]
 #[allow(variant_size_differences)]
 #[allow(clippy::large_enum_variant)]
 enum EnumProjOwn<T, U> {

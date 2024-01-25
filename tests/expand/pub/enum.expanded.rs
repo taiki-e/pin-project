@@ -17,6 +17,7 @@ pub enum Enum<T, U> {
 #[allow(clippy::type_repetition_in_bounds)]
 #[allow(dead_code)]
 #[allow(clippy::mut_mut)]
+#[allow(clippy::missing_docs_in_private_items)]
 pub(crate) enum EnumProj<'pin, T, U>
 where
     Enum<T, U>: 'pin,
