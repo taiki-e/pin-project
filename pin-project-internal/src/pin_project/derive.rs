@@ -143,6 +143,7 @@ fn proj_allowed_lints(cx: &Context<'_>) -> (TokenStream, TokenStream, TokenStrea
         #proj_ref_allowed_lints
         #[allow(dead_code)] // This lint warns unused fields/variants.
         #[allow(clippy::ref_option_ref)] // This lint warns `&Option<&<ty>>`.
+        #[allow(clippy::missing_docs_in_private_items)]
     };
     let proj_own_allowed_lints =
         if cx.project_replace.ident().is_some() { Some(&global_allowed_lints) } else { None };
@@ -856,6 +857,7 @@ fn make_drop_impl(cx: &Context<'_>) -> TokenStream {
             impl #impl_generics _pin_project::__private::Drop for #ident #ty_generics
             #where_clause
             {
+                #[allow(clippy::missing_inline_in_public_items)]
                 fn drop(&mut self) {
                     #unsafety {
                         // Safety - we're in 'drop', so we know that 'self' will

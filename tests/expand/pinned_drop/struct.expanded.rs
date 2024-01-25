@@ -35,6 +35,7 @@ const _: () = {
     }
     #[allow(dead_code)]
     #[allow(clippy::ref_option_ref)]
+    #[allow(clippy::missing_docs_in_private_items)]
     struct __StructProjectionRef<'pin, T, U>
     where
         Struct<T, U>: 'pin,
@@ -97,6 +98,7 @@ const _: () = {
         __Struct<'pin, T, U>: _pin_project::__private::Unpin,
     {}
     impl<T, U> _pin_project::__private::Drop for Struct<T, U> {
+        #[allow(clippy::missing_inline_in_public_items)]
         fn drop(&mut self) {
             unsafe {
                 let __pinned_self = _pin_project::__private::Pin::new_unchecked(self);

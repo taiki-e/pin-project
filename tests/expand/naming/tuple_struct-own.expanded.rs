@@ -42,6 +42,7 @@ const _: () = {
         TupleStruct<T, U>: 'pin;
     #[allow(dead_code)]
     #[allow(clippy::ref_option_ref)]
+    #[allow(clippy::missing_docs_in_private_items)]
     struct __TupleStructProjectionRef<'pin, T, U>(
         ::pin_project::__private::Pin<&'pin (T)>,
         &'pin (U),

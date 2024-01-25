@@ -30,6 +30,7 @@ const _: () = {
         TupleStruct<T, U>: 'pin;
     #[allow(dead_code)]
     #[allow(clippy::ref_option_ref)]
+    #[allow(clippy::missing_docs_in_private_items)]
     struct __TupleStructProjectionRef<'pin, T, U>(
         ::pin_project::__private::Pin<&'pin (T)>,
         &'pin (U),
@@ -91,6 +92,7 @@ const _: () = {
         __TupleStruct<'pin, T, U>: _pin_project::__private::Unpin,
     {}
     impl<T, U> _pin_project::__private::Drop for TupleStruct<T, U> {
+        #[allow(clippy::missing_inline_in_public_items)]
         fn drop(&mut self) {
             unsafe {
                 let __pinned_self = _pin_project::__private::Pin::new_unchecked(self);
