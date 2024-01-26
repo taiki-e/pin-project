@@ -574,9 +574,7 @@ fn visit_fields<'a>(
     let mut proj_move = TokenStream::new();
     let mut pinned_bindings = Vec::with_capacity(fields.len());
 
-    for (i, Field { attrs, vis, ident, colon_token, ty, mutability: _ }) in
-        fields.iter().enumerate()
-    {
+    for (i, Field { attrs, vis, ident, colon_token, ty, .. }) in fields.iter().enumerate() {
         let binding = ident.clone().unwrap_or_else(|| format_ident!("_{}", i));
         proj_pat.extend(quote!(#binding,));
         let lifetime = &cx.proj.lifetime;
