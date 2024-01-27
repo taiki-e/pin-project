@@ -56,11 +56,11 @@
     clippy::single_char_lifetime_names
 )] // TODO
 
-/// Testing basic lints.
+/// Test for basic cases.
 pub mod basic {
     include!("../include/basic.rs");
 
-    /// Module for macro.
+    /// Test for <https://github.com/rust-lang/rust/issues/77973>.
     pub mod inside_macro {
         /// Test lints from macro.
         #[rustfmt::skip]
@@ -339,13 +339,13 @@ pub mod basic {
     }
 }
 
-/// Testing `forbid(unsafe_code)`.
+/// Test for `forbid(unsafe_code)`-able cases.
 pub mod forbid_unsafe {
     #![forbid(unsafe_code)]
 
     include!("../include/basic-safe-part.rs");
 
-    /// Module for macro.
+    /// Test for <https://github.com/rust-lang/rust/issues/77973>.
     pub mod inside_macro {
         /// Test lints from macro.
         #[rustfmt::skip]
@@ -607,7 +607,7 @@ pub mod forbid_unsafe {
     }
 }
 
-/// Testing [`Box`].
+/// Test for `box_pointers` lint.
 pub mod box_pointers {
     use pin_project::pin_project;
 
@@ -652,7 +652,7 @@ pub mod box_pointers {
         Unit,
     }
 
-    /// Module for macro.
+    /// Test for <https://github.com/rust-lang/rust/issues/77973>.
     pub mod inside_macro {
         use pin_project::pin_project;
 
@@ -707,7 +707,7 @@ pub mod box_pointers {
     }
 }
 
-/// Testing `#[deprecated]`.
+/// Test for `deprecated` lint.
 pub mod deprecated {
     use pin_project::pin_project;
 
@@ -775,7 +775,7 @@ pub mod deprecated {
         Unit,
     }
 
-    /// Module for macro.
+    /// Test for <https://github.com/rust-lang/rust/issues/77973>.
     pub mod inside_macro {
         use pin_project::pin_project;
 
@@ -853,7 +853,7 @@ pub mod deprecated {
     }
 }
 
-/// Testing `explicit_outlives_requirements`.
+/// Test for `explicit_outlives_requirements` lint.
 pub mod explicit_outlives_requirements {
     use pin_project::pin_project;
 
@@ -909,7 +909,7 @@ pub mod explicit_outlives_requirements {
         Unit,
     }
 
-    /// Module for macro.
+    /// Test for <https://github.com/rust-lang/rust/issues/77973>.
     pub mod inside_macro {
         use pin_project::pin_project;
 
@@ -975,7 +975,7 @@ pub mod explicit_outlives_requirements {
     }
 }
 
-/// Testing `single_use_lifetimes`.
+/// Test for `single_use_lifetimes` lint.
 #[allow(missing_debug_implementations)]
 pub mod single_use_lifetimes {
     use pin_project::pin_project;
@@ -999,7 +999,7 @@ pub mod single_use_lifetimes {
         _f: &'pin___ mut T,
     }
 
-    /// Module for macro.
+    /// Test for <https://github.com/rust-lang/rust/issues/77973>.
     pub mod inside_macro {
         use pin_project::pin_project;
 
@@ -1032,7 +1032,7 @@ pub mod single_use_lifetimes {
     }
 }
 
-/// Testing `variant_size_differences`.
+/// Test for `variant_size_differences` and `clippy::large_enum_variant` lints.
 pub mod variant_size_differences {
     use pin_project::pin_project;
 
@@ -1052,7 +1052,7 @@ pub mod variant_size_differences {
         V2([u8; 1024]),
     }
 
-    /// Module for macro.
+    /// Test for <https://github.com/rust-lang/rust/issues/77973>.
     pub mod inside_macro {
         use pin_project::pin_project;
 
@@ -1082,7 +1082,7 @@ pub mod variant_size_differences {
     }
 }
 
-/// Testing `clippy::mut_mut`.
+/// Test for `clippy::mut_mut` lint.
 pub mod clippy_mut_mut {
     use pin_project::pin_project;
 
@@ -1124,7 +1124,7 @@ pub mod clippy_mut_mut {
         Unit,
     }
 
-    /// Module for macro.
+    /// Test for <https://github.com/rust-lang/rust/issues/77973>.
     pub mod inside_macro {
         use pin_project::pin_project;
 
@@ -1176,7 +1176,7 @@ pub mod clippy_mut_mut {
     }
 }
 
-/// Testing `redundant_pub_crate`.
+/// Test for `clippy::redundant_pub_crate` lint.
 #[allow(missing_debug_implementations)]
 #[allow(unreachable_pub)]
 mod clippy_redundant_pub_crate {
@@ -1218,7 +1218,7 @@ mod clippy_redundant_pub_crate {
         Unit,
     }
 
-    /// Module for macro.
+    /// Test for <https://github.com/rust-lang/rust/issues/77973>.
     pub mod inside_macro {
         use pin_project::pin_project;
 
@@ -1269,7 +1269,7 @@ mod clippy_redundant_pub_crate {
     }
 }
 
-/// Testing `clippy::type_repetition_in_bounds`.
+/// Test for `clippy::type_repetition_in_bounds` lint.
 #[allow(missing_debug_implementations)]
 pub mod clippy_type_repetition_in_bounds {
     use pin_project::pin_project;
@@ -1317,7 +1317,7 @@ pub mod clippy_type_repetition_in_bounds {
         Unit,
     }
 
-    /// Module for macro.
+    /// Test for <https://github.com/rust-lang/rust/issues/77973>.
     pub mod inside_macro {
         use pin_project::pin_project;
 
@@ -1374,7 +1374,7 @@ pub mod clippy_type_repetition_in_bounds {
     }
 }
 
-/// Testing `clippy::use_self`.
+/// Test for `clippy::use_self` lint.
 #[allow(missing_debug_implementations)]
 pub mod clippy_use_self {
     use pin_project::pin_project;
@@ -1395,7 +1395,7 @@ pub mod clippy_use_self {
         _f: T,
     }
 
-    /// Module for macro.
+    /// Test for <https://github.com/rust-lang/rust/issues/77973>.
     pub mod inside_macro {
         use pin_project::pin_project;
 
@@ -1421,7 +1421,7 @@ pub mod clippy_use_self {
     }
 }
 
-/// Testing `clippy::used_underscore_binding`.
+/// Test for `clippy::used_underscore_binding` lint.
 #[allow(missing_debug_implementations)]
 pub mod clippy_used_underscore_binding {
     use pin_project::pin_project;
@@ -1454,7 +1454,7 @@ pub mod clippy_used_underscore_binding {
         },
     }
 
-    /// Module for macro.
+    /// Test for <https://github.com/rust-lang/rust/issues/77973>.
     pub mod inside_macro {
         use pin_project::pin_project;
 
@@ -1496,7 +1496,7 @@ pub mod clippy_used_underscore_binding {
     }
 }
 
-/// Testing `clippy::ref_option_ref`.
+/// Test for `clippy::ref_option_ref` lint.
 #[allow(missing_debug_implementations)]
 pub mod clippy_ref_option_ref {
     use pin_project::pin_project;
