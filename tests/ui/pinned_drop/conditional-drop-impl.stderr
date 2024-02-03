@@ -14,7 +14,7 @@ error[E0277]: `T` cannot be unpinned
   --> tests/ui/pinned_drop/conditional-drop-impl.rs:18:15
    |
 18 | #[pin_project(PinnedDrop)] //~ ERROR E0277
-   |               ^^^^^^^^^^ the trait `Unpin` is not implemented for `T`
+   |               ^^^^^^^^^^ the trait `Unpin` is not implemented for `T`, which is required by `PinnedDropImpl<T>: PinnedDrop`
    |
    = note: consider using the `pin!` macro
            consider using `Box::pin` if you need to access the pinned value outside of the current scope
