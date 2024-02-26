@@ -137,6 +137,8 @@ fn self_inside_macro_containing_fn() {
     impl PinnedDrop for S {
         fn drop(self: Pin<&mut Self>) {
             mac!({
+                #[allow(dead_code)]
+                struct S(());
                 impl S {
                     fn _f(self) -> Self {
                         self
