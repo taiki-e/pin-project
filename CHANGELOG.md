@@ -10,6 +10,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+- Suppress `unused_qualifications` lint in generated code.
+
 ## [1.1.4] - 2024-01-25
 
 - Suppress `clippy::missing_docs_in_private_items` and `clippy::missing_inline_in_public_items` lints in generated code. ([#356](https://github.com/taiki-e/pin-project/pull/356), thanks @daxpedda)

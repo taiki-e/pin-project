@@ -102,6 +102,7 @@ const _: () = {
     }
 };
 #[doc(hidden)]
+#[allow(unused_qualifications)]
 impl<T, U> ::pin_project::__private::PinnedDrop for TupleStruct<T, U> {
     unsafe fn drop(self: Pin<&mut Self>) {
         #[allow(clippy::needless_pass_by_value)]

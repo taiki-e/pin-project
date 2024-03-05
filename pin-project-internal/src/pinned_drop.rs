@@ -47,6 +47,7 @@ pub(crate) fn attribute(args: &TokenStream, mut input: ItemImpl) -> TokenStream 
         }
         tokens
     } else {
+        input.attrs.push(parse_quote!(#[allow(unused_qualifications)]));
         input.into_token_stream()
     }
 }
