@@ -339,6 +339,7 @@ pub mod basic {
     }
 }
 
+#[allow(clippy::mixed_attributes_style)] // https://github.com/rust-lang/rust-clippy/issues/12435
 /// Test for `forbid(unsafe_code)`-able cases.
 pub mod forbid_unsafe {
     #![forbid(unsafe_code)]
