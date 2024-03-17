@@ -86,7 +86,7 @@ impl GenerateTokens {
             // - https://github.com/taiki-e/pin-project/pull/53#issuecomment-525906867
             // - https://github.com/taiki-e/pin-project/pull/70
             #allowed_lints
-            #[allow(unused_qualifications)] // https://github.com/rust-lang/rust/issues/122519
+            #[allow(unused_qualifications)]
             #[allow(clippy::semicolon_if_nothing_returned)]
             #[allow(clippy::use_self)]
             #[allow(clippy::used_underscore_binding)]

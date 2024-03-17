@@ -47,7 +47,7 @@ pub(crate) fn attribute(args: &TokenStream, mut input: ItemImpl) -> TokenStream 
         }
         tokens
     } else {
-        input.attrs.push(parse_quote!(#[allow(unused_qualifications)]));
+        input.attrs.push(parse_quote!(#[allow(unused_qualifications)])); // https://github.com/rust-lang/rust/issues/122519
         input.into_token_stream()
     }
 }
