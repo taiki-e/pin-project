@@ -29,10 +29,10 @@ pin-project-internal = { version = "=1.1.5", path = "pin-project-internal" }
 
 [dev-dependencies]
 pin-project-auxiliary-macro = { path = "tests/auxiliary/macro" }
-macrotest = { git = "https://github.com/taiki-e/macrotest.git", branch = "dev-old-msrv-1.56" } # 2021 edition support + syn 2.0 + no cargo-expand + adjust overwrite behavior
+macrotest = { git = "https://github.com/taiki-e/macrotest.git", branch = "dev-old-msrv-syn2" } # adjust overwrite behavior + no cargo-expand
 rustversion = "1"
 static_assertions = "1"
-trybuild = { git = "https://github.com/taiki-e/trybuild.git", branch = "dev-old-msrv-1.56" } # adjust overwrite behavior + lower MSRV
+trybuild = { git = "https://github.com/taiki-e/trybuild.git", branch = "dev-old-msrv-syn2" } # adjust overwrite behavior + lower MSRV
 
 [lints]
 workspace = true
