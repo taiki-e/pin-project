@@ -14,15 +14,20 @@ ignore = [
 multiple-versions = "warn"
 wildcards = "deny"
 allow-wildcard-paths = true
+build.executables = "deny"
+build.interpreted = "deny"
+build.include-dependencies = true
+build.include-workspace = false # covered by tools/tidy.sh
+build.include-archives = true
 build.allow-build-scripts = [
     { name = "proc-macro2" },
+]
+build.bypass = [
 ]
 
 # https://embarkstudios.github.io/cargo-deny/checks/licenses/cfg.html
 [licenses]
-default = "deny"
-unlicensed = "deny"
-copyleft = "deny"
+version = 2
 unused-allowed-license = "deny"
 private.ignore = true
 allow = [
