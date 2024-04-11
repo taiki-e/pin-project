@@ -549,7 +549,7 @@ fn dst() {
     }
 
     let mut x = Struct1 { f: 0_u8 };
-    let x: Pin<&mut Struct1<dyn core::fmt::Debug>> = Pin::new(&mut x as _);
+    let x: Pin<&mut Struct1<dyn core::fmt::Debug>> = Pin::new(&mut x);
     let _: &mut (dyn core::fmt::Debug) = x.project().f;
 
     #[pin_project]
@@ -559,7 +559,7 @@ fn dst() {
     }
 
     let mut x = Struct2 { f: 0_u8 };
-    let x: Pin<&mut Struct2<dyn core::fmt::Debug + Unpin>> = Pin::new(&mut x as _);
+    let x: Pin<&mut Struct2<dyn core::fmt::Debug + Unpin>> = Pin::new(&mut x);
     let _: Pin<&mut (dyn core::fmt::Debug + Unpin)> = x.project().f;
 
     #[allow(explicit_outlives_requirements)] // https://github.com/rust-lang/rust/issues/60993
