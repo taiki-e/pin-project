@@ -32,6 +32,7 @@
     noop_method_call,
     private_bounds,
     private_interfaces,
+    redundant_lifetimes,
     single_use_lifetimes,
     trivial_casts,
     trivial_numeric_casts,
