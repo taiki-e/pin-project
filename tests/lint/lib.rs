@@ -18,6 +18,7 @@
 #![warn(
     box_pointers,
     deprecated_in_future,
+    dereferencing_mut_binding,
     fuzzy_provenance_casts,
     invalid_reference_casting,
     let_underscore_drop,
