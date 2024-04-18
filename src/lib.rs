@@ -13,8 +13,6 @@ Add this to your `Cargo.toml`:
 pin-project = "1"
 ```
 
-*Compiler support: requires rustc 1.56+*
-
 ## Examples
 
 [`#[pin_project]`][`pin_project`] attribute creates projection types
