@@ -91,7 +91,7 @@ see [examples] directory for more examples and generated code.
 
 <!-- tidy:crate-doc:end -->
 
-[`pin_project`]: https://docs.rs/pin-project/1/pin_project/attr.pin_project.html
+[`pin_project`]: https://docs.rs/pin-project/latest/pin_project/attr.pin_project.html
 
 ## License
 

@@ -14,25 +14,25 @@
 
 - [example](unsafe_unpin.rs)
 - [generated code](unsafe_unpin-expanded.rs)
-- [`UnsafeUnpin` documentation](https://docs.rs/pin-project/1/pin_project/trait.UnsafeUnpin.html)
+- [`UnsafeUnpin` documentation](https://docs.rs/pin-project/latest/pin_project/trait.UnsafeUnpin.html)
 
 ## Manual implementation of `Drop` by `#[pinned_drop]`
 
 - [example](pinned_drop.rs)
 - [generated code](pinned_drop-expanded.rs)
-- [`#[pinned_drop]` documentation](https://docs.rs/pin-project/1/pin_project/attr.pinned_drop.html)
+- [`#[pinned_drop]` documentation](https://docs.rs/pin-project/latest/pin_project/attr.pinned_drop.html)
 
 ## `project_replace()` method
 
 - [example](project_replace.rs)
 - [generated code](project_replace-expanded.rs)
-- [`project_replace()` documentation](https://docs.rs/pin-project/1/pin_project/attr.pin_project.html#project_replace-method)
+- [`project_replace()` documentation](https://docs.rs/pin-project/latest/pin_project/attr.pin_project.html#project_replace-method)
 
 ## Ensure `!Unpin` by `#[pin_project(!Unpin)]`
 
 - [example](not_unpin.rs)
 - [generated code](not_unpin-expanded.rs)
-- [`!Unpin` documentation](https://docs.rs/pin-project/1/pin_project/attr.pin_project.html#unpin)
+- [`!Unpin` documentation](https://docs.rs/pin-project/latest/pin_project/attr.pin_project.html#unpin)
 
 ---
 

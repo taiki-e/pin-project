@@ -474,7 +474,7 @@ use proc_macro::TokenStream;
 /// [`Pin::as_mut`]: core::pin::Pin::as_mut
 /// [`Pin::set`]: core::pin::Pin::set
 /// [`Pin`]: core::pin::Pin
-/// [`UnsafeUnpin`]: https://docs.rs/pin-project/1/pin_project/trait.UnsafeUnpin.html
+/// [`UnsafeUnpin`]: https://docs.rs/pin-project/latest/pin_project/trait.UnsafeUnpin.html
 /// [drop-guarantee]: core::pin#drop-guarantee
 /// [pin-projection]: core::pin#projections-and-structural-pinning
 /// [pinned-drop]: macro@pin_project#pinned_drop
