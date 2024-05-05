@@ -4,6 +4,7 @@ use std::{env, process::Command};
 
 fn main() {
     println!("cargo:rerun-if-changed=build.rs");
+    println!("cargo:rustc-check-cfg=cfg(nightly)");
 
     if is_nightly() {
         println!("cargo:rustc-cfg=nightly");
