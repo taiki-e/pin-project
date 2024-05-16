@@ -2,6 +2,7 @@ compiletest
 elems
 expandtest
 HRTB
+overcaptures
 projectable
 qself
 reborrow
