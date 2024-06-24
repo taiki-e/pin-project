@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+#![allow(internal_features)]
 #![feature(unsized_fn_params)]
 
 use pin_project::pin_project;
