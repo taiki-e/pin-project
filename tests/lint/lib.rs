@@ -56,6 +56,8 @@
 #![allow(clippy::blanket_clippy_restriction_lints)] // this is a test, so enable all restriction lints intentionally.
 #![allow(
     clippy::absolute_paths,
+    clippy::allow_attributes,
+    clippy::allow_attributes_without_reason,
     clippy::exhaustive_enums,
     clippy::exhaustive_structs,
     clippy::min_ident_chars,
