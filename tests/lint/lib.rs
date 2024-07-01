@@ -65,7 +65,7 @@
     clippy::single_call_fn,
     clippy::single_char_lifetime_names
 )] // TODO
-#![allow(clippy::lint_groups_priority)] // https://github.com/rust-lang/rust-clippy/issues/12270
+#![allow(clippy::lint_groups_priority)] // https://github.com/rust-lang/rust-clippy/issues/12920
 
 /// Test for basic cases.
 pub mod basic {
