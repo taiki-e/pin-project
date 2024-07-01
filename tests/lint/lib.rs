@@ -20,7 +20,6 @@
 // unused_crate_dependencies, must_not_suspend: unrelated
 // unsafe_code: checked in forbid_unsafe module
 #![warn(
-    box_pointers,
     deprecated_in_future,
     dereferencing_mut_binding,
     fuzzy_provenance_casts,
@@ -35,6 +34,7 @@
     missing_debug_implementations,
     missing_docs,
     non_ascii_idents,
+    non_local_definitions,
     noop_method_call,
     private_bounds,
     private_interfaces,
@@ -608,106 +608,6 @@ pub mod forbid_unsafe {
                     },
                     /// Tuple variant.
                     Tuple(#[pin] T, U),
-                    /// Unit variant.
-                    Unit,
-                }
-            };
-        }
-
-        mac!();
-    }
-}
-
-/// Test for `box_pointers` lint.
-pub mod box_pointers {
-    use pin_project::pin_project;
-
-    /// Testing struct.
-    #[allow(box_pointers)] // for the type itself
-    #[pin_project(project_replace)]
-    #[derive(Debug)]
-    pub struct Struct {
-        /// Pinned field.
-        #[pin]
-        pub p: Box<isize>,
-        /// Unpinned field.
-        pub u: Box<isize>,
-    }
-
-    /// Testing tuple struct.
-    #[allow(box_pointers)] // for the type itself
-    #[pin_project(project_replace)]
-    #[derive(Debug)]
-    pub struct TupleStruct(#[pin] pub Box<isize>, pub Box<isize>);
-
-    /// Testing enum.
-    #[allow(box_pointers)] // for the type itself
-    #[pin_project(
-        project = EnumProj,
-        project_ref = EnumProjRef,
-        project_replace = EnumProjOwn,
-    )]
-    #[derive(Debug)]
-    pub enum Enum {
-        /// Struct variant.
-        Struct {
-            /// Pinned field.
-            #[pin]
-            p: Box<isize>,
-            /// Unpinned field.
-            u: Box<isize>,
-        },
-        /// Tuple variant.
-        Tuple(#[pin] Box<isize>, Box<isize>),
-        /// Unit variant.
-        Unit,
-    }
-
-    /// Test for <https://github.com/rust-lang/rust/issues/77973>.
-    pub mod inside_macro {
-        use pin_project::pin_project;
-
-        /// Test lints from macro.
-        #[rustfmt::skip]
-        macro_rules! mac {
-            () => {
-                /// Testing struct.
-                #[allow(box_pointers)] // for the type itself
-                #[pin_project(project_replace)]
-                #[derive(Debug)]
-                pub struct Struct {
-                    /// Pinned field.
-                    #[pin]
-                    pub p: Box<isize>,
-                    /// Unpinned field.
-                    pub u: Box<isize>,
-                }
-
-                /// Testing tuple struct.
-                #[allow(box_pointers)] // for the type itself
-                #[pin_project(project_replace)]
-                #[derive(Debug)]
-                pub struct TupleStruct(#[pin] pub Box<isize>, pub Box<isize>);
-
-                /// Testing enum.
-                #[allow(box_pointers)] // for the type itself
-                #[pin_project(
-                    project = EnumProj,
-                    project_ref = EnumProjRef,
-                    project_replace = EnumProjOwn,
-                )]
-                #[derive(Debug)]
-                pub enum Enum {
-                    /// Struct variant.
-                    Struct {
-                        /// Pinned field.
-                        #[pin]
-                        p: Box<isize>,
-                        /// Unpinned field.
-                        u: Box<isize>,
-                    },
-                    /// Tuple variant.
-                    Tuple(#[pin] Box<isize>, Box<isize>),
                     /// Unit variant.
                     Unit,
                 }
