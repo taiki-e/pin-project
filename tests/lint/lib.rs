@@ -20,6 +20,7 @@
 // unused_crate_dependencies, must_not_suspend: unrelated
 // unsafe_code: checked in forbid_unsafe module
 #![warn(
+    closure_returning_async_block,
     deprecated_in_future,
     dereferencing_mut_binding,
     fuzzy_provenance_casts,
