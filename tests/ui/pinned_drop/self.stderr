@@ -60,3 +60,8 @@ error[E0533]: expected value, found struct variant `E::V`
    |
 55 |             let _: Self = Self::V; //~ ERROR E0533
    |                           ^^^^^^^ not a value
+   |
+help: you might have meant to create a new value of the struct
+   |
+55 |             let _: Self = Self::V { f: /* value */ }; //~ ERROR E0533
+   |                                   ++++++++++++++++++
