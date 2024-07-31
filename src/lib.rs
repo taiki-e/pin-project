@@ -274,6 +274,7 @@ pub mod __private {
     // Unpin), or provide an impl of `UnsafeUnpin`. It is impossible for them to
     // provide an impl of `Unpin`
     #[doc(hidden)]
+    #[allow(dead_code)]
     pub struct Wrapper<'a, T: ?Sized>(PhantomData<&'a ()>, T);
 
     // SAFETY: `T` implements UnsafeUnpin.
