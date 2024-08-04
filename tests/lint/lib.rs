@@ -4,7 +4,7 @@
 
 // for old compilers
 #![allow(unknown_lints)]
-#![warn(nonstandard_style, rust_2018_idioms, unused)]
+#![warn(nonstandard_style, rust_2018_idioms, unused, deprecated_safe)]
 // Note: This does not guarantee compatibility with forbidding these lints in the future.
 // If rustc adds a new lint, we may not be able to keep this.
 #![forbid(
@@ -20,6 +20,7 @@
 // unused_crate_dependencies, must_not_suspend: unrelated
 // unsafe_code: checked in forbid_unsafe module
 #![warn(
+    ambiguous_negative_literals,
     closure_returning_async_block,
     deprecated_in_future,
     dereferencing_mut_binding,
@@ -39,6 +40,7 @@
     noop_method_call,
     private_bounds,
     private_interfaces,
+    redundant_imports,
     redundant_lifetimes,
     rust_2024_incompatible_pat,
     single_use_lifetimes,
