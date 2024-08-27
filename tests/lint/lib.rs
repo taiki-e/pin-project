@@ -25,7 +25,6 @@
     deprecated_in_future,
     dereferencing_mut_binding,
     fuzzy_provenance_casts,
-    impl_trait_overcaptures,
     invalid_reference_casting,
     let_underscore_drop,
     lossy_provenance_casts,
