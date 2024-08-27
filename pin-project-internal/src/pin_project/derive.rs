@@ -3,9 +3,9 @@
 use proc_macro2::{Delimiter, Group, Span, TokenStream};
 use quote::{format_ident, quote, quote_spanned, ToTokens};
 use syn::{
-    parse_quote, punctuated::Punctuated, token, visit_mut::VisitMut, Attribute, Data, DataEnum,
-    DeriveInput, Error, Field, Fields, FieldsNamed, FieldsUnnamed, Generics, Ident, Index,
-    Lifetime, LifetimeParam, Meta, Result, Token, Type, Variant, Visibility, WhereClause,
+    parse_quote, punctuated::Punctuated, token, visit_mut::VisitMut, Attribute, Error, Field,
+    Fields, FieldsNamed, FieldsUnnamed, Generics, Ident, Index, Item, Lifetime, LifetimeParam,
+    Meta, Result, Token, Type, Variant, Visibility, WhereClause,
 };
 
 use super::{
@@ -18,30 +18,31 @@ use crate::utils::{
 };
 
 pub(super) fn parse_derive(input: TokenStream) -> Result<TokenStream> {
-    let mut input: DeriveInput = syn::parse2(input)?;
+    let mut input: Item = syn::parse2(input)?;
 
     let mut cx;
     let mut generate = GenerateTokens::default();
 
-    let ident = &input.ident;
-    let ty_generics = input.generics.split_for_impl().1;
-    let self_ty = parse_quote!(#ident #ty_generics);
-    let mut visitor = ReplaceReceiver(&self_ty);
-    visitor.visit_generics_mut(&mut input.generics);
-    visitor.visit_data_mut(&mut input.data);
-
-    match &input.data {
-        Data::Struct(data) => {
-            cx = Context::new(&input.attrs, &input.vis, ident, &mut input.generics, Struct)?;
-            parse_struct(&mut cx, &data.fields, &mut generate)?;
+    match &mut input {
+        Item::Struct(input) => {
+            let ident = &input.ident;
+            let ty_generics = input.generics.split_for_impl().1;
+            let self_ty = parse_quote!(#ident #ty_generics);
+            let mut visitor = ReplaceReceiver(&self_ty);
+            visitor.visit_item_struct_mut(input);
+            cx = Context::new(&input.attrs, &input.vis, &input.ident, &mut input.generics, Struct)?;
+            parse_struct(&mut cx, &input.fields, &mut generate)?;
         }
-        Data::Enum(data) => {
-            cx = Context::new(&input.attrs, &input.vis, ident, &mut input.generics, Enum)?;
-            parse_enum(&mut cx, data, &mut generate)?;
+        Item::Enum(input) => {
+            let ident = &input.ident;
+            let ty_generics = input.generics.split_for_impl().1;
+            let self_ty = parse_quote!(#ident #ty_generics);
+            let mut visitor = ReplaceReceiver(&self_ty);
+            visitor.visit_item_enum_mut(input);
+            cx = Context::new(&input.attrs, &input.vis, &input.ident, &mut input.generics, Enum)?;
+            parse_enum(&mut cx, input.brace_token, &input.variants, &mut generate)?;
         }
-        Data::Union(_) => {
-            bail!(input, "#[pin_project] attribute may only be used on structs or enums");
-        }
+        _ => bail!(input, "#[pin_project] attribute may only be used on structs or enums"),
     }
 
     Ok(generate.into_tokens(&cx))
@@ -416,7 +417,8 @@ fn parse_struct<'a>(
 
 fn parse_enum<'a>(
     cx: &mut Context<'a>,
-    DataEnum { brace_token, variants, .. }: &'a DataEnum,
+    brace_token: token::Brace,
+    variants: &'a Punctuated<Variant, Token![,]>,
     generate: &mut GenerateTokens,
 ) -> Result<()> {
     if let ProjReplace::Unnamed { span } = &cx.project_replace {
@@ -433,7 +435,7 @@ fn parse_enum<'a>(
     // Do this first for a better error message.
     ensure_not_packed(&cx.orig, None)?;
 
-    validate_enum(*brace_token, variants)?;
+    validate_enum(brace_token, variants)?;
 
     let ProjectedVariants {
         proj_variants,
