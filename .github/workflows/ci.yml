@@ -61,10 +61,13 @@ jobs:
     timeout-minutes: 60
     steps:
       - uses: taiki-e/checkout-action@v1
-      - name: Install Rust
-        run: rustup toolchain add "${{ matrix.rust }}" --no-self-update --component rust-src && rustup default "${{ matrix.rust }}"
+      - uses: taiki-e/github-actions/install-rust@main
+        with:
+          toolchain: ${{ matrix.rust }}
+          component: rust-src
+          target: thumbv6m-none-eabi
       - run: rustup toolchain add nightly --no-self-update
-      - run: rustup target add thumbv6m-none-eabi
+        if: matrix.rust == '1.56'
       - uses: taiki-e/install-action@cargo-hack
       - uses: taiki-e/install-action@cargo-minimal-versions
       - uses: taiki-e/install-action@cargo-careful
