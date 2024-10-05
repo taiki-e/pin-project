@@ -66,8 +66,6 @@ jobs:
           toolchain: ${{ matrix.rust }}
           component: rust-src
           target: thumbv6m-none-eabi
-      - run: rustup toolchain add nightly --no-self-update
-        if: matrix.rust == '1.56'
       - uses: taiki-e/install-action@cargo-hack
       - uses: taiki-e/install-action@cargo-minimal-versions
       - uses: taiki-e/install-action@cargo-careful
@@ -83,3 +81,4 @@ jobs:
       - run: cargo build --manifest-path tests/rust-2015/Cargo.toml --target thumbv6m-none-eabi
       - run: cargo minimal-versions build --workspace --no-private --detach-path-deps=skip-exact --all-features
       - run: cargo minimal-versions build --workspace --no-private --detach-path-deps=skip-exact --all-features --direct
+        if: matrix.rust != '1.56'
