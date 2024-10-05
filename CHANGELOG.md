@@ -10,6 +10,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+## [1.1.6] - 2024-10-05
+
 - Suppress `clippy::needless_lifetimes` lint in generated code.
 
 - Disable `derive` feature of `syn` dependency.
@@ -708,7 +710,8 @@ See also [tracking issue for 0.4 release](https://github.com/taiki-e/pin-project
 
 Initial release
 
-[Unreleased]: https://github.com/taiki-e/pin-project/compare/v1.1.5...HEAD
+[Unreleased]: https://github.com/taiki-e/pin-project/compare/v1.1.6...HEAD
+[1.1.6]: https://github.com/taiki-e/pin-project/compare/v1.1.5...v1.1.6
 [1.1.5]: https://github.com/taiki-e/pin-project/compare/v1.1.4...v1.1.5
 [1.1.4]: https://github.com/taiki-e/pin-project/compare/v1.1.3...v1.1.4
 [1.1.3]: https://github.com/taiki-e/pin-project/compare/v1.1.2...v1.1.3
