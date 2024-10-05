@@ -10,6 +10,10 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+- Suppress `clippy::needless_lifetimes` lint in generated code.
+
+- Disable `derive` feature of `syn` dependency.
+
 ## [1.1.5] - 2024-03-05
 
 - Suppress `unused_qualifications` lint in generated code.
