@@ -107,7 +107,7 @@ const _: () = {
     // this would cause an E0446 (private type in public interface).
     //
     // When RFC 2145 is implemented (rust-lang/rust#48054),
-    // this will become a lint, rather then a hard error.
+    // this will become a lint, rather than a hard error.
     //
     // As a workaround for this, we generate a new struct, containing all of
     // the pinned fields from our #[pin_project] type. This struct is declared
