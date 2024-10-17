@@ -41,7 +41,6 @@
     private_interfaces,
     redundant_imports,
     redundant_lifetimes,
-    rust_2024_incompatible_pat,
     single_use_lifetimes,
     trivial_casts,
     trivial_numeric_casts,
