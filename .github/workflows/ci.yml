@@ -47,6 +47,11 @@ jobs:
       event_name: ${{ github.event_name }}
   tidy:
     uses: taiki-e/github-actions/.github/workflows/tidy.yml@main
+    permissions:
+      contents: read
+      pull-requests: write # for gh pr edit --add-assignee
+      repository-projects: read # for gh pr edit --add-assignee
+    secrets: inherit
 
   test:
     strategy:
