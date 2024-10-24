@@ -119,7 +119,9 @@ const _: () = {
     }
     impl<'pin, T, U> _pin_project::__private::Unpin for Enum<T, U>
     where
-        _pin_project::__private::Wrapper<'pin, Self>: _pin_project::UnsafeUnpin,
+        ::pin_project::__private::PinnedFieldsOf<
+            _pin_project::__private::Wrapper<'pin, Self>,
+        >: _pin_project::UnsafeUnpin,
     {}
     trait EnumMustNotImplDrop {}
     #[allow(clippy::drop_bounds, drop_bounds)]

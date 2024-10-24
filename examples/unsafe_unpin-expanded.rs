@@ -92,7 +92,8 @@ const _: () = {
 
     // Implement `Unpin` via `UnsafeUnpin`.
     impl<'pin, T, U> ::pin_project::__private::Unpin for Struct<T, U> where
-        ::pin_project::__private::Wrapper<'pin, Self>: ::pin_project::UnsafeUnpin
+        ::pin_project::__private::PinnedFieldsOf<::pin_project::__private::Wrapper<'pin, Self>>:
+            ::pin_project::UnsafeUnpin
     {
     }
 

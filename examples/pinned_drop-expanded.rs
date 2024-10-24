@@ -123,13 +123,15 @@ const _: () = {
         __lifetime0: &'a (),
     }
     impl<'pin, 'a, T> ::pin_project::__private::Unpin for Struct<'a, T> where
-        __Struct<'pin, 'a, T>: ::pin_project::__private::Unpin
+        ::pin_project::__private::PinnedFieldsOf<__Struct<'pin, 'a, T>>:
+            ::pin_project::__private::Unpin
     {
     }
     // A dummy impl of `UnsafeUnpin`, to ensure that the user cannot implement it.
     #[doc(hidden)]
     unsafe impl<'pin, 'a, T> ::pin_project::UnsafeUnpin for Struct<'a, T> where
-        __Struct<'pin, 'a, T>: ::pin_project::__private::Unpin
+        ::pin_project::__private::PinnedFieldsOf<__Struct<'pin, 'a, T>>:
+            ::pin_project::__private::Unpin
     {
     }
 };

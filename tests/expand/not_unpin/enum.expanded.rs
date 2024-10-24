@@ -120,17 +120,21 @@ const _: () = {
     #[doc(hidden)]
     impl<'pin, T, U> _pin_project::__private::Unpin for Enum<T, U>
     where
-        _pin_project::__private::Wrapper<
-            'pin,
-            _pin_project::__private::PhantomPinned,
+        ::pin_project::__private::PinnedFieldsOf<
+            _pin_project::__private::Wrapper<
+                'pin,
+                _pin_project::__private::PhantomPinned,
+            >,
         >: _pin_project::__private::Unpin,
     {}
     #[doc(hidden)]
     unsafe impl<'pin, T, U> _pin_project::UnsafeUnpin for Enum<T, U>
     where
-        _pin_project::__private::Wrapper<
-            'pin,
-            _pin_project::__private::PhantomPinned,
+        ::pin_project::__private::PinnedFieldsOf<
+            _pin_project::__private::Wrapper<
+                'pin,
+                _pin_project::__private::PhantomPinned,
+            >,
         >: _pin_project::__private::Unpin,
     {}
     trait EnumMustNotImplDrop {}
