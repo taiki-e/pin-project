@@ -130,9 +130,8 @@ const _: () = {
         let _ = &this.unpinned2;
     }
     #[allow(missing_debug_implementations)]
-    struct __Struct<'pin, T, U> {
+    struct __Struct<T, U> {
         __pin_project_use_generics: _pin_project::__private::AlwaysUnpin<
-            'pin,
             (
                 _pin_project::__private::PhantomData<T>,
                 _pin_project::__private::PhantomData<U>,
@@ -141,17 +140,17 @@ const _: () = {
         __field0: T,
         __field1: T,
     }
-    impl<'pin, T, U> _pin_project::__private::Unpin for Struct<T, U>
+    impl<T, U> _pin_project::__private::Unpin for Struct<T, U>
     where
-        ::pin_project::__private::PinnedFieldsOf<
-            __Struct<'pin, T, U>,
+        for<'pin> ::pin_project::__private::PinnedFieldsOf<
+            __Struct<T, U>,
         >: _pin_project::__private::Unpin,
     {}
     #[doc(hidden)]
-    unsafe impl<'pin, T, U> _pin_project::UnsafeUnpin for Struct<T, U>
+    unsafe impl<T, U> _pin_project::UnsafeUnpin for Struct<T, U>
     where
-        ::pin_project::__private::PinnedFieldsOf<
-            __Struct<'pin, T, U>,
+        for<'pin> ::pin_project::__private::PinnedFieldsOf<
+            __Struct<T, U>,
         >: _pin_project::__private::Unpin,
     {}
     trait StructMustNotImplDrop {}

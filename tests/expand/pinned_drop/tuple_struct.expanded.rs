@@ -73,9 +73,8 @@ const _: () = {
         let _ = &this.1;
     }
     #[allow(missing_debug_implementations)]
-    struct __TupleStruct<'pin, T, U> {
+    struct __TupleStruct<T, U> {
         __pin_project_use_generics: _pin_project::__private::AlwaysUnpin<
-            'pin,
             (
                 _pin_project::__private::PhantomData<T>,
                 _pin_project::__private::PhantomData<U>,
@@ -83,17 +82,17 @@ const _: () = {
         >,
         __field0: T,
     }
-    impl<'pin, T, U> _pin_project::__private::Unpin for TupleStruct<T, U>
+    impl<T, U> _pin_project::__private::Unpin for TupleStruct<T, U>
     where
-        ::pin_project::__private::PinnedFieldsOf<
-            __TupleStruct<'pin, T, U>,
+        for<'pin> ::pin_project::__private::PinnedFieldsOf<
+            __TupleStruct<T, U>,
         >: _pin_project::__private::Unpin,
     {}
     #[doc(hidden)]
-    unsafe impl<'pin, T, U> _pin_project::UnsafeUnpin for TupleStruct<T, U>
+    unsafe impl<T, U> _pin_project::UnsafeUnpin for TupleStruct<T, U>
     where
-        ::pin_project::__private::PinnedFieldsOf<
-            __TupleStruct<'pin, T, U>,
+        for<'pin> ::pin_project::__private::PinnedFieldsOf<
+            __TupleStruct<T, U>,
         >: _pin_project::__private::Unpin,
     {}
     impl<T, U> _pin_project::__private::Drop for TupleStruct<T, U> {

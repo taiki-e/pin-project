@@ -129,22 +129,22 @@ const _: () = {
     //
     // See ./struct-default-expanded.rs and https://github.com/taiki-e/pin-project/pull/53.
     // for details.
-    struct __Struct<'pin, T, U> {
-        __pin_project_use_generics: ::pin_project::__private::AlwaysUnpin<
-            'pin,
-            (::pin_project::__private::PhantomData<T>, ::pin_project::__private::PhantomData<U>),
-        >,
+    struct __Struct<T, U> {
+        __pin_project_use_generics: ::pin_project::__private::AlwaysUnpin<(
+            ::pin_project::__private::PhantomData<T>,
+            ::pin_project::__private::PhantomData<U>,
+        )>,
         __field0: T,
     }
-    impl<'pin, T, U> ::pin_project::__private::Unpin for Struct<T, U> where
-        ::pin_project::__private::PinnedFieldsOf<__Struct<'pin, T, U>>:
+    impl<T, U> ::pin_project::__private::Unpin for Struct<T, U> where
+        for<'pin> ::pin_project::__private::PinnedFieldsOf<__Struct<T, U>>:
             ::pin_project::__private::Unpin
     {
     }
     // A dummy impl of `UnsafeUnpin`, to ensure that the user cannot implement it.
     #[doc(hidden)]
-    unsafe impl<'pin, T, U> ::pin_project::UnsafeUnpin for Struct<T, U> where
-        ::pin_project::__private::PinnedFieldsOf<__Struct<'pin, T, U>>:
+    unsafe impl<T, U> ::pin_project::UnsafeUnpin for Struct<T, U> where
+        for<'pin> ::pin_project::__private::PinnedFieldsOf<__Struct<T, U>>:
             ::pin_project::__private::Unpin
     {
     }

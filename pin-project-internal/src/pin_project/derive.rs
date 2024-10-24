@@ -687,19 +687,17 @@ fn proj_own_body(
 fn make_unpin_impl(cx: &Context<'_>) -> TokenStream {
     match cx.unpin_impl {
         UnpinImpl::Unsafe(span) => {
-            let mut proj_generics = cx.proj.generics.clone();
+            let mut where_clause = cx.orig.generics.where_clause.clone().unwrap();
             let orig_ident = cx.orig.ident;
+            let (impl_generics, ty_generics, _) = cx.orig.generics.split_for_impl();
             let lifetime = &cx.proj.lifetime;
 
             // Make the error message highlight `UnsafeUnpin` argument.
-            proj_generics.make_where_clause().predicates.push(parse_quote_spanned! { span =>
-                ::pin_project::__private::PinnedFieldsOf<
-                    _pin_project::__private::Wrapper<#lifetime, Self>
+            where_clause.predicates.push(parse_quote_spanned! { span =>
+                for<#lifetime> ::pin_project::__private::PinnedFieldsOf<
+                    _pin_project::__private::Wrapper<Self>
                 >: _pin_project::UnsafeUnpin
             });
-
-            let (impl_generics, _, where_clause) = proj_generics.split_for_impl();
-            let ty_generics = cx.orig.generics.split_for_impl().1;
 
             quote_spanned! { span =>
                 impl #impl_generics _pin_project::__private::Unpin for #orig_ident #ty_generics
@@ -709,27 +707,27 @@ fn make_unpin_impl(cx: &Context<'_>) -> TokenStream {
             }
         }
         UnpinImpl::Negative(span) => {
-            let mut proj_generics = cx.proj.generics.clone();
+            let mut where_clause = cx.orig.generics.where_clause.clone().unwrap();
             let orig_ident = cx.orig.ident;
+            let (impl_generics, ty_generics, _) = cx.orig.generics.split_for_impl();
             let lifetime = &cx.proj.lifetime;
 
-            proj_generics.make_where_clause().predicates.push(parse_quote! {
-                ::pin_project::__private::PinnedFieldsOf<_pin_project::__private::Wrapper<
-                    #lifetime, _pin_project::__private::PhantomPinned
-                >>: _pin_project::__private::Unpin
+            where_clause.predicates.push(parse_quote! {
+                // TODO: Using `<unsized type>: Sized` here allow emulating real negative_impls...
+                // https://github.com/taiki-e/pin-project/issues/340#issuecomment-2428002670
+                for<#lifetime> ::pin_project::__private::PinnedFieldsOf<
+                    _pin_project::__private::Wrapper<_pin_project::__private::PhantomPinned>
+                >: _pin_project::__private::Unpin
             });
-
-            let (proj_impl_generics, _, proj_where_clause) = proj_generics.split_for_impl();
-            let ty_generics = cx.orig.generics.split_for_impl().1;
 
             // For interoperability with `forbid(unsafe_code)`, `unsafe` token should be
             // call-site span.
             let unsafety = <Token![unsafe]>::default();
             quote_spanned! { span =>
                 #[doc(hidden)]
-                impl #proj_impl_generics _pin_project::__private::Unpin
+                impl #impl_generics _pin_project::__private::Unpin
                     for #orig_ident #ty_generics
-                #proj_where_clause
+                #where_clause
                 {
                 }
 
@@ -740,9 +738,9 @@ fn make_unpin_impl(cx: &Context<'_>) -> TokenStream {
                 // impl, they'll get a "conflicting implementations of trait" error when
                 // coherence checks are run.
                 #[doc(hidden)]
-                #unsafety impl #proj_impl_generics _pin_project::UnsafeUnpin
+                #unsafety impl #impl_generics _pin_project::UnsafeUnpin
                     for #orig_ident #ty_generics
-                #proj_where_clause
+                #where_clause
                 {
                 }
             }
@@ -790,12 +788,11 @@ fn make_unpin_impl(cx: &Context<'_>) -> TokenStream {
             let vis = cx.orig.vis;
             let lifetime = &cx.proj.lifetime;
             let type_params = cx.orig.generics.type_params().map(|t| &t.ident);
-            let proj_generics = &cx.proj.generics;
-            let (proj_impl_generics, proj_ty_generics, _) = proj_generics.split_for_impl();
-            let (_, ty_generics, where_clause) = cx.orig.generics.split_for_impl();
+            let orig_generics = &cx.orig.generics;
+            let (impl_generics, ty_generics, where_clause) = cx.orig.generics.split_for_impl();
 
             full_where_clause.predicates.push(parse_quote! {
-                ::pin_project::__private::PinnedFieldsOf<#struct_ident #proj_ty_generics>:
+                for<#lifetime> ::pin_project::__private::PinnedFieldsOf<#struct_ident #ty_generics>:
                     _pin_project::__private::Unpin
             });
 
@@ -811,17 +808,16 @@ fn make_unpin_impl(cx: &Context<'_>) -> TokenStream {
                 // However, we ensure that the user can never actually reference
                 // this 'public' type by creating this type in the inside of `const`.
                 #[allow(missing_debug_implementations)]
-                #vis struct #struct_ident #proj_generics #where_clause {
+                #vis struct #struct_ident #orig_generics #where_clause {
                     __pin_project_use_generics: _pin_project::__private::AlwaysUnpin<
-                        #lifetime, (#(_pin_project::__private::PhantomData<#type_params>),*)
+                        (#(_pin_project::__private::PhantomData<#type_params>),*)
                     >,
 
                     #(#fields,)*
                     #(#lifetime_fields,)*
                 }
 
-                impl #proj_impl_generics _pin_project::__private::Unpin
-                    for #orig_ident #ty_generics
+                impl #impl_generics _pin_project::__private::Unpin for #orig_ident #ty_generics
                 #full_where_clause
                 {
                 }
@@ -833,8 +829,7 @@ fn make_unpin_impl(cx: &Context<'_>) -> TokenStream {
                 // impl, they'll get a "conflicting implementations of trait" error when
                 // coherence checks are run.
                 #[doc(hidden)]
-                unsafe impl #proj_impl_generics _pin_project::UnsafeUnpin
-                    for #orig_ident #ty_generics
+                unsafe impl #impl_generics _pin_project::UnsafeUnpin for #orig_ident #ty_generics
                 #full_where_clause
                 {
                 }

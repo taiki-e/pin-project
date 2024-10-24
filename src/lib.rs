@@ -275,9 +275,9 @@ pub mod __private {
     // provide an impl of `Unpin`
     #[doc(hidden)]
     #[allow(dead_code)]
-    pub struct Wrapper<'a, T: ?Sized>(PhantomData<&'a ()>, T);
+    pub struct Wrapper<T: ?Sized>(T);
     // SAFETY: `T` implements UnsafeUnpin.
-    unsafe impl<T: ?Sized + UnsafeUnpin> UnsafeUnpin for Wrapper<'_, T> {}
+    unsafe impl<T: ?Sized + UnsafeUnpin> UnsafeUnpin for Wrapper<T> {}
 
     // Workaround for issue on unstable negative_impls feature that allows unsound overlapping Unpin
     // implementations and rustc bug that leaks unstable negative_impls into stable.
@@ -300,8 +300,8 @@ pub mod __private {
     //
     // See https://github.com/taiki-e/pin-project/pull/53 for more details.
     #[doc(hidden)]
-    pub struct AlwaysUnpin<'a, T>(PhantomData<&'a ()>, PhantomData<T>);
-    impl<T> Unpin for AlwaysUnpin<'_, T> {}
+    pub struct AlwaysUnpin<T>(PhantomData<T>);
+    impl<T> Unpin for AlwaysUnpin<T> {}
 
     // This is an internal helper used to ensure a value is dropped.
     #[doc(hidden)]

@@ -71,10 +71,10 @@ const _: () = {
         let _ = &this.0;
         let _ = &this.1;
     }
-    impl<'pin, T, U> _pin_project::__private::Unpin for TupleStruct<T, U>
+    impl<T, U> _pin_project::__private::Unpin for TupleStruct<T, U>
     where
-        ::pin_project::__private::PinnedFieldsOf<
-            _pin_project::__private::Wrapper<'pin, Self>,
+        for<'pin> ::pin_project::__private::PinnedFieldsOf<
+            _pin_project::__private::Wrapper<Self>,
         >: _pin_project::UnsafeUnpin,
     {}
     trait TupleStructMustNotImplDrop {}

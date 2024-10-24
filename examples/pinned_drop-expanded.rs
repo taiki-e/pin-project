@@ -117,20 +117,20 @@ const _: () = {
     //
     // See ./struct-default-expanded.rs and https://github.com/taiki-e/pin-project/pull/53.
     // for details.
-    pub struct __Struct<'pin, 'a, T> {
-        __pin_project_use_generics: ::pin_project::__private::AlwaysUnpin<'pin, (T)>,
+    pub struct __Struct<'a, T> {
+        __pin_project_use_generics: ::pin_project::__private::AlwaysUnpin<(T)>,
         __field0: T,
         __lifetime0: &'a (),
     }
-    impl<'pin, 'a, T> ::pin_project::__private::Unpin for Struct<'a, T> where
-        ::pin_project::__private::PinnedFieldsOf<__Struct<'pin, 'a, T>>:
+    impl<'a, T> ::pin_project::__private::Unpin for Struct<'a, T> where
+        for<'pin> ::pin_project::__private::PinnedFieldsOf<__Struct<'a, T>>:
             ::pin_project::__private::Unpin
     {
     }
     // A dummy impl of `UnsafeUnpin`, to ensure that the user cannot implement it.
     #[doc(hidden)]
-    unsafe impl<'pin, 'a, T> ::pin_project::UnsafeUnpin for Struct<'a, T> where
-        ::pin_project::__private::PinnedFieldsOf<__Struct<'pin, 'a, T>>:
+    unsafe impl<'a, T> ::pin_project::UnsafeUnpin for Struct<'a, T> where
+        for<'pin> ::pin_project::__private::PinnedFieldsOf<__Struct<'a, T>>:
             ::pin_project::__private::Unpin
     {
     }

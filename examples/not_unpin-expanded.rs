@@ -96,9 +96,9 @@ const _: () = {
     // See https://github.com/taiki-e/pin-project/issues/102#issuecomment-540472282
     // for details.
     #[doc(hidden)]
-    impl<'pin, T, U> ::pin_project::__private::Unpin for Struct<T, U> where
-        ::pin_project::__private::PinnedFieldsOf<
-            ::pin_project::__private::Wrapper<'pin, ::pin_project::__private::PhantomPinned>,
+    impl<T, U> ::pin_project::__private::Unpin for Struct<T, U> where
+        for<'pin> ::pin_project::__private::PinnedFieldsOf<
+            ::pin_project::__private::Wrapper<::pin_project::__private::PhantomPinned>,
         >: ::pin_project::__private::Unpin
     {
     }
@@ -109,9 +109,9 @@ const _: () = {
     // impl, they'll get a "conflicting implementations of trait" error when
     // coherence checks are run.
     #[doc(hidden)]
-    unsafe impl<'pin, T, U> ::pin_project::UnsafeUnpin for Struct<T, U> where
-        ::pin_project::__private::PinnedFieldsOf<
-            ::pin_project::__private::Wrapper<'pin, ::pin_project::__private::PhantomPinned>,
+    unsafe impl<T, U> ::pin_project::UnsafeUnpin for Struct<T, U> where
+        for<'pin> ::pin_project::__private::PinnedFieldsOf<
+            ::pin_project::__private::Wrapper<::pin_project::__private::PhantomPinned>,
         >: ::pin_project::__private::Unpin
     {
     }

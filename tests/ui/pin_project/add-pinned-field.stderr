@@ -2,11 +2,11 @@ error[E0277]: `PhantomPinned` cannot be unpinned
   --> tests/ui/pin_project/add-pinned-field.rs:23:16
    |
 23 |     is_unpin::<Foo>(); //~ ERROR E0277
-   |                ^^^ within `__Foo<'_>`, the trait `Unpin` is not implemented for `PhantomPinned`, which is required by `Foo: Unpin`
+   |                ^^^ within `__Foo`, the trait `Unpin` is not implemented for `PhantomPinned`, which is required by `Foo: Unpin`
    |
    = note: consider using the `pin!` macro
            consider using `Box::pin` if you need to access the pinned value outside of the current scope
-note: required because it appears within the type `__Foo<'_>`
+note: required because it appears within the type `__Foo`
   --> tests/ui/pin_project/add-pinned-field.rs:10:8
    |
 10 | struct Foo {
@@ -30,11 +30,11 @@ error[E0277]: `PhantomPinned` cannot be unpinned
   --> tests/ui/pin_project/add-pinned-field.rs:24:16
    |
 24 |     is_unpin::<Bar>(); //~ ERROR E0277
-   |                ^^^ within `__Bar<'_>`, the trait `Unpin` is not implemented for `PhantomPinned`, which is required by `Bar: Unpin`
+   |                ^^^ within `__Bar`, the trait `Unpin` is not implemented for `PhantomPinned`, which is required by `Bar: Unpin`
    |
    = note: consider using the `pin!` macro
            consider using `Box::pin` if you need to access the pinned value outside of the current scope
-note: required because it appears within the type `__Bar<'_>`
+note: required because it appears within the type `__Bar`
   --> tests/ui/pin_project/add-pinned-field.rs:17:8
    |
 17 | struct Bar {

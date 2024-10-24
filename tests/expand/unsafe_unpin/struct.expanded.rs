@@ -77,10 +77,10 @@ const _: () = {
         let _ = &this.pinned;
         let _ = &this.unpinned;
     }
-    impl<'pin, T, U> _pin_project::__private::Unpin for Struct<T, U>
+    impl<T, U> _pin_project::__private::Unpin for Struct<T, U>
     where
-        ::pin_project::__private::PinnedFieldsOf<
-            _pin_project::__private::Wrapper<'pin, Self>,
+        for<'pin> ::pin_project::__private::PinnedFieldsOf<
+            _pin_project::__private::Wrapper<Self>,
         >: _pin_project::UnsafeUnpin,
     {}
     trait StructMustNotImplDrop {}

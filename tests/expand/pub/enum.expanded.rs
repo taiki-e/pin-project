@@ -118,9 +118,8 @@ const _: () = {
         }
     }
     #[allow(missing_debug_implementations)]
-    pub struct __Enum<'pin, T, U> {
+    pub struct __Enum<T, U> {
         __pin_project_use_generics: _pin_project::__private::AlwaysUnpin<
-            'pin,
             (
                 _pin_project::__private::PhantomData<T>,
                 _pin_project::__private::PhantomData<U>,
@@ -129,17 +128,17 @@ const _: () = {
         __field0: T,
         __field1: T,
     }
-    impl<'pin, T, U> _pin_project::__private::Unpin for Enum<T, U>
+    impl<T, U> _pin_project::__private::Unpin for Enum<T, U>
     where
-        ::pin_project::__private::PinnedFieldsOf<
-            __Enum<'pin, T, U>,
+        for<'pin> ::pin_project::__private::PinnedFieldsOf<
+            __Enum<T, U>,
         >: _pin_project::__private::Unpin,
     {}
     #[doc(hidden)]
-    unsafe impl<'pin, T, U> _pin_project::UnsafeUnpin for Enum<T, U>
+    unsafe impl<T, U> _pin_project::UnsafeUnpin for Enum<T, U>
     where
-        ::pin_project::__private::PinnedFieldsOf<
-            __Enum<'pin, T, U>,
+        for<'pin> ::pin_project::__private::PinnedFieldsOf<
+            __Enum<T, U>,
         >: _pin_project::__private::Unpin,
     {}
     trait EnumMustNotImplDrop {}
