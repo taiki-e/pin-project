@@ -132,12 +132,16 @@ const _: () = {
     }
     impl<'pin, T, U> _pin_project::__private::Unpin for Enum<T, U>
     where
-        __Enum<'pin, T, U>: _pin_project::__private::Unpin,
+        ::pin_project::__private::PinnedFieldsOf<
+            __Enum<'pin, T, U>,
+        >: _pin_project::__private::Unpin,
     {}
     #[doc(hidden)]
     unsafe impl<'pin, T, U> _pin_project::UnsafeUnpin for Enum<T, U>
     where
-        __Enum<'pin, T, U>: _pin_project::__private::Unpin,
+        ::pin_project::__private::PinnedFieldsOf<
+            __Enum<'pin, T, U>,
+        >: _pin_project::__private::Unpin,
     {}
     impl<T, U> _pin_project::__private::Drop for Enum<T, U> {
         #[allow(clippy::missing_inline_in_public_items)]

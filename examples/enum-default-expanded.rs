@@ -77,13 +77,15 @@ const _: () = {
         __field0: T,
     }
     impl<'pin, T, U> ::pin_project::__private::Unpin for Enum<T, U> where
-        __Enum<'pin, T, U>: ::pin_project::__private::Unpin
+        ::pin_project::__private::PinnedFieldsOf<__Enum<'pin, T, U>>:
+            ::pin_project::__private::Unpin
     {
     }
     // A dummy impl of `UnsafeUnpin`, to ensure that the user cannot implement it.
     #[doc(hidden)]
     unsafe impl<'pin, T, U> ::pin_project::UnsafeUnpin for Enum<T, U> where
-        __Enum<'pin, T, U>: ::pin_project::__private::Unpin
+        ::pin_project::__private::PinnedFieldsOf<__Enum<'pin, T, U>>:
+            ::pin_project::__private::Unpin
     {
     }
 

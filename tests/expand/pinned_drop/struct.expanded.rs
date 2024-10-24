@@ -91,12 +91,16 @@ const _: () = {
     }
     impl<'pin, T, U> _pin_project::__private::Unpin for Struct<T, U>
     where
-        __Struct<'pin, T, U>: _pin_project::__private::Unpin,
+        ::pin_project::__private::PinnedFieldsOf<
+            __Struct<'pin, T, U>,
+        >: _pin_project::__private::Unpin,
     {}
     #[doc(hidden)]
     unsafe impl<'pin, T, U> _pin_project::UnsafeUnpin for Struct<T, U>
     where
-        __Struct<'pin, T, U>: _pin_project::__private::Unpin,
+        ::pin_project::__private::PinnedFieldsOf<
+            __Struct<'pin, T, U>,
+        >: _pin_project::__private::Unpin,
     {}
     impl<T, U> _pin_project::__private::Drop for Struct<T, U> {
         #[allow(clippy::missing_inline_in_public_items)]

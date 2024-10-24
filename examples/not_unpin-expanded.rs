@@ -95,9 +95,11 @@ const _: () = {
     //
     // See https://github.com/taiki-e/pin-project/issues/102#issuecomment-540472282
     // for details.
+    #[doc(hidden)]
     impl<'pin, T, U> ::pin_project::__private::Unpin for Struct<T, U> where
-        ::pin_project::__private::Wrapper<'pin, ::pin_project::__private::PhantomPinned>:
-            ::pin_project::__private::Unpin
+        ::pin_project::__private::PinnedFieldsOf<
+            ::pin_project::__private::Wrapper<'pin, ::pin_project::__private::PhantomPinned>,
+        >: ::pin_project::__private::Unpin
     {
     }
     // A dummy impl of `UnsafeUnpin`, to ensure that the user cannot implement it.
@@ -108,8 +110,9 @@ const _: () = {
     // coherence checks are run.
     #[doc(hidden)]
     unsafe impl<'pin, T, U> ::pin_project::UnsafeUnpin for Struct<T, U> where
-        ::pin_project::__private::Wrapper<'pin, ::pin_project::__private::PhantomPinned>:
-            ::pin_project::__private::Unpin
+        ::pin_project::__private::PinnedFieldsOf<
+            ::pin_project::__private::Wrapper<'pin, ::pin_project::__private::PhantomPinned>,
+        >: ::pin_project::__private::Unpin
     {
     }
 

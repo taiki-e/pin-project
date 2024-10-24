@@ -137,13 +137,15 @@ const _: () = {
         __field0: T,
     }
     impl<'pin, T, U> ::pin_project::__private::Unpin for Struct<T, U> where
-        __Struct<'pin, T, U>: ::pin_project::__private::Unpin
+        ::pin_project::__private::PinnedFieldsOf<__Struct<'pin, T, U>>:
+            ::pin_project::__private::Unpin
     {
     }
     // A dummy impl of `UnsafeUnpin`, to ensure that the user cannot implement it.
     #[doc(hidden)]
     unsafe impl<'pin, T, U> ::pin_project::UnsafeUnpin for Struct<T, U> where
-        __Struct<'pin, T, U>: ::pin_project::__private::Unpin
+        ::pin_project::__private::PinnedFieldsOf<__Struct<'pin, T, U>>:
+            ::pin_project::__private::Unpin
     {
     }
 

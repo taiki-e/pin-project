@@ -693,7 +693,9 @@ fn make_unpin_impl(cx: &Context<'_>) -> TokenStream {
 
             // Make the error message highlight `UnsafeUnpin` argument.
             proj_generics.make_where_clause().predicates.push(parse_quote_spanned! { span =>
-                _pin_project::__private::Wrapper<#lifetime, Self>: _pin_project::UnsafeUnpin
+                ::pin_project::__private::PinnedFieldsOf<
+                    _pin_project::__private::Wrapper<#lifetime, Self>
+                >: _pin_project::UnsafeUnpin
             });
 
             let (impl_generics, _, where_clause) = proj_generics.split_for_impl();
@@ -712,9 +714,9 @@ fn make_unpin_impl(cx: &Context<'_>) -> TokenStream {
             let lifetime = &cx.proj.lifetime;
 
             proj_generics.make_where_clause().predicates.push(parse_quote! {
-                _pin_project::__private::Wrapper<
+                ::pin_project::__private::PinnedFieldsOf<_pin_project::__private::Wrapper<
                     #lifetime, _pin_project::__private::PhantomPinned
-                >: _pin_project::__private::Unpin
+                >>: _pin_project::__private::Unpin
             });
 
             let (proj_impl_generics, _, proj_where_clause) = proj_generics.split_for_impl();
@@ -793,7 +795,8 @@ fn make_unpin_impl(cx: &Context<'_>) -> TokenStream {
             let (_, ty_generics, where_clause) = cx.orig.generics.split_for_impl();
 
             full_where_clause.predicates.push(parse_quote! {
-                #struct_ident #proj_ty_generics: _pin_project::__private::Unpin
+                ::pin_project::__private::PinnedFieldsOf<#struct_ident #proj_ty_generics>:
+                    _pin_project::__private::Unpin
             });
 
             quote! {
