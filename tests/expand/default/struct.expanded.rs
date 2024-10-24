@@ -90,14 +90,14 @@ const _: () = {
     }
     impl<'pin, T, U> _pin_project::__private::Unpin for Struct<T, U>
     where
-        ::pin_project::__private::PinnedFieldsOf<
+        _pin_project::__private::PinnedFieldsOf<
             __Struct<'pin, T, U>,
         >: _pin_project::__private::Unpin,
     {}
     #[doc(hidden)]
     unsafe impl<'pin, T, U> _pin_project::UnsafeUnpin for Struct<T, U>
     where
-        ::pin_project::__private::PinnedFieldsOf<
+        _pin_project::__private::PinnedFieldsOf<
             __Struct<'pin, T, U>,
         >: _pin_project::__private::Unpin,
     {}

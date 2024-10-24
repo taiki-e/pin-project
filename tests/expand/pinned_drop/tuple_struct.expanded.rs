@@ -85,14 +85,14 @@ const _: () = {
     }
     impl<'pin, T, U> _pin_project::__private::Unpin for TupleStruct<T, U>
     where
-        ::pin_project::__private::PinnedFieldsOf<
+        _pin_project::__private::PinnedFieldsOf<
             __TupleStruct<'pin, T, U>,
         >: _pin_project::__private::Unpin,
     {}
     #[doc(hidden)]
     unsafe impl<'pin, T, U> _pin_project::UnsafeUnpin for TupleStruct<T, U>
     where
-        ::pin_project::__private::PinnedFieldsOf<
+        _pin_project::__private::PinnedFieldsOf<
             __TupleStruct<'pin, T, U>,
         >: _pin_project::__private::Unpin,
     {}

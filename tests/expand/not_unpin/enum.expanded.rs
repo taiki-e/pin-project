@@ -120,7 +120,7 @@ const _: () = {
     #[doc(hidden)]
     impl<'pin, T, U> _pin_project::__private::Unpin for Enum<T, U>
     where
-        ::pin_project::__private::PinnedFieldsOf<
+        _pin_project::__private::PinnedFieldsOf<
             _pin_project::__private::Wrapper<
                 'pin,
                 _pin_project::__private::PhantomPinned,
@@ -130,7 +130,7 @@ const _: () = {
     #[doc(hidden)]
     unsafe impl<'pin, T, U> _pin_project::UnsafeUnpin for Enum<T, U>
     where
-        ::pin_project::__private::PinnedFieldsOf<
+        _pin_project::__private::PinnedFieldsOf<
             _pin_project::__private::Wrapper<
                 'pin,
                 _pin_project::__private::PhantomPinned,
