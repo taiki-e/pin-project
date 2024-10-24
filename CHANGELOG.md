@@ -12,6 +12,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+## [1.1.7] - 2024-10-24
+
 - Work around an issue on negative_impls that allows unsound overlapping `Unpin` implementations. ([#357](https://github.com/taiki-e/pin-project/pull/357))
 
 ## [1.1.6] - 2024-10-05
@@ -714,7 +716,8 @@ See also [tracking issue for 0.4 release](https://github.com/taiki-e/pin-project
 
 Initial release
 
-[Unreleased]: https://github.com/taiki-e/pin-project/compare/v1.1.6...HEAD
+[Unreleased]: https://github.com/taiki-e/pin-project/compare/v1.1.7...HEAD
+[1.1.7]: https://github.com/taiki-e/pin-project/compare/v1.1.6...v1.1.7
 [1.1.6]: https://github.com/taiki-e/pin-project/compare/v1.1.5...v1.1.6
 [1.1.5]: https://github.com/taiki-e/pin-project/compare/v1.1.4...v1.1.5
 [1.1.4]: https://github.com/taiki-e/pin-project/compare/v1.1.3...v1.1.4
