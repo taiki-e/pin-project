@@ -107,7 +107,6 @@ impl GenerateTokens {
 /// Returns attributes that should be applied to all generated code.
 fn global_allowed_lints() -> TokenStream {
     quote! {
-        #[allow(box_pointers)] // This lint warns use of the `Box` type.
         #[allow(deprecated)]
         #[allow(explicit_outlives_requirements)] // https://github.com/rust-lang/rust/issues/60993
         #[allow(single_use_lifetimes)] // https://github.com/rust-lang/rust/issues/55058

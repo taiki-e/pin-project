@@ -1,7 +1,6 @@
 use pin_project::pin_project;
 #[pin(__private(project = Proj, project_ref = ProjRef, project_replace = ProjOwn))]
 struct TupleStruct<T, U>(#[pin] T, U);
-#[allow(box_pointers)]
 #[allow(deprecated)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
@@ -20,7 +19,6 @@ struct Proj<'pin, T, U>(
 )
 where
     TupleStruct<T, U>: 'pin;
-#[allow(box_pointers)]
 #[allow(deprecated)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
@@ -39,7 +37,6 @@ struct ProjRef<'pin, T, U>(
 )
 where
     TupleStruct<T, U>: 'pin;
-#[allow(box_pointers)]
 #[allow(deprecated)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
@@ -52,7 +49,6 @@ where
 #[allow(dead_code)]
 #[allow(clippy::missing_docs_in_private_items)]
 struct ProjOwn<T, U>(::pin_project::__private::PhantomData<T>, U);
-#[allow(box_pointers)]
 #[allow(deprecated)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]

@@ -1,7 +1,6 @@
 use pin_project::pin_project;
 #[pin(__private(project_ref = ProjRef))]
 struct TupleStruct<T, U>(#[pin] T, U);
-#[allow(box_pointers)]
 #[allow(deprecated)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
@@ -20,7 +19,6 @@ struct ProjRef<'pin, T, U>(
 )
 where
     TupleStruct<T, U>: 'pin;
-#[allow(box_pointers)]
 #[allow(deprecated)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]

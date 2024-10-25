@@ -2,7 +2,6 @@ use std::pin::Pin;
 use pin_project::{pin_project, pinned_drop};
 #[pin(__private(PinnedDrop))]
 struct TupleStruct<T, U>(#[pin] T, U);
-#[allow(box_pointers)]
 #[allow(deprecated)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]

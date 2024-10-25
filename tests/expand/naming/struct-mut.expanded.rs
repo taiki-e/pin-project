@@ -5,7 +5,6 @@ struct Struct<T, U> {
     pinned: T,
     unpinned: U,
 }
-#[allow(box_pointers)]
 #[allow(deprecated)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
@@ -25,7 +24,6 @@ where
     pinned: ::pin_project::__private::Pin<&'pin mut (T)>,
     unpinned: &'pin mut (U),
 }
-#[allow(box_pointers)]
 #[allow(deprecated)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]

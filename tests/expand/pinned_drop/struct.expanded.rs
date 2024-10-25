@@ -6,7 +6,6 @@ struct Struct<T, U> {
     pinned: T,
     unpinned: U,
 }
-#[allow(box_pointers)]
 #[allow(deprecated)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]

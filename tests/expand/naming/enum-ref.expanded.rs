@@ -5,7 +5,6 @@ enum Enum<T, U> {
     Tuple(#[pin] T, U),
     Unit,
 }
-#[allow(box_pointers)]
 #[allow(deprecated)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
@@ -26,7 +25,6 @@ where
     Tuple(::pin_project::__private::Pin<&'pin (T)>, &'pin (U)),
     Unit,
 }
-#[allow(box_pointers)]
 #[allow(deprecated)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]

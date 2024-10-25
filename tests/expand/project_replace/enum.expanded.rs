@@ -5,7 +5,6 @@ enum Enum<T, U> {
     Tuple(#[pin] T, U),
     Unit,
 }
-#[allow(box_pointers)]
 #[allow(deprecated)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
@@ -24,7 +23,6 @@ enum EnumProjOwn<T, U> {
     Tuple(::pin_project::__private::PhantomData<T>, U),
     Unit,
 }
-#[allow(box_pointers)]
 #[allow(deprecated)]
 #[allow(explicit_outlives_requirements)]
 #[allow(single_use_lifetimes)]
