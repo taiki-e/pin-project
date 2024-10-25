@@ -712,6 +712,8 @@ fn make_unpin_impl(cx: &Context<'_>) -> TokenStream {
             let orig_ident = cx.orig.ident;
             let lifetime = &cx.proj.lifetime;
 
+            // TODO: Using `<unsized type>: Sized` here allow emulating real negative_impls...
+            // https://github.com/taiki-e/pin-project/issues/340#issuecomment-2428002670
             proj_generics.make_where_clause().predicates.push(parse_quote! {
                 _pin_project::__private::PinnedFieldsOf<_pin_project::__private::Wrapper<
                     #lifetime, _pin_project::__private::PhantomPinned
