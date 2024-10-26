@@ -246,8 +246,7 @@ enum TypeKind {
     Enum,
     Struct,
 }
-
-use TypeKind::{Enum, Struct};
+use self::TypeKind::{Enum, Struct};
 
 struct OriginalType<'a> {
     /// Attributes of the original type.
