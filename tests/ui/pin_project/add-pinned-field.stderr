@@ -2,7 +2,7 @@ error[E0277]: `PhantomPinned` cannot be unpinned
   --> tests/ui/pin_project/add-pinned-field.rs:23:16
    |
 23 |     is_unpin::<Foo>(); //~ ERROR E0277
-   |                ^^^ within `__Foo<'_>`, the trait `Unpin` is not implemented for `PhantomPinned`, which is required by `Foo: Unpin`
+   |                ^^^ within `__Foo<'_>`, the trait `Unpin` is not implemented for `PhantomPinned`
    |
    = note: consider using the `pin!` macro
            consider using `Box::pin` if you need to access the pinned value outside of the current scope
@@ -30,7 +30,7 @@ error[E0277]: `PhantomPinned` cannot be unpinned
   --> tests/ui/pin_project/add-pinned-field.rs:24:16
    |
 24 |     is_unpin::<Bar>(); //~ ERROR E0277
-   |                ^^^ within `__Bar<'_>`, the trait `Unpin` is not implemented for `PhantomPinned`, which is required by `Bar: Unpin`
+   |                ^^^ within `__Bar<'_>`, the trait `Unpin` is not implemented for `PhantomPinned`
    |
    = note: consider using the `pin!` macro
            consider using `Box::pin` if you need to access the pinned value outside of the current scope

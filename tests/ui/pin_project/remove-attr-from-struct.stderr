@@ -22,7 +22,7 @@ error[E0277]: `PhantomPinned` cannot be unpinned
   --> tests/ui/pin_project/remove-attr-from-struct.rs:37:16
    |
 37 |     is_unpin::<A>(); //~ ERROR E0277
-   |                ^ within `A`, the trait `Unpin` is not implemented for `PhantomPinned`, which is required by `A: Unpin`
+   |                ^ within `A`, the trait `Unpin` is not implemented for `PhantomPinned`
    |
    = note: consider using the `pin!` macro
            consider using `Box::pin` if you need to access the pinned value outside of the current scope
@@ -41,7 +41,7 @@ error[E0277]: `PhantomPinned` cannot be unpinned
   --> tests/ui/pin_project/remove-attr-from-struct.rs:38:16
    |
 38 |     is_unpin::<B>(); //~ ERROR E0277
-   |                ^ within `B`, the trait `Unpin` is not implemented for `PhantomPinned`, which is required by `B: Unpin`
+   |                ^ within `B`, the trait `Unpin` is not implemented for `PhantomPinned`
    |
    = note: consider using the `pin!` macro
            consider using `Box::pin` if you need to access the pinned value outside of the current scope
@@ -60,7 +60,7 @@ error[E0277]: `PhantomPinned` cannot be unpinned
   --> tests/ui/pin_project/remove-attr-from-struct.rs:42:22
    |
 42 |     let _ = Pin::new(&mut x).project(); //~ ERROR E0277,E0599
-   |             -------- ^^^^^^ within `A`, the trait `Unpin` is not implemented for `PhantomPinned`, which is required by `A: Unpin`
+   |             -------- ^^^^^^ within `A`, the trait `Unpin` is not implemented for `PhantomPinned`
    |             |
    |             required by a bound introduced by this call
    |
@@ -90,7 +90,7 @@ error[E0277]: `PhantomPinned` cannot be unpinned
   --> tests/ui/pin_project/remove-attr-from-struct.rs:45:22
    |
 45 |     let _ = Pin::new(&mut x).project(); //~ ERROR E0277,E0599
-   |             -------- ^^^^^^ within `B`, the trait `Unpin` is not implemented for `PhantomPinned`, which is required by `B: Unpin`
+   |             -------- ^^^^^^ within `B`, the trait `Unpin` is not implemented for `PhantomPinned`
    |             |
    |             required by a bound introduced by this call
    |

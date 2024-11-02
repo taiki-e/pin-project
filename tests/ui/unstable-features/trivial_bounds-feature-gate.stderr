@@ -16,7 +16,7 @@ error[E0277]: `PhantomPinned` cannot be unpinned
   --> tests/ui/unstable-features/trivial_bounds-feature-gate.rs:18:28
    |
 18 |     impl Unpin for B where Wrapper<PhantomPinned>: Unpin {} //~ ERROR E0277
-   |                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `Unpin` is not implemented for `PhantomPinned`, which is required by `phantom_pinned::Wrapper<PhantomPinned>: Unpin`
+   |                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `Unpin` is not implemented for `PhantomPinned`
    |
    = note: consider using the `pin!` macro
            consider using `Box::pin` if you need to access the pinned value outside of the current scope
@@ -35,7 +35,7 @@ error[E0277]: `PhantomPinned` cannot be unpinned
   --> tests/ui/unstable-features/trivial_bounds-feature-gate.rs:36:28
    |
 36 |     impl Unpin for A where Inner: Unpin {} //~ ERROR E0277
-   |                            ^^^^^^^^^^^^ within `Inner`, the trait `Unpin` is not implemented for `PhantomPinned`, which is required by `Inner: Unpin`
+   |                            ^^^^^^^^^^^^ within `Inner`, the trait `Unpin` is not implemented for `PhantomPinned`
    |
    = note: consider using the `pin!` macro
            consider using `Box::pin` if you need to access the pinned value outside of the current scope
@@ -54,7 +54,7 @@ error[E0277]: `PhantomPinned` cannot be unpinned
   --> tests/ui/unstable-features/trivial_bounds-feature-gate.rs:44:28
    |
 44 |     impl Unpin for B where Wrapper<Inner>: Unpin {} //~ ERROR E0277
-   |                            ^^^^^^^^^^^^^^^^^^^^^ within `Inner`, the trait `Unpin` is not implemented for `PhantomPinned`, which is required by `inner::Wrapper<Inner>: Unpin`
+   |                            ^^^^^^^^^^^^^^^^^^^^^ within `Inner`, the trait `Unpin` is not implemented for `PhantomPinned`
    |
    = note: consider using the `pin!` macro
            consider using `Box::pin` if you need to access the pinned value outside of the current scope
