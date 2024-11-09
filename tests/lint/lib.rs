@@ -60,6 +60,7 @@
     clippy::absolute_paths,
     clippy::allow_attributes,
     clippy::allow_attributes_without_reason,
+    clippy::arbitrary_source_item_ordering,
     clippy::exhaustive_enums,
     clippy::exhaustive_structs,
     clippy::min_ident_chars,
