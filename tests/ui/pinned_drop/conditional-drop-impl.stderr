@@ -25,7 +25,7 @@ note: required for `PinnedDropImpl<T>` to implement `PinnedDrop`
    |         -----  ^^^^^^^^^^     ^^^^^^^^^^^^^^^^^
    |         |
    |         unsatisfied trait bound introduced here
-help: consider restricting type parameter `T`
+help: consider restricting type parameter `T` with trait `Unpin`
    |
 19 | struct PinnedDropImpl<T: std::marker::Unpin> {
    |                        ++++++++++++++++++++
