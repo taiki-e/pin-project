@@ -12,6 +12,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+## [1.1.8] - 2025-01-06
+
 - Suppress `unnameable_types`, `clippy::absolute_paths`, `clippy::min_ident_chars`, `clippy::pub_with_shorthand`, `clippy::single_call_fn`, `clippy::single_char_lifetime_names` lints in generated code.
 
 ## [1.1.7] - 2024-10-24
@@ -718,7 +720,8 @@ See also [tracking issue for 0.4 release](https://github.com/taiki-e/pin-project
 
 Initial release
 
-[Unreleased]: https://github.com/taiki-e/pin-project/compare/v1.1.7...HEAD
+[Unreleased]: https://github.com/taiki-e/pin-project/compare/v1.1.8...HEAD
+[1.1.8]: https://github.com/taiki-e/pin-project/compare/v1.1.7...v1.1.8
 [1.1.7]: https://github.com/taiki-e/pin-project/compare/v1.1.6...v1.1.7
 [1.1.6]: https://github.com/taiki-e/pin-project/compare/v1.1.5...v1.1.6
 [1.1.5]: https://github.com/taiki-e/pin-project/compare/v1.1.4...v1.1.5
