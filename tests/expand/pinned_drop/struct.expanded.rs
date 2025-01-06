@@ -114,11 +114,9 @@ const _: () = {
     }
 };
 #[doc(hidden)]
-#[allow(unused_qualifications, clippy::unknown_clippy_lints, clippy::absolute_paths)]
 impl<T, U> ::pin_project::__private::PinnedDrop for Struct<T, U> {
     unsafe fn drop(self: Pin<&mut Self>) {
-        #[allow(clippy::needless_pass_by_value)]
-        #[allow(clippy::single_call_fn)]
+        #[allow(clippy::needless_pass_by_value, clippy::single_call_fn)]
         fn __drop_inner<T, U>(__self: Pin<&mut Struct<T, U>>) {
             fn __drop_inner() {}
             let _ = __self;

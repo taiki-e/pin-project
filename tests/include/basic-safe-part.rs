@@ -80,6 +80,7 @@ pub struct PinnedDropStruct<T, U> {
 
 #[::pin_project::pinned_drop]
 impl<T, U> PinnedDrop for PinnedDropStruct<T, U> {
+    #[allow(clippy::absolute_paths)]
     fn drop(self: ::pin_project::__private::Pin<&mut Self>) {}
 }
 
@@ -91,6 +92,7 @@ pub struct PinnedDropTupleStruct<T, U>(#[pin] pub T, pub U);
 
 #[::pin_project::pinned_drop]
 impl<T, U> PinnedDrop for PinnedDropTupleStruct<T, U> {
+    #[allow(clippy::absolute_paths)]
     fn drop(self: ::pin_project::__private::Pin<&mut Self>) {}
 }
 
@@ -118,6 +120,7 @@ pub enum PinnedDropEnum<T: ::pin_project::__private::Unpin, U> {
 }
 
 #[::pin_project::pinned_drop]
+#[allow(clippy::absolute_paths)]
 impl<T: ::pin_project::__private::Unpin, U> PinnedDrop for PinnedDropEnum<T, U> {
     fn drop(self: ::pin_project::__private::Pin<&mut Self>) {}
 }
