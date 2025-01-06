@@ -31,6 +31,7 @@
     unused_parens,
     unknown_lints,
     renamed_and_removed_lints,
+    unnameable_types,
     clippy::mut_mut,
     clippy::needless_lifetimes,
     clippy::undocumented_unsafe_blocks
