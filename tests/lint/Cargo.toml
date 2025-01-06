@@ -11,4 +11,5 @@ path = "lib.rs"
 pin-project = { path = "../.." }
 
 [lints]
-workspace = true
+# Set at the crate root.
+# workspace = true

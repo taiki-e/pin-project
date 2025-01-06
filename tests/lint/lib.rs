@@ -2,8 +2,7 @@
 
 //! Check interoperability with rustc and clippy lints.
 
-// for old compilers
-#![allow(unknown_lints)]
+#![allow(unknown_lints)] // for old compilers
 #![warn(nonstandard_style, rust_2018_idioms, unused, deprecated_safe)]
 // Note: This does not guarantee compatibility with forbidding these lints in the future.
 // If rustc adds a new lint, we may not be able to keep this.
@@ -14,7 +13,7 @@
     rust_2024_compatibility
 )]
 // lints forbidden as a part of future_incompatible, rust_2018_compatibility, rust_2021_compatibility, rust_2024_compatibility are not included in the list below.
-// elided_lifetimes_in_paths, explicit_outlives_requirements, unused_extern_crates:  as a part of rust_2018_idioms
+// elided_lifetimes_in_paths, explicit_outlives_requirements, unused_extern_crates: included as a part of rust_2018_idioms
 // non_exhaustive_omitted_patterns, multiple_supertrait_upcastable: unstable
 // unstable_features: no way to generate #![feature(..)] by macros, expect for unstable inner attribute. and this lint is deprecated: https://doc.rust-lang.org/rustc/lints/listing/allowed-by-default.html#unstable-features
 // unused_crate_dependencies, must_not_suspend: unrelated
@@ -34,7 +33,7 @@
     missing_copy_implementations,
     missing_debug_implementations,
     missing_docs,
-    non_ascii_idents,
+    non_ascii_idents, // TODO: add test case
     non_local_definitions,
     noop_method_call,
     private_bounds,
@@ -45,7 +44,7 @@
     trivial_casts,
     trivial_numeric_casts,
     unit_bindings,
-    // unnameable_types, // TODO
+    unnameable_types,
     unqualified_local_imports,
     unreachable_pub,
     unused_import_braces,
@@ -57,18 +56,10 @@
 #![warn(clippy::all, clippy::pedantic, clippy::nursery, clippy::restriction)]
 #![allow(clippy::blanket_clippy_restriction_lints)] // this is a test, so enable all restriction lints intentionally.
 #![allow(
-    clippy::absolute_paths,
     clippy::allow_attributes,
     clippy::allow_attributes_without_reason,
-    clippy::arbitrary_source_item_ordering,
-    clippy::exhaustive_enums,
-    clippy::exhaustive_structs,
-    clippy::min_ident_chars,
-    clippy::pub_with_shorthand,
-    clippy::single_call_fn,
-    clippy::single_char_lifetime_names
+    clippy::arbitrary_source_item_ordering
 )] // TODO
-#![allow(clippy::lint_groups_priority)] // https://github.com/rust-lang/rust-clippy/issues/12920
 
 /// Test for basic cases.
 pub mod basic {
@@ -83,6 +74,7 @@ pub mod basic {
                 /// Testing default struct.
                 #[::pin_project::pin_project]
                 #[derive(Debug)]
+                #[allow(clippy::exhaustive_structs)] // for the type itself
                 pub struct DefaultStruct<T, U> {
                     /// Pinned field.
                     #[pin]
@@ -97,6 +89,7 @@ pub mod basic {
                     project_ref = DefaultStructNamedProjRef,
                 )]
                 #[derive(Debug)]
+                #[allow(clippy::exhaustive_structs)] // for the type itself
                 pub struct DefaultStructNamed<T, U> {
                     /// Pinned field.
                     #[pin]
@@ -106,11 +99,13 @@ pub mod basic {
                 }
 
                 /// Testing default tuple struct.
+                #[allow(clippy::exhaustive_structs)] // for the type itself
                 #[::pin_project::pin_project]
                 #[derive(Debug)]
                 pub struct DefaultTupleStruct<T, U>(#[pin] pub T, pub U);
 
                 /// Testing named tuple struct.
+                #[allow(clippy::exhaustive_structs)] // for the type itself
                 #[::pin_project::pin_project(
                     project = DefaultTupleStructNamedProj,
                     project_ref = DefaultTupleStructNamedProjRef,
@@ -119,6 +114,7 @@ pub mod basic {
                 pub struct DefaultTupleStructNamed<T, U>(#[pin] pub T, pub U);
 
                 /// Testing enum.
+                #[allow(clippy::exhaustive_enums)] // for the type itself
                 #[::pin_project::pin_project(
                     project = DefaultEnumProj,
                     project_ref = DefaultEnumProjRef,
@@ -140,6 +136,7 @@ pub mod basic {
                 }
 
                 /// Testing pinned drop struct.
+                #[allow(clippy::exhaustive_structs)] // for the type itself
                 #[::pin_project::pin_project(PinnedDrop)]
                 #[derive(Debug)]
                 pub struct PinnedDropStruct<T, U> {
@@ -156,6 +153,7 @@ pub mod basic {
                 }
 
                 /// Testing pinned drop tuple struct.
+                #[allow(clippy::exhaustive_structs)] // for the type itself
                 #[::pin_project::pin_project(PinnedDrop)]
                 #[derive(Debug)]
                 pub struct PinnedDropTupleStruct<T, U>(#[pin] pub T, pub U);
@@ -166,6 +164,7 @@ pub mod basic {
                 }
 
                 /// Testing pinned drop enum.
+                #[allow(clippy::exhaustive_enums)] // for the type itself
                 #[::pin_project::pin_project(
                     PinnedDrop,
                     project = PinnedDropEnumProj,
@@ -195,6 +194,7 @@ pub mod basic {
                 /// Testing default struct with replace.
                 #[::pin_project::pin_project(project_replace)]
                 #[derive(Debug)]
+                #[allow(clippy::exhaustive_structs)] // for the type itself
                 pub struct ReplaceStruct<T, U> {
                     /// Pinned field.
                     #[pin]
@@ -204,6 +204,7 @@ pub mod basic {
                 }
 
                 /// Testing named struct with replace.
+                #[allow(clippy::exhaustive_structs)] // for the type itself
                 #[::pin_project::pin_project(
                     project = ReplaceStructNamedProj,
                     project_ref = ReplaceStructNamedProjRef,
@@ -220,10 +221,12 @@ pub mod basic {
 
                 /// Testing default struct with replace.
                 #[::pin_project::pin_project(project_replace)]
+                #[allow(clippy::exhaustive_structs)] // for the type itself
                 #[derive(Debug)]
                 pub struct ReplaceTupleStruct<T, U>(#[pin] pub T, pub U);
 
                 /// Testing named struct with replace.
+                #[allow(clippy::exhaustive_structs)] // for the type itself
                 #[::pin_project::pin_project(
                     project = ReplaceTupleStructNamedProj,
                     project_ref = ReplaceTupleStructNamedProjRef,
@@ -233,6 +236,7 @@ pub mod basic {
                 pub struct ReplaceTupleStructNamed<T, U>(#[pin] pub T, pub U);
 
                 /// Testing enum with replace.
+                #[allow(clippy::exhaustive_enums)] // for the type itself
                 #[::pin_project::pin_project(
                     project = ReplaceEnumProj,
                     project_ref = ReplaceEnumProjRef,
@@ -255,6 +259,7 @@ pub mod basic {
                 }
 
                 /// Testing struct with unsafe `Unpin`.
+                #[allow(clippy::exhaustive_structs)] // for the type itself
                 #[::pin_project::pin_project(UnsafeUnpin)]
                 #[derive(Debug)]
                 pub struct UnsafeUnpinStruct<T, U> {
@@ -266,11 +271,13 @@ pub mod basic {
                 }
 
                 /// Testing tuple struct with unsafe `Unpin`.
+                #[allow(clippy::exhaustive_structs)] // for the type itself
                 #[::pin_project::pin_project(UnsafeUnpin)]
                 #[derive(Debug)]
                 pub struct UnsafeUnpinTupleStruct<T, U>(#[pin] pub T, pub U);
 
                 /// Testing enum unsafe `Unpin`.
+                #[allow(clippy::exhaustive_enums)] // for the type itself
                 #[::pin_project::pin_project(
                     UnsafeUnpin,
                     project = UnsafeUnpinEnumProj,
@@ -294,6 +301,7 @@ pub mod basic {
 
 
                 /// Testing struct with `!Unpin`.
+                #[allow(clippy::exhaustive_structs)] // for the type itself
                 #[::pin_project::pin_project(!Unpin)]
                 #[derive(Debug)]
                 pub struct NotUnpinStruct<T, U> {
@@ -305,11 +313,13 @@ pub mod basic {
                 }
 
                 /// Testing tuple struct with `!Unpin`.
+                #[allow(clippy::exhaustive_structs)] // for the type itself
                 #[::pin_project::pin_project(!Unpin)]
                 #[derive(Debug)]
                 pub struct NotUnpinTupleStruct<T, U>(#[pin] pub T, pub U);
 
                 /// Testing enum with `!Unpin`.
+                #[allow(clippy::exhaustive_enums)] // for the type itself
                 #[::pin_project::pin_project(
                     !Unpin,
                     project = NotUnpinEnumProj,
@@ -367,6 +377,7 @@ pub mod forbid_unsafe {
             () => {
                 /// Testing default struct.
                 #[::pin_project::pin_project]
+                #[allow(clippy::exhaustive_structs)] // for the type itself
                 #[derive(Debug)]
                 pub struct DefaultStruct<T, U> {
                     /// Pinned field.
@@ -377,6 +388,7 @@ pub mod forbid_unsafe {
                 }
 
                 /// Testing named struct.
+                #[allow(clippy::exhaustive_structs)] // for the type itself
                 #[::pin_project::pin_project(
                     project = DefaultStructNamedProj,
                     project_ref = DefaultStructNamedProjRef,
@@ -391,11 +403,13 @@ pub mod forbid_unsafe {
                 }
 
                 /// Testing default tuple struct.
+                #[allow(clippy::exhaustive_structs)] // for the type itself
                 #[::pin_project::pin_project]
                 #[derive(Debug)]
                 pub struct DefaultTupleStruct<T, U>(#[pin] pub T, pub U);
 
                 /// Testing named tuple struct.
+                #[allow(clippy::exhaustive_structs)] // for the type itself
                 #[::pin_project::pin_project(
                     project = DefaultTupleStructNamedProj,
                     project_ref = DefaultTupleStructNamedProjRef,
@@ -404,6 +418,7 @@ pub mod forbid_unsafe {
                 pub struct DefaultTupleStructNamed<T, U>(#[pin] pub T, pub U);
 
                 /// Testing enum.
+                #[allow(clippy::exhaustive_enums)] // for the type itself
                 #[::pin_project::pin_project(
                     project = DefaultEnumProj,
                     project_ref = DefaultEnumProjRef,
@@ -425,6 +440,7 @@ pub mod forbid_unsafe {
                 }
 
                 /// Testing pinned drop struct.
+                #[allow(clippy::exhaustive_structs)] // for the type itself
                 #[::pin_project::pin_project(PinnedDrop)]
                 #[derive(Debug)]
                 pub struct PinnedDropStruct<T, U> {
@@ -441,6 +457,7 @@ pub mod forbid_unsafe {
                 }
 
                 /// Testing pinned drop tuple struct.
+                #[allow(clippy::exhaustive_structs)] // for the type itself
                 #[::pin_project::pin_project(PinnedDrop)]
                 #[derive(Debug)]
                 pub struct PinnedDropTupleStruct<T, U>(#[pin] pub T, pub U);
@@ -451,6 +468,7 @@ pub mod forbid_unsafe {
                 }
 
                 /// Testing pinned drop enum.
+                #[allow(clippy::exhaustive_enums)] // for the type itself
                 #[::pin_project::pin_project(
                     PinnedDrop,
                     project = PinnedDropEnumProj,
@@ -479,6 +497,7 @@ pub mod forbid_unsafe {
 
                 /// Testing default struct with replace.
                 #[::pin_project::pin_project(project_replace)]
+                #[allow(clippy::exhaustive_structs)] // for the type itself
                 #[derive(Debug)]
                 pub struct ReplaceStruct<T, U> {
                     /// Pinned field.
@@ -489,6 +508,7 @@ pub mod forbid_unsafe {
                 }
 
                 /// Testing named struct with replace.
+                #[allow(clippy::exhaustive_structs)] // for the type itself
                 #[::pin_project::pin_project(
                     project = ReplaceStructNamedProj,
                     project_ref = ReplaceStructNamedProjRef,
@@ -504,11 +524,13 @@ pub mod forbid_unsafe {
                 }
 
                 /// Testing default struct with replace.
+                #[allow(clippy::exhaustive_structs)] // for the type itself
                 #[::pin_project::pin_project(project_replace)]
                 #[derive(Debug)]
                 pub struct ReplaceTupleStruct<T, U>(#[pin] pub T, pub U);
 
                 /// Testing named struct with replace.
+                #[allow(clippy::exhaustive_structs)] // for the type itself
                 #[::pin_project::pin_project(
                     project = ReplaceTupleStructNamedProj,
                     project_ref = ReplaceTupleStructNamedProjRef,
@@ -518,6 +540,7 @@ pub mod forbid_unsafe {
                 pub struct ReplaceTupleStructNamed<T, U>(#[pin] pub T, pub U);
 
                 /// Testing enum with replace.
+                #[allow(clippy::exhaustive_enums)] // for the type itself
                 #[::pin_project::pin_project(
                     project = ReplaceEnumProj,
                     project_ref = ReplaceEnumProjRef,
@@ -540,6 +563,7 @@ pub mod forbid_unsafe {
                 }
 
                 /// Testing struct with unsafe `Unpin`.
+                #[allow(clippy::exhaustive_structs)] // for the type itself
                 #[::pin_project::pin_project(UnsafeUnpin)]
                 #[derive(Debug)]
                 pub struct UnsafeUnpinStruct<T, U> {
@@ -551,11 +575,13 @@ pub mod forbid_unsafe {
                 }
 
                 /// Testing tuple struct with unsafe `Unpin`.
+                #[allow(clippy::exhaustive_structs)] // for the type itself
                 #[::pin_project::pin_project(UnsafeUnpin)]
                 #[derive(Debug)]
                 pub struct UnsafeUnpinTupleStruct<T, U>(#[pin] pub T, pub U);
 
                 /// Testing enum unsafe `Unpin`.
+                #[allow(clippy::exhaustive_enums)] // for the type itself
                 #[::pin_project::pin_project(
                     UnsafeUnpin,
                     project = UnsafeUnpinEnumProj,
@@ -580,6 +606,7 @@ pub mod forbid_unsafe {
                 /// Testing struct with `!Unpin`.
                 #[::pin_project::pin_project(!Unpin)]
                 #[derive(Debug)]
+                #[allow(clippy::exhaustive_structs)] // for the type itself
                 pub struct NotUnpinStruct<T, U> {
                     /// Pinned field.
                     #[pin]
@@ -589,11 +616,13 @@ pub mod forbid_unsafe {
                 }
 
                 /// Testing tuple struct with `!Unpin`.
+                #[allow(clippy::exhaustive_structs)] // for the type itself
                 #[::pin_project::pin_project(!Unpin)]
                 #[derive(Debug)]
                 pub struct NotUnpinTupleStruct<T, U>(#[pin] pub T, pub U);
 
                 /// Testing enum with `!Unpin`.
+                #[allow(clippy::exhaustive_enums)] // for the type itself
                 #[::pin_project::pin_project(
                     !Unpin,
                     project = NotUnpinEnumProj,
@@ -626,7 +655,7 @@ pub mod deprecated {
     use pin_project::pin_project;
 
     /// Testing struct.
-    #[allow(deprecated)] // for the type itself
+    #[allow(deprecated, clippy::exhaustive_structs, clippy::min_ident_chars)] // for the type itself
     #[pin_project(project_replace)]
     #[derive(Debug, Clone, Copy)]
     #[deprecated]
@@ -641,7 +670,7 @@ pub mod deprecated {
     }
 
     /// Testing tuple struct.
-    #[allow(deprecated)] // for the type itself
+    #[allow(deprecated, clippy::exhaustive_structs)] // for the type itself
     #[pin_project(project_replace)]
     #[derive(Debug, Clone, Copy)]
     #[deprecated]
@@ -656,7 +685,7 @@ pub mod deprecated {
     );
 
     /// Testing enum.
-    #[allow(deprecated)] // for the type itself
+    #[allow(deprecated, clippy::exhaustive_enums, clippy::min_ident_chars)] // for the type itself
     #[pin_project(
         project = EnumProj,
         project_ref = EnumProjRef,
@@ -698,7 +727,7 @@ pub mod deprecated {
         macro_rules! mac {
             () => {
                 /// Testing struct.
-                #[allow(deprecated)] // for the type itself
+                #[allow(deprecated, clippy::exhaustive_structs, clippy::min_ident_chars)] // for the type itself
                 #[pin_project(project_replace)]
                 #[derive(Debug, Clone, Copy)]
                 #[deprecated]
@@ -713,7 +742,7 @@ pub mod deprecated {
                 }
 
                 /// Testing tuple struct.
-                #[allow(deprecated)] // for the type itself
+                #[allow(deprecated, clippy::exhaustive_structs)] // for the type itself
                 #[pin_project(project_replace)]
                 #[derive(Debug, Clone, Copy)]
                 #[deprecated]
@@ -728,7 +757,7 @@ pub mod deprecated {
                 );
 
                 /// Testing enum.
-                #[allow(deprecated)] // for the type itself
+                #[allow(deprecated, clippy::exhaustive_enums, clippy::min_ident_chars)] // for the type itself
                 #[pin_project(
                     project = EnumProj,
                     project_ref = EnumProjRef,
@@ -773,6 +802,7 @@ pub mod explicit_outlives_requirements {
 
     /// Testing struct.
     #[allow(explicit_outlives_requirements)] // for the type itself: https://github.com/rust-lang/rust/issues/60993
+    #[allow(clippy::exhaustive_structs, clippy::single_char_lifetime_names)] // for the type itself
     #[pin_project(project_replace)]
     #[derive(Debug)]
     pub struct Struct<'a, T, U>
@@ -789,6 +819,7 @@ pub mod explicit_outlives_requirements {
 
     /// Testing tuple struct.
     #[allow(explicit_outlives_requirements)] // for the type itself: https://github.com/rust-lang/rust/issues/60993
+    #[allow(clippy::exhaustive_structs, clippy::single_char_lifetime_names)] // for the type itself
     #[pin_project(project_replace)]
     #[derive(Debug)]
     pub struct TupleStruct<'a, T, U>(#[pin] pub &'a mut T, pub &'a mut U)
@@ -798,6 +829,7 @@ pub mod explicit_outlives_requirements {
 
     /// Testing enum.
     #[allow(explicit_outlives_requirements)] // for the type itself: https://github.com/rust-lang/rust/issues/60993
+    #[allow(clippy::exhaustive_enums, clippy::single_char_lifetime_names)] // for the type itself
     #[pin_project(
         project = EnumProj,
         project_ref = EnumProjRef,
@@ -833,6 +865,7 @@ pub mod explicit_outlives_requirements {
             () => {
                 /// Testing struct.
                 #[allow(explicit_outlives_requirements)] // for the type itself: https://github.com/rust-lang/rust/issues/60993
+                #[allow(clippy::exhaustive_structs, clippy::single_char_lifetime_names)] // for the type itself
                 #[pin_project(project_replace)]
                 #[derive(Debug)]
                 pub struct Struct<'a, T, U>
@@ -849,6 +882,7 @@ pub mod explicit_outlives_requirements {
 
                 /// Testing tuple struct.
                 #[allow(explicit_outlives_requirements)] // for the type itself: https://github.com/rust-lang/rust/issues/60993
+                #[allow(clippy::exhaustive_structs, clippy::single_char_lifetime_names)] // for the type itself
                 #[pin_project(project_replace)]
                 #[derive(Debug)]
                 pub struct TupleStruct<'a, T, U>(#[pin] pub &'a mut T, pub &'a mut U)
@@ -858,6 +892,7 @@ pub mod explicit_outlives_requirements {
 
                 /// Testing enum.
                 #[allow(explicit_outlives_requirements)] // for the type itself: https://github.com/rust-lang/rust/issues/60993
+                #[allow(clippy::exhaustive_enums, clippy::single_char_lifetime_names)] // for the type itself
                 #[pin_project(
                     project = EnumProj,
                     project_ref = EnumProjRef,
@@ -896,6 +931,7 @@ pub mod single_use_lifetimes {
 
     /// Testing trait.
     #[allow(unused_lifetimes)]
+    #[allow(clippy::single_char_lifetime_names)] // for the type itself
     pub trait Trait<'a> {}
 
     /// Testing HRTB.
@@ -923,6 +959,7 @@ pub mod single_use_lifetimes {
             () => {
                 /// Testing trait.
                 #[allow(unused_lifetimes)]
+                #[allow(clippy::single_char_lifetime_names)] // for the type itself
                 pub trait Trait<'a> {}
 
                 /// Testing HRTB.
@@ -952,8 +989,7 @@ pub mod variant_size_differences {
 
     /// Testing enum.
     #[allow(missing_debug_implementations, missing_copy_implementations)] // https://github.com/rust-lang/rust/pull/74060
-    #[allow(variant_size_differences)] // for the type itself
-    #[allow(clippy::large_enum_variant)] // for the type itself
+    #[allow(variant_size_differences, clippy::exhaustive_enums, clippy::large_enum_variant)] // for the type itself
     #[pin_project(
         project = EnumProj,
         project_ref = EnumProjRef,
@@ -976,8 +1012,7 @@ pub mod variant_size_differences {
             () => {
                 /// Testing enum.
                 #[allow(missing_debug_implementations, missing_copy_implementations)] // https://github.com/rust-lang/rust/pull/74060
-                #[allow(variant_size_differences)] // for the type itself
-                #[allow(clippy::large_enum_variant)] // for the type itself
+                #[allow(variant_size_differences, clippy::exhaustive_enums, clippy::large_enum_variant)] // for the type itself
                 #[pin_project(
                     project = EnumProj,
                     project_ref = EnumProjRef,
@@ -1001,6 +1036,7 @@ pub mod clippy_mut_mut {
     use pin_project::pin_project;
 
     /// Testing struct.
+    #[allow(clippy::exhaustive_structs, clippy::single_char_lifetime_names)] // for the type itself
     #[pin_project(project_replace)]
     #[derive(Debug)]
     pub struct Struct<'a, T, U> {
@@ -1012,11 +1048,13 @@ pub mod clippy_mut_mut {
     }
 
     /// Testing tuple struct.
+    #[allow(clippy::single_char_lifetime_names)] // for the type itself
     #[pin_project(project_replace)]
     #[derive(Debug)]
     pub struct TupleStruct<'a, T, U>(#[pin] &'a mut T, &'a mut U);
 
     /// Testing enum.
+    #[allow(clippy::exhaustive_enums, clippy::single_char_lifetime_names)] // for the type itself
     #[pin_project(
         project = EnumProj,
         project_ref = EnumProjRef,
@@ -1047,6 +1085,7 @@ pub mod clippy_mut_mut {
         macro_rules! mac {
             () => {
                 /// Testing struct.
+                #[allow(clippy::exhaustive_structs, clippy::single_char_lifetime_names)] // for the type itself
                 #[pin_project(project_replace)]
                 #[derive(Debug)]
                 pub struct Struct<'a, T, U> {
@@ -1058,11 +1097,13 @@ pub mod clippy_mut_mut {
                 }
 
                 /// Testing tuple struct.
+                #[allow(clippy::single_char_lifetime_names)] // for the type itself
                 #[pin_project(project_replace)]
                 #[derive(Debug)]
                 pub struct TupleStruct<'a, T, U>(#[pin] &'a mut T, &'a mut U);
 
                 /// Testing enum.
+                #[allow(clippy::exhaustive_enums, clippy::single_char_lifetime_names)] // for the type itself
                 #[pin_project(
                     project = EnumProj,
                     project_ref = EnumProjRef,
@@ -1190,6 +1231,7 @@ pub mod clippy_type_repetition_in_bounds {
 
     /// Testing struct.
     #[pin_project(project_replace)]
+    #[allow(clippy::exhaustive_structs)] // for the type itself
     pub struct Struct<T, U>
     where
         Self: Sized,
@@ -1208,6 +1250,7 @@ pub mod clippy_type_repetition_in_bounds {
         Self: Sized;
 
     /// Testing enum.
+    #[allow(clippy::exhaustive_enums)] // for the type itself
     #[pin_project(
         project = EnumProj,
         project_ref = EnumProjRef,
@@ -1240,6 +1283,7 @@ pub mod clippy_type_repetition_in_bounds {
         macro_rules! mac {
             () => {
                 /// Testing struct.
+                #[allow(clippy::exhaustive_structs)] // for the type itself
                 #[pin_project(project_replace)]
                 pub struct Struct<T, U>
                 where
@@ -1259,6 +1303,7 @@ pub mod clippy_type_repetition_in_bounds {
                     Self: Sized;
 
                 /// Testing enum.
+                #[allow(clippy::exhaustive_enums)] // for the type itself
                 #[pin_project(
                     project = EnumProj,
                     project_ref = EnumProjRef,
@@ -1341,7 +1386,7 @@ pub mod clippy_used_underscore_binding {
     use pin_project::pin_project;
 
     /// Testing struct.
-    #[allow(clippy::pub_underscore_fields)]
+    #[allow(clippy::exhaustive_structs, clippy::pub_underscore_fields)] // for the type itself
     #[pin_project(project_replace)]
     pub struct Struct<T, U> {
         /// Pinned field.
@@ -1352,6 +1397,7 @@ pub mod clippy_used_underscore_binding {
     }
 
     /// Testing enum.
+    #[allow(clippy::exhaustive_enums)] // for the type itself
     #[pin_project(
         project = EnumProj,
         project_ref = EnumProjRef,
@@ -1377,7 +1423,7 @@ pub mod clippy_used_underscore_binding {
         macro_rules! mac {
             () => {
                 /// Testing struct.
-                #[allow(clippy::pub_underscore_fields)]
+                #[allow(clippy::exhaustive_structs, clippy::pub_underscore_fields)] // for the type itself
                 #[pin_project(project_replace)]
                 pub struct Struct<T, U> {
                     /// Pinned field.
@@ -1388,6 +1434,7 @@ pub mod clippy_used_underscore_binding {
                 }
 
                 /// Testing enum.
+                #[allow(clippy::exhaustive_enums)] // for the type itself
                 #[pin_project(
                     project = EnumProj,
                     project_ref = EnumProjRef,
@@ -1416,7 +1463,11 @@ pub mod clippy_ref_option_ref {
     use pin_project::pin_project;
 
     /// Testing struct.
-    #[allow(clippy::pub_underscore_fields)]
+    #[allow(
+        clippy::exhaustive_structs,
+        clippy::pub_underscore_fields,
+        clippy::single_char_lifetime_names
+    )] // for the type itself
     #[pin_project]
     pub struct Struct<'a> {
         /// Pinned field.
@@ -1427,6 +1478,7 @@ pub mod clippy_ref_option_ref {
     }
 
     /// Testing enum.
+    #[allow(clippy::exhaustive_enums, clippy::single_char_lifetime_names)] // for the type itself
     #[pin_project(project = EnumProj, project_ref = EnumProjRef)]
     pub enum Enum<'a> {
         /// Variant.

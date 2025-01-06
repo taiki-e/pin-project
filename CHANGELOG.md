@@ -12,6 +12,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+- Suppress `unnameable_types`, `clippy::absolute_paths`, `clippy::min_ident_chars`, `clippy::pub_with_shorthand`, `clippy::single_call_fn`, `clippy::single_char_lifetime_names` lints in generated code.
+
 ## [1.1.7] - 2024-10-24
 
 - Work around an issue on negative_impls that allows unsound overlapping `Unpin` implementations. ([#357](https://github.com/taiki-e/pin-project/pull/357))
