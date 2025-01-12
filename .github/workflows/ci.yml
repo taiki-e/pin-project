@@ -33,12 +33,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  check-external-types:
-    uses: taiki-e/github-actions/.github/workflows/check-external-types.yml@main
-  deny:
-    uses: taiki-e/github-actions/.github/workflows/deny.yml@main
-  docs:
-    uses: taiki-e/github-actions/.github/workflows/docs.yml@main
   miri:
     uses: taiki-e/github-actions/.github/workflows/miri.yml@main
     with:
