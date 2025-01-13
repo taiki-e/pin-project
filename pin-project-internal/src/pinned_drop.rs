@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 use proc_macro2::{Span, TokenStream};
-use quote::{format_ident, quote, ToTokens};
+use quote::{format_ident, quote, ToTokens as _};
 use syn::{
-    parse_quote, spanned::Spanned, token::Colon, visit_mut::VisitMut, Error, FnArg,
+    parse_quote, spanned::Spanned as _, token::Colon, visit_mut::VisitMut as _, Error, FnArg,
     GenericArgument, Ident, ImplItem, ItemImpl, Pat, PatIdent, PatType, Path, PathArguments,
     Result, ReturnType, Signature, Token, Type, TypePath, TypeReference,
 };
 
-use crate::utils::{ReplaceReceiver, SliceExt};
+use crate::utils::{ReplaceReceiver, SliceExt as _};
 
 pub(crate) fn attribute(args: &TokenStream, mut input: ItemImpl) -> TokenStream {
     let res = (|| -> Result<()> {

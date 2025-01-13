@@ -4,12 +4,12 @@ use proc_macro2::{Span, TokenStream};
 use quote::quote;
 use syn::{
     parse::{Parse, ParseStream},
-    spanned::Spanned,
+    spanned::Spanned as _,
     Attribute, Error, Ident, Result, Token,
 };
 
 use super::PIN;
-use crate::utils::{ParseBufferExt, SliceExt};
+use crate::utils::{ParseBufferExt as _, SliceExt as _};
 
 pub(super) fn parse_args(attrs: &[Attribute]) -> Result<Args> {
     // `(__private(<args>))` -> `<args>`

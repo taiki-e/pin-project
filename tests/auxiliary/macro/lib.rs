@@ -3,7 +3,7 @@
 #![allow(clippy::missing_panics_doc)]
 
 use proc_macro::TokenStream;
-use quote::{format_ident, quote, ToTokens};
+use quote::{format_ident, quote, ToTokens as _};
 use syn::{parse_quote, Field, FieldMutability, Fields, ItemStruct, Token, Visibility};
 
 fn tokens2(tokens: TokenStream) -> proc_macro2::TokenStream {

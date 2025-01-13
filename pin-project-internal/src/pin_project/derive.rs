@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 use proc_macro2::{Delimiter, Group, Span, TokenStream};
-use quote::{format_ident, quote, quote_spanned, ToTokens};
+use quote::{format_ident, quote, quote_spanned, ToTokens as _};
 use syn::{
-    parse_quote, punctuated::Punctuated, token, visit_mut::VisitMut, Attribute, Error, Field,
+    parse_quote, punctuated::Punctuated, token, visit_mut::VisitMut as _, Attribute, Error, Field,
     Fields, FieldsNamed, FieldsUnnamed, Generics, Ident, Index, Item, Lifetime, LifetimeParam,
     Meta, Result, Token, Type, Variant, Visibility, WhereClause,
 };
@@ -14,7 +14,7 @@ use super::{
 };
 use crate::utils::{
     determine_lifetime_name, determine_visibility, insert_lifetime_and_bound, ReplaceReceiver,
-    SliceExt, Variants,
+    SliceExt as _, Variants,
 };
 
 pub(super) fn parse_derive(input: TokenStream) -> Result<TokenStream> {

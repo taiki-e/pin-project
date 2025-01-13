@@ -8,7 +8,7 @@ use syn::{
 };
 
 use super::PIN;
-use crate::utils::SliceExt;
+use crate::utils::SliceExt as _;
 
 // To generate the correct `Unpin` implementation and the projection methods,
 // we need to collect the types of the pinned fields.
