@@ -2,7 +2,7 @@
 name = "pin-project"
 version = "1.1.8" #publish:version
 edition = "2021"
-rust-version = "1.56"
+rust-version = "1.56" # Align to pin-project-internal
 license = "Apache-2.0 OR MIT"
 repository = "https://github.com/taiki-e/pin-project"
 keywords = ["pin", "macros", "attribute"]
