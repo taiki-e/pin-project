@@ -18,6 +18,7 @@
 // unstable_features: no way to generate #![feature(..)] by macros, expect for unstable inner attribute. and this lint is deprecated: https://doc.rust-lang.org/rustc/lints/listing/allowed-by-default.html#unstable-features
 // unused_crate_dependencies, must_not_suspend: unrelated
 // unsafe_code: checked in forbid_unsafe module
+// TODO: Add warn-by-default lints for old versions?
 #![warn(
     ambiguous_negative_literals,
     closure_returning_async_block,
