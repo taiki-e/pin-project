@@ -41,6 +41,10 @@ jobs:
     uses: taiki-e/github-actions/.github/workflows/msrv.yml@main
     with:
       event_name: ${{ github.event_name }}
+  test:
+    uses: taiki-e/github-actions/.github/workflows/test.yml@main
+    with:
+      rust: 1.56,stable,beta,nightly
   tidy:
     uses: taiki-e/github-actions/.github/workflows/tidy.yml@main
     permissions:
@@ -49,38 +53,13 @@ jobs:
       repository-projects: read # for gh pr edit --add-assignee
     secrets: inherit
 
-  test:
-    strategy:
-      fail-fast: false
-      matrix:
-        rust:
-          - '1.56'
-          - stable
-          - beta
-          - nightly
+  no-std:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
       - uses: taiki-e/checkout-action@v1
-      - uses: taiki-e/github-actions/install-rust@main
+      - uses: taiki-e/github-actions/install-rust@nightly
         with:
-          toolchain: ${{ matrix.rust }}
-          component: rust-src
           target: thumbv6m-none-eabi
-      - uses: taiki-e/install-action@cargo-hack
-      - uses: taiki-e/install-action@cargo-minimal-versions
-      - uses: taiki-e/install-action@cargo-careful
-        if: startsWith(matrix.rust, 'nightly')
-      - run: cargo test --workspace --all-features
-      - run: cargo careful test --workspace --all-features
-        env:
-          RUSTDOCFLAGS: ${{ env.RUSTDOCFLAGS }} -Z randomize-layout
-          RUSTFLAGS: ${{ env.RUSTFLAGS }} -Z randomize-layout
-        if: startsWith(matrix.rust, 'nightly')
-      - run: cargo hack build --workspace --no-private --feature-powerset --no-dev-deps
       - run: cargo build --manifest-path tests/no-std/Cargo.toml --target thumbv6m-none-eabi
       - run: cargo build --manifest-path tests/rust-2015/Cargo.toml --target thumbv6m-none-eabi
-      - run: cargo minimal-versions build --workspace --no-private --detach-path-deps=skip-exact --all-features
-      - run: cargo minimal-versions build --workspace --no-private --detach-path-deps=skip-exact --all-features --direct
-        # -Z direct-minimal-versions requires Cargo 1.70.
-        if: (!(startsWith(matrix.rust, '1.5') || startsWith(matrix.rust, '1.6')))
