@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 /*!
-<!-- tidy:crate-doc:start -->
+<!-- Note: Document from sync-markdown-to-rustdoc:start through sync-markdown-to-rustdoc:end
+     is synchronized from README.md. Any changes to that range are not preserved. -->
+<!-- tidy:sync-markdown-to-rustdoc:start -->
+
 A crate for safe and ergonomic [pin-projection].
 
 ## Usage
@@ -18,7 +21,7 @@ pin-project = "1"
 [`#[pin_project]`][`pin_project`] attribute creates projection types
 covering all the fields of struct or enum.
 
-```rust
+```
 use std::pin::Pin;
 
 use pin_project::pin_project;
@@ -44,7 +47,7 @@ impl<T, U> Struct<T, U> {
 To use `#[pin_project]` on enums, you need to name the projection type
 returned from the method.
 
-```rust
+```
 use std::pin::Pin;
 
 use pin_project::pin_project;
@@ -84,7 +87,7 @@ see [examples] directory for more examples and generated code.
 [pin-projection]: https://doc.rust-lang.org/std/pin/index.html#projections-and-structural-pinning
 [struct-default-expanded]: https://github.com/taiki-e/pin-project/blob/HEAD/examples/struct-default-expanded.rs
 
-<!-- tidy:crate-doc:end -->
+<!-- tidy:sync-markdown-to-rustdoc:end -->
 */
 
 #![no_std]

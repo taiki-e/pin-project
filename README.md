@@ -6,7 +6,8 @@
 [![msrv](https://img.shields.io/badge/msrv-1.56-blue?style=flat-square&logo=rust)](https://www.rust-lang.org)
 [![github actions](https://img.shields.io/github/actions/workflow/status/taiki-e/pin-project/ci.yml?branch=main&style=flat-square&logo=github)](https://github.com/taiki-e/pin-project/actions)
 
-<!-- tidy:crate-doc:start -->
+<!-- tidy:sync-markdown-to-rustdoc:start:src/lib.rs -->
+
 A crate for safe and ergonomic [pin-projection].
 
 ## Usage
@@ -89,7 +90,7 @@ see [examples] directory for more examples and generated code.
 [pin-projection]: https://doc.rust-lang.org/std/pin/index.html#projections-and-structural-pinning
 [struct-default-expanded]: https://github.com/taiki-e/pin-project/blob/HEAD/examples/struct-default-expanded.rs
 
-<!-- tidy:crate-doc:end -->
+<!-- tidy:sync-markdown-to-rustdoc:end -->
 
 [`pin_project`]: https://docs.rs/pin-project/latest/pin_project/attr.pin_project.html
 
