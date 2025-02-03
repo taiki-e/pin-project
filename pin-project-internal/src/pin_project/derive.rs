@@ -89,6 +89,7 @@ impl GenerateTokens {
             #[allow(
                 unused_qualifications,
                 #allowed_lints
+                clippy::missing_const_for_fn,
                 clippy::needless_lifetimes,
                 clippy::semicolon_if_nothing_returned,
                 clippy::use_self,
@@ -972,7 +973,6 @@ fn make_proj_impl(
     });
     let mut project_ref = Some(quote! {
         #allow_dead_code
-        #[allow(clippy::missing_const_for_fn)]
         #[inline]
         #vis fn project_ref<#lifetime>(
             self: _pin_project::__private::Pin<&#lifetime Self>,

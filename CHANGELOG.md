@@ -12,6 +12,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+- Suppress `clippy::missing_const_for_fn` lint in generated code.
+
 ## [1.1.8] - 2025-01-06
 
 - Suppress `unnameable_types`, `clippy::absolute_paths`, `clippy::min_ident_chars`, `clippy::pub_with_shorthand`, `clippy::single_call_fn`, `clippy::single_char_lifetime_names` lints in generated code.

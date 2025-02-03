@@ -17,6 +17,7 @@ struct TupleStruct<T, U>(#[pin] T, U);
     clippy::redundant_pub_crate,
     clippy::single_char_lifetime_names,
     clippy::type_repetition_in_bounds,
+    clippy::missing_const_for_fn,
     clippy::needless_lifetimes,
     clippy::semicolon_if_nothing_returned,
     clippy::use_self,
@@ -54,7 +55,6 @@ const _: () = {
             }
         }
         #[allow(dead_code)]
-        #[allow(clippy::missing_const_for_fn)]
         #[inline]
         fn project_ref<'pin>(
             self: _pin_project::__private::Pin<&'pin Self>,
@@ -110,7 +110,11 @@ const _: () = {
 #[doc(hidden)]
 impl<T, U> ::pin_project::__private::PinnedDrop for TupleStruct<T, U> {
     unsafe fn drop(self: Pin<&mut Self>) {
-        #[allow(clippy::needless_pass_by_value, clippy::single_call_fn)]
+        #[allow(
+            clippy::missing_const_for_fn,
+            clippy::needless_pass_by_value,
+            clippy::single_call_fn
+        )]
         fn __drop_inner<T, U>(__self: Pin<&mut TupleStruct<T, U>>) {
             fn __drop_inner() {}
             let _ = __self;

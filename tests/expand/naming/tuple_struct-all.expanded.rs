@@ -82,6 +82,7 @@ struct ProjOwn<T, U>(::pin_project::__private::PhantomData<T>, U);
     clippy::redundant_pub_crate,
     clippy::single_char_lifetime_names,
     clippy::type_repetition_in_bounds,
+    clippy::missing_const_for_fn,
     clippy::needless_lifetimes,
     clippy::semicolon_if_nothing_returned,
     clippy::use_self,
@@ -102,7 +103,6 @@ const _: () = {
             }
         }
         #[allow(dead_code)]
-        #[allow(clippy::missing_const_for_fn)]
         #[inline]
         fn project_ref<'pin>(
             self: _pin_project::__private::Pin<&'pin Self>,

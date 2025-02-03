@@ -231,6 +231,7 @@ fn expand_impl(item: &mut ItemImpl) {
 
     method.block.stmts = parse_quote! {
         #[allow(
+            clippy::missing_const_for_fn,
             clippy::needless_pass_by_value, // This lint does not warn the receiver.
             clippy::single_call_fn
         )]
