@@ -12,6 +12,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+## [1.1.9] - 2025-02-03
+
 - Suppress `clippy::missing_const_for_fn` lint in generated code.
 
 ## [1.1.8] - 2025-01-06
@@ -722,7 +724,8 @@ See also [tracking issue for 0.4 release](https://github.com/taiki-e/pin-project
 
 Initial release
 
-[Unreleased]: https://github.com/taiki-e/pin-project/compare/v1.1.8...HEAD
+[Unreleased]: https://github.com/taiki-e/pin-project/compare/v1.1.9...HEAD
+[1.1.9]: https://github.com/taiki-e/pin-project/compare/v1.1.8...v1.1.9
 [1.1.8]: https://github.com/taiki-e/pin-project/compare/v1.1.7...v1.1.8
 [1.1.7]: https://github.com/taiki-e/pin-project/compare/v1.1.6...v1.1.7
 [1.1.6]: https://github.com/taiki-e/pin-project/compare/v1.1.5...v1.1.6
