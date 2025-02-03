@@ -848,6 +848,7 @@ fn make_unpin_impl(cx: &Context<'_>) -> TokenStream {
     }
 }
 
+#[allow(clippy::doc_overindented_list_items)]
 /// Creates `Drop` implementation for the original type.
 ///
 /// The kind of `Drop` impl generated depends on `pinned_drop` field:
