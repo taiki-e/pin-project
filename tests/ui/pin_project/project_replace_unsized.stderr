@@ -1,4 +1,46 @@
 error[E0277]: the size for values of type `T` cannot be known at compilation time
+ --> tests/ui/pin_project/project_replace_unsized.rs:6:8
+  |
+6 | struct Struct<T: ?Sized> {
+  |        ^^^^^^^-^^^^^^^^^
+  |        |      |
+  |        |      this type parameter needs to be `Sized`
+  |        doesn't have a size known at compile-time
+  |
+note: required because it appears within the type `__StructProjectionOwned<T>`
+ --> tests/ui/pin_project/project_replace_unsized.rs:6:8
+  |
+6 | struct Struct<T: ?Sized> {
+  |        ^^^^^^
+  = note: the return type of a function must have a statically known size
+help: consider removing the `?Sized` bound to make the type parameter `Sized`
+  |
+6 - struct Struct<T: ?Sized> {
+6 + struct Struct<T> {
+  |
+
+error[E0277]: the size for values of type `T` cannot be known at compilation time
+  --> tests/ui/pin_project/project_replace_unsized.rs:11:8
+   |
+11 | struct TupleStruct<T: ?Sized>(T);
+   |        ^^^^^^^^^^^^-^^^^^^^^^
+   |        |           |
+   |        |           this type parameter needs to be `Sized`
+   |        doesn't have a size known at compile-time
+   |
+note: required because it appears within the type `__TupleStructProjectionOwned<T>`
+  --> tests/ui/pin_project/project_replace_unsized.rs:11:8
+   |
+11 | struct TupleStruct<T: ?Sized>(T);
+   |        ^^^^^^^^^^^
+   = note: the return type of a function must have a statically known size
+help: consider removing the `?Sized` bound to make the type parameter `Sized`
+   |
+11 - struct TupleStruct<T: ?Sized>(T);
+11 + struct TupleStruct<T>(T);
+   |
+
+error[E0277]: the size for values of type `T` cannot be known at compilation time
  --> tests/ui/pin_project/project_replace_unsized.rs:5:15
   |
 5 | #[pin_project(project_replace)] //~ ERROR E0277
