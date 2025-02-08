@@ -49,7 +49,7 @@ members = [
 ]
 
 # This table is shared by projects under github.com/taiki-e.
-# It is not intended for manual editing.
+# Expect for unexpected_cfgs.check-cfg, it is not intended for manual editing.
 [workspace.lints.rust]
 deprecated_safe = "warn"
 improper_ctypes = "warn"
@@ -61,7 +61,7 @@ unexpected_cfgs = { level = "warn", check-cfg = [
 ] }
 unnameable_types = "warn"
 unreachable_pub = "warn"
-# unsafe_op_in_unsafe_fn = "warn" # Set at crate-level instead since https://github.com/rust-lang/rust/pull/100081 is not available on MSRV
+# unsafe_op_in_unsafe_fn = "warn" # Set at crate-level instead since https://github.com/rust-lang/rust/pull/100081 merged in Rust 1.65 is not available on MSRV
 [workspace.lints.clippy]
 all = "warn" # Downgrade deny-by-default lints
 pedantic = "warn"
