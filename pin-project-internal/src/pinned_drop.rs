@@ -47,6 +47,7 @@ pub(crate) fn attribute(args: &TokenStream, mut input: ItemImpl) -> TokenStream 
         }
         tokens
     } else {
+        // no #[automatically_derived] since it contains input code.
         input.into_token_stream()
     }
 }

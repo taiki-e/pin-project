@@ -709,6 +709,7 @@ fn make_unpin_impl(cx: &Context<'_>) -> TokenStream {
             let ty_generics = cx.orig.generics.split_for_impl().1;
 
             quote_spanned! { span =>
+                #[automatically_derived]
                 impl #impl_generics _pin_project::__private::Unpin for #orig_ident #ty_generics
                 #where_clause
                 {
@@ -736,6 +737,7 @@ fn make_unpin_impl(cx: &Context<'_>) -> TokenStream {
             let unsafety = <Token![unsafe]>::default();
             quote_spanned! { span =>
                 #[doc(hidden)]
+                #[automatically_derived]
                 impl #impl_generics _pin_project::__private::Unpin for #orig_ident #ty_generics
                 #where_clause
                 {
@@ -748,6 +750,7 @@ fn make_unpin_impl(cx: &Context<'_>) -> TokenStream {
                 // impl, they'll get a "conflicting implementations of trait" error when
                 // coherence checks are run.
                 #[doc(hidden)]
+                #[automatically_derived]
                 #unsafety impl #impl_generics _pin_project::UnsafeUnpin for #orig_ident #ty_generics
                 #where_clause
                 {
@@ -827,6 +830,7 @@ fn make_unpin_impl(cx: &Context<'_>) -> TokenStream {
                     #(#lifetime_fields,)*
                 }
 
+                #[automatically_derived]
                 impl #impl_generics _pin_project::__private::Unpin for #orig_ident #ty_generics
                 #impl_where_clause
                 {
@@ -839,6 +843,7 @@ fn make_unpin_impl(cx: &Context<'_>) -> TokenStream {
                 // impl, they'll get a "conflicting implementations of trait" error when
                 // coherence checks are run.
                 #[doc(hidden)]
+                #[automatically_derived]
                 unsafe impl #impl_generics _pin_project::UnsafeUnpin for #orig_ident #ty_generics
                 #impl_where_clause
                 {
@@ -863,6 +868,7 @@ fn make_drop_impl(cx: &Context<'_>) -> TokenStream {
         // call-site span.
         let unsafety = <Token![unsafe]>::default();
         quote_spanned! { span =>
+            #[automatically_derived]
             impl #impl_generics _pin_project::__private::Drop for #ident #ty_generics
             #where_clause
             {
@@ -907,7 +913,9 @@ fn make_drop_impl(cx: &Context<'_>) -> TokenStream {
             // This will result in a compilation error, which is exactly what we want.
             trait #trait_ident {}
             #[allow(clippy::drop_bounds, drop_bounds)]
+            #[automatically_derived]
             impl<T: _pin_project::__private::Drop> #trait_ident for T {}
+            #[automatically_derived]
             impl #impl_generics #trait_ident for #ident #ty_generics #where_clause {}
 
             // Generate a dummy impl of `PinnedDrop`, to ensure that the user cannot implement it.
@@ -921,6 +929,7 @@ fn make_drop_impl(cx: &Context<'_>) -> TokenStream {
             // they'll get a "conflicting implementations of trait" error when coherence
             // checks are run.
             #[doc(hidden)]
+            #[automatically_derived]
             impl #impl_generics _pin_project::__private::PinnedDrop for #ident #ty_generics
             #where_clause
             {
@@ -1022,6 +1031,7 @@ fn make_proj_impl(
     }
 
     quote! {
+        #[automatically_derived]
         impl #impl_generics #orig_ident #ty_generics #where_clause {
             #project
             #project_ref
@@ -1133,6 +1143,8 @@ fn ensure_not_packed(orig: &OriginalType<'_>, fields: Option<&Fields>) -> Result
     let (impl_generics, ty_generics, where_clause) = orig.generics.split_for_impl();
     let ident = orig.ident;
     Ok(quote! {
+        // TODO: without this, #[pin_project] on struct are marked as uncovered
+        // #[coverage(off)]
         #[forbid(unaligned_references, safe_packed_borrows)]
         fn __assert_not_repr_packed #impl_generics (this: &#ident #ty_generics) #where_clause {
             #(let _ = #field_refs;)*
