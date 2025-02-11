@@ -164,7 +164,7 @@ pub mod __private {
     use core::mem::ManuallyDrop;
     #[doc(hidden)]
     pub use core::{
-        marker::{PhantomData, PhantomPinned, Unpin},
+        marker::{PhantomData, PhantomPinned, Sized, Unpin},
         ops::Drop,
         pin::Pin,
         ptr,

@@ -704,7 +704,7 @@ fn make_unpin_impl(cx: &Context<'_>) -> TokenStream {
             let lifetime = &cx.proj.lifetime;
 
             proj_generics.make_where_clause().predicates.push(parse_quote! {
-                _pin_project::__private::Wrapper<
+                __Wrapper<
                     #lifetime, _pin_project::__private::PhantomPinned
                 >: _pin_project::__private::Unpin
             });
@@ -712,10 +712,18 @@ fn make_unpin_impl(cx: &Context<'_>) -> TokenStream {
             let (proj_impl_generics, _, proj_where_clause) = proj_generics.split_for_impl();
             let ty_generics = cx.orig.generics.split_for_impl().1;
 
+            let wrapper = quote! {
+                #[doc(hidden)]
+                pub struct __Wrapper<'a, T: ?_pin_project::__private::Sized>(_pin_project::__private::PhantomData<&'a ()>, T);
+                // SAFETY: `T` implements UnsafeUnpin.
+                unsafe impl<T: ?_pin_project::__private::Sized + _pin_project::UnsafeUnpin> _pin_project::UnsafeUnpin for __Wrapper<'_, T> {}
+            };
+
             // For interoperability with `forbid(unsafe_code)`, `unsafe` token should be
             // call-site span.
             let unsafety = <Token![unsafe]>::default();
             quote_spanned! { span =>
+                #wrapper
                 impl #proj_impl_generics _pin_project::__private::Unpin
                     for #orig_ident #ty_generics
                 #proj_where_clause

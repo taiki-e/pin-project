@@ -112,9 +112,17 @@ const _: () = {
             }
         }
     }
+    #[doc(hidden)]
+    pub struct __Wrapper<'a, T: ?_pin_project::__private::Sized>(
+        _pin_project::__private::PhantomData<&'a ()>,
+        T,
+    );
+    unsafe impl<
+        T: ?_pin_project::__private::Sized + _pin_project::UnsafeUnpin,
+    > _pin_project::UnsafeUnpin for __Wrapper<'_, T> {}
     impl<'pin, T, U> _pin_project::__private::Unpin for Enum<T, U>
     where
-        _pin_project::__private::Wrapper<
+        __Wrapper<
             'pin,
             _pin_project::__private::PhantomPinned,
         >: _pin_project::__private::Unpin,
@@ -122,7 +130,7 @@ const _: () = {
     #[doc(hidden)]
     unsafe impl<'pin, T, U> _pin_project::UnsafeUnpin for Enum<T, U>
     where
-        _pin_project::__private::Wrapper<
+        __Wrapper<
             'pin,
             _pin_project::__private::PhantomPinned,
         >: _pin_project::__private::Unpin,
