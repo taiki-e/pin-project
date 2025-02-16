@@ -77,14 +77,11 @@ note: required because it appears within the type `Struct<T>`
   |
 6 | struct Struct<T: ?Sized> {
   |        ^^^^^^
-note: required by a bound in `UnsafeOverwriteGuard::<T>::new`
+note: required by an implicit `Sized` bound in `UnsafeOverwriteGuard`
  --> src/lib.rs
   |
-  |     impl<T> UnsafeOverwriteGuard<T> {
-  |          ^ required by this bound in `UnsafeOverwriteGuard::<T>::new`
-  |         #[doc(hidden)]
-  |         pub unsafe fn new(target: *mut T, value: T) -> Self {
-  |                       --- required by a bound in this associated function
+  |     pub struct UnsafeOverwriteGuard<T> {
+  |                                     ^ required by the implicit `Sized` requirement on this type parameter in `UnsafeOverwriteGuard`
   = note: this error originates in the derive macro `::pin_project::__private::__PinProjectInternalDerive` (in Nightly builds, run with -Z macro-backtrace for more info)
 help: consider removing the `?Sized` bound to make the type parameter `Sized`
   |
@@ -150,14 +147,11 @@ note: required because it appears within the type `TupleStruct<T>`
    |
 11 | struct TupleStruct<T: ?Sized>(T);
    |        ^^^^^^^^^^^
-note: required by a bound in `UnsafeOverwriteGuard::<T>::new`
+note: required by an implicit `Sized` bound in `UnsafeOverwriteGuard`
   --> src/lib.rs
    |
-   |     impl<T> UnsafeOverwriteGuard<T> {
-   |          ^ required by this bound in `UnsafeOverwriteGuard::<T>::new`
-   |         #[doc(hidden)]
-   |         pub unsafe fn new(target: *mut T, value: T) -> Self {
-   |                       --- required by a bound in this associated function
+   |     pub struct UnsafeOverwriteGuard<T> {
+   |                                     ^ required by the implicit `Sized` requirement on this type parameter in `UnsafeOverwriteGuard`
    = note: this error originates in the derive macro `::pin_project::__private::__PinProjectInternalDerive` (in Nightly builds, run with -Z macro-backtrace for more info)
 help: consider removing the `?Sized` bound to make the type parameter `Sized`
    |
