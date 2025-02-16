@@ -43,6 +43,8 @@
     redundant_imports,
     redundant_lifetimes,
     single_use_lifetimes,
+    supertrait_item_shadowing_definition,
+    supertrait_item_shadowing_usage,
     trivial_casts,
     trivial_numeric_casts,
     unit_bindings,
