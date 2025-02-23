@@ -3,8 +3,8 @@
 use proc_macro2::TokenStream;
 use quote::quote;
 use syn::{
-    parse::{Parse, ParseStream},
     Attribute, Result, Token, Visibility,
+    parse::{Parse, ParseStream},
 };
 
 use super::PIN;

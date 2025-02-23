@@ -3,9 +3,9 @@
 use proc_macro2::{Span, TokenStream};
 use quote::quote;
 use syn::{
+    Attribute, Error, Ident, Result, Token,
     parse::{Parse, ParseStream},
     spanned::Spanned as _,
-    Attribute, Error, Ident, Result, Token,
 };
 
 use super::PIN;
@@ -245,10 +245,6 @@ impl ProjReplace {
     }
 
     pub(super) fn ident(&self) -> Option<&Ident> {
-        if let Self::Named { ident, .. } = self {
-            Some(ident)
-        } else {
-            None
-        }
+        if let Self::Named { ident, .. } = self { Some(ident) } else { None }
     }
 }

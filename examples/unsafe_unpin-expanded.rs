@@ -29,7 +29,7 @@
     clippy::undocumented_unsafe_blocks
 )]
 
-use pin_project::{pin_project, UnsafeUnpin};
+use pin_project::{UnsafeUnpin, pin_project};
 
 // #[pin_project(UnsafeUnpin)]
 struct Struct<T, U> {

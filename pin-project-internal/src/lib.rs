@@ -315,7 +315,7 @@ use proc_macro::TokenStream;
 /// argument to `#[pin_project]`.
 ///
 /// ```
-/// use pin_project::{pin_project, UnsafeUnpin};
+/// use pin_project::{UnsafeUnpin, pin_project};
 ///
 /// #[pin_project(UnsafeUnpin)]
 /// struct Struct<T, U> {

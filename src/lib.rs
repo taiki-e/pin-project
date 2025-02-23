@@ -162,7 +162,7 @@ pub use pin_project_internal::pinned_drop;
 /// pinned fields be [`Unpin`], imposes an additional requirement:
 ///
 /// ```
-/// use pin_project::{pin_project, UnsafeUnpin};
+/// use pin_project::{UnsafeUnpin, pin_project};
 ///
 /// #[pin_project(UnsafeUnpin)]
 /// struct Struct<K, V> {

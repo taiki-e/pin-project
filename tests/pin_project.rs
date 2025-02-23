@@ -17,7 +17,7 @@ use std::{
     pin::Pin,
 };
 
-use pin_project::{pin_project, pinned_drop, UnsafeUnpin};
+use pin_project::{UnsafeUnpin, pin_project, pinned_drop};
 
 #[test]
 fn projection() {

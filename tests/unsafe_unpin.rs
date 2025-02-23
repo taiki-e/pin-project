@@ -7,7 +7,7 @@ mod auxiliary;
 
 use std::marker::PhantomPinned;
 
-use pin_project::{pin_project, UnsafeUnpin};
+use pin_project::{UnsafeUnpin, pin_project};
 
 #[pin_project(UnsafeUnpin)]
 struct Blah<T, U> {
