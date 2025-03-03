@@ -108,7 +108,7 @@ fn validate_sig(sig: &Signature) -> Result<()> {
     const INVALID_ARGUMENT: &str = "method `drop` must take an argument `self: Pin<&mut Self>`";
 
     if sig.ident != "drop" {
-        bail!(sig.ident, "method `{}` is not a member of trait `PinnedDrop", sig.ident);
+        bail!(sig.ident, "method `{}` is not a member of trait `PinnedDrop`", sig.ident);
     }
 
     if let ReturnType::Type(_, ty) = &sig.output {
@@ -128,7 +128,7 @@ fn validate_sig(sig: &Signature) -> Result<()> {
         // (mut) self: <path>
         if let Some(path) = get_ty_path(&arg.ty) {
             let ty =
-                path.segments.last().expect("Type paths should always have at least one segment");
+                path.segments.last().expect("type paths should always have at least one segment");
             if let PathArguments::AngleBracketed(args) = &ty.arguments {
                 // (mut) self: (<path>::)<ty><&mut <elem>..>
                 if let Some(GenericArgument::Type(Type::Reference(TypeReference {

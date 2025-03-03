@@ -204,7 +204,7 @@ mod method {
 
     #[pinned_drop]
     impl PinnedDrop for InvalidName {
-        fn pinned_drop(self: Pin<&mut Self>) {} //~ ERROR method `pinned_drop` is not a member of trait `PinnedDrop
+        fn pinned_drop(self: Pin<&mut Self>) {} //~ ERROR method `pinned_drop` is not a member of trait `PinnedDrop`
     }
 }
 

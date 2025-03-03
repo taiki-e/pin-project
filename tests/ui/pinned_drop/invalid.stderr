@@ -118,10 +118,10 @@ error: method `drop` must take an argument `self: Pin<&mut Self>`
 199 |         fn drop(self: Pin<&mut ()>) {} //~ ERROR method `drop` must take an argument `self: Pin<&mut Self>`
     |                 ^^^^^^^^^^^^^^^^^^
 
-error: method `pinned_drop` is not a member of trait `PinnedDrop
+error: method `pinned_drop` is not a member of trait `PinnedDrop`
    --> tests/ui/pinned_drop/invalid.rs:207:12
     |
-207 |         fn pinned_drop(self: Pin<&mut Self>) {} //~ ERROR method `pinned_drop` is not a member of trait `PinnedDrop
+207 |         fn pinned_drop(self: Pin<&mut Self>) {} //~ ERROR method `pinned_drop` is not a member of trait `PinnedDrop`
     |            ^^^^^^^^^^^
 
 error: implementing the trait `PinnedDrop` on this type is unsupported
