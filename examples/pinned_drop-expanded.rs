@@ -32,6 +32,7 @@
     unknown_lints,
     renamed_and_removed_lints,
     unnameable_types,
+    clippy::elidable_lifetime_names,
     clippy::mut_mut,
     clippy::needless_lifetimes,
     clippy::undocumented_unsafe_blocks

@@ -21,6 +21,7 @@ struct Struct<T, U> {
     clippy::redundant_pub_crate,
     clippy::single_char_lifetime_names,
     clippy::type_repetition_in_bounds,
+    clippy::elidable_lifetime_names,
     clippy::missing_const_for_fn,
     clippy::needless_lifetimes,
     clippy::semicolon_if_nothing_returned,

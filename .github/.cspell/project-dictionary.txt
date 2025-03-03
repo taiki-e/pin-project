@@ -1,4 +1,5 @@
 compiletest
+elidable
 expandtest
 HRTB
 overindented

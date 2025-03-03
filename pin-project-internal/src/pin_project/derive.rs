@@ -89,6 +89,7 @@ impl GenerateTokens {
             #[allow(
                 unused_qualifications,
                 #allowed_lints
+                clippy::elidable_lifetime_names,
                 clippy::missing_const_for_fn,
                 clippy::needless_lifetimes,
                 clippy::semicolon_if_nothing_returned,

@@ -12,6 +12,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+- Suppress `clippy::elidable_lifetime_names` lint in generated code.
+
 ## [1.1.9] - 2025-02-03
 
 - Suppress `clippy::missing_const_for_fn` lint in generated code.
