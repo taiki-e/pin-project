@@ -9,7 +9,7 @@ error[E0277]: `PhantomPinned` cannot be unpinned
    = help: see issue #48214
 help: add `#![feature(trivial_bounds)]` to the crate attributes to enable
    |
-5  + #![feature(trivial_bounds)]
+ 5 + #![feature(trivial_bounds)]
    |
 
 error[E0277]: `PhantomPinned` cannot be unpinned
@@ -28,7 +28,7 @@ note: required for `phantom_pinned::Wrapper<PhantomPinned>` to implement `Unpin`
    = help: see issue #48214
 help: add `#![feature(trivial_bounds)]` to the crate attributes to enable
    |
-5  + #![feature(trivial_bounds)]
+ 5 + #![feature(trivial_bounds)]
    |
 
 error[E0277]: `PhantomPinned` cannot be unpinned
@@ -47,7 +47,7 @@ note: required because it appears within the type `Inner`
    = help: see issue #48214
 help: add `#![feature(trivial_bounds)]` to the crate attributes to enable
    |
-5  + #![feature(trivial_bounds)]
+ 5 + #![feature(trivial_bounds)]
    |
 
 error[E0277]: `PhantomPinned` cannot be unpinned
@@ -71,5 +71,5 @@ note: required for `inner::Wrapper<Inner>` to implement `Unpin`
    = help: see issue #48214
 help: add `#![feature(trivial_bounds)]` to the crate attributes to enable
    |
-5  + #![feature(trivial_bounds)]
+ 5 + #![feature(trivial_bounds)]
    |

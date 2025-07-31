@@ -1,7 +1,7 @@
 error[E0119]: conflicting implementations of trait `UnsafeUnpin` for type `Foo<_, _>`
   --> tests/ui/pin_project/impl-unsafe-unpin.rs:5:1
    |
-5  | #[pin_project] //~ ERROR E0119
+ 5 | #[pin_project] //~ ERROR E0119
    | ^^^^^^^^^^^^^^ conflicting implementation for `Foo<_, _>`
 ...
 12 | unsafe impl<T, U> UnsafeUnpin for Foo<T, U> where T: Unpin {}

@@ -38,7 +38,7 @@ note: required because it appears within the type `A`
 note: required by a bound in `is_unpin`
   --> tests/ui/pin_project/remove-attr-from-struct.rs:8:16
    |
-8  | fn is_unpin<T: Unpin>() {}
+ 8 | fn is_unpin<T: Unpin>() {}
    |                ^^^^^ required by this bound in `is_unpin`
 
 error[E0277]: `PhantomPinned` cannot be unpinned
@@ -57,7 +57,7 @@ note: required because it appears within the type `B`
 note: required by a bound in `is_unpin`
   --> tests/ui/pin_project/remove-attr-from-struct.rs:8:16
    |
-8  | fn is_unpin<T: Unpin>() {}
+ 8 | fn is_unpin<T: Unpin>() {}
    |                ^^^^^ required by this bound in `is_unpin`
 
 error[E0277]: `PhantomPinned` cannot be unpinned
