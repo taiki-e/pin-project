@@ -13,7 +13,7 @@ use super::{
     args::{Args, ProjReplace, UnpinImpl, parse_args},
 };
 use crate::utils::{
-    ReplaceReceiver, SliceExt as _, Variants, determine_lifetime_name, determine_visibility,
+    ReplaceReceiver, SliceExt as _, Variants, determine_lifetime_name,
     insert_lifetime_and_bound,
 };
 
@@ -238,7 +238,7 @@ impl<'a> Context<'a> {
             project_ref: project_ref.is_some(),
             project_replace,
             proj: ProjectedType {
-                vis: determine_visibility(vis),
+                vis: vis.clone(),
                 mut_ident: project.unwrap_or_else(|| format_ident!("__{}Projection", ident)),
                 ref_ident: project_ref.unwrap_or_else(|| format_ident!("__{}ProjectionRef", ident)),
                 own_ident,
