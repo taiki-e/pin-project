@@ -3,7 +3,9 @@
 use proc_macro2::{Span, TokenStream};
 use quote::quote;
 use syn::{
-    parse::{Parse, ParseStream}, spanned::Spanned as _, Attribute, Error, Ident, Result, Token, Visibility
+    Attribute, Error, Ident, Result, Token, Visibility,
+    parse::{Parse, ParseStream},
+    spanned::Spanned as _,
 };
 
 use super::PIN;
@@ -288,7 +290,7 @@ impl ProjArgs {
             None
         }
     }
-    pub(super) fn vis(&self,default_vis: &Visibility) -> Visibility {
+    pub(super) fn vis(&self, default_vis: &Visibility) -> Visibility {
         match self {
             Self::NamedPublic { .. } => parse_quote_spanned!(default_vis.span() => pub),
             _ => default_vis.clone(),
