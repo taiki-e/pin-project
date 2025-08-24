@@ -74,7 +74,7 @@ pub(crate) fn insert_lifetime(generics: &mut Generics, lifetime: Lifetime) {
     generics.params.insert(0, LifetimeParam::new(lifetime).into());
 }
 
-/// Determines the visibility of the projected types and projection methods.
+/// Determines the default visibility of the projected types and projection methods.
 ///
 /// If given visibility is `pub`, returned visibility is `pub(crate)`.
 /// Otherwise, returned visibility is the same as given visibility.

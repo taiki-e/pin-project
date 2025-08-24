@@ -193,6 +193,18 @@ mod pin_project_argument {
     enum ProjectReplaceEnum {
         V(#[pin] ()),
     }
+
+    #[pin_project(pub)] //~ Error `pub` can only be used on project, project_ref or named project_replace.
+    struct Pub1(#[pin] ());
+
+    #[pin_project(pub Unpin)] //~ Error `pub` can only be used on project, project_ref or named project_replace.
+    struct Pub2(#[pin] ());
+
+    #[pin_project(pub project_replace)] //~ Error project_replace cannot be pub if it is not named
+    struct Pub3(#[pin] ());
+
+    #[pin_project(pub project_replace = Pub4ProjReplace, pub Project = Pub4Proj)] // Ok
+    struct Pub4(#[pin] ());
 }
 
 mod pin_project_conflict_naming {
