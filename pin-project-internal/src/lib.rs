@@ -74,7 +74,7 @@ use proc_macro::TokenStream;
 /// (In that case, you are also required to provide a name for the returned struct)
 ///
 /// ```
-/// # use pin_project::pin_project
+/// # use pin_project::pin_project;
 /// #[pin_project(pub project = StructProj)] //force the project method and StructProj to be pub
 /// pub struct Struct<T> {
 ///     #[pin]
