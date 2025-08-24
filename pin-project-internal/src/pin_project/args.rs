@@ -297,9 +297,6 @@ impl ProjArgs {
         }
     }
     pub(super) fn is_some(&self) -> bool {
-        match self {
-            Self::None => false,
-            _ => true,
-        }
+        !matches!(self, Self::None)
     }
 }
