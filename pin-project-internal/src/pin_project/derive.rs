@@ -5,10 +5,7 @@ use quote::{ToTokens as _, format_ident, quote, quote_spanned};
 use syn::{
     Attribute, Error, Field, Fields, FieldsNamed, FieldsUnnamed, Generics, Ident, Index, Item,
     Lifetime, LifetimeParam, Meta, Result, Token, Type, Variant, Visibility, WhereClause,
-    parse_quote,
-    punctuated::Punctuated,
-    token::{self},
-    visit_mut::VisitMut as _,
+    parse_quote, punctuated::Punctuated, token, visit_mut::VisitMut as _,
 };
 
 use super::{
