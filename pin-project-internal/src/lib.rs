@@ -68,6 +68,20 @@ use proc_macro::TokenStream;
 /// }
 /// ```
 ///
+/// By default, the visibility of the projected types and projection methods is
+/// based on the original type, except `pub` which is downgraded to `pub(crate)`.
+/// You can force `pub` visibility by passing a pub before the method name.
+/// (In that case, you are also required to provide a name for the returned struct)
+///
+/// ```
+/// # use pin_project::pin_project
+/// #[pin_project(pub project = StructProj)] //force the project method and StructProj to be pub
+/// struct Struct<T> {
+///     #[pin]
+///     field: T,
+/// }
+/// ```
+///
 /// Note that the projection types returned by `project` and `project_ref` have
 /// an additional lifetime at the beginning of generics.
 ///
@@ -75,11 +89,6 @@ use proc_macro::TokenStream;
 /// let this: EnumProj<'_, T> = self.project();
 ///                    ^^
 /// ```
-///
-/// The visibility of the projected types and projection methods is based on the
-/// original type. However, if the visibility of the original type is `pub`, the
-/// visibility of the projected types and the projection methods is downgraded
-/// to `pub(crate)`.
 ///
 /// # Safety
 ///

@@ -3,9 +3,7 @@
 use proc_macro2::{Span, TokenStream};
 use quote::quote;
 use syn::{
-    Attribute, Error, Ident, Result, Token,
-    parse::{Parse, ParseStream},
-    spanned::Spanned as _,
+    parse::{Parse, ParseStream}, spanned::Spanned as _, Attribute, Error, Ident, Result, Token, Visibility
 };
 
 use super::PIN;
@@ -64,11 +62,11 @@ pub(super) struct Args {
     /// `UnsafeUnpin` or `!Unpin` argument.
     pub(super) unpin_impl: UnpinImpl,
     /// `project = <ident>` argument.
-    pub(super) project: Option<Ident>,
+    pub(super) project: ProjArgs,
     /// `project_ref = <ident>` argument.
-    pub(super) project_ref: Option<Ident>,
+    pub(super) project_ref: ProjArgs,
     /// `project_replace [= <ident>]` argument.
-    pub(super) project_replace: ProjReplace,
+    pub(super) project_replace: ProjArgs,
 }
 
 impl Parse for Args {
@@ -103,11 +101,19 @@ impl Parse for Args {
         let mut unsafe_unpin = None;
         let mut not_unpin = None;
         let mut project = None;
+        let mut project_pub = false;
         let mut project_ref = None;
+        let mut project_ref_pub = false;
         let mut project_replace_value = None;
         let mut project_replace_span = None;
+        let mut project_replace_pub = false;
+        let mut visibility_pub = None;
 
         while !input.is_empty() {
+            if input.peek(Token![pub]) {
+                let pub_token: Token![pub] = input.parse()?;
+                visibility_pub.replace(pub_token.span());
+            }
             if input.peek(Token![!]) {
                 let bang: Token![!] = input.parse()?;
                 if input.is_empty() {
@@ -133,9 +139,11 @@ impl Parse for Args {
                     }
                     "project" => {
                         project = Some(parse_value(input, &token, project.is_some())?.0);
+                        project_pub = visibility_pub.take().is_some();
                     }
                     "project_ref" => {
                         project_ref = Some(parse_value(input, &token, project_ref.is_some())?.0);
+                        project_ref_pub = visibility_pub.take().is_some();
                     }
                     "project_replace" => {
                         if input.peek(Token![=]) {
@@ -143,6 +151,7 @@ impl Parse for Args {
                                 parse_value(input, &token, project_replace_span.is_some())?;
                             project_replace_value = Some(value);
                             project_replace_span = Some(span.span());
+                            project_replace_pub = visibility_pub.take().is_some();
                         } else if project_replace_span.is_some() {
                             bail!(token, "duplicate `project_replace` argument");
                         } else {
@@ -158,7 +167,12 @@ impl Parse for Args {
                     _ => bail!(token, "unexpected argument: {}", token),
                 }
             }
-
+            if let Some(span) = visibility_pub {
+                return Err(Error::new(
+                    span,
+                    "`pub` can only be used on project, project_ref or named project_replace.",
+                ));
+            }
             if input.is_empty() {
                 break;
             }
@@ -181,7 +195,6 @@ impl Parse for Args {
                 }
             }
         }
-
         if let Some(span) = pinned_drop {
             if project_replace_span.is_some() {
                 return Err(Error::new(
@@ -190,10 +203,28 @@ impl Parse for Args {
                 ));
             }
         }
-        let project_replace = match (project_replace_span, project_replace_value) {
-            (None, _) => ProjReplace::None,
-            (Some(span), Some(ident)) => ProjReplace::Named { ident, span },
-            (Some(span), None) => ProjReplace::Unnamed { span },
+        let project_replace =
+            match (project_replace_span, project_replace_value, project_replace_pub) {
+                (None, _, _) => ProjArgs::None,
+                (Some(span), Some(ident), false) => ProjArgs::Named { ident, span },
+                (Some(span), Some(ident), true) => ProjArgs::NamedPublic { span, ident },
+                (Some(span), None, false) => ProjArgs::Unnamed { span },
+                (Some(span), None, true) => {
+                    return Err(Error::new(
+                        span,
+                        "project_replace cannot be pub if it is not named",
+                    ));
+                }
+            };
+        let project = match (project, project_pub) {
+            (None, _) => ProjArgs::None,
+            (Some(ident), false) => ProjArgs::Named { span: ident.span(), ident },
+            (Some(ident), true) => ProjArgs::NamedPublic { span: ident.span(), ident },
+        };
+        let project_ref = match (project_ref, project_ref_pub) {
+            (None, _) => ProjArgs::None,
+            (Some(ident), false) => ProjArgs::Named { span: ident.span(), ident },
+            (Some(ident), true) => ProjArgs::NamedPublic { span: ident.span(), ident },
         };
         let unpin_impl = match (unsafe_unpin, not_unpin) {
             (None, None) => UnpinImpl::Default,
@@ -221,8 +252,8 @@ pub(super) enum UnpinImpl {
     Negative(Span),
 }
 
-/// `project_replace [= <ident>]` argument.
-pub(super) enum ProjReplace {
+/// `[pub] project{,_ref,_replace} [= <ident>]` argument.
+pub(super) enum ProjArgs {
     None,
     /// `project_replace`.
     Unnamed {
@@ -233,18 +264,40 @@ pub(super) enum ProjReplace {
         span: Span,
         ident: Ident,
     },
+    NamedPublic {
+        span: Span,
+        ident: Ident,
+    },
 }
 
-impl ProjReplace {
+impl ProjArgs {
     /// Return the span of this argument.
     pub(super) fn span(&self) -> Option<Span> {
         match self {
             Self::None => None,
-            Self::Named { span, .. } | Self::Unnamed { span, .. } => Some(*span),
+            Self::Named { span, .. }
+            | Self::Unnamed { span, .. }
+            | Self::NamedPublic { span, .. } => Some(*span),
         }
     }
 
     pub(super) fn ident(&self) -> Option<&Ident> {
-        if let Self::Named { ident, .. } = self { Some(ident) } else { None }
+        if let Self::Named { ident, .. } | Self::NamedPublic { ident, .. } = self {
+            Some(ident)
+        } else {
+            None
+        }
+    }
+    pub(super) fn vis(&self,default_vis: &Visibility) -> Visibility {
+        match self {
+            Self::NamedPublic { .. } => parse_quote_spanned!(default_vis.span() => pub),
+            _ => default_vis.clone(),
+        }
+    }
+    pub(super) fn is_some(&self) -> bool {
+        match self {
+            Self::None => false,
+            _ => true,
+        }
     }
 }

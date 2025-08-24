@@ -7,7 +7,7 @@ use quote::{ToTokens, quote, quote_spanned};
 use syn::{
     Attribute, ExprPath, ExprStruct, Generics, Ident, Item, Lifetime, LifetimeParam, Macro,
     PatStruct, PatTupleStruct, Path, PathArguments, PredicateType, QSelf, Result, Token, Type,
-    TypeParamBound, TypePath, Variant, WherePredicate,
+    TypeParamBound, TypePath, Variant, Visibility, WherePredicate,
     parse::{Parse, ParseBuffer, ParseStream},
     parse_quote,
     punctuated::Punctuated,
@@ -72,6 +72,18 @@ pub(crate) fn insert_lifetime(generics: &mut Generics, lifetime: Lifetime) {
     generics.lt_token.get_or_insert_with(<Token![<]>::default);
     generics.gt_token.get_or_insert_with(<Token![>]>::default);
     generics.params.insert(0, LifetimeParam::new(lifetime).into());
+}
+
+/// Determines the default visibility of the projected types and projection methods.
+///
+/// If given visibility is `pub`, returned visibility is `pub(crate)`.
+/// Otherwise, returned visibility is the same as given visibility.
+pub(crate) fn determine_visibility(vis: &Visibility) -> Visibility {
+    if let Visibility::Public(token) = vis {
+        parse_quote_spanned!(token.span => pub(crate))
+    } else {
+        vis.clone()
+    }
 }
 
 pub(crate) fn respan<T>(node: &T, span: Span) -> T
