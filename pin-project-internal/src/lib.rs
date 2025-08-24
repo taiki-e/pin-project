@@ -76,7 +76,7 @@ use proc_macro::TokenStream;
 /// ```
 /// # use pin_project::pin_project
 /// #[pin_project(pub project = StructProj)] //force the project method and StructProj to be pub
-/// struct Struct<T> {
+/// pub struct Struct<T> {
 ///     #[pin]
 ///     field: T,
 /// }
