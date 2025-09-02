@@ -115,7 +115,10 @@ impl Parse for Args {
             if input.peek(Token![pub]) {
                 let pub_token: Token![pub] = input.parse()?;
                 if input.is_empty() {
-                    bail!(pub_token, "`pub` can only be used on project, project_ref or named project_replace")
+                    bail!(
+                        pub_token,
+                        "`pub` can only be used on project, project_ref or named project_replace"
+                    )
                 }
                 visibility_pub.replace(pub_token.span());
             }
