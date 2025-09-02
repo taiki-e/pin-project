@@ -19,5 +19,6 @@ jobs:
     with:
       crates: pin-project-internal,.
     permissions:
-      contents: write
+      contents: write # for taiki-e/create-gh-release-action
+      id-token: write # for rust-lang/crates-io-auth-action
     secrets: inherit
