@@ -265,7 +265,7 @@ error: unexpected argument: Unpin
 error: `pub` can only be used on project, project_ref or named project_replace.
    --> tests/ui/pin_project/invalid.rs:203:19
     |
-203 |     #[pin_project(pub project_replace)] //~ Error project_replace cannot be pub if it is not named
+203 |     #[pin_project(pub project_replace)] //~ Error `pub` can only be used on project, project_ref or named project_replace.
     |                   ^^^
 
 error: name `OrigAndProj` is the same as the original type name

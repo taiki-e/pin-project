@@ -200,7 +200,7 @@ mod pin_project_argument {
     #[pin_project(pub Unpin)] //~ Error unexpected argument: Unpin
     struct Pub2(#[pin] ());
 
-    #[pin_project(pub project_replace)] //~ Error project_replace cannot be pub if it is not named
+    #[pin_project(pub project_replace)] //~ Error `pub` can only be used on project, project_ref or named project_replace.
     struct Pub3(#[pin] ());
 
     #[pin_project(pub project_replace = Pub4ProjReplace, pub project = Pub4Proj)] // Ok

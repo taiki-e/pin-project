@@ -214,12 +214,7 @@ impl Parse for Args {
                 (Some(span), Some(ident), false) => ProjArgs::Named { ident, span },
                 (Some(span), Some(ident), true) => ProjArgs::NamedPublic { span, ident },
                 (Some(span), None, false) => ProjArgs::Unnamed { span },
-                (Some(span), None, true) => {
-                    return Err(Error::new(
-                        span,
-                        "project_replace cannot be pub if it is not named",
-                    ));
-                }
+                (Some(_), None, true) => unreachable!(),
             };
         let project = match (project, project_pub) {
             (None, _) => ProjArgs::None,
