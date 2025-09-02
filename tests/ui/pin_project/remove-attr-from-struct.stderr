@@ -77,6 +77,12 @@ note: required because it appears within the type `A`
    |        ^
 note: required by a bound in `Pin::<Ptr>::new`
   --> $RUST/core/src/pin.rs
+   |
+   | impl<Ptr: Deref<Target: Unpin>> Pin<Ptr> {
+   |                         ^^^^^ required by this bound in `Pin::<Ptr>::new`
+...
+   |     pub const fn new(pointer: Ptr) -> Pin<Ptr> {
+   |                  --- required by a bound in this associated function
 
 error[E0599]: no method named `project` found for struct `Pin<&mut A>` in the current scope
   --> tests/ui/pin_project/remove-attr-from-struct.rs:42:30
@@ -101,6 +107,12 @@ note: required because it appears within the type `B`
    |        ^
 note: required by a bound in `Pin::<Ptr>::new`
   --> $RUST/core/src/pin.rs
+   |
+   | impl<Ptr: Deref<Target: Unpin>> Pin<Ptr> {
+   |                         ^^^^^ required by this bound in `Pin::<Ptr>::new`
+...
+   |     pub const fn new(pointer: Ptr) -> Pin<Ptr> {
+   |                  --- required by a bound in this associated function
 
 error[E0599]: no method named `project` found for struct `Pin<&mut B>` in the current scope
   --> tests/ui/pin_project/remove-attr-from-struct.rs:45:30
