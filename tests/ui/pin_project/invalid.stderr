@@ -250,18 +250,16 @@ error: `project_replace` argument requires a value when used on enums
 192 |     #[pin_project(project_replace)] //~ ERROR `project_replace` argument requires a value when used on enums
     |                   ^^^^^^^^^^^^^^^
 
-error: unexpected end of input, expected identifier
-   --> tests/ui/pin_project/invalid.rs:197:5
+error: `pub` can only be used on project, project_ref or named project_replace
+   --> tests/ui/pin_project/invalid.rs:197:19
     |
 197 |     #[pin_project(pub)] //~ Error `pub` can only be used on project, project_ref or named project_replace.
-    |     ^^^^^^^^^^^^^^^^^^^
-    |
-    = note: this error originates in the derive macro `::pin_project::__private::__PinProjectInternalDerive` (in Nightly builds, run with -Z macro-backtrace for more info)
+    |                   ^^^
 
 error: unexpected argument: Unpin
    --> tests/ui/pin_project/invalid.rs:200:23
     |
-200 |     #[pin_project(pub Unpin)] //~ Error `pub` can only be used on project, project_ref or named project_replace.
+200 |     #[pin_project(pub Unpin)] //~ Error unexpected argument: Unpin
     |                       ^^^^^
 
 error: `pub` can only be used on project, project_ref or named project_replace.
@@ -269,12 +267,6 @@ error: `pub` can only be used on project, project_ref or named project_replace.
     |
 203 |     #[pin_project(pub project_replace)] //~ Error project_replace cannot be pub if it is not named
     |                   ^^^
-
-error: unexpected argument: Project
-   --> tests/ui/pin_project/invalid.rs:206:62
-    |
-206 |     #[pin_project(pub project_replace = Pub4ProjReplace, pub Project = Pub4Proj)] // Ok
-    |                                                              ^^^^^^^
 
 error: name `OrigAndProj` is the same as the original type name
    --> tests/ui/pin_project/invalid.rs:213:29
