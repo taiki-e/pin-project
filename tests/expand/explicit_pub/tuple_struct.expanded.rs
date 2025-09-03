@@ -21,6 +21,7 @@ pub struct TupleStruct<T, U>(#[pin] pub T, pub U);
 )]
 /**A projected TupleStruct. Obtained trough the .project() method, useful to access the fields.
 You should however consider passing around a Pin<&mut TupleStruct> directly rather than this struct*/
+#[non_exhaustive]
 pub struct TupleStructProj<'pin, T, U>(
     pub ::pin_project::__private::Pin<&'pin mut (T)>,
     pub &'pin mut (U),
@@ -55,6 +56,7 @@ const _: () = {
     #[allow(dead_code, clippy::missing_docs_in_private_items, clippy::ref_option_ref)]
     /**A immutably projected TupleStruct. Obtained trough the .project_ref() method, useful to access the fields.
 You should consider passing around a Pin<& TupleStruct> directly rather than this struct*/
+    #[non_exhaustive]
     pub(crate) struct __TupleStructProjectionRef<'pin, T, U>(
         pub ::pin_project::__private::Pin<&'pin (T)>,
         pub &'pin (U),
@@ -77,7 +79,7 @@ You should consider passing around a Pin<& TupleStruct> directly rather than thi
         #[allow(dead_code)]
         #[inline]
         /**Take a Pin<& TupleStruct> and project it, aka return a TupleStruct-like data structure with fields of the same name,
-        each being a (pinne if necessary) reference to the corresponding field of Self*/
+        each being a (pinned if necessary) reference to the corresponding field of Self*/
         pub(crate) fn project_ref<'pin>(
             self: _pin_project::__private::Pin<&'pin Self>,
         ) -> __TupleStructProjectionRef<'pin, T, U> {

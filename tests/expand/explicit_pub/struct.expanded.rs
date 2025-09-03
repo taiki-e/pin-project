@@ -28,6 +28,7 @@ pub struct Struct<T, U> {
 )]
 /**A projected Struct. Obtained trough the .project() method, useful to access the fields.
 You should however consider passing around a Pin<&mut Struct> directly rather than this struct*/
+#[non_exhaustive]
 pub struct StructProj<'pin, T, U>
 where
     Struct<T, U>: 'pin,
@@ -57,6 +58,7 @@ where
 )]
 /**A immutably projected Struct. Obtained trough the .project_ref() method, useful to access the fields.
 You should consider passing around a Pin<& Struct> directly rather than this struct*/
+#[non_exhaustive]
 pub(crate) struct StructProjRef<'pin, T, U>
 where
     Struct<T, U>: 'pin,
@@ -110,7 +112,7 @@ const _: () = {
         #[allow(dead_code)]
         #[inline]
         /**Take a Pin<& Struct> and project it, aka return a Struct-like data structure with fields of the same name,
-        each being a (pinne if necessary) reference to the corresponding field of Self*/
+        each being a (pinned if necessary) reference to the corresponding field of Self*/
         pub(crate) fn project_ref<'pin>(
             self: _pin_project::__private::Pin<&'pin Self>,
         ) -> StructProjRef<'pin, T, U> {

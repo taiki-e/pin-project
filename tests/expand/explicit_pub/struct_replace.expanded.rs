@@ -23,6 +23,7 @@ pub struct Struct<T, U> {
     clippy::missing_docs_in_private_items
 )]
 ///A projection that own a Struct.
+#[non_exhaustive]
 pub struct StructProjReplace<T, U> {
     pub pinned: ::pin_project::__private::PhantomData<T>,
     pub unpinned: U,
@@ -55,6 +56,7 @@ const _: () = {
     #[allow(dead_code, clippy::missing_docs_in_private_items, clippy::mut_mut)]
     /**A projected Struct. Obtained trough the .project() method, useful to access the fields.
 You should however consider passing around a Pin<&mut Struct> directly rather than this struct*/
+    #[non_exhaustive]
     pub(crate) struct __StructProjection<'pin, T, U>
     where
         Struct<T, U>: 'pin,
@@ -65,6 +67,7 @@ You should however consider passing around a Pin<&mut Struct> directly rather th
     #[allow(dead_code, clippy::missing_docs_in_private_items, clippy::ref_option_ref)]
     /**A immutably projected Struct. Obtained trough the .project_ref() method, useful to access the fields.
 You should consider passing around a Pin<& Struct> directly rather than this struct*/
+    #[non_exhaustive]
     pub(crate) struct __StructProjectionRef<'pin, T, U>
     where
         Struct<T, U>: 'pin,
@@ -91,7 +94,7 @@ You should consider passing around a Pin<& Struct> directly rather than this str
         #[allow(dead_code)]
         #[inline]
         /**Take a Pin<& Struct> and project it, aka return a Struct-like data structure with fields of the same name,
-        each being a (pinne if necessary) reference to the corresponding field of Self*/
+        each being a (pinned if necessary) reference to the corresponding field of Self*/
         pub(crate) fn project_ref<'pin>(
             self: _pin_project::__private::Pin<&'pin Self>,
         ) -> __StructProjectionRef<'pin, T, U> {

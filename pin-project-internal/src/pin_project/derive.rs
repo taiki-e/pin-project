@@ -411,6 +411,7 @@ You should however consider passing around a Pin<&mut {0}> directly rather than 
     generate.extend(cx.project.is_some(), quote! {
         #proj_attrs
         #[doc = #project_doc]
+        #[non_exhaustive]
         #project_vis struct #proj_ident #proj_generics #where_clause_fields
     });
 
@@ -421,6 +422,7 @@ You should consider passing around a Pin<& {0}> directly rather than this struct
     generate.extend(cx.project_ref.is_some(), quote! {
         #proj_ref_attrs
         #[doc = #project_ref_doc]
+        #[non_exhaustive]
         #project_ref_vis struct #proj_ref_ident #proj_generics #where_clause_ref_fields
     });
 
@@ -430,6 +432,7 @@ You should consider passing around a Pin<& {0}> directly rather than this struct
         generate.extend(cx.project_replace.ident().is_some(), quote! {
             #proj_own_attrs
             #[doc = #project_own_doc]
+            #[non_exhaustive]
             #project_own_vis struct #proj_own_ident #orig_generics #where_clause_own_fields
         });
     }

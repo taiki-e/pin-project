@@ -25,6 +25,7 @@ struct Struct<T, U> {
 )]
 /**A projected Struct. Obtained trough the .project() method, useful to access the fields.
 You should however consider passing around a Pin<&mut Struct> directly rather than this struct*/
+#[non_exhaustive]
 struct Proj<'pin, T, U>
 where
     Struct<T, U>: 'pin,
@@ -52,6 +53,7 @@ where
 )]
 /**A immutably projected Struct. Obtained trough the .project_ref() method, useful to access the fields.
 You should consider passing around a Pin<& Struct> directly rather than this struct*/
+#[non_exhaustive]
 struct ProjRef<'pin, T, U>
 where
     Struct<T, U>: 'pin,
@@ -77,6 +79,7 @@ where
     clippy::missing_docs_in_private_items
 )]
 ///A projection that own a Struct.
+#[non_exhaustive]
 struct ProjOwn<T, U> {
     pinned: ::pin_project::__private::PhantomData<T>,
     unpinned: U,
@@ -125,7 +128,7 @@ const _: () = {
         #[allow(dead_code)]
         #[inline]
         /**Take a Pin<& Struct> and project it, aka return a Struct-like data structure with fields of the same name,
-        each being a (pinne if necessary) reference to the corresponding field of Self*/
+        each being a (pinned if necessary) reference to the corresponding field of Self*/
         fn project_ref<'pin>(
             self: _pin_project::__private::Pin<&'pin Self>,
         ) -> ProjRef<'pin, T, U> {

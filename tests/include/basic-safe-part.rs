@@ -2,6 +2,7 @@
 
 // default #[pin_project], PinnedDrop, project_replace, !Unpin, and UnsafeUnpin without UnsafeUnpin impl are completely safe.
 
+
 /// Testing default struct.
 #[allow(clippy::exhaustive_structs)] // for the type itself
 #[::pin_project::pin_project]
