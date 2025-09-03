@@ -275,10 +275,10 @@ pub enum NotUnpinEnum<T, U> {
 }
 
 /// Testing pub doc
-#[allow(clippy::exhaustive_structs)] // for the type itself
 #[::pin_project::pin_project(pub project = PubStructProj)]
 #[derive(Debug)]
-pub struct PubStruct<T,U> {
+#[allow(clippy::exhaustive_structs)] // for the type itself
+pub struct PubStruct<T, U> {
     /// Pinned field.
     #[pin]
     pub pinned: T,
