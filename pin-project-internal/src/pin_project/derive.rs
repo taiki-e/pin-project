@@ -1020,7 +1020,7 @@ fn make_proj_impl(
     let project_ref_vis = cx.project_ref.vis(default_vis);
     let project_ref_doc = format!(
         "Take a Pin<& {0}> and project it, aka return a {0}-like data structure with fields of the same name,
-        each being a (pinne if necessary) reference to the corresponding field of Self",orig_name
+        each being a (pinned if necessary) reference to the corresponding field of Self",orig_name
     );
     let mut project_ref = Some(quote! {
         #allow_dead_code
