@@ -1,8 +1,11 @@
 use pin_project::pin_project;
+/// Test Struct
 #[pin(__private(pub project = StructProj, project_ref = StructProjRef))]
 pub struct Struct<T, U> {
+    /// Pinned field
     #[pin]
     pub pinned: T,
+    /// UnPinned field
     pub unpinned: U,
 }
 #[allow(
@@ -23,11 +26,15 @@ pub struct Struct<T, U> {
     clippy::missing_docs_in_private_items,
     clippy::mut_mut
 )]
+/**A projected Struct. Obtained trough the .project() method, useful to access the fields.
+You should however consider passing around a Pin<&mut Struct> directly rather than this struct*/
 pub struct StructProj<'pin, T, U>
 where
     Struct<T, U>: 'pin,
 {
+    /// Pinned field
     pub pinned: ::pin_project::__private::Pin<&'pin mut (T)>,
+    /// UnPinned field
     pub unpinned: &'pin mut (U),
 }
 #[allow(
@@ -48,11 +55,15 @@ where
     clippy::missing_docs_in_private_items,
     clippy::ref_option_ref
 )]
+/**A immutably projected Struct. Obtained trough the .project_ref() method, useful to access the fields.
+You should consider passing around a Pin<& Struct> directly rather than this struct*/
 pub(crate) struct StructProjRef<'pin, T, U>
 where
     Struct<T, U>: 'pin,
 {
+    /// Pinned field
     pub pinned: ::pin_project::__private::Pin<&'pin (T)>,
+    /// UnPinned field
     pub unpinned: &'pin (U),
 }
 #[allow(
@@ -83,6 +94,8 @@ const _: () = {
     impl<T, U> Struct<T, U> {
         #[allow(dead_code)]
         #[inline]
+        /**Take a Pin<&mut Struct> and project it, aka return a Struct-like data structure with fields of the same name,
+        each being a (pinned if necessary) mutable reference to the coresponding field of Self*/
         pub fn project<'pin>(
             self: _pin_project::__private::Pin<&'pin mut Self>,
         ) -> StructProj<'pin, T, U> {
@@ -96,6 +109,8 @@ const _: () = {
         }
         #[allow(dead_code)]
         #[inline]
+        /**Take a Pin<& Struct> and project it, aka return a Struct-like data structure with fields of the same name,
+        each being a (pinne if necessary) reference to the corresponding field of Self*/
         pub(crate) fn project_ref<'pin>(
             self: _pin_project::__private::Pin<&'pin Self>,
         ) -> StructProjRef<'pin, T, U> {

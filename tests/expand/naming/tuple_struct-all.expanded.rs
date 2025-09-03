@@ -19,6 +19,8 @@ struct TupleStruct<T, U>(#[pin] T, U);
     clippy::missing_docs_in_private_items,
     clippy::mut_mut
 )]
+/**A projected TupleStruct. Obtained trough the .project() method, useful to access the fields.
+You should however consider passing around a Pin<&mut TupleStruct> directly rather than this struct*/
 struct Proj<'pin, T, U>(
     ::pin_project::__private::Pin<&'pin mut (T)>,
     &'pin mut (U),
@@ -43,6 +45,8 @@ where
     clippy::missing_docs_in_private_items,
     clippy::ref_option_ref
 )]
+/**A immutably projected TupleStruct. Obtained trough the .project_ref() method, useful to access the fields.
+You should consider passing around a Pin<& TupleStruct> directly rather than this struct*/
 struct ProjRef<'pin, T, U>(
     ::pin_project::__private::Pin<&'pin (T)>,
     &'pin (U),
@@ -66,6 +70,7 @@ where
     clippy::type_repetition_in_bounds,
     clippy::missing_docs_in_private_items
 )]
+///A projection that own a TupleStruct.
 struct ProjOwn<T, U>(::pin_project::__private::PhantomData<T>, U);
 #[allow(
     unused_qualifications,
@@ -95,6 +100,8 @@ const _: () = {
     impl<T, U> TupleStruct<T, U> {
         #[allow(dead_code)]
         #[inline]
+        /**Take a Pin<&mut TupleStruct> and project it, aka return a TupleStruct-like data structure with fields of the same name,
+        each being a (pinned if necessary) mutable reference to the coresponding field of Self*/
         fn project<'pin>(
             self: _pin_project::__private::Pin<&'pin mut Self>,
         ) -> Proj<'pin, T, U> {
@@ -105,6 +112,8 @@ const _: () = {
         }
         #[allow(dead_code)]
         #[inline]
+        /**Take a Pin<& TupleStruct> and project it, aka return a TupleStruct-like data structure with fields of the same name,
+        each being a (pinne if necessary) reference to the corresponding field of Self*/
         fn project_ref<'pin>(
             self: _pin_project::__private::Pin<&'pin Self>,
         ) -> ProjRef<'pin, T, U> {
@@ -115,6 +124,7 @@ const _: () = {
         }
         #[allow(dead_code)]
         #[inline]
+        ///Take a Pin<&mut TupleStruct>, and a replacement. Replace the pinned TupleStruct and return an owning projection
         fn project_replace(
             self: _pin_project::__private::Pin<&mut Self>,
             __replacement: Self,

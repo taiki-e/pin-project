@@ -279,7 +279,7 @@ struct OriginalType<'a> {
 }
 
 struct ProjectedType {
-    /// Visibility of the projected types.
+    /// Visibility of the projected type.
     vis: Visibility,
     /// Name of the projected type returned by `project` method.
     mut_ident: Ident,
@@ -380,6 +380,7 @@ fn parse_struct<'a>(
     let default_vis = &cx.proj.vis;
     let mut orig_generics = cx.orig.generics.clone();
     let orig_where_clause = orig_generics.where_clause.take();
+    let orig_name = cx.orig.ident;
     let proj_generics = &cx.proj.generics;
     let proj_where_clause = &cx.proj.where_clause;
 
@@ -400,20 +401,35 @@ fn parse_struct<'a>(
     };
 
     let (proj_attrs, proj_ref_attrs, proj_own_attrs) = proj_allowed_lints(cx);
+
     let project_vis = cx.project.vis(default_vis);
+    let project_doc = format!(
+        "A projected {0}. Obtained trough the .project() method, useful to access the fields.
+You should however consider passing around a Pin<&mut {0}> directly rather than this struct",
+        orig_name
+    );
     generate.extend(cx.project.is_some(), quote! {
         #proj_attrs
+        #[doc = #project_doc]
         #project_vis struct #proj_ident #proj_generics #where_clause_fields
     });
+
+    let project_ref_doc = format!(
+        "A immutably projected {0}. Obtained trough the .project_ref() method, useful to access the fields.
+You should consider passing around a Pin<& {0}> directly rather than this struct",orig_name);
     let project_ref_vis = cx.project_ref.vis(default_vis);
     generate.extend(cx.project_ref.is_some(), quote! {
         #proj_ref_attrs
+        #[doc = #project_ref_doc]
         #project_ref_vis struct #proj_ref_ident #proj_generics #where_clause_ref_fields
     });
+
+    let project_own_doc = format!("A projection that own a {0}.", orig_name);
     let project_own_vis = cx.project_replace.vis(default_vis);
     if cx.project_replace.span().is_some() {
         generate.extend(cx.project_replace.ident().is_some(), quote! {
             #proj_own_attrs
+            #[doc = #project_own_doc]
             #project_own_vis struct #proj_own_ident #orig_generics #where_clause_own_fields
         });
     }
@@ -605,14 +621,18 @@ fn visit_fields<'a>(
         let binding = ident.clone().unwrap_or_else(|| format_ident!("_{}", i));
         proj_pat.extend(quote!(#binding,));
         let lifetime = &cx.proj.lifetime;
+        let doc = attrs.extract_doc();
         if attrs.position_exact(PIN)?.is_some() {
             proj_fields.extend(quote! {
+                #doc
                 #vis #ident #colon_token ::pin_project::__private::Pin<&#lifetime mut (#ty)>,
             });
             proj_ref_fields.extend(quote! {
+                #doc
                 #vis #ident #colon_token ::pin_project::__private::Pin<&#lifetime (#ty)>,
             });
             proj_own_fields.extend(quote! {
+                #doc
                 #vis #ident #colon_token ::pin_project::__private::PhantomData<#ty>,
             });
             proj_body.extend(quote! {
@@ -626,12 +646,15 @@ fn visit_fields<'a>(
             pinned_bindings.push(binding);
         } else {
             proj_fields.extend(quote! {
+                #doc
                 #vis #ident #colon_token &#lifetime mut (#ty),
             });
             proj_ref_fields.extend(quote! {
+                #doc
                 #vis #ident #colon_token &#lifetime (#ty),
             });
             proj_own_fields.extend(quote! {
+                #doc
                 #vis #ident #colon_token #ty,
             });
             proj_body.extend(quote! {
@@ -968,6 +991,7 @@ fn make_proj_impl(
     let proj_own_ident = &cx.proj.own_ident;
 
     let orig_ty_generics = cx.orig.generics.split_for_impl().1;
+    let orig_name = cx.orig.ident;
     let proj_ty_generics = cx.proj.generics.split_for_impl().1;
     let (impl_generics, ty_generics, where_clause) = cx.orig.generics.split_for_impl();
     // TODO: For enums and project_replace, dead_code warnings should not be
@@ -977,9 +1001,13 @@ fn make_proj_impl(
     let allow_dead_code = quote! { #[allow(dead_code)] };
 
     let project_vis = cx.project.vis(default_vis);
+    let project_doc = format!(
+        "Take a Pin<&mut {0}> and project it, aka return a {0}-like data structure with fields of the same name,
+        each being a (pinned if necessary) mutable reference to the coresponding field of Self",orig_name);
     let mut project = Some(quote! {
         #allow_dead_code
         #[inline]
+        #[doc = #project_doc]
         #project_vis fn project<#lifetime>(
             self: _pin_project::__private::Pin<&#lifetime mut Self>,
         ) -> #proj_ident #proj_ty_generics {
@@ -988,10 +1016,16 @@ fn make_proj_impl(
             }
         }
     });
+
     let project_ref_vis = cx.project_ref.vis(default_vis);
+    let project_ref_doc = format!(
+        "Take a Pin<& {0}> and project it, aka return a {0}-like data structure with fields of the same name,
+        each being a (pinne if necessary) reference to the corresponding field of Self",orig_name
+    );
     let mut project_ref = Some(quote! {
         #allow_dead_code
         #[inline]
+        #[doc = #project_ref_doc]
         #project_ref_vis fn project_ref<#lifetime>(
             self: _pin_project::__private::Pin<&#lifetime Self>,
         ) -> #proj_ref_ident #proj_ty_generics {
@@ -1000,7 +1034,12 @@ fn make_proj_impl(
             }
         }
     });
+
     let project_own_vis = cx.project_replace.vis(default_vis);
+    let project_own_doc = format!(
+        "Take a Pin<&mut {0}>, and a replacement. Replace the pinned {0} and return an owning projection",
+        orig_name
+    );
     let mut project_replace = cx.project_replace.span().map(|span| {
         // It is enough to only set the span of the signature.
         let sig = quote_spanned! { span =>
@@ -1012,6 +1051,7 @@ fn make_proj_impl(
         quote! {
             #allow_dead_code
             #[inline]
+            #[doc = #project_own_doc]
             #sig {
                 unsafe {
                     let __self_ptr: *mut Self = self.get_unchecked_mut();

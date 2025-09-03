@@ -273,3 +273,14 @@ pub enum NotUnpinEnum<T, U> {
     /// Unit variant.
     Unit,
 }
+
+/// Testing pub doc
+#[derive(Debug)]
+#[::pin_project::pin_project(pub project = PubStructProj)]
+pub struct PubStruct<T,U> {
+    /// Pinned field.
+    #[pin]
+    pub pinned: T,
+    /// Unpinned field.
+    pub unpinned: U,
+}

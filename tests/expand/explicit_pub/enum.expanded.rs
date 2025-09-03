@@ -88,6 +88,8 @@ const _: () = {
     impl<T, U> Enum<T, U> {
         #[allow(dead_code)]
         #[inline]
+        /**Take a Pin<&mut Enum> and project it, aka return a Enum-like data structure with fields of the same name,
+        each being a (pinned if necessary) mutable reference to the coresponding field of Self*/
         pub fn project<'pin>(
             self: _pin_project::__private::Pin<&'pin mut Self>,
         ) -> EnumProj<'pin, T, U> {
@@ -111,6 +113,8 @@ const _: () = {
         }
         #[allow(dead_code)]
         #[inline]
+        /**Take a Pin<& Enum> and project it, aka return a Enum-like data structure with fields of the same name,
+        each being a (pinne if necessary) reference to the corresponding field of Self*/
         pub fn project_ref<'pin>(
             self: _pin_project::__private::Pin<&'pin Self>,
         ) -> EnumProjRef<'pin, T, U> {
