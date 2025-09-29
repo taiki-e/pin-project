@@ -17,6 +17,7 @@ build.include-workspace = false # covered by tools/tidy.sh
 build.include-archives = true
 build.allow-build-scripts = [
     { name = "proc-macro2" },
+    { name = "quote" },
 ]
 build.bypass = [
 ]

@@ -2,7 +2,8 @@
 name = "pin-project"
 version = "1.1.10" #publish:version
 edition = "2021"
-rust-version = "1.56" # Align to pin-project-internal
+# NB: Sync with rust-version field in other Cargo.toml files and msrv badge in README.md
+rust-version = "1.61" # Align to pin-project-internal
 license = "Apache-2.0 OR MIT"
 repository = "https://github.com/taiki-e/pin-project"
 keywords = ["pin", "macros", "attribute"]

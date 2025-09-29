@@ -2,7 +2,7 @@
 name = "no-core"
 version = "0.0.0"
 edition = "2021"
-rust-version = "1.56" # Prevent clippy from suggesting a code that requires a new version.
+rust-version = "1.61" # Prevent clippy from suggesting a code that requires a new version.
 publish = false
 
 [lib]
