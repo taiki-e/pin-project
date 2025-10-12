@@ -57,6 +57,7 @@ const _: () = {
     impl<T, U> Enum<T, U> {
         #[allow(dead_code)]
         #[inline]
+        ///Take a Pin<&mut Enum>, and a replacement. Replace the pinned Enum and return an owning projection
         fn project_replace(
             self: _pin_project::__private::Pin<&mut Self>,
             __replacement: Self,
