@@ -3,7 +3,7 @@ name = "pin-project"
 version = "1.1.10" #publish:version
 edition = "2021"
 # NB: Sync with rust-version field in other Cargo.toml files and msrv badge in README.md
-rust-version = "1.61" # Align to pin-project-internal
+rust-version = "1.68" # Align to pin-project-internal
 license = "Apache-2.0 OR MIT"
 repository = "https://github.com/taiki-e/pin-project"
 keywords = ["pin", "macros", "attribute"]
@@ -62,7 +62,7 @@ unexpected_cfgs = { level = "warn", check-cfg = [
 ] }
 unnameable_types = "warn"
 unreachable_pub = "warn"
-# unsafe_op_in_unsafe_fn = "warn" # Set at crate-level instead since https://github.com/rust-lang/rust/pull/100081 merged in Rust 1.65 is not available on MSRV
+unsafe_op_in_unsafe_fn = "warn"
 [workspace.lints.clippy]
 all = "warn" # Downgrade deny-by-default lints
 pedantic = "warn"

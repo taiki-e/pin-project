@@ -98,7 +98,6 @@ see [examples] directory for more examples and generated code.
         allow(dead_code, unused_variables)
     )
 ))]
-#![warn(unsafe_op_in_unsafe_fn)]
 #![warn(
     // Lints that may help when writing public library.
     missing_debug_implementations,
