@@ -1065,10 +1065,7 @@ fn ensure_not_packed(orig: &OriginalType<'_>, fields: Option<&Fields>) -> Result
         }
     }
 
-    let fields = match fields {
-        Some(fields) => fields,
-        None => return Ok(TokenStream::new()),
-    };
+    let Some(fields) = fields else { return Ok(TokenStream::new()) };
 
     // Workaround for https://github.com/taiki-e/pin-project/issues/32
     // Through the tricky use of proc macros, it's possible to bypass

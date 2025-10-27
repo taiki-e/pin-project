@@ -45,7 +45,7 @@ pub fn hidden_repr_cfg_not_any(args: TokenStream, input: TokenStream) -> TokenSt
 #[proc_macro_attribute]
 pub fn add_pinned_field(_: TokenStream, input: TokenStream) -> TokenStream {
     let mut item: ItemStruct = syn::parse_macro_input!(input);
-    let fields = if let Fields::Named(fields) = &mut item.fields { fields } else { unreachable!() };
+    let Fields::Named(fields) = &mut item.fields else { unreachable!() };
     fields.named.push(Field {
         attrs: vec![parse_quote!(#[pin])],
         vis: Visibility::Inherited,
@@ -63,8 +63,7 @@ pub fn remove_attr(args: TokenStream, input: TokenStream) -> TokenStream {
     let mut item: ItemStruct = syn::parse_macro_input!(input);
     match &*args.to_string() {
         "field_all" => {
-            let fields =
-                if let Fields::Named(fields) = &mut item.fields { fields } else { unreachable!() };
+            let Fields::Named(fields) = &mut item.fields else { unreachable!() };
             fields.named.iter_mut().for_each(|field| field.attrs.clear());
         }
         "struct_all" => item.attrs.clear(),
