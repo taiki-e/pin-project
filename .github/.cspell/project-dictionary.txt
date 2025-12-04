@@ -2,6 +2,7 @@ compiletest
 elidable
 expandtest
 HRTB
+multifields
 overindented
 projectable
 qself
