@@ -42,6 +42,8 @@
     private_interfaces,
     redundant_imports,
     redundant_lifetimes,
+    resolving_to_items_shadowing_supertrait_items,
+    shadowing_supertrait_items,
     single_use_lifetimes,
     supertrait_item_shadowing_definition,
     supertrait_item_shadowing_usage,
