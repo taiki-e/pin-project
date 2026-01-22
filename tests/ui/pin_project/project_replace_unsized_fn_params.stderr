@@ -53,7 +53,7 @@ note: required because it appears within the type `Struct<T>`
   |
 9 | struct Struct<T: ?Sized> {
   |        ^^^^^^
-note: required by an implicit `Sized` bound in `UnsafeOverwriteGuard`
+note: required by an implicit `Sized` bound in `_::_pin_project::__private::UnsafeOverwriteGuard`
  --> src/lib.rs
   |
   |     pub struct UnsafeOverwriteGuard<T> {
@@ -99,7 +99,7 @@ note: required because it appears within the type `TupleStruct<T>`
    |
 14 | struct TupleStruct<T: ?Sized>(T);
    |        ^^^^^^^^^^^
-note: required by an implicit `Sized` bound in `UnsafeOverwriteGuard`
+note: required by an implicit `Sized` bound in `_::_pin_project::__private::UnsafeOverwriteGuard`
   --> src/lib.rs
    |
    |     pub struct UnsafeOverwriteGuard<T> {
