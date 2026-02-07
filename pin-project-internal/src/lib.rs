@@ -4,10 +4,12 @@
 
 #![doc(test(
     no_crate_inject,
-    attr(
-        deny(warnings, rust_2018_idioms, single_use_lifetimes),
-        allow(dead_code, unused_variables)
-    )
+    attr(allow(
+        dead_code,
+        unused_variables,
+        clippy::undocumented_unsafe_blocks,
+        clippy::unused_trait_names,
+    ))
 ))]
 #![forbid(unsafe_code)]
 #![allow(clippy::needless_doctest_main)]
@@ -325,6 +327,7 @@ use proc_macro::TokenStream;
 ///     unpinned: U,
 /// }
 ///
+/// # #[allow(clippy::undocumented_unsafe_blocks)]
 /// unsafe impl<T: Unpin, U> UnsafeUnpin for Struct<T, U> {}
 /// ```
 ///
@@ -356,6 +359,7 @@ use proc_macro::TokenStream;
 ///
 /// ```
 /// # use std::pin::Pin;
+/// # #[allow(unreachable_pub)]
 /// pub trait PinnedDrop {
 ///     fn drop(self: Pin<&mut Self>);
 /// }
@@ -500,6 +504,7 @@ pub fn pin_project(args: TokenStream, input: TokenStream) -> TokenStream {
 ///
 /// ```
 /// # use std::pin::Pin;
+/// # #[allow(unreachable_pub)]
 /// pub trait PinnedDrop {
 ///     fn drop(self: Pin<&mut Self>);
 /// }
@@ -552,6 +557,7 @@ pub fn pin_project(args: TokenStream, input: TokenStream) -> TokenStream {
 ///
 /// ```
 /// # use std::pin::Pin;
+/// # #[allow(unreachable_pub)]
 /// pub trait PinnedDrop {
 ///     unsafe fn drop(self: Pin<&mut Self>);
 /// }

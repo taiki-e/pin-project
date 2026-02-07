@@ -6,6 +6,7 @@ publish = false
 
 [lib]
 path = "lib.rs"
+doctest = false
 
 [dependencies]
 pin-project = { path = "../.." }
