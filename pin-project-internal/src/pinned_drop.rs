@@ -140,7 +140,7 @@ fn validate_sig(sig: &Signature) -> Result<()> {
                     // (mut) self: (<path>::)Pin<&mut Self>
                     if args.args.len() == 1
                         && ty.ident == "Pin"
-                        && get_ty_path(elem).map_or(false, |path| path.is_ident("Self"))
+                        && get_ty_path(elem).is_some_and(|path| path.is_ident("Self"))
                     {
                         if sig.unsafety.is_some() {
                             bail!(sig.unsafety, "implementing the method `drop` is not unsafe");
