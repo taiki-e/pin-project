@@ -2,7 +2,7 @@
 name = "pin-project-auxiliary-macro"
 version = "0.0.0"
 edition = "2021"
-rust-version = "1.68" # Prevent clippy from suggesting a code that requires a new version.
+rust-version = "1.71" # Prevent clippy from suggesting a code that requires a new version.
 publish = false
 
 [lib]
