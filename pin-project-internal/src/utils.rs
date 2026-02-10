@@ -74,7 +74,7 @@ pub(crate) fn insert_lifetime(generics: &mut Generics, lifetime: Lifetime) {
     generics.params.insert(0, LifetimeParam::new(lifetime).into());
 }
 
-/// Determines the visibility of the projected types and projection methods.
+/// Determines the default visibility of the projected types and projection methods.
 ///
 /// If given visibility is `pub`, returned visibility is `pub(crate)`.
 /// Otherwise, returned visibility is the same as given visibility.
@@ -111,6 +111,7 @@ fn respan_tokens(tokens: TokenStream, span: Span) -> TokenStream {
 pub(crate) trait SliceExt {
     fn position_exact(&self, ident: &str) -> Result<Option<usize>>;
     fn find(&self, ident: &str) -> Option<&Attribute>;
+    fn extract_doc(&self) -> TokenStream;
 }
 
 impl SliceExt for [Attribute] {
@@ -134,6 +135,16 @@ impl SliceExt for [Attribute] {
 
     fn find(&self, ident: &str) -> Option<&Attribute> {
         self.iter().position(|attr| attr.path().is_ident(ident)).map(|i| &self[i])
+    }
+    fn extract_doc(&self) -> TokenStream {
+        let mut doc = TokenStream::new();
+        for doc_item in self.iter().filter(|attr| attr.path().is_ident("doc")) {
+            doc = quote! {
+                #doc
+                #doc_item
+            };
+        }
+        doc
     }
 }
 

@@ -1,9 +1,72 @@
 use pin_project::pin_project;
-#[pin(__private())]
+/// Test Struct
+#[pin(__private(pub project = StructProj, project_ref = StructProjRef))]
 pub struct Struct<T, U> {
+    /// Pinned field
     #[pin]
     pub pinned: T,
+    /// UnPinned field
     pub unpinned: U,
+}
+#[allow(
+    dead_code,
+    deprecated,
+    explicit_outlives_requirements,
+    single_use_lifetimes,
+    unreachable_pub,
+    unused_tuple_struct_fields,
+    clippy::unknown_clippy_lints,
+    clippy::absolute_paths,
+    clippy::min_ident_chars,
+    clippy::pattern_type_mismatch,
+    clippy::pub_with_shorthand,
+    clippy::redundant_pub_crate,
+    clippy::single_char_lifetime_names,
+    clippy::type_repetition_in_bounds,
+    clippy::missing_docs_in_private_items,
+    clippy::mut_mut
+)]
+/**A projected Struct. Obtained trough the .project() method, useful to access the fields.
+You should however consider passing around a Pin<&mut Struct> directly rather than this struct*/
+#[non_exhaustive]
+pub struct StructProj<'pin, T, U>
+where
+    Struct<T, U>: 'pin,
+{
+    /// Pinned field
+    pub pinned: ::pin_project::__private::Pin<&'pin mut (T)>,
+    /// UnPinned field
+    pub unpinned: &'pin mut (U),
+}
+#[allow(
+    dead_code,
+    deprecated,
+    explicit_outlives_requirements,
+    single_use_lifetimes,
+    unreachable_pub,
+    unused_tuple_struct_fields,
+    clippy::unknown_clippy_lints,
+    clippy::absolute_paths,
+    clippy::min_ident_chars,
+    clippy::pattern_type_mismatch,
+    clippy::pub_with_shorthand,
+    clippy::redundant_pub_crate,
+    clippy::single_char_lifetime_names,
+    clippy::type_repetition_in_bounds,
+    clippy::missing_docs_in_private_items,
+    clippy::ref_option_ref
+)]
+/**A immutably projected Struct. Obtained trough the .project_ref() method, useful to access the fields.
+You should consider passing around a Pin<& Struct> directly rather than this struct*/
+#[non_exhaustive]
+pub(crate) struct StructProjRef<'pin, T, U>
+where
+    Struct<T, U>: 'pin,
+{
+    /// Pinned field
+    pub pinned: ::pin_project::__private::Pin<&'pin (T)>,
+    /// UnPinned field
+    pub unpinned: &'pin (U),
 }
 #[allow(
     unused_qualifications,
@@ -30,39 +93,17 @@ pub struct Struct<T, U> {
 const _: () = {
     #[allow(unused_extern_crates)]
     extern crate pin_project as _pin_project;
-    #[allow(dead_code, clippy::missing_docs_in_private_items, clippy::mut_mut)]
-    /**A projected Struct. Obtained trough the .project() method, useful to access the fields.
-You should however consider passing around a Pin<&mut Struct> directly rather than this struct*/
-    #[non_exhaustive]
-    pub(crate) struct __StructProjection<'pin, T, U>
-    where
-        Struct<T, U>: 'pin,
-    {
-        pub pinned: ::pin_project::__private::Pin<&'pin mut (T)>,
-        pub unpinned: &'pin mut (U),
-    }
-    #[allow(dead_code, clippy::missing_docs_in_private_items, clippy::ref_option_ref)]
-    /**A immutably projected Struct. Obtained trough the .project_ref() method, useful to access the fields.
-You should consider passing around a Pin<& Struct> directly rather than this struct*/
-    #[non_exhaustive]
-    pub(crate) struct __StructProjectionRef<'pin, T, U>
-    where
-        Struct<T, U>: 'pin,
-    {
-        pub pinned: ::pin_project::__private::Pin<&'pin (T)>,
-        pub unpinned: &'pin (U),
-    }
     impl<T, U> Struct<T, U> {
         #[allow(dead_code)]
         #[inline]
         /**Take a Pin<&mut Struct> and project it, aka return a Struct-like data structure with fields of the same name,
         each being a (pinned if necessary) mutable reference to the corresponding field of Self*/
-        pub(crate) fn project<'pin>(
+        pub fn project<'pin>(
             self: _pin_project::__private::Pin<&'pin mut Self>,
-        ) -> __StructProjection<'pin, T, U> {
+        ) -> StructProj<'pin, T, U> {
             unsafe {
                 let Self { pinned, unpinned } = self.get_unchecked_mut();
-                __StructProjection {
+                StructProj {
                     pinned: _pin_project::__private::Pin::new_unchecked(pinned),
                     unpinned,
                 }
@@ -74,10 +115,10 @@ You should consider passing around a Pin<& Struct> directly rather than this str
         each being a (pinned if necessary) reference to the corresponding field of Self*/
         pub(crate) fn project_ref<'pin>(
             self: _pin_project::__private::Pin<&'pin Self>,
-        ) -> __StructProjectionRef<'pin, T, U> {
+        ) -> StructProjRef<'pin, T, U> {
             unsafe {
                 let Self { pinned, unpinned } = self.get_ref();
-                __StructProjectionRef {
+                StructProjRef {
                     pinned: _pin_project::__private::Pin::new_unchecked(pinned),
                     unpinned,
                 }
