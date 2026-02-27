@@ -1,6 +1,6 @@
 [package]
 name = "pin-project"
-version = "1.1.10" #publish:version
+version = "1.1.11" #publish:version
 edition = "2021"
 # NB: Sync with rust-version field in other Cargo.toml files, msrv badge in README.md, and test job in .github/workflows/ci.yml
 rust-version = "1.71" # Align to pin-project-internal
@@ -26,7 +26,7 @@ allowed_external_types = [
 doc-scrape-examples = false
 
 [dependencies]
-pin-project-internal = { version = "=1.1.10", path = "pin-project-internal" }
+pin-project-internal = { version = "=1.1.11", path = "pin-project-internal" }
 
 [dev-dependencies]
 pin-project-auxiliary-macro = { path = "tests/auxiliary/macro" }

@@ -12,6 +12,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+## [1.1.11] - 2026-02-27
+
 - Enable [release immutability](https://docs.github.com/en/code-security/supply-chain-security/understanding-your-software-supply-chain/immutable-releases).
 
 ## [1.1.10] - 2025-03-03
@@ -730,7 +732,8 @@ See also [tracking issue for 0.4 release](https://github.com/taiki-e/pin-project
 
 Initial release
 
-[Unreleased]: https://github.com/taiki-e/pin-project/compare/v1.1.10...HEAD
+[Unreleased]: https://github.com/taiki-e/pin-project/compare/v1.1.11...HEAD
+[1.1.11]: https://github.com/taiki-e/pin-project/compare/v1.1.10...v1.1.11
 [1.1.10]: https://github.com/taiki-e/pin-project/compare/v1.1.9...v1.1.10
 [1.1.9]: https://github.com/taiki-e/pin-project/compare/v1.1.8...v1.1.9
 [1.1.8]: https://github.com/taiki-e/pin-project/compare/v1.1.7...v1.1.8
