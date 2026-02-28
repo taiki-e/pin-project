@@ -10,7 +10,7 @@ use syn::{
 
 use super::{
     PIN,
-    args::{Args, ProjReplace, UnpinImpl, parse_args},
+    args::{Args, ProjArgs, UnpinImpl, parse_args},
 };
 use crate::utils::{
     ReplaceReceiver, SliceExt as _, Variants, determine_lifetime_name, determine_visibility,
@@ -132,7 +132,8 @@ fn global_allowed_lints() -> TokenStream {
 /// Returns attributes used on projected types.
 fn proj_allowed_lints(cx: &Context<'_>) -> (TokenStream, TokenStream, TokenStream) {
     let global_allowed_lints = global_allowed_lints();
-    let proj_mut_allowed_lints = if cx.project { Some(&global_allowed_lints) } else { None };
+    let proj_mut_allowed_lints =
+        if cx.project.is_some() { Some(&global_allowed_lints) } else { None };
     let proj_mut = quote! {
         #[allow(
             dead_code, // This lint warns unused fields/variants.
@@ -141,7 +142,8 @@ fn proj_allowed_lints(cx: &Context<'_>) -> (TokenStream, TokenStream, TokenStrea
             clippy::mut_mut // This lint warns `&mut &mut <ty>`.
         )]
     };
-    let proj_ref_allowed_lints = if cx.project_ref { Some(&global_allowed_lints) } else { None };
+    let proj_ref_allowed_lints =
+        if cx.project_ref.is_some() { Some(&global_allowed_lints) } else { None };
     let proj_ref = quote! {
         #[allow(
             dead_code, // This lint warns unused fields/variants.
@@ -182,12 +184,12 @@ struct Context<'a> {
     pinned_drop: Option<Span>,
     /// `UnsafeUnpin` or `!Unpin` argument.
     unpin_impl: UnpinImpl,
-    /// `project` argument.
-    project: bool,
-    /// `project_ref` argument.
-    project_ref: bool,
-    /// `project_replace [= <ident>]` argument.
-    project_replace: ProjReplace,
+    /// `[pub] project` argument.
+    project: ProjArgs,
+    /// `[pub] project_ref` argument.
+    project_ref: ProjArgs,
+    /// `[pub] project_replace [= <ident>]` argument.
+    project_replace: ProjArgs,
 }
 
 impl<'a> Context<'a> {
@@ -201,7 +203,7 @@ impl<'a> Context<'a> {
         let Args { pinned_drop, unpin_impl, project, project_ref, project_replace } =
             parse_args(attrs)?;
 
-        if let Some(name) = [project.as_ref(), project_ref.as_ref(), project_replace.ident()]
+        if let Some(name) = [project.ident(), project_ref.ident(), project_replace.ident()]
             .iter()
             .filter_map(Option::as_ref)
             .find(|name| **name == ident)
@@ -229,18 +231,24 @@ impl<'a> Context<'a> {
             .ident()
             .cloned()
             .unwrap_or_else(|| format_ident!("__{}ProjectionOwned", ident));
+        let mut_ident =
+            project.ident().cloned().unwrap_or_else(|| format_ident!("__{}Projection", ident));
+        let ref_ident = project_ref
+            .ident()
+            .cloned()
+            .unwrap_or_else(|| format_ident!("__{}ProjectionRef", ident));
 
         Ok(Self {
             kind,
             pinned_drop,
             unpin_impl,
-            project: project.is_some(),
-            project_ref: project_ref.is_some(),
+            project,
+            project_ref,
             project_replace,
             proj: ProjectedType {
                 vis: determine_visibility(vis),
-                mut_ident: project.unwrap_or_else(|| format_ident!("__{}Projection", ident)),
-                ref_ident: project_ref.unwrap_or_else(|| format_ident!("__{}ProjectionRef", ident)),
+                mut_ident,
+                ref_ident,
                 own_ident,
                 lifetime,
                 generics: proj_generics,
@@ -271,7 +279,7 @@ struct OriginalType<'a> {
 }
 
 struct ProjectedType {
-    /// Visibility of the projected types.
+    /// Visibility of the projected type.
     vis: Visibility,
     /// Name of the projected type returned by `project` method.
     mut_ident: Ident,
@@ -369,9 +377,10 @@ fn parse_struct<'a>(
     let proj_ident = &cx.proj.mut_ident;
     let proj_ref_ident = &cx.proj.ref_ident;
     let proj_own_ident = &cx.proj.own_ident;
-    let vis = &cx.proj.vis;
+    let default_vis = &cx.proj.vis;
     let mut orig_generics = cx.orig.generics.clone();
     let orig_where_clause = orig_generics.where_clause.take();
+    let orig_name = cx.orig.ident;
     let proj_generics = &cx.proj.generics;
     let proj_where_clause = &cx.proj.where_clause;
 
@@ -392,18 +401,39 @@ fn parse_struct<'a>(
     };
 
     let (proj_attrs, proj_ref_attrs, proj_own_attrs) = proj_allowed_lints(cx);
-    generate.extend(cx.project, quote! {
+
+    let project_vis = cx.project.vis(default_vis);
+    let project_doc = format!(
+        "A projected {0}. Obtained trough the .project() method, useful to access the fields.
+You should however consider passing around a Pin<&mut {0}> directly rather than this struct",
+        orig_name
+    );
+    generate.extend(cx.project.is_some(), quote! {
         #proj_attrs
-        #vis struct #proj_ident #proj_generics #where_clause_fields
+        #[doc = #project_doc]
+        #[non_exhaustive]
+        #project_vis struct #proj_ident #proj_generics #where_clause_fields
     });
-    generate.extend(cx.project_ref, quote! {
+
+    let project_ref_doc = format!(
+        "A immutably projected {0}. Obtained trough the .project_ref() method, useful to access the fields.
+You should consider passing around a Pin<& {0}> directly rather than this struct",orig_name);
+    let project_ref_vis = cx.project_ref.vis(default_vis);
+    generate.extend(cx.project_ref.is_some(), quote! {
         #proj_ref_attrs
-        #vis struct #proj_ref_ident #proj_generics #where_clause_ref_fields
+        #[doc = #project_ref_doc]
+        #[non_exhaustive]
+        #project_ref_vis struct #proj_ref_ident #proj_generics #where_clause_ref_fields
     });
+
+    let project_own_doc = format!("A projection that own a {0}.", orig_name);
+    let project_own_vis = cx.project_replace.vis(default_vis);
     if cx.project_replace.span().is_some() {
         generate.extend(cx.project_replace.ident().is_some(), quote! {
             #proj_own_attrs
-            #vis struct #proj_own_ident #orig_generics #where_clause_own_fields
+            #[doc = #project_own_doc]
+            #[non_exhaustive]
+            #project_own_vis struct #proj_own_ident #orig_generics #where_clause_own_fields
         });
     }
 
@@ -431,7 +461,7 @@ fn parse_enum<'a>(
     variants: &'a Punctuated<Variant, Token![,]>,
     generate: &mut GenerateTokens,
 ) -> Result<()> {
-    if let ProjReplace::Unnamed { span } = &cx.project_replace {
+    if let ProjArgs::Unnamed { span } = &cx.project_replace {
         return Err(Error::new(
             *span,
             "`project_replace` argument requires a value when used on enums",
@@ -459,33 +489,37 @@ fn parse_enum<'a>(
     let proj_ident = &cx.proj.mut_ident;
     let proj_ref_ident = &cx.proj.ref_ident;
     let proj_own_ident = &cx.proj.own_ident;
-    let vis = &cx.proj.vis;
+    let default_vis = &cx.proj.vis;
     let mut orig_generics = cx.orig.generics.clone();
     let orig_where_clause = orig_generics.where_clause.take();
     let proj_generics = &cx.proj.generics;
     let proj_where_clause = &cx.proj.where_clause;
 
     let (proj_attrs, proj_ref_attrs, proj_own_attrs) = proj_allowed_lints(cx);
-    if cx.project {
+
+    let project_vis = cx.project.vis(default_vis);
+    if cx.project.is_some() {
         generate.extend(true, quote! {
             #proj_attrs
-            #vis enum #proj_ident #proj_generics #proj_where_clause {
+            #project_vis enum #proj_ident #proj_generics #proj_where_clause {
                 #proj_variants
             }
         });
     }
-    if cx.project_ref {
+    let project_ref_vis = cx.project_ref.vis(default_vis);
+    if cx.project_ref.is_some() {
         generate.extend(true, quote! {
             #proj_ref_attrs
-            #vis enum #proj_ref_ident #proj_generics #proj_where_clause {
+            #project_ref_vis enum #proj_ref_ident #proj_generics #proj_where_clause {
                 #proj_ref_variants
             }
         });
     }
+    let project_own_vis = cx.project_replace.vis(default_vis);
     if cx.project_replace.ident().is_some() {
         generate.extend(true, quote! {
             #proj_own_attrs
-            #vis enum #proj_own_ident #orig_generics #orig_where_clause {
+            #project_own_vis enum #proj_own_ident #orig_generics #orig_where_clause {
                 #proj_own_variants
             }
         });
@@ -590,14 +624,18 @@ fn visit_fields<'a>(
         let binding = ident.clone().unwrap_or_else(|| format_ident!("_{}", i));
         proj_pat.extend(quote!(#binding,));
         let lifetime = &cx.proj.lifetime;
+        let doc = attrs.extract_doc();
         if attrs.position_exact(PIN)?.is_some() {
             proj_fields.extend(quote! {
+                #doc
                 #vis #ident #colon_token ::pin_project::__private::Pin<&#lifetime mut (#ty)>,
             });
             proj_ref_fields.extend(quote! {
+                #doc
                 #vis #ident #colon_token ::pin_project::__private::Pin<&#lifetime (#ty)>,
             });
             proj_own_fields.extend(quote! {
+                #doc
                 #vis #ident #colon_token ::pin_project::__private::PhantomData<#ty>,
             });
             proj_body.extend(quote! {
@@ -611,12 +649,15 @@ fn visit_fields<'a>(
             pinned_bindings.push(binding);
         } else {
             proj_fields.extend(quote! {
+                #doc
                 #vis #ident #colon_token &#lifetime mut (#ty),
             });
             proj_ref_fields.extend(quote! {
+                #doc
                 #vis #ident #colon_token &#lifetime (#ty),
             });
             proj_own_fields.extend(quote! {
+                #doc
                 #vis #ident #colon_token #ty,
             });
             proj_body.extend(quote! {
@@ -945,7 +986,7 @@ fn make_proj_impl(
     proj_ref_body: &TokenStream,
     proj_own_body: &TokenStream,
 ) -> TokenStream {
-    let vis = &cx.proj.vis;
+    let default_vis = &cx.proj.vis;
     let lifetime = &cx.proj.lifetime;
     let orig_ident = cx.orig.ident;
     let proj_ident = &cx.proj.mut_ident;
@@ -953,6 +994,7 @@ fn make_proj_impl(
     let proj_own_ident = &cx.proj.own_ident;
 
     let orig_ty_generics = cx.orig.generics.split_for_impl().1;
+    let orig_name = cx.orig.ident;
     let proj_ty_generics = cx.proj.generics.split_for_impl().1;
     let (impl_generics, ty_generics, where_clause) = cx.orig.generics.split_for_impl();
     // TODO: For enums and project_replace, dead_code warnings should not be
@@ -961,10 +1003,15 @@ fn make_proj_impl(
     // code, so we allow warnings for all methods for now.
     let allow_dead_code = quote! { #[allow(dead_code)] };
 
+    let project_vis = cx.project.vis(default_vis);
+    let project_doc = format!(
+        "Take a Pin<&mut {0}> and project it, aka return a {0}-like data structure with fields of the same name,
+        each being a (pinned if necessary) mutable reference to the corresponding field of Self",orig_name);
     let mut project = Some(quote! {
         #allow_dead_code
         #[inline]
-        #vis fn project<#lifetime>(
+        #[doc = #project_doc]
+        #project_vis fn project<#lifetime>(
             self: _pin_project::__private::Pin<&#lifetime mut Self>,
         ) -> #proj_ident #proj_ty_generics {
             unsafe {
@@ -972,10 +1019,17 @@ fn make_proj_impl(
             }
         }
     });
+
+    let project_ref_vis = cx.project_ref.vis(default_vis);
+    let project_ref_doc = format!(
+        "Take a Pin<& {0}> and project it, aka return a {0}-like data structure with fields of the same name,
+        each being a (pinned if necessary) reference to the corresponding field of Self",orig_name
+    );
     let mut project_ref = Some(quote! {
         #allow_dead_code
         #[inline]
-        #vis fn project_ref<#lifetime>(
+        #[doc = #project_ref_doc]
+        #project_ref_vis fn project_ref<#lifetime>(
             self: _pin_project::__private::Pin<&#lifetime Self>,
         ) -> #proj_ref_ident #proj_ty_generics {
             unsafe {
@@ -983,10 +1037,16 @@ fn make_proj_impl(
             }
         }
     });
+
+    let project_own_vis = cx.project_replace.vis(default_vis);
+    let project_own_doc = format!(
+        "Take a Pin<&mut {0}>, and a replacement. Replace the pinned {0} and return an owning projection",
+        orig_name
+    );
     let mut project_replace = cx.project_replace.span().map(|span| {
         // It is enough to only set the span of the signature.
         let sig = quote_spanned! { span =>
-            #vis fn project_replace(
+            #project_own_vis fn project_replace(
                 self: _pin_project::__private::Pin<&mut Self>,
                 __replacement: Self,
             ) -> #proj_own_ident #orig_ty_generics
@@ -994,6 +1054,7 @@ fn make_proj_impl(
         quote! {
             #allow_dead_code
             #[inline]
+            #[doc = #project_own_doc]
             #sig {
                 unsafe {
                     let __self_ptr: *mut Self = self.get_unchecked_mut();
@@ -1012,10 +1073,10 @@ fn make_proj_impl(
     });
 
     if cx.kind == Enum {
-        if !cx.project {
+        if !cx.project.is_some() {
             project = None;
         }
-        if !cx.project_ref {
+        if !cx.project_ref.is_some() {
             project_ref = None;
         }
         if cx.project_replace.ident().is_none() {
