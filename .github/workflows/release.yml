@@ -26,6 +26,7 @@ jobs:
     permissions:
       contents: write # for taiki-e/create-gh-release-action
       id-token: write # for rust-lang/crates-io-auth-action
+      attestations: write # unused (used when options for uploading binaries are set)
     secrets: inherit
     with:
       version: ${{ inputs.version }}
