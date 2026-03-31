@@ -250,115 +250,133 @@ error: `project_replace` argument requires a value when used on enums
 192 |     #[pin_project(project_replace)] //~ ERROR `project_replace` argument requires a value when used on enums
     |                   ^^^^^^^^^^^^^^^
 
-error: name `OrigAndProj` is the same as the original type name
-   --> tests/ui/pin_project/invalid.rs:201:29
+error: `pub` can only be used on project, project_ref or named project_replace
+   --> tests/ui/pin_project/invalid.rs:197:19
     |
-201 |     #[pin_project(project = OrigAndProj)] //~ ERROR name `OrigAndProj` is the same as the original type name
+197 |     #[pin_project(pub)] //~ Error `pub` can only be used on project, project_ref or named project_replace.
+    |                   ^^^
+
+error: unexpected argument: Unpin
+   --> tests/ui/pin_project/invalid.rs:200:23
+    |
+200 |     #[pin_project(pub Unpin)] //~ Error unexpected argument: Unpin
+    |                       ^^^^^
+
+error: `pub` can only be used on project, project_ref or named project_replace.
+   --> tests/ui/pin_project/invalid.rs:203:19
+    |
+203 |     #[pin_project(pub project_replace)] //~ Error `pub` can only be used on project, project_ref or named project_replace.
+    |                   ^^^
+
+error: name `OrigAndProj` is the same as the original type name
+   --> tests/ui/pin_project/invalid.rs:213:29
+    |
+213 |     #[pin_project(project = OrigAndProj)] //~ ERROR name `OrigAndProj` is the same as the original type name
     |                             ^^^^^^^^^^^
 
 error: name `OrigAndProjRef` is the same as the original type name
-   --> tests/ui/pin_project/invalid.rs:204:33
+   --> tests/ui/pin_project/invalid.rs:216:33
     |
-204 |     #[pin_project(project_ref = OrigAndProjRef)] //~ ERROR name `OrigAndProjRef` is the same as the original type name
+216 |     #[pin_project(project_ref = OrigAndProjRef)] //~ ERROR name `OrigAndProjRef` is the same as the original type name
     |                                 ^^^^^^^^^^^^^^
 
 error: name `OrigAndProjOwn` is the same as the original type name
-   --> tests/ui/pin_project/invalid.rs:207:37
+   --> tests/ui/pin_project/invalid.rs:219:37
     |
-207 |     #[pin_project(project_replace = OrigAndProjOwn)] //~ ERROR name `OrigAndProjOwn` is the same as the original type name
+219 |     #[pin_project(project_replace = OrigAndProjOwn)] //~ ERROR name `OrigAndProjOwn` is the same as the original type name
     |                                     ^^^^^^^^^^^^^^
 
 error: name `A` is already specified by `project` argument
-   --> tests/ui/pin_project/invalid.rs:210:46
+   --> tests/ui/pin_project/invalid.rs:222:46
     |
-210 |     #[pin_project(project = A, project_ref = A)] //~ ERROR name `A` is already specified by `project` argument
+222 |     #[pin_project(project = A, project_ref = A)] //~ ERROR name `A` is already specified by `project` argument
     |                                              ^
 
 error: name `A` is already specified by `project` argument
-   --> tests/ui/pin_project/invalid.rs:213:50
+   --> tests/ui/pin_project/invalid.rs:225:50
     |
-213 |     #[pin_project(project = A, project_replace = A)] //~ ERROR name `A` is already specified by `project` argument
+225 |     #[pin_project(project = A, project_replace = A)] //~ ERROR name `A` is already specified by `project` argument
     |                                                  ^
 
 error: name `A` is already specified by `project_ref` argument
-   --> tests/ui/pin_project/invalid.rs:216:54
+   --> tests/ui/pin_project/invalid.rs:228:54
     |
-216 |     #[pin_project(project_ref = A, project_replace = A)] //~ ERROR name `A` is already specified by `project_ref` argument
+228 |     #[pin_project(project_ref = A, project_replace = A)] //~ ERROR name `A` is already specified by `project_ref` argument
     |                                                      ^
 
 error: duplicate #[pin_project] attribute
-   --> tests/ui/pin_project/invalid.rs:224:5
+   --> tests/ui/pin_project/invalid.rs:236:5
     |
-224 |     #[pin_project] //~ ERROR duplicate #[pin_project] attribute
+236 |     #[pin_project] //~ ERROR duplicate #[pin_project] attribute
     |     ^^^^^^^^^^^^^^
 
 error: #[pin_project] attribute may not be used on structs with zero fields
-   --> tests/ui/pin_project/invalid.rs:232:19
+   --> tests/ui/pin_project/invalid.rs:244:19
     |
-232 |     struct Struct {} //~ ERROR may not be used on structs with zero fields
+244 |     struct Struct {} //~ ERROR may not be used on structs with zero fields
     |                   ^^
 
 error: #[pin_project] attribute may not be used on structs with zero fields
-   --> tests/ui/pin_project/invalid.rs:235:23
+   --> tests/ui/pin_project/invalid.rs:247:23
     |
-235 |     struct TupleStruct(); //~ ERROR may not be used on structs with zero fields
+247 |     struct TupleStruct(); //~ ERROR may not be used on structs with zero fields
     |                       ^^
 
 error: #[pin_project] attribute may not be used on structs with zero fields
-   --> tests/ui/pin_project/invalid.rs:238:12
+   --> tests/ui/pin_project/invalid.rs:250:12
     |
-238 |     struct UnitStruct; //~ ERROR may not be used on structs with zero fields
+250 |     struct UnitStruct; //~ ERROR may not be used on structs with zero fields
     |            ^^^^^^^^^^
 
 error: #[pin_project] attribute may not be used on enums without variants
-   --> tests/ui/pin_project/invalid.rs:241:20
+   --> tests/ui/pin_project/invalid.rs:253:20
     |
-241 |     enum EnumEmpty {} //~ ERROR may not be used on enums without variants
+253 |     enum EnumEmpty {} //~ ERROR may not be used on enums without variants
     |                    ^^
 
 error: #[pin_project] attribute may not be used on enums with discriminants
-   --> tests/ui/pin_project/invalid.rs:245:13
+   --> tests/ui/pin_project/invalid.rs:257:13
     |
-245 |         V = 2, //~ ERROR may not be used on enums with discriminants
+257 |         V = 2, //~ ERROR may not be used on enums with discriminants
     |             ^
 
 error: #[pin_project] attribute may not be used on enums with zero fields
-   --> tests/ui/pin_project/invalid.rs:250:9
+   --> tests/ui/pin_project/invalid.rs:262:9
     |
-250 | /         Unit, //~ ERROR may not be used on enums with zero fields
-251 | |         Tuple(),
-252 | |         Struct {},
+262 | /         Unit, //~ ERROR may not be used on enums with zero fields
+263 | |         Tuple(),
+264 | |         Struct {},
     | |__________________^
 
 error: #[pin_project] attribute may only be used on structs or enums
-   --> tests/ui/pin_project/invalid.rs:256:5
+   --> tests/ui/pin_project/invalid.rs:268:5
     |
-256 | /     union Union {
-257 | |         //~^ ERROR may only be used on structs or enums
-258 | |         f: (),
-259 | |     }
+268 | /     union Union {
+269 | |         //~^ ERROR may only be used on structs or enums
+270 | |         f: (),
+271 | |     }
     | |_____^
 
 error: #[pin_project] attribute may only be used on structs or enums
-   --> tests/ui/pin_project/invalid.rs:262:5
+   --> tests/ui/pin_project/invalid.rs:274:5
     |
-262 |     impl Impl {} //~ ERROR may only be used on structs or enums
+274 |     impl Impl {} //~ ERROR may only be used on structs or enums
     |     ^^^^^^^^^^^^
 
 error: #[pin_project] attribute may not be used on #[repr(packed)] types
-   --> tests/ui/pin_project/invalid.rs:270:12
+   --> tests/ui/pin_project/invalid.rs:282:12
     |
-270 |     #[repr(packed)]
+282 |     #[repr(packed)]
     |            ^^^^^^
 
 error: #[pin_project] attribute may not be used on #[repr(packed)] types
-   --> tests/ui/pin_project/invalid.rs:274:12
+   --> tests/ui/pin_project/invalid.rs:286:12
     |
-274 |     #[repr(packed)]
+286 |     #[repr(packed)]
     |            ^^^^^^
 
 error: #[pin_project] attribute may not be used on #[repr(packed)] types
-   --> tests/ui/pin_project/invalid.rs:278:12
+   --> tests/ui/pin_project/invalid.rs:290:12
     |
-278 |     #[repr(packed)]
+290 |     #[repr(packed)]
     |            ^^^^^^
