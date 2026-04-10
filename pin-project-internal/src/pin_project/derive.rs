@@ -1108,6 +1108,8 @@ fn ensure_not_packed(orig: &OriginalType<'_>, fields: Option<&Fields>) -> Result
     // Note:
     // - Lint-based tricks aren't perfect, but they're much better than nothing:
     //   https://github.com/taiki-e/pin-project-lite/issues/26
+    //   Since Rust 1.69, unaligned_references is a hard error, so this issue only
+    //   affects projects that using only very old compilers.
     //
     // - Enable both unaligned_references and safe_packed_borrows lints
     //   because unaligned_references lint does not exist in older compilers:
