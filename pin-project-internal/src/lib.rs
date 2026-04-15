@@ -547,7 +547,7 @@ pub fn pin_project(args: TokenStream, input: TokenStream) -> TokenStream {
 /// # Why `#[pinned_drop]` attribute is needed?
 ///
 /// Implementing `PinnedDrop::drop` is safe, but calling it is not safe.
-/// This is because destructors can be called multiple times in safe code and
+/// This is because if calling it is safe destructors can be called multiple times in safe code and
 /// [double dropping is unsound][rust-lang/rust#62360].
 ///
 /// Ideally, it would be desirable to be able to forbid manual calls in
