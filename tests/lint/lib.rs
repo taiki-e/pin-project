@@ -18,6 +18,8 @@
 // unstable_features: no way to generate #![feature(..)] by macros, expect for unstable inner attribute. and this lint is deprecated: https://doc.rust-lang.org/rustc/lints/listing/allowed-by-default.html#unstable-features
 // unused_crate_dependencies, must_not_suspend: unrelated
 // unsafe_code: checked in forbid_unsafe module
+// linker_messages, linker_info: not for code
+// deprecated_llvm_intrinsic: only related to unstable thing
 // TODO: Add warn-by-default lints for old versions?
 #![warn(
     ambiguous_negative_literals,
@@ -61,6 +63,7 @@
 )]
 #![warn(clippy::all, clippy::pedantic, clippy::nursery, clippy::restriction)]
 #![allow(clippy::blanket_clippy_restriction_lints)] // this is a test, so enable all restriction lints intentionally.
+#![allow(clippy::inline_modules)] // use inline modules due to the structure of the test.
 #![allow(
     clippy::allow_attributes,
     clippy::allow_attributes_without_reason,
