@@ -9,12 +9,21 @@ cd -- "$(dirname -- "$0")"/..
 #    GITHUB_TOKEN=$(gh auth token) ./tools/tidy.sh
 #
 # Note: This script requires the following tools:
-# - docker
+# - docker or podman (or compatible CLI specified by TIDY_DOCKER_PATH. when both available and TIDY_DOCKER_PATH is not set, docker is preferred)
 #
 # This script is shared by projects under github.com/taiki-e, so there may also
 # be checks for files not included in this repository, but they will be skipped
 # if the corresponding files do not exist.
 # It is not intended for manual editing.
+
+bail() {
+  if [[ -n "${GITHUB_ACTIONS:-}" ]]; then
+    printf '::error::%s\n' "$*"
+  else
+    printf >&2 'error: %s\n' "$*"
+  fi
+  exit 1
+}
 
 if [[ $# -gt 0 ]]; then
   cat <<EOF
@@ -24,24 +33,29 @@ EOF
   exit 1
 fi
 
+image='ghcr.io/taiki-e/tidy'
 if [[ -n "${TIDY_DEV:-}" ]]; then
-  image="ghcr.io/taiki-e/tidy:latest"
+  image+=':latest'
 else
-  image="ghcr.io/taiki-e/tidy@sha256:bce85a4321f80c09f2b68420e9149bcf7c085130ab1e1fca54443f76833cd184"
+  image+='@sha256:4d7ec52a86bd3c0a2d96627b0ec3aa534afc02c2d56fc9a898df64e29aa03312'
 fi
 user="$(id -u):$(id -g)"
 workdir=$(pwd)
 tmp=$(mktemp -d)
 trap -- 'rm -rf -- "${tmp:?}"' EXIT
 mkdir -p -- "${tmp}"/{pwsh-cache,pwsh-local,zizmor-cache,dummy-dir,tmp}
-touch -- "${tmp}"/dummy
+printf '' >"${tmp}"/dummy
 code=0
 color=''
 if [[ -t 1 ]] || [[ -n "${GITHUB_ACTIONS:-}" ]]; then
   color=1
 fi
+# Refs:
+# - https://docs.docker.com/reference/cli/docker/container/run/
+# - https://docs.podman.io/en/latest/markdown/podman-run.1.html
+# - https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html
 common_args=(
-  run --rm --init -i --user "${user}"
+  run --rm --init
   --cap-drop=all
   --security-opt=no-new-privileges
   --read-only
@@ -59,6 +73,30 @@ common_args=(
   --env TIDY_EXPECTED_SHELL_FILE_COUNT
   --env TIDY_EXPECTED_DOCKER_FILE_COUNT
 )
+if [[ -n "${TIDY_DOCKER_PATH:-}" ]]; then
+  docker="${TIDY_DOCKER_PATH}"
+elif type -P docker >/dev/null; then
+  docker='docker'
+elif type -P podman >/dev/null; then
+  docker='podman'
+else
+  bail 'this script requires docker or podman'
+fi
+rootless=''
+if [[ "$("${docker}" --version)" == *'podman'* ]]; then
+  if [[ "$("${docker}" info)" == *'rootless: true'* ]]; then
+    rootless=1
+  fi
+elif [[ "$("${docker}" info -f '{{println .SecurityOptions}}')" == *'rootless'* ]]; then
+  rootless=1
+fi
+if [[ -n "${rootless}" ]]; then
+  printf 'docker path: %s\n' "${docker} (rootless)"
+else
+  printf 'docker path: %s\n' "${docker}"
+  common_args+=(--user "${user}")
+fi
+
 # Map ignored files (e.g., .env) to dummy files.
 while IFS= read -r path; do
   if [[ -d "${path}" ]]; then
@@ -73,7 +111,7 @@ while IFS= read -r path; do
 done < <(git status --porcelain --ignored | grep -E '^!!' | cut -d' ' -f2)
 
 docker_run() {
-  docker "${common_args[@]}" "$@"
+  "${docker}" "${common_args[@]}" "$@"
   code2="$?"
   if [[ ${code} -eq 0 ]] && [[ ${code2} -ne 0 ]]; then
     code="${code2}"
