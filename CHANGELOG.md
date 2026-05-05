@@ -12,6 +12,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+## [1.1.12] - 2026-05-05
+
 - Documentation improvements.
 
 ## [1.1.11] - 2026-02-27
@@ -734,7 +736,8 @@ See also [tracking issue for 0.4 release](https://github.com/taiki-e/pin-project
 
 Initial release
 
-[Unreleased]: https://github.com/taiki-e/pin-project/compare/v1.1.11...HEAD
+[Unreleased]: https://github.com/taiki-e/pin-project/compare/v1.1.12...HEAD
+[1.1.12]: https://github.com/taiki-e/pin-project/compare/v1.1.11...v1.1.12
 [1.1.11]: https://github.com/taiki-e/pin-project/compare/v1.1.10...v1.1.11
 [1.1.10]: https://github.com/taiki-e/pin-project/compare/v1.1.9...v1.1.10
 [1.1.9]: https://github.com/taiki-e/pin-project/compare/v1.1.8...v1.1.9
