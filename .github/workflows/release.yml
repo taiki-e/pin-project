@@ -25,7 +25,7 @@ concurrency:
 jobs:
   release:
     if: github.repository_owner == 'taiki-e'
-    uses: taiki-e/github-actions/.github/workflows/rust-release.yml@68753a4331ec78cb842512fd16ae32da0c066e31 # main
+    uses: taiki-e/github-actions/.github/workflows/rust-release.yml@37ce806177394600c262cd830083c72363ca4be9 # main
     permissions:
       contents: write # for taiki-e/create-gh-release-action
       id-token: write # for rust-lang/crates-io-auth-action
@@ -35,4 +35,4 @@ jobs:
       PUSH_TOKEN_APP_PRIVATE_KEY: ${{ secrets.PUSH_TOKEN_APP_PRIVATE_KEY }}
     with:
       version: ${{ inputs.version }}
-      crates: pin-project-internal,.
+      package: pin-project,pin-project-internal

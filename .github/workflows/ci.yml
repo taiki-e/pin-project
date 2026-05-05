@@ -33,15 +33,15 @@ concurrency:
 
 jobs:
   miri:
-    uses: taiki-e/github-actions/.github/workflows/miri.yml@68753a4331ec78cb842512fd16ae32da0c066e31 # main
+    uses: taiki-e/github-actions/.github/workflows/miri.yml@37ce806177394600c262cd830083c72363ca4be9 # main
   msrv:
-    uses: taiki-e/github-actions/.github/workflows/msrv.yml@68753a4331ec78cb842512fd16ae32da0c066e31 # main
+    uses: taiki-e/github-actions/.github/workflows/msrv.yml@37ce806177394600c262cd830083c72363ca4be9 # main
   test:
-    uses: taiki-e/github-actions/.github/workflows/test.yml@68753a4331ec78cb842512fd16ae32da0c066e31 # main
+    uses: taiki-e/github-actions/.github/workflows/test.yml@37ce806177394600c262cd830083c72363ca4be9 # main
     with:
       rust: 1.71,stable,beta,nightly
   tidy:
-    uses: taiki-e/github-actions/.github/workflows/tidy.yml@68753a4331ec78cb842512fd16ae32da0c066e31 # main
+    uses: taiki-e/github-actions/.github/workflows/tidy.yml@37ce806177394600c262cd830083c72363ca4be9 # main
     permissions:
       contents: write # for creating branch for pr
       pull-requests: write # unused (used in `codegen-automerge: true` case)
@@ -54,9 +54,9 @@ jobs:
     timeout-minutes: 60
     steps:
       - uses: taiki-e/checkout-action@7d1e50e93dc4fb3bba58f85018fadf77898aee8b # v1.4.2
-      - uses: taiki-e/github-actions/install-rust@68753a4331ec78cb842512fd16ae32da0c066e31 # main # zizmor: ignore[stale-action-refs]
+      - uses: taiki-e/install-action@7ea35f098a7369cd23488403f58be9c491a6c55f # v2.77.0
         with:
-          toolchain: nightly
-          target: thumbv6m-none-eabi
+          tool: rust@nightly+thumbv6m-none-eabi
+          fallback: none
       - run: cargo build --manifest-path tests/no-std/Cargo.toml --target thumbv6m-none-eabi
       - run: cargo build --manifest-path tests/rust-2015/Cargo.toml --target thumbv6m-none-eabi

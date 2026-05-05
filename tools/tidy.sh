@@ -121,6 +121,7 @@ docker_run() {
 set +e
 docker_run \
   --mount "type=bind,source=${workdir},target=${workdir}" --workdir "${workdir}" \
+  --mount "type=bind,source=${workdir}/.git,target=${workdir}/.git,readonly" \
   --mount "type=bind,source=${tmp}/tmp,target=/tmp/tidy" \
   --mount "type=bind,source=${tmp}/pwsh-cache,target=/.cache/powershell" \
   --mount "type=bind,source=${tmp}/pwsh-local,target=/.local/share/powershell" \
