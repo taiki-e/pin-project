@@ -33,23 +33,23 @@ concurrency:
 
 jobs:
   miri:
-    uses: taiki-e/github-actions/.github/workflows/miri.yml@37ce806177394600c262cd830083c72363ca4be9 # main
+    needs: tidy
+    uses: taiki-e/github-actions/.github/workflows/miri.yml@931686d4e4cf88b13e790040727ccde2dba8ec62 # main
   msrv:
-    uses: taiki-e/github-actions/.github/workflows/msrv.yml@37ce806177394600c262cd830083c72363ca4be9 # main
+    needs: tidy
+    uses: taiki-e/github-actions/.github/workflows/msrv.yml@931686d4e4cf88b13e790040727ccde2dba8ec62 # main
   test:
-    uses: taiki-e/github-actions/.github/workflows/test.yml@37ce806177394600c262cd830083c72363ca4be9 # main
+    needs: tidy
+    uses: taiki-e/github-actions/.github/workflows/test.yml@931686d4e4cf88b13e790040727ccde2dba8ec62 # main
     with:
       rust: 1.71,stable,beta,nightly
   tidy:
-    uses: taiki-e/github-actions/.github/workflows/tidy.yml@37ce806177394600c262cd830083c72363ca4be9 # main
+    uses: taiki-e/github-actions/.github/workflows/tidy.yml@931686d4e4cf88b13e790040727ccde2dba8ec62 # main
     permissions:
-      contents: write # for creating branch for pr
-      pull-requests: write # unused (used in `codegen-automerge: true` case)
       security-events: write # for github/codeql-action/*
-    secrets:
-      PR_TOKEN_APP_PRIVATE_KEY: ${{ secrets.PR_TOKEN_APP_PRIVATE_KEY }}
 
   no-std:
+    needs: tidy
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:

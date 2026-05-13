@@ -37,10 +37,10 @@ image='ghcr.io/taiki-e/tidy'
 if [[ -n "${TIDY_DEV:-}" ]]; then
   image+=':latest'
 else
-  image+='@sha256:4d7ec52a86bd3c0a2d96627b0ec3aa534afc02c2d56fc9a898df64e29aa03312'
+  image+='@sha256:1d3a5d57c486cbac02ef3d8ee29bb0768ebd1fbffef61a61d282215464e2551d'
 fi
 user="$(id -u):$(id -g)"
-workdir=$(pwd)
+workdir="${PWD}"
 tmp=$(mktemp -d)
 trap -- 'rm -rf -- "${tmp:?}"' EXIT
 mkdir -p -- "${tmp}"/{pwsh-cache,pwsh-local,zizmor-cache,dummy-dir,tmp}
@@ -111,7 +111,9 @@ while IFS= read -r path; do
 done < <(git status --porcelain --ignored | grep -E '^!!' | cut -d' ' -f2)
 
 docker_run() {
-  "${docker}" "${common_args[@]}" "$@"
+  local script="$1"
+  shift
+  "${docker}" "${common_args[@]}" "$@" "${image}" /checks/"${script}"
   code2="$?"
   if [[ ${code} -eq 0 ]] && [[ ${code2} -ne 0 ]]; then
     code="${code2}"
@@ -119,29 +121,23 @@ docker_run() {
 }
 
 set +e
-docker_run \
+docker_run offline.sh \
   --mount "type=bind,source=${workdir},target=${workdir}" --workdir "${workdir}" \
   --mount "type=bind,source=${workdir}/.git,target=${workdir}/.git,readonly" \
   --mount "type=bind,source=${tmp}/tmp,target=/tmp/tidy" \
   --mount "type=bind,source=${tmp}/pwsh-cache,target=/.cache/powershell" \
   --mount "type=bind,source=${tmp}/pwsh-local,target=/.local/share/powershell" \
-  --network=none \
-  "${image}" \
-  /checks/offline.sh
+  --network=none
 # Some good audits requires access to GitHub API.
-docker_run \
+docker_run zizmor.sh \
   --mount "type=bind,source=${workdir},target=${workdir},readonly" --workdir "${workdir}" \
   --mount "type=bind,source=${tmp}/zizmor-cache,target=/.cache/zizmor" \
-  --env GH_TOKEN --env GITHUB_TOKEN --env ZIZMOR_GITHUB_TOKEN \
-  "${image}" \
-  /checks/zizmor.sh
+  --env GH_TOKEN --env GITHUB_TOKEN --env ZIZMOR_GITHUB_TOKEN
 # We use remote dictionary.
-docker_run \
+docker_run cspell.sh \
   --mount "type=bind,source=${workdir},target=${workdir},readonly" --workdir "${workdir}" \
   --mount "type=bind,source=${workdir}/.github/.cspell/project-dictionary.txt,target=${workdir}/.github/.cspell/project-dictionary.txt" \
   --mount "type=bind,source=${workdir}/.github/.cspell/rust-dependencies.txt,target=${workdir}/.github/.cspell/rust-dependencies.txt" \
-  --mount "type=bind,source=${tmp}/tmp,target=/tmp/tidy" \
-  "${image}" \
-  /checks/cspell.sh
+  --mount "type=bind,source=${tmp}/tmp,target=/tmp/tidy"
 
 exit "${code}"
