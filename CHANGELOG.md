@@ -12,6 +12,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+## [1.1.13] - 2026-05-13
+
 - Suppress `clippy::missing_trait_methods` lint in generated code.
 
 ## [1.1.12] - 2026-05-05
@@ -738,7 +740,8 @@ See also [tracking issue for 0.4 release](https://github.com/taiki-e/pin-project
 
 Initial release
 
-[Unreleased]: https://github.com/taiki-e/pin-project/compare/v1.1.12...HEAD
+[Unreleased]: https://github.com/taiki-e/pin-project/compare/v1.1.13...HEAD
+[1.1.13]: https://github.com/taiki-e/pin-project/compare/v1.1.12...v1.1.13
 [1.1.12]: https://github.com/taiki-e/pin-project/compare/v1.1.11...v1.1.12
 [1.1.11]: https://github.com/taiki-e/pin-project/compare/v1.1.10...v1.1.11
 [1.1.10]: https://github.com/taiki-e/pin-project/compare/v1.1.9...v1.1.10
