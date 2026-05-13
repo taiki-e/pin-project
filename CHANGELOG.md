@@ -12,6 +12,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+- Suppress `clippy::missing_trait_methods` lint in generated code.
+
 ## [1.1.12] - 2026-05-05
 
 - Documentation improvements.

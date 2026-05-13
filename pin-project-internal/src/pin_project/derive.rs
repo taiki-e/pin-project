@@ -866,6 +866,7 @@ fn make_drop_impl(cx: &Context<'_>) -> TokenStream {
         // call-site span.
         let unsafety = <Token![unsafe]>::default();
         quote_spanned! { span =>
+            #[allow(clippy::missing_trait_methods)]
             impl #impl_generics _pin_project::__private::Drop for #ident #ty_generics
             #where_clause
             {
