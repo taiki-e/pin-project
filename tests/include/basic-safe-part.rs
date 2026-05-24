@@ -120,7 +120,7 @@ pub enum PinnedDropEnum<T: ::pin_project::__private::Unpin, U> {
 }
 
 #[::pin_project::pinned_drop]
-#[allow(clippy::absolute_paths)]
+#[allow(clippy::absolute_paths, clippy::inline_trait_bounds)]
 impl<T: ::pin_project::__private::Unpin, U> PinnedDrop for PinnedDropEnum<T, U> {
     fn drop(self: ::pin_project::__private::Pin<&mut Self>) {}
 }
