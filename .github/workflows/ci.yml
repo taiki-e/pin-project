@@ -12,50 +12,24 @@ on:
     - cron: '0 2 * * *'
   workflow_dispatch:
 
-env:
-  CARGO_INCREMENTAL: 0
-  CARGO_NET_GIT_FETCH_WITH_CLI: true
-  CARGO_NET_RETRY: 10
-  CARGO_TERM_COLOR: always
-  RUST_BACKTRACE: 1
-  RUSTDOCFLAGS: -D warnings
-  RUSTFLAGS: -D warnings
-  RUSTUP_MAX_RETRIES: 10
-
-defaults:
-  run:
-    shell: bash --noprofile --norc -CeEuxo pipefail {0}
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
 
 jobs:
-  miri:
-    needs: tidy
-    uses: taiki-e/github-actions/.github/workflows/miri.yml@a57add62f2464b6791c594783f513e5194350ac9 # main
-  msrv:
-    needs: tidy
-    uses: taiki-e/github-actions/.github/workflows/msrv.yml@a57add62f2464b6791c594783f513e5194350ac9 # main
-  test:
-    needs: tidy
-    uses: taiki-e/github-actions/.github/workflows/test.yml@a57add62f2464b6791c594783f513e5194350ac9 # main
-    with:
-      rust: 1.71,stable,beta,nightly
   tidy:
-    uses: taiki-e/github-actions/.github/workflows/tidy.yml@a57add62f2464b6791c594783f513e5194350ac9 # main
+    uses: taiki-e/github-actions/.github/workflows/tidy.yml@6bdbb973f58616e14d2905249e163a0ac857ef24 # main
     permissions:
       security-events: write # for github/codeql-action/*
-
-  no-std:
+  miri:
     needs: tidy
-    runs-on: ubuntu-24.04
-    timeout-minutes: 60
-    steps:
-      - uses: taiki-e/checkout-action@7d1e50e93dc4fb3bba58f85018fadf77898aee8b # v1.4.2
-      - uses: taiki-e/install-action@ec28e287910af896fd98e04056d31fa68607e7ad # v2.77.4
-        with:
-          tool: rust@nightly+thumbv6m-none-eabi
-          fallback: none
-      - run: cargo build --manifest-path tests/no-std/Cargo.toml --target thumbv6m-none-eabi
-      - run: cargo build --manifest-path tests/rust-2015/Cargo.toml --target thumbv6m-none-eabi
+    uses: taiki-e/github-actions/.github/workflows/rust-miri.yml@6bdbb973f58616e14d2905249e163a0ac857ef24 # main
+  msrv:
+    needs: tidy
+    uses: taiki-e/github-actions/.github/workflows/rust-msrv.yml@6bdbb973f58616e14d2905249e163a0ac857ef24 # main
+  test:
+    needs: tidy
+    uses: taiki-e/github-actions/.github/workflows/rust-test.yml@6bdbb973f58616e14d2905249e163a0ac857ef24 # main
+    with:
+      rust: 1.71,stable,beta,nightly
+      additional-no-std-crates: tests/no-std,tests/rust-2015
