@@ -53,7 +53,7 @@ jobs:
     timeout-minutes: 60
     steps:
       - uses: taiki-e/checkout-action@7d1e50e93dc4fb3bba58f85018fadf77898aee8b # v1.4.2
-      - uses: taiki-e/install-action@7ea35f098a7369cd23488403f58be9c491a6c55f # v2.77.0
+      - uses: taiki-e/install-action@ec28e287910af896fd98e04056d31fa68607e7ad # v2.77.4
         with:
           tool: rust@nightly+thumbv6m-none-eabi
           fallback: none
