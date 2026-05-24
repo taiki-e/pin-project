@@ -8,7 +8,6 @@ on:
     branches:
       - main
       - dev
-      - v[0-9]+.[0-9]+
   schedule:
     - cron: '0 2 * * *'
   workflow_dispatch:
@@ -34,17 +33,17 @@ concurrency:
 jobs:
   miri:
     needs: tidy
-    uses: taiki-e/github-actions/.github/workflows/miri.yml@931686d4e4cf88b13e790040727ccde2dba8ec62 # main
+    uses: taiki-e/github-actions/.github/workflows/miri.yml@a57add62f2464b6791c594783f513e5194350ac9 # main
   msrv:
     needs: tidy
-    uses: taiki-e/github-actions/.github/workflows/msrv.yml@931686d4e4cf88b13e790040727ccde2dba8ec62 # main
+    uses: taiki-e/github-actions/.github/workflows/msrv.yml@a57add62f2464b6791c594783f513e5194350ac9 # main
   test:
     needs: tidy
-    uses: taiki-e/github-actions/.github/workflows/test.yml@931686d4e4cf88b13e790040727ccde2dba8ec62 # main
+    uses: taiki-e/github-actions/.github/workflows/test.yml@a57add62f2464b6791c594783f513e5194350ac9 # main
     with:
       rust: 1.71,stable,beta,nightly
   tidy:
-    uses: taiki-e/github-actions/.github/workflows/tidy.yml@931686d4e4cf88b13e790040727ccde2dba8ec62 # main
+    uses: taiki-e/github-actions/.github/workflows/tidy.yml@a57add62f2464b6791c594783f513e5194350ac9 # main
     permissions:
       security-events: write # for github/codeql-action/*
 
