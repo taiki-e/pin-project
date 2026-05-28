@@ -20,6 +20,7 @@
 // unsafe_code: checked in forbid_unsafe module
 // linker_messages, linker_info: not for code
 // deprecated_llvm_intrinsic: only related to unstable thing
+// dead_code_pub_in_binary: not related to library crate
 // TODO: Add warn-by-default lints for old versions?
 #![warn(
     ambiguous_negative_literals,
