@@ -1,5 +1,5 @@
 use pin_project::pin_project;
-#[pin(__private(project = EnumProj, project_ref = EnumProjRef))]
+#[pin(__private(pub project = EnumProj, pub project_ref = EnumProjRef))]
 pub enum Enum<T, U> {
     Struct { #[pin] pinned: T, unpinned: U },
     Tuple(#[pin] T, U),
@@ -23,7 +23,7 @@ pub enum Enum<T, U> {
     clippy::missing_docs_in_private_items,
     clippy::mut_mut
 )]
-pub(crate) enum EnumProj<'pin, T, U>
+pub enum EnumProj<'pin, T, U>
 where
     Enum<T, U>: 'pin,
 {
@@ -52,7 +52,7 @@ where
     clippy::missing_docs_in_private_items,
     clippy::ref_option_ref
 )]
-pub(crate) enum EnumProjRef<'pin, T, U>
+pub enum EnumProjRef<'pin, T, U>
 where
     Enum<T, U>: 'pin,
 {
@@ -90,7 +90,7 @@ const _: () = {
         #[inline]
         /**Take a Pin<&mut Enum> and project it, aka return a Enum-like data structure with fields of the same name,
         each being a (pinned if necessary) mutable reference to the corresponding field of Self*/
-        pub(crate) fn project<'pin>(
+        pub fn project<'pin>(
             self: _pin_project::__private::Pin<&'pin mut Self>,
         ) -> EnumProj<'pin, T, U> {
             unsafe {
@@ -115,7 +115,7 @@ const _: () = {
         #[inline]
         /**Take a Pin<& Enum> and project it, aka return a Enum-like data structure with fields of the same name,
         each being a (pinned if necessary) reference to the corresponding field of Self*/
-        pub(crate) fn project_ref<'pin>(
+        pub fn project_ref<'pin>(
             self: _pin_project::__private::Pin<&'pin Self>,
         ) -> EnumProjRef<'pin, T, U> {
             unsafe {
