@@ -18,12 +18,14 @@ concurrency:
 
 jobs:
   tidy:
-    uses: taiki-e/github-actions/.github/workflows/tidy.yml@1bb80ca038216cd1fb7b6ca6d76240b3772963ab # main
+    uses: taiki-e/github-actions/.github/workflows/tidy.yml@e6a1170cbd07eb898017958967912976fce18f2d # 2026.7.3
     permissions:
       security-events: write # for github/codeql-action/*
+    with:
+      implicit_provenance_casts: false # we cast ptr to int to move check in test (addr requires Rust 1.84)
   test:
     needs: tidy
-    uses: taiki-e/github-actions/.github/workflows/rust-test.yml@1bb80ca038216cd1fb7b6ca6d76240b3772963ab # main
+    uses: taiki-e/github-actions/.github/workflows/rust-test.yml@e6a1170cbd07eb898017958967912976fce18f2d # 2026.7.3
     with:
       rust: 1.71,stable,beta,nightly
       additional-no-std-crates: tests/no-std,tests/rust-2015
