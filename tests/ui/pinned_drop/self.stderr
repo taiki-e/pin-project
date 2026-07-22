@@ -22,7 +22,7 @@ error[E0434]: can't capture dynamic environment in a fn item
    = help: use the `|| { ... }` closure form instead
    = note: this error originates in the macro `t` (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error[E0423]: expected value, found struct `S`
+error[E0423]: cannot find value `S` in this scope
   --> tests/ui/pinned_drop/self.rs:42:27
    |
 34 | /     pub struct S {
@@ -32,6 +32,8 @@ error[E0423]: expected value, found struct `S`
 ...
 42 |               let _: Self = Self; //~ ERROR E0423
    |                             ^^^^ help: use struct literal syntax instead: `S { f: val }`
+   |
+   = note: a struct named `S` exists in another namespace
 
 error[E0308]: mismatched types
   --> tests/ui/pinned_drop/self.rs:41:25
