@@ -10,26 +10,26 @@ error: #[repr(packed)] attribute should be applied to a struct or union
 20 | #[repr(packed)] //~ ERROR E0517
    |        ^^^^^^
 
-error: `#[repr(packed)]` attribute cannot be used on enums
- --> tests/ui/pin_project/packed-enum.rs:9:1
+error: the `repr(packed)` attribute cannot be used on enums
+ --> tests/ui/pin_project/packed-enum.rs:9:3
   |
 9 | #[repr(packed)] //~ ERROR E0517
-  | ^^^^^^^^^^^^^^^
+  |   ^^^^^^^^^^^^
   |
-  = help: `#[repr(packed)]` can be applied to structs and unions
+  = help: the `repr(packed)` attribute can be applied to structs and unions
 
-error: `#[repr(packed)]` attribute cannot be used on enums
-  --> tests/ui/pin_project/packed-enum.rs:15:1
+error: the `repr(packed)` attribute cannot be used on enums
+  --> tests/ui/pin_project/packed-enum.rs:15:3
    |
 15 | #[repr(packed)] //~ ERROR E0517
-   | ^^^^^^^^^^^^^^^
+   |   ^^^^^^^^^^^^
    |
-   = help: `#[repr(packed)]` can be applied to structs and unions
+   = help: the `repr(packed)` attribute can be applied to structs and unions
 
-error: `#[repr(packed)]` attribute cannot be used on enums
-  --> tests/ui/pin_project/packed-enum.rs:20:1
+error: the `repr(packed)` attribute cannot be used on enums
+  --> tests/ui/pin_project/packed-enum.rs:20:3
    |
 20 | #[repr(packed)] //~ ERROR E0517
-   | ^^^^^^^^^^^^^^^
+   |   ^^^^^^^^^^^^
    |
-   = help: `#[repr(packed)]` can be applied to structs and unions
+   = help: the `repr(packed)` attribute can be applied to structs and unions
