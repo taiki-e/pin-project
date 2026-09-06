@@ -42,6 +42,7 @@
     noop_method_call,
     private_bounds,
     private_interfaces,
+    raw_borrows_via_references,
     redundant_imports,
     redundant_lifetimes,
     resolving_to_items_shadowing_supertrait_items,
