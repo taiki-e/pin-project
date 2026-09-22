@@ -41,7 +41,7 @@ note: required because it appears within the type `Inner`
   --> tests/ui/unstable-features/trivial_bounds-feature-gate.rs:32:12
    |
 32 |     struct Inner(PhantomPinned);
-   |            ^^^^^
+   |            ^^^^^ ------------- required by this field
 help: add `#![feature(trivial_bounds)]` to the crate attributes to enable
    |
  5 + #![feature(trivial_bounds)]
@@ -59,7 +59,7 @@ note: required because it appears within the type `Inner`
   --> tests/ui/unstable-features/trivial_bounds-feature-gate.rs:32:12
    |
 32 |     struct Inner(PhantomPinned);
-   |            ^^^^^
+   |            ^^^^^ ------------- required by this field
 note: required for `inner::Wrapper<Inner>` to implement `Unpin`
   --> tests/ui/unstable-features/trivial_bounds-feature-gate.rs:40:13
    |

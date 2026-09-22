@@ -35,6 +35,9 @@ note: required because it appears within the type `A`
    |
 12 | struct A {
    |        ^
+13 |     #[pin] //~ ERROR cannot find attribute `pin` in this scope
+14 |     f: PhantomPinned,
+   |     ---------------- required by this field
 note: required by a bound in `is_unpin`
   --> tests/ui/pin_project/remove-attr-from-struct.rs:8:16
    |
@@ -54,6 +57,9 @@ note: required because it appears within the type `B`
    |
 19 | struct B {
    |        ^
+20 |     #[pin] //~ ERROR cannot find attribute `pin` in this scope
+21 |     f: PhantomPinned,
+   |     ---------------- required by this field
 note: required by a bound in `is_unpin`
   --> tests/ui/pin_project/remove-attr-from-struct.rs:8:16
    |
@@ -75,6 +81,9 @@ note: required because it appears within the type `A`
    |
 12 | struct A {
    |        ^
+13 |     #[pin] //~ ERROR cannot find attribute `pin` in this scope
+14 |     f: PhantomPinned,
+   |     ---------------- required by this field
 note: required by a bound in `Pin::<Ptr>::new`
   --> $RUST/core/src/pin.rs
    |
@@ -82,7 +91,7 @@ note: required by a bound in `Pin::<Ptr>::new`
    |                         ^^^^^ required by this bound in `Pin::<Ptr>::new`
 ...
    |     pub const fn new(pointer: Ptr) -> Pin<Ptr> {
-   |                  --- required by a bound in this associated function
+   |
 
 error[E0599]: no method named `project` found for struct `Pin<&mut A>` in the current scope
   --> tests/ui/pin_project/remove-attr-from-struct.rs:42:30
@@ -105,6 +114,9 @@ note: required because it appears within the type `B`
    |
 19 | struct B {
    |        ^
+20 |     #[pin] //~ ERROR cannot find attribute `pin` in this scope
+21 |     f: PhantomPinned,
+   |     ---------------- required by this field
 note: required by a bound in `Pin::<Ptr>::new`
   --> $RUST/core/src/pin.rs
    |
@@ -112,7 +124,7 @@ note: required by a bound in `Pin::<Ptr>::new`
    |                         ^^^^^ required by this bound in `Pin::<Ptr>::new`
 ...
    |     pub const fn new(pointer: Ptr) -> Pin<Ptr> {
-   |                  --- required by a bound in this associated function
+   |
 
 error[E0599]: no method named `project` found for struct `Pin<&mut B>` in the current scope
   --> tests/ui/pin_project/remove-attr-from-struct.rs:45:30
