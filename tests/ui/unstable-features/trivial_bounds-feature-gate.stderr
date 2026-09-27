@@ -38,10 +38,10 @@ error[E0277]: `PhantomPinned` cannot be unpinned
    = note: consider using the `pin!` macro
            consider using `Box::pin` if you need to access the pinned value outside of the current scope
 note: required because it appears within the type `Inner`
-  --> tests/ui/unstable-features/trivial_bounds-feature-gate.rs:32:12
+  --> tests/ui/unstable-features/trivial_bounds-feature-gate.rs:32:18
    |
 32 |     struct Inner(PhantomPinned);
-   |            ^^^^^ ------------- required by this field
+   |                  ^^^^^^^^^^^^^ required by this field
 help: add `#![feature(trivial_bounds)]` to the crate attributes to enable
    |
  5 + #![feature(trivial_bounds)]
@@ -56,10 +56,10 @@ error[E0277]: `PhantomPinned` cannot be unpinned
    = note: consider using the `pin!` macro
            consider using `Box::pin` if you need to access the pinned value outside of the current scope
 note: required because it appears within the type `Inner`
-  --> tests/ui/unstable-features/trivial_bounds-feature-gate.rs:32:12
+  --> tests/ui/unstable-features/trivial_bounds-feature-gate.rs:32:18
    |
 32 |     struct Inner(PhantomPinned);
-   |            ^^^^^ ------------- required by this field
+   |                  ^^^^^^^^^^^^^ required by this field
 note: required for `inner::Wrapper<Inner>` to implement `Unpin`
   --> tests/ui/unstable-features/trivial_bounds-feature-gate.rs:40:13
    |

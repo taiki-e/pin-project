@@ -8,12 +8,11 @@ error[E0277]: the size for values of type `T` cannot be known at compilation tim
   |        doesn't have a size known at compile-time
   |
 note: required because it appears within the type `__StructProjectionOwned<T>`
- --> tests/ui/pin_project/project_replace_unsized.rs:6:8
+ --> tests/ui/pin_project/project_replace_unsized.rs:7:5
   |
 6 | struct Struct<T: ?Sized> {
-  |        ^^^^^^
 7 |     f: T,
-  |     ---- required by this field
+  |     ^^^^ required by this field
   = note: the return type of a function must have a statically known size
 help: consider removing the `?Sized` bound to make the type parameter `Sized`
   |
@@ -31,10 +30,10 @@ error[E0277]: the size for values of type `T` cannot be known at compilation tim
    |        doesn't have a size known at compile-time
    |
 note: required because it appears within the type `__TupleStructProjectionOwned<T>`
-  --> tests/ui/pin_project/project_replace_unsized.rs:11:8
+  --> tests/ui/pin_project/project_replace_unsized.rs:11:31
    |
 11 | struct TupleStruct<T: ?Sized>(T);
-   |        ^^^^^^^^^^^            - required by this field
+   |                               ^ required by this field
    = note: the return type of a function must have a statically known size
 help: consider removing the `?Sized` bound to make the type parameter `Sized`
    |
@@ -51,12 +50,11 @@ error[E0277]: the size for values of type `T` cannot be known at compilation tim
   |               - this type parameter needs to be `Sized`
   |
 note: required because it appears within the type `Struct<T>`
- --> tests/ui/pin_project/project_replace_unsized.rs:6:8
+ --> tests/ui/pin_project/project_replace_unsized.rs:7:5
   |
 6 | struct Struct<T: ?Sized> {
-  |        ^^^^^^
 7 |     f: T,
-  |     ---- required by this field
+  |     ^^^^ required by this field
   = help: unsized fn params are gated as an unstable feature
 help: consider removing the `?Sized` bound to make the type parameter `Sized`
   |
@@ -77,12 +75,11 @@ error[E0277]: the size for values of type `T` cannot be known at compilation tim
   |               - this type parameter needs to be `Sized`
   |
 note: required because it appears within the type `Struct<T>`
- --> tests/ui/pin_project/project_replace_unsized.rs:6:8
+ --> tests/ui/pin_project/project_replace_unsized.rs:7:5
   |
 6 | struct Struct<T: ?Sized> {
-  |        ^^^^^^
 7 |     f: T,
-  |     ---- required by this field
+  |     ^^^^ required by this field
 note: required by an implicit `Sized` bound in `_::_pin_project::__private::UnsafeOverwriteGuard`
  --> src/lib.rs
   |
@@ -125,10 +122,10 @@ error[E0277]: the size for values of type `T` cannot be known at compilation tim
    |                    - this type parameter needs to be `Sized`
    |
 note: required because it appears within the type `TupleStruct<T>`
-  --> tests/ui/pin_project/project_replace_unsized.rs:11:8
+  --> tests/ui/pin_project/project_replace_unsized.rs:11:31
    |
 11 | struct TupleStruct<T: ?Sized>(T);
-   |        ^^^^^^^^^^^            - required by this field
+   |                               ^ required by this field
    = help: unsized fn params are gated as an unstable feature
 help: consider removing the `?Sized` bound to make the type parameter `Sized`
    |
@@ -149,10 +146,10 @@ error[E0277]: the size for values of type `T` cannot be known at compilation tim
    |                    - this type parameter needs to be `Sized`
    |
 note: required because it appears within the type `TupleStruct<T>`
-  --> tests/ui/pin_project/project_replace_unsized.rs:11:8
+  --> tests/ui/pin_project/project_replace_unsized.rs:11:31
    |
 11 | struct TupleStruct<T: ?Sized>(T);
-   |        ^^^^^^^^^^^            - required by this field
+   |                               ^ required by this field
 note: required by an implicit `Sized` bound in `_::_pin_project::__private::UnsafeOverwriteGuard`
   --> src/lib.rs
    |

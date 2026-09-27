@@ -8,12 +8,11 @@ error[E0277]: the size for values of type `T` cannot be known at compilation tim
    |        doesn't have a size known at compile-time
    |
 note: required because it appears within the type `__StructProjectionOwned<T>`
-  --> tests/ui/pin_project/project_replace_unsized_fn_params.rs:9:8
+  --> tests/ui/pin_project/project_replace_unsized_fn_params.rs:10:5
    |
  9 | struct Struct<T: ?Sized> {
-   |        ^^^^^^
 10 |     f: T,
-   |     ---- required by this field
+   |     ^^^^ required by this field
    = note: the return type of a function must have a statically known size
 help: consider removing the `?Sized` bound to make the type parameter `Sized`
    |
@@ -31,10 +30,10 @@ error[E0277]: the size for values of type `T` cannot be known at compilation tim
    |        doesn't have a size known at compile-time
    |
 note: required because it appears within the type `__TupleStructProjectionOwned<T>`
-  --> tests/ui/pin_project/project_replace_unsized_fn_params.rs:14:8
+  --> tests/ui/pin_project/project_replace_unsized_fn_params.rs:14:31
    |
 14 | struct TupleStruct<T: ?Sized>(T);
-   |        ^^^^^^^^^^^            - required by this field
+   |                               ^ required by this field
    = note: the return type of a function must have a statically known size
 help: consider removing the `?Sized` bound to make the type parameter `Sized`
    |
@@ -51,12 +50,11 @@ error[E0277]: the size for values of type `T` cannot be known at compilation tim
    |               - this type parameter needs to be `Sized`
    |
 note: required because it appears within the type `Struct<T>`
-  --> tests/ui/pin_project/project_replace_unsized_fn_params.rs:9:8
+  --> tests/ui/pin_project/project_replace_unsized_fn_params.rs:10:5
    |
  9 | struct Struct<T: ?Sized> {
-   |        ^^^^^^
 10 |     f: T,
-   |     ---- required by this field
+   |     ^^^^ required by this field
 note: required by an implicit `Sized` bound in `_::_pin_project::__private::UnsafeOverwriteGuard`
   --> src/lib.rs
    |
@@ -99,10 +97,10 @@ error[E0277]: the size for values of type `T` cannot be known at compilation tim
    |                    - this type parameter needs to be `Sized`
    |
 note: required because it appears within the type `TupleStruct<T>`
-  --> tests/ui/pin_project/project_replace_unsized_fn_params.rs:14:8
+  --> tests/ui/pin_project/project_replace_unsized_fn_params.rs:14:31
    |
 14 | struct TupleStruct<T: ?Sized>(T);
-   |        ^^^^^^^^^^^            - required by this field
+   |                               ^ required by this field
 note: required by an implicit `Sized` bound in `_::_pin_project::__private::UnsafeOverwriteGuard`
   --> src/lib.rs
    |
