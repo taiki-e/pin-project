@@ -1,6 +1,6 @@
 use pin_project::pin_project;
-#[pin(__private(project = Proj, project_ref = ProjRef, project_replace = ProjOwn))]
-struct TupleStruct<T, U>(#[pin] T, U);
+#[pin(__private(pub project = TupleStructProj))]
+pub struct TupleStruct<T, U>(#[pin] pub T, pub U);
 #[allow(
     dead_code,
     deprecated,
@@ -22,59 +22,12 @@ struct TupleStruct<T, U>(#[pin] T, U);
 /**A projected TupleStruct. Obtained trough the .project() method, useful to access the fields.
 You should however consider passing around a Pin<&mut TupleStruct> directly rather than this struct*/
 #[non_exhaustive]
-struct Proj<'pin, T, U>(
-    ::pin_project::__private::Pin<&'pin mut (T)>,
-    &'pin mut (U),
+pub struct TupleStructProj<'pin, T, U>(
+    pub ::pin_project::__private::Pin<&'pin mut (T)>,
+    pub &'pin mut (U),
 )
 where
     TupleStruct<T, U>: 'pin;
-#[allow(
-    dead_code,
-    deprecated,
-    explicit_outlives_requirements,
-    single_use_lifetimes,
-    unreachable_pub,
-    unused_tuple_struct_fields,
-    clippy::unknown_clippy_lints,
-    clippy::absolute_paths,
-    clippy::min_ident_chars,
-    clippy::pattern_type_mismatch,
-    clippy::pub_with_shorthand,
-    clippy::redundant_pub_crate,
-    clippy::single_char_lifetime_names,
-    clippy::type_repetition_in_bounds,
-    clippy::missing_docs_in_private_items,
-    clippy::ref_option_ref
-)]
-/**A immutably projected TupleStruct. Obtained trough the .project_ref() method, useful to access the fields.
-You should consider passing around a Pin<& TupleStruct> directly rather than this struct*/
-#[non_exhaustive]
-struct ProjRef<'pin, T, U>(
-    ::pin_project::__private::Pin<&'pin (T)>,
-    &'pin (U),
-)
-where
-    TupleStruct<T, U>: 'pin;
-#[allow(
-    dead_code,
-    deprecated,
-    explicit_outlives_requirements,
-    single_use_lifetimes,
-    unreachable_pub,
-    unused_tuple_struct_fields,
-    clippy::unknown_clippy_lints,
-    clippy::absolute_paths,
-    clippy::min_ident_chars,
-    clippy::pattern_type_mismatch,
-    clippy::pub_with_shorthand,
-    clippy::redundant_pub_crate,
-    clippy::single_char_lifetime_names,
-    clippy::type_repetition_in_bounds,
-    clippy::missing_docs_in_private_items
-)]
-///A projection that own a TupleStruct.
-#[non_exhaustive]
-struct ProjOwn<T, U>(::pin_project::__private::PhantomData<T>, U);
 #[allow(
     unused_qualifications,
     deprecated,
@@ -100,55 +53,42 @@ struct ProjOwn<T, U>(::pin_project::__private::PhantomData<T>, U);
 const _: () = {
     #[allow(unused_extern_crates)]
     extern crate pin_project as _pin_project;
+    #[allow(dead_code, clippy::missing_docs_in_private_items, clippy::ref_option_ref)]
+    /**A immutably projected TupleStruct. Obtained trough the .project_ref() method, useful to access the fields.
+You should consider passing around a Pin<& TupleStruct> directly rather than this struct*/
+    #[non_exhaustive]
+    pub(crate) struct __TupleStructProjectionRef<'pin, T, U>(
+        pub ::pin_project::__private::Pin<&'pin (T)>,
+        pub &'pin (U),
+    )
+    where
+        TupleStruct<T, U>: 'pin;
     impl<T, U> TupleStruct<T, U> {
         #[allow(dead_code)]
         #[inline]
         /**Take a Pin<&mut TupleStruct> and project it, aka return a TupleStruct-like data structure with fields of the same name,
         each being a (pinned if necessary) mutable reference to the corresponding field of Self*/
-        fn project<'pin>(
+        pub fn project<'pin>(
             self: _pin_project::__private::Pin<&'pin mut Self>,
-        ) -> Proj<'pin, T, U> {
+        ) -> TupleStructProj<'pin, T, U> {
             unsafe {
                 let Self(_0, _1) = self.get_unchecked_mut();
-                Proj(_pin_project::__private::Pin::new_unchecked(_0), _1)
+                TupleStructProj(_pin_project::__private::Pin::new_unchecked(_0), _1)
             }
         }
         #[allow(dead_code)]
         #[inline]
         /**Take a Pin<& TupleStruct> and project it, aka return a TupleStruct-like data structure with fields of the same name,
         each being a (pinned if necessary) reference to the corresponding field of Self*/
-        fn project_ref<'pin>(
+        pub(crate) fn project_ref<'pin>(
             self: _pin_project::__private::Pin<&'pin Self>,
-        ) -> ProjRef<'pin, T, U> {
+        ) -> __TupleStructProjectionRef<'pin, T, U> {
             unsafe {
                 let Self(_0, _1) = self.get_ref();
-                ProjRef(_pin_project::__private::Pin::new_unchecked(_0), _1)
-            }
-        }
-        #[allow(dead_code)]
-        #[inline]
-        ///Take a Pin<&mut TupleStruct>, and a replacement. Replace the pinned TupleStruct and return an owning projection
-        fn project_replace(
-            self: _pin_project::__private::Pin<&mut Self>,
-            __replacement: Self,
-        ) -> ProjOwn<T, U> {
-            unsafe {
-                let __self_ptr: *mut Self = self.get_unchecked_mut();
-                let __guard = _pin_project::__private::UnsafeOverwriteGuard::new(
-                    __self_ptr,
-                    __replacement,
-                );
-                let Self(_0, _1) = &mut *__self_ptr;
-                let __result = ProjOwn(
-                    _pin_project::__private::PhantomData,
-                    _pin_project::__private::ptr::read(_1),
-                );
-                {
-                    let __guard = _pin_project::__private::UnsafeDropInPlaceGuard::new(
-                        _0,
-                    );
-                }
-                __result
+                __TupleStructProjectionRef(
+                    _pin_project::__private::Pin::new_unchecked(_0),
+                    _1,
+                )
             }
         }
     }
@@ -158,7 +98,7 @@ const _: () = {
         let _ = &this.1;
     }
     #[allow(missing_debug_implementations, unnameable_types)]
-    struct __TupleStruct<'pin, T, U> {
+    pub struct __TupleStruct<'pin, T, U> {
         __pin_project_use_generics: _pin_project::__private::AlwaysUnpin<
             'pin,
             (

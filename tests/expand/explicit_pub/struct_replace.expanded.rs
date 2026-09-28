@@ -1,8 +1,31 @@
 use pin_project::pin_project;
-#[pin(__private())]
+#[pin(__private(pub project_replace = StructProjReplace))]
 pub struct Struct<T, U> {
     #[pin]
     pub pinned: T,
+    pub unpinned: U,
+}
+#[allow(
+    dead_code,
+    deprecated,
+    explicit_outlives_requirements,
+    single_use_lifetimes,
+    unreachable_pub,
+    unused_tuple_struct_fields,
+    clippy::unknown_clippy_lints,
+    clippy::absolute_paths,
+    clippy::min_ident_chars,
+    clippy::pattern_type_mismatch,
+    clippy::pub_with_shorthand,
+    clippy::redundant_pub_crate,
+    clippy::single_char_lifetime_names,
+    clippy::type_repetition_in_bounds,
+    clippy::missing_docs_in_private_items
+)]
+///A projection that own a Struct.
+#[non_exhaustive]
+pub struct StructProjReplace<T, U> {
+    pub pinned: ::pin_project::__private::PhantomData<T>,
     pub unpinned: U,
 }
 #[allow(
@@ -81,6 +104,32 @@ You should consider passing around a Pin<& Struct> directly rather than this str
                     pinned: _pin_project::__private::Pin::new_unchecked(pinned),
                     unpinned,
                 }
+            }
+        }
+        #[allow(dead_code)]
+        #[inline]
+        ///Take a Pin<&mut Struct>, and a replacement. Replace the pinned Struct and return an owning projection
+        pub fn project_replace(
+            self: _pin_project::__private::Pin<&mut Self>,
+            __replacement: Self,
+        ) -> StructProjReplace<T, U> {
+            unsafe {
+                let __self_ptr: *mut Self = self.get_unchecked_mut();
+                let __guard = _pin_project::__private::UnsafeOverwriteGuard::new(
+                    __self_ptr,
+                    __replacement,
+                );
+                let Self { pinned, unpinned } = &mut *__self_ptr;
+                let __result = StructProjReplace {
+                    pinned: _pin_project::__private::PhantomData,
+                    unpinned: _pin_project::__private::ptr::read(unpinned),
+                };
+                {
+                    let __guard = _pin_project::__private::UnsafeDropInPlaceGuard::new(
+                        pinned,
+                    );
+                }
+                __result
             }
         }
     }
