@@ -80,7 +80,7 @@ note: required because it appears within the type `Struct<T>`
 6 | struct Struct<T: ?Sized> {
 7 |     f: T,
   |     ^^^^ required by this field
-note: required by an implicit `Sized` bound in `_::_pin_project::__private::UnsafeOverwriteGuard`
+note: required by an implicit `Sized` bound in `pin_project::__private::UnsafeOverwriteGuard`
  --> src/lib.rs
   |
   |     pub struct UnsafeOverwriteGuard<T> {
@@ -150,7 +150,7 @@ note: required because it appears within the type `TupleStruct<T>`
    |
 11 | struct TupleStruct<T: ?Sized>(T);
    |                               ^ required by this field
-note: required by an implicit `Sized` bound in `_::_pin_project::__private::UnsafeOverwriteGuard`
+note: required by an implicit `Sized` bound in `pin_project::__private::UnsafeOverwriteGuard`
   --> src/lib.rs
    |
    |     pub struct UnsafeOverwriteGuard<T> {
