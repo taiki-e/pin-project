@@ -466,7 +466,7 @@ use proc_macro::TokenStream;
 ///     B,
 /// }
 ///
-/// let mut x = Box::pin(Enum::A { pinned_field: 42, unpinned_field: "hello" });
+/// let mut x = std::pin::pin!(Enum::A { pinned_field: 42, unpinned_field: "hello" });
 ///
 /// match x.as_mut().project_replace(Enum::B) {
 ///     EnumProjOwn::A { unpinned_field, .. } => assert_eq!(unpinned_field, "hello"),

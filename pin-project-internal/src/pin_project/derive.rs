@@ -911,7 +911,9 @@ fn make_drop_impl(cx: &Context<'_>) -> TokenStream {
             // This will result in a compilation error, which is exactly what we want.
             trait #trait_ident {}
             #[allow(clippy::drop_bounds, drop_bounds)]
-            impl<T: _pin_project::__private::Drop> #trait_ident for T {}
+            impl<T: ?_pin_project::__private::Sized + _pin_project::__private::Drop>
+                #trait_ident for T
+            {}
             impl #impl_generics #trait_ident for #ident #ty_generics #where_clause {}
 
             // Generate a dummy impl of `PinnedDrop`, to ensure that the user cannot implement it.

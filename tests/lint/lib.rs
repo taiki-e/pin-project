@@ -662,6 +662,12 @@ pub mod forbid_unsafe {
 
 /// Test for `deprecated` lint.
 pub mod deprecated {
+    // Test the propagation of a bare `deprecated` attribute.
+    #![allow(
+        clippy::deprecated_attributes_without_note,
+        clippy::deprecated_attributes_without_since
+    )]
+
     use pin_project::pin_project;
 
     /// Testing struct.
