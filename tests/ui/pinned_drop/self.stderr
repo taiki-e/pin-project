@@ -1,6 +1,8 @@
 error: `self` parameter is only allowed in associated functions
   --> tests/ui/pinned_drop/self.rs:20:26
    |
+16 |             macro_rules! t {
+...
 20 |                     fn f(self: ()) {} //~ ERROR `self` parameter is only allowed in associated functions
    |                          ^^^^ not semantically valid as function parameter
 ...
@@ -8,11 +10,12 @@ error: `self` parameter is only allowed in associated functions
    |             ---- in this macro invocation
    |
    = note: associated functions are those in `impl` or `trait` definitions
-   = note: this error originates in the macro `t` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0434]: can't capture dynamic environment in a fn item
   --> tests/ui/pinned_drop/self.rs:18:29
    |
+16 |             macro_rules! t {
+17 |                 () => {{
 18 |                     let _ = self; //~ ERROR E0434
    |                             ^^^^
 ...
@@ -20,7 +23,6 @@ error[E0434]: can't capture dynamic environment in a fn item
    |             ---- in this macro invocation
    |
    = help: use the `|| { ... }` closure form instead
-   = note: this error originates in the macro `t` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0423]: cannot find value `S` in this scope
   --> tests/ui/pinned_drop/self.rs:42:27

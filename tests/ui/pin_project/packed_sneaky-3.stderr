@@ -9,13 +9,13 @@ error: expected item after attributes
 error: expected item after attributes
   --> tests/ui/pin_project/packed_sneaky-3.rs:15:9
    |
+13 | macro_rules! hidden_repr_macro2 {
+14 |     () => {
 15 |         #[repr(packed)] //~ ERROR expected item after attributes
    |         ^^^^^^^^^^^^^^^ expected an item after this
 ...
 19 | hidden_repr_macro2! {}
    | ---------------------- in this macro invocation
-   |
-   = note: this error originates in the macro `hidden_repr_macro2` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: expected item after attributes
   --> tests/ui/pin_project/packed_sneaky-3.rs:26:10
