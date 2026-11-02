@@ -5,9 +5,9 @@ use std::mem;
 use proc_macro2::{Group, Spacing, Span, TokenStream, TokenTree};
 use quote::{ToTokens, quote, quote_spanned};
 use syn::{
-    Attribute, ExprPath, ExprStruct, Generics, Ident, Item, Lifetime, LifetimeParam, Macro,
-    PatStruct, PatTupleStruct, Path, PathArguments, PredicateType, QSelf, Result, Token, Type,
-    TypeParamBound, TypePath, Variant, Visibility, WherePredicate,
+    Attribute, ExprPath, ExprStruct, GenericParam, Generics, Ident, Item, Lifetime, LifetimeParam,
+    Macro, PatStruct, PatTupleStruct, Path, PathArguments, PredicateType, QSelf, Result, Token,
+    Type, TypeParamBound, TypePath, Variant, Visibility, WherePredicate,
     parse::{Parse, ParseBuffer, ParseStream},
     parse_quote,
     punctuated::Punctuated,
@@ -60,6 +60,7 @@ pub(crate) fn insert_lifetime_and_bound(
     punct.push(TypeParamBound::Lifetime(lifetime));
 
     WherePredicate::Type(PredicateType {
+        attrs: vec![],
         lifetimes: None,
         bounded_ty: orig_type,
         colon_token: <Token![:]>::default(),
@@ -71,7 +72,7 @@ pub(crate) fn insert_lifetime_and_bound(
 pub(crate) fn insert_lifetime(generics: &mut Generics, lifetime: Lifetime) {
     generics.lt_token.get_or_insert_with(<Token![<]>::default);
     generics.gt_token.get_or_insert_with(<Token![>]>::default);
-    generics.params.insert(0, LifetimeParam::new(lifetime).into());
+    generics.params.insert(0, GenericParam::Lifetime(LifetimeParam::new(lifetime)));
 }
 
 /// Determines the visibility of the projected types and projection methods.
@@ -190,7 +191,7 @@ impl ReplaceReceiver<'_> {
         let span = first.ident.span();
         *qself = Some(QSelf {
             lt_token: Token![<](span),
-            ty: Box::new(self.self_ty(span).into()),
+            ty: Box::new(Type::Path(self.self_ty(span))),
             position: 0,
             as_token: None,
             gt_token: Token![>](span),
@@ -280,7 +281,7 @@ impl VisitMut for ReplaceReceiver<'_> {
     fn visit_type_mut(&mut self, ty: &mut Type) {
         if let Type::Path(node) = ty {
             if node.qself.is_none() && node.path.is_ident("Self") {
-                *ty = self.self_ty(node.path.segments[0].ident.span()).into();
+                *ty = Type::Path(self.self_ty(node.path.segments[0].ident.span()));
             } else {
                 self.visit_type_path_mut(node);
             }

@@ -12,6 +12,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+- Update to `syn` 3.0. ([#367](https://github.com/taiki-e/pin-project/pull/367))
+
 ## [1.1.13] - 2026-05-13
 
 - Suppress `clippy::missing_trait_methods` lint in generated code.
