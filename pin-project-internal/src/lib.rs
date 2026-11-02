@@ -454,6 +454,8 @@ use proc_macro::TokenStream;
 /// the same way as the `project` and `project_ref` arguments.
 ///
 /// ```
+/// use std::pin::pin;
+///
 /// use pin_project::pin_project;
 ///
 /// #[pin_project(project_replace = EnumProjOwn)]
@@ -466,7 +468,7 @@ use proc_macro::TokenStream;
 ///     B,
 /// }
 ///
-/// let mut x = Box::pin(Enum::A { pinned_field: 42, unpinned_field: "hello" });
+/// let mut x = pin!(Enum::A { pinned_field: 42, unpinned_field: "hello" });
 ///
 /// match x.as_mut().project_replace(Enum::B) {
 ///     EnumProjOwn::A { unpinned_field, .. } => assert_eq!(unpinned_field, "hello"),
