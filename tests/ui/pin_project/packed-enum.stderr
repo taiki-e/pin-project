@@ -11,13 +11,13 @@ error: #[repr(packed)] attribute should be applied to a struct or union
    |        ^^^^^^
 
 error: the `repr(packed)` attribute cannot be used on enums
-  --> tests/ui/pin_project/packed-enum.rs:9:3
-   |
- 9 | #[repr(packed)] //~ ERROR E0517
-   |   ^^^^^^^^^^^^
-10 | enum E1 {
-   |
-   = help: the `repr(packed)` attribute can be applied to structs and unions
+ --> tests/ui/pin_project/packed-enum.rs:9:3
+  |
+9 | #[repr(packed)] //~ ERROR E0517
+  |   ^^^^^^^^^^^^
+10| enum E1 {
+  |
+  = help: the `repr(packed)` attribute can be applied to structs and unions
 
 error: the `repr(packed)` attribute cannot be used on enums
   --> tests/ui/pin_project/packed-enum.rs:15:3
