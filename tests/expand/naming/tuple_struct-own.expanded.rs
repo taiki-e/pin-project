@@ -142,7 +142,9 @@ const _: () = {
     {}
     trait TupleStructMustNotImplDrop {}
     #[allow(clippy::drop_bounds, drop_bounds)]
-    impl<T: _pin_project::__private::Drop> TupleStructMustNotImplDrop for T {}
+    impl<
+        T: ?_pin_project::__private::Sized + _pin_project::__private::Drop,
+    > TupleStructMustNotImplDrop for T {}
     impl<T, U> TupleStructMustNotImplDrop for TupleStruct<T, U> {}
     #[doc(hidden)]
     impl<T, U> _pin_project::__private::PinnedDrop for TupleStruct<T, U> {
