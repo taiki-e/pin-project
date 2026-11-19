@@ -12,6 +12,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-11-19
+
 - Update to `syn` 3.0. ([#367](https://github.com/taiki-e/pin-project/pull/367))
 
 - Fix `Drop` impl check with always unsized type. ([#375](https://github.com/taiki-e/pin-project/pull/375), thanks @jadenfix)
@@ -744,7 +746,8 @@ See also [tracking issue for 0.4 release](https://github.com/taiki-e/pin-project
 
 Initial release
 
-[Unreleased]: https://github.com/taiki-e/pin-project/compare/v1.1.13...HEAD
+[Unreleased]: https://github.com/taiki-e/pin-project/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/taiki-e/pin-project/compare/v1.1.13...v1.2.0
 [1.1.13]: https://github.com/taiki-e/pin-project/compare/v1.1.12...v1.1.13
 [1.1.12]: https://github.com/taiki-e/pin-project/compare/v1.1.11...v1.1.12
 [1.1.11]: https://github.com/taiki-e/pin-project/compare/v1.1.10...v1.1.11
