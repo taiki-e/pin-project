@@ -14,6 +14,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 - Update to `syn` 3.0. ([#367](https://github.com/taiki-e/pin-project/pull/367))
 
+- Fix `Drop` impl check with always unsized type. ([#375](https://github.com/taiki-e/pin-project/pull/375), thanks @jadenfix)
+
 ## [1.1.13] - 2026-05-13
 
 - Suppress `clippy::missing_trait_methods` lint in generated code.
