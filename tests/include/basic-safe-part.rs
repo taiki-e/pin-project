@@ -273,3 +273,15 @@ pub enum NotUnpinEnum<T, U> {
     /// Unit variant.
     Unit,
 }
+
+/// Testing pub doc
+#[::pin_project::pin_project(pub project = PubStructProj)]
+#[derive(Debug)]
+#[allow(clippy::exhaustive_structs)] // for the type itself
+pub struct PubStruct<T, U> {
+    /// Pinned field.
+    #[pin]
+    pub pinned: T,
+    /// Unpinned field.
+    pub unpinned: U,
+}
